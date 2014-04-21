@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+
+<!-- web app infrastracture  -->
+
+	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
+	    <property name="defaultLang" value="SimplifiedChinese"/>
+	</bean>
+	<bean id="bootHelper" class="com.caibowen.gplume.web.i18n.WebAppBootHelper">
+	    <property name="pkgFiles">
+	        <list>
+	            <value>/WEB-INF/i18n/en.properties</value>
+	            <value>/WEB-INF/i18n/zh_CN.properties</value>
+	        </list>
+	    </property>
+	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
+	</bean>
+
+	<bean id="controlCenter" class="com.caibowen.gplume.web.SimpleControlCenter">
+		<property name="preProcessor">
+			<bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">
+				  <property name="i18nService" ref="i18nService"/>
+			</bean>
+		</property>
+		<property name="actionFactory">
+		    <bean class="com.caibowen.gplume.web.action.ActionFactory" />
+		</property>
+		<property name="injector">
+			<bean class="com.caibowen.gplume.core.Injector"/>
+		</property>
+	</bean>
+	
+    <bean class="com.caibowen.gplume.web.misc.ControllerScanner">
+        <property name="packages">
+            <list>
+                <value>com.caibowen.gplume.sample</value>
+            </list>
+        </property>
+        <property name="controlCenterCallBack" ref="controlCenter"/>
+    </bean>
+
+	<bean id="birthdayCalculator" class="com.caibowen.gplume.sample.BirthdayCalculator"/>
+</beans>
+
+

@@ -1,18 +1,28 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Bowen Cai.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributor:
+ *     Bowen Cai - initial API and implementation
+ ******************************************************************************/
 package com.caibowen.gplume.common;
 
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
 /*
- *  bench mark
+ *  benchmark
   K/V : String Integer
  HashMap TreeMap: put / get
- URITrie branch / match prefix
+ URITrie branch / matchPrefix
  
  1. 
- data 100 random strings size random under 60
+ data : 100 random strings sized under 60 randomly
  
-  map.get vs trie.matchPrefix  times : 100 * 1000
+  map.get vs trie.matchPrefix  cycle : 100 * 1000
   
  hash 30031633
  tree 41383009
@@ -26,6 +36,8 @@ import java.util.regex.Pattern;
  
  
  2.  tree vs trie
+ 
+  map.get vs trie.matchPrefix  cycle : 100 * 1000
  data 240 random strings size random under 60
  
  tree79230807
@@ -33,6 +45,9 @@ trie80667221
 
 
  3.  tree vs trie
+ 
+  map.get vs trie.matchPrefix  cycle : 100 * 1000
+  
  data 1000 random strings size random under 60
  
  tree 305070823
@@ -43,43 +58,56 @@ trie80667221
 
  conclusion:
  
- trie performs well when size is under 200 
- when trie grow up, performance decrease sharply, 
- maybe its due to trie's unbalanced structure
+ trie performs better(than rb-tree) when size is under 200 
+ when a trie grows up, performance decrease sharply.
  
 
  */
+
 /**
+ *
+ * thread-safe prefix tree for URI matching
  * 
  * @author BowenCai
- *
+ * 
+ * @since 2014-1-14
  * @param <V>
  */
-public class URITrie<V> implements Serializable{
+public class URITrie<V> implements Serializable {
 
-	protected static final char BTN;
+	private static final long serialVersionUID = 6420673991145017909L;
+	
+	// from 45 to 126, note that TABLE is for indexing only, not all chars are valid for URI
+	// partial URI pattern is "^/[\\w\\-\\.~/_]{1,64}$"
 	protected static final char[] TABLE;
+	protected static final char OFFSET;
+	
+	// 82
 	protected static final int TABLE_LEN;
+	// input checking
 	protected static final Pattern PATTERN;
 	
 	static {
-		BTN = '-';
-		TABLE = "-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".toCharArray();
-		TABLE_LEN = TABLE.length;
-		PATTERN = Pattern.compile("^/[\\w\\-\\.~/_]{1,64}$");
+		TABLE = ("-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^"
+					+"_`abcdefghijklmnopqrstuvwxyz{|}~").toCharArray();
+//		ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
+//		-._~:/?#[]@!$&'()*+,;=
+		OFFSET = TABLE[0];
+		TABLE_LEN = TABLE.length;//w /._-~#
+		PATTERN = Pattern.compile("^/[\\w\\-\\.~/_=#]{1,64}$");
 	}
-	
-	private static final long serialVersionUID = 6420673991145017909L;
-	
+//	public static void main(String...a) {
+//		System.out.println(PATTERN.matcher("/param2=1").matches());
+//	}
 	protected int size;
 	protected TrieNode root;
 	
 	public URITrie(){
 		size = 0;
-		root = new TrieNode(null, (int)('/' - BTN));// the char '/'
+		root = new TrieNode(null, (int)('/' - OFFSET));// the char '/'
 	}
 	/**
-	 * create sub-tree
+	 * to create sub-tree
 	 * @see  public URITrie<V> getBranch(final String k)
 	 * 
 	 * @param rt
@@ -97,10 +125,11 @@ public class URITrie<V> implements Serializable{
 	 * @param v
 	 * @return true value added, false value already exists at the branch(position is taken)
 	 */
-	public boolean branch(final String k, V v) {
+	synchronized public boolean branch(final String k, V v) {
 		
 		if (!PATTERN.matcher(k).matches()) {
-			throw new IllegalArgumentException("string must matches regex ^/[\\w\\-\\.~/]{1,64}$");
+			throw new IllegalArgumentException("string must matches regex " +
+					PATTERN.pattern());
 		}
 		/**
 		 * start from index 1, index[0] is / 
@@ -110,7 +139,7 @@ public class URITrie<V> implements Serializable{
 		int seqIdx = 1;
 		
 		while (seqIdx < len) {
-			int _idx = (int) (k.charAt(seqIdx) - BTN);
+			int _idx = (int) (k.charAt(seqIdx) - OFFSET);
 			/**
 			 * node array is not initialized until first visit,
 			 *  so use nodeAt()  to detect node array,
@@ -118,9 +147,26 @@ public class URITrie<V> implements Serializable{
 			 *   @see TrieNode()
 			 *   @see TrieNode.nodeAt()
 			 */
-			if (ptr.nodeAt(_idx) == null) {
+			/**
+			 * now subs is needed, initialize it.
+			 * @param idx
+			 * @return
+			 */
+//			public TrieNode nodeAt(int idx) {
+//				if (subs == null) {
+//					subs = new TrieNode[TABLE_LEN];
+//				}
+//				return subs[idx];
+//			}
+			if (ptr.subs == null) {
+				ptr.subs = new TrieNode[TABLE_LEN];
+				ptr.subs[_idx] = new TrieNode(ptr, _idx); 
+			} else if (ptr.subs[_idx] == null) {
 				ptr.subs[_idx] = new TrieNode(ptr, _idx);
 			}
+//			if (ptr.nodeAt(_idx) == null) {
+//				ptr.subs[_idx] = new TrieNode(ptr, _idx);
+//			}
 			ptr = ptr.subs[_idx];
 			seqIdx++;
 		}
@@ -143,7 +189,7 @@ public class URITrie<V> implements Serializable{
 	 * @return true added to existing tree, false no matching branch exists 
 	 * or value already exists at the branch(position is taken)
 	 */
-	public boolean join(final String k, V v) {
+	synchronized public boolean join(final String k, V v) {
 		
 		if (!PATTERN.matcher(k).matches()) {
 			throw new IllegalArgumentException("string must matches regex ^/[\\w\\-\\.~/]{1,64}$");
@@ -161,7 +207,7 @@ public class URITrie<V> implements Serializable{
 				return false;
 			}
 			
-			int _idx = (int) (k.charAt(seqIdx) - BTN);
+			int _idx = (int) (k.charAt(seqIdx) - OFFSET);
 			if (ptr.subs[_idx] == null) {
 				return false;
 			}
@@ -179,7 +225,8 @@ public class URITrie<V> implements Serializable{
 		}	
 	}
 	
-	public TrieNode getVar(final String k) {
+	@SuppressWarnings("unchecked")
+	public V getVar(final String k) {
 		
 		// check here to avoid array-index-out-of-range error
 		
@@ -197,7 +244,7 @@ public class URITrie<V> implements Serializable{
 		int seqIdx = 1;
 		
 		while (seqIdx < len) {
-			int _idx = (int) (k.charAt(seqIdx) - BTN);
+			int _idx = (int) (k.charAt(seqIdx) - OFFSET);
 			if (ptr.subs == null) {
 				return null;
 			}
@@ -209,7 +256,7 @@ public class URITrie<V> implements Serializable{
 			ptr = _node;
 			seqIdx++;
 		}
-		return ptr;
+		return (V) ptr.var;
 	}
 	/**
 	 * 
@@ -238,7 +285,7 @@ public class URITrie<V> implements Serializable{
 			if (ptr.subs == null) {
 				return null;
 			}
-			int _idx = (int) (k.charAt(seqIdx) - BTN);
+			int _idx = (int) (k.charAt(seqIdx) - OFFSET);
 			TrieNode _node = ptr.subs[_idx];
 //			System.out.println("idx " + _idx + "  ch " + TABLE[_idx]);
 			if (_node == null) {
@@ -279,7 +326,7 @@ public class URITrie<V> implements Serializable{
 				return null;
 			}
 			
-			int _idx = (int) (k.charAt(seqIdx) - BTN);
+			int _idx = (int) (k.charAt(seqIdx) - OFFSET);
 			TrieNode _node = ptr.subs[_idx];
 			
 			if (_node == null) {
@@ -301,7 +348,7 @@ public class URITrie<V> implements Serializable{
 	 * 			0 no intersection
 	 * 			1 k covered by existing branch
 	 */
-	public int covers_or_covered_by(final String k) {
+	public String covers_or_covered_by(final String k) {
 		
 		// check here to avoid array-index-out-of-range error
 		
@@ -319,27 +366,28 @@ public class URITrie<V> implements Serializable{
 		while (seqIdx < len) {
 			
 			if (ptr.subs == null) {
-				return 0;
+				return null;
 			}
 			
-			int _idx = (int) (k.charAt(seqIdx) - BTN);
+			int _idx = (int) (k.charAt(seqIdx) - OFFSET);
 			TrieNode _node = ptr.subs[_idx];
 			
 			if (_node == null) {
-				return 0; // no intersection
+				return null; // no intersection
 			}
 			
 			if (_node.var != null) {
-				return -1; // covered by k
+				return _node.buildStr().toString(); // covered by k
 			}
 			ptr = _node;
 			seqIdx++;
 		}
 		
 		if (ptr != null) {
-			return 0 == countVar(ptr) ? 0 : 1; // covers k
+			int sz = countVar(ptr);
+			return 0 == sz ? null : new URITrie<V>(ptr, sz).toString(); // covers k
 		} else {
-			return 0;
+			return null;
 		}
 	}
 	/**
@@ -348,7 +396,7 @@ public class URITrie<V> implements Serializable{
 	 * @return the removed value. null if not found
 	 * @see TrieNode.disjoin()
 	 */
-	public V disjoin(String k) {
+	synchronized public V disjoin(String k) {
 		
 		// check here to avoid array-index-out-of-range error
 		// 2014-1-14: removed check to speed up searching
@@ -363,7 +411,10 @@ public class URITrie<V> implements Serializable{
 		int seqIdx = 1;
 		
 		while (seqIdx < len) {
-			int _idx = (int) (k.charAt(seqIdx) - BTN);
+			int _idx = (int) (k.charAt(seqIdx) - OFFSET);
+			if (ptr.subs == null) {
+				return null;
+			}
 			if (ptr.subs[_idx] == null) {
 				return null;
 			}
@@ -379,7 +430,37 @@ public class URITrie<V> implements Serializable{
 		}
 		return oldVar;
 	}
-
+	
+	public String getPrefix(V var) {
+		TrieNode node = find(root, var);
+		if (node != null) {
+			return node.buildStr().toString();
+		} else {
+			return null;
+		}
+	}
+	
+	protected TrieNode find(TrieNode node, V var) {
+		
+		if (node.var != null && node.var.equals(var)) {
+			return node;
+			
+		} else if (node.subs != null) {
+			for (TrieNode _n : node.subs) {
+				if (_n != null) {
+					TrieNode varNode = find(_n, var);
+					if (varNode != null) {
+						return varNode;
+					}
+				}
+			}
+			return null;
+			
+		} else {
+			return null;
+		}
+	}
+	
 	public int size() {
 		return size;
 	}
@@ -388,9 +469,9 @@ public class URITrie<V> implements Serializable{
 		return root;
 	}
 	
-	public void clear() {
+	synchronized public void clear() {
 		this.size = 0;
-		this.root = new TrieNode(null, (int)('/' - BTN));// the char '/'
+		this.root = new TrieNode(null, (int)('/' - OFFSET));// the char '/'
 	}
 	
 	private static int countVar(TrieNode node) {
@@ -442,17 +523,19 @@ public class URITrie<V> implements Serializable{
 		
 		Closure dd = new Closure();
 		
-		dd.iter(root, new StringBuilder(127));
+		dd.iter(root, new StringBuilder(128));
 		
 		return dd.builder0.append('}').toString();
 	}
 	
-	public static class TrieNode {
+	public static class TrieNode implements Serializable {
+
+		private static final long serialVersionUID = -7216677483159064029L;
 		
 		private TrieNode parent = null;
 		int idx;
 		/**
-		 * subs is null, it will be initialize only when necessary
+		 * subs is null, it will not be initialize until is needed
 		 * @see nodeAt
 		 */
 		TrieNode[] subs;
@@ -464,17 +547,7 @@ public class URITrie<V> implements Serializable{
 			subs = null;
 			var = null;
 		}
-		/**
-		 * now subs is needed, initialize it.
-		 * @param idx
-		 * @return
-		 */
-		public TrieNode nodeAt(int idx) {
-			if (subs == null) {
-				subs = new TrieNode[TABLE_LEN];
-			}
-			return subs[idx];
-		}
+
 		public StringBuilder buildStr() {
 			
 			StringBuilder builder = new StringBuilder(32);

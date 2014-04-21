@@ -1,85 +1,169 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Bowen Cai.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributor:
+ *     Bowen Cai - initial API and implementation
+ ******************************************************************************/
 package com.caibowen.gplume.event;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caibowen.gplume.core.IBeanFactory;
+import com.caibowen.gplume.core.IBeanAssembler;
 import com.caibowen.gplume.core.TypeTraits;
 
 /**
  * Register listener and broadcast event.
  * Listeners are stored in slots.
+ * 
  * @author BowenCai
  *
  */
-public class Broadcaster {
+public class Broadcaster implements Serializable{
+	
+	private static final long serialVersionUID = -247132524218855841L;
 
 	private static final Logger LOG = Logger.getLogger(Broadcaster.class.getName());
 	
+	private static final Object PRESENT = new Object();
 	/**
 	 * slots: the key is the event type, the value-----HashSet, 
 	 * is the listener listen to this kind of event
 	 * 
 	 *how i wish there is a typedef here 
 	 */
-	private HashMap<Class< ? extends AppEvent>, 
-					HashSet<AppListener<? extends AppEvent> > > slots;
+	private Map<Class< ? extends AppEvent>, 
+					Map<IAppListener<? extends AppEvent>, Object> > slots;
+	
+	private Map<IEventHook, Object> hooks;
 	
 	private static Broadcaster handle = null;	
 	private Broadcaster() {
 		slots = new HashMap<>(16);
+		hooks = new LinkedHashMap<IEventHook, Object>();
 	}
+	
 	synchronized public static Broadcaster getInstance() {
-		
 		if(handle == null) {
 			handle = new Broadcaster();
 		}
 		return handle;
 	}
-
-	public void register(AppListener<? extends AppEvent> listener) {
+	
+	/**
+	 * add new event hook
+	 * @param hook
+	 * @return true if this set did not already contain the specified element
+	 */
+	public boolean register(IEventHook hook) {
+		return	hooks.put(hook, PRESENT) == null;
+	}
+	
+	/**
+	 * register listener to an event,
+	 * listeners are stored in different slots
+	 * 
+	 * @param listener
+	 */
+	public void register(IAppListener<? extends AppEvent> listener) {
 
 		Class<? extends AppEvent> eventClazz = getEventClazz(listener);
 
-		HashSet<AppListener<? extends AppEvent> > listeners 
-													= slots.get(eventClazz);
+		Map<IAppListener<? extends AppEvent>, Object>
+			listeners = slots.get(eventClazz);
 
 		synchronized (slots) {
 			
 			if (listeners != null) {
-				listeners.add(listener);
+				listeners.put(listener, PRESENT);
 
 			} else {
-				HashSet<AppListener<? extends AppEvent>> ls = new HashSet<>(16);
-				ls.add(listener);
+				Map<IAppListener<? extends AppEvent>, Object>
+					ls = new LinkedHashMap<IAppListener<? extends AppEvent>, Object>(16);
+				ls.put(listener, PRESENT);
 				slots.put(eventClazz, ls);
 			}
-
 		}
 	}
 	
-	public void remove(AppListener<? extends AppEvent> listener) {
+	/**
+	 * get all listeners to this kind of event
+	 * @param eventClazz
+	 * @return
+	 */
+	public Set<IAppListener<? extends AppEvent>>
+	getListener(Class<? extends AppEvent> eventClazz) {
+		return slots.get(eventClazz).keySet();
+	}
+	
+	/**
+	 * 
+	 * @param listener
+	 * @return
+	 */
+	public boolean remove(IAppListener<? extends AppEvent> listener) {
 
 		Class<? extends AppEvent> eventClazz = getEventClazz(listener);
 
-		HashSet<AppListener<? extends AppEvent> > listeners = slots.get(eventClazz);
+		Map<IAppListener<? extends AppEvent>, Object>
+			listeners = slots.get(eventClazz);
 		
 		if (listeners != null) {
 			synchronized (slots) {
 				listeners.remove(listener);
 			}
+			return true;
+		} else {
+			return false;
 		}
 	}
 	
-	public void clear() {
+	public boolean removeListeners(Class<? extends AppEvent> eventClazz) {
+		synchronized (slots) {
+			return slots.remove(eventClazz) != null;
+		}
+	}
+	
+	public boolean clearAllListeners() {
 		synchronized (slots) {
 			slots.clear();
 		}
+		return true;
+	}
+	
+	public boolean containsHook(IEventHook hook) {
+		return hooks.containsKey(hook);
 	}
 	
 	/**
+	 * 
+	 * @param hook
+	 * @return true if hook removed
+	 */
+	public boolean remove(IEventHook hook) {
+		synchronized (hooks) {
+			return this.hooks.remove(hook) != null;
+		}
+	}
+	
+	public boolean clearHooks() {
+		synchronized (hooks) {
+			hooks.clear();
+		}
+		return true;
+	}
+	/**
+	 * listeners will be informed of this event ahead of hooks.
 	 * 
 	 * note that the order listeners receive event are undetermined,
 	 * 
@@ -89,27 +173,59 @@ public class Broadcaster {
 	public void broadcast(AppEvent event) {
 		
 		if (event == null) {
-			LOG.warning("null event ");
 			return;
 		}
-		
 		Class<? extends AppEvent> eventClazz = event.getClass();
 
-		HashSet<AppListener<? extends AppEvent>> listeners = slots.get(eventClazz);
+		Map<IAppListener<? extends AppEvent>, Object> listeners = slots.get(eventClazz);
+		
 		if (listeners != null) {
-			for (AppListener listener : listeners) {
-				listener.onEvent(event);
+			for (IAppListener listener : listeners.keySet()) {
+				try {
+					listener.onEvent(event);
+				} catch (Exception e) {
+					LOG.log(Level.SEVERE, 
+							"error broadcasting event[" 
+							+ event + "] on listener [" + listener + "]"
+							, e);
+				}
 			}
 		} else {
-				LOG.info("no listener for event [" 
+				LOG.log(Level.WARNING,
+						"no listener for event [" 
 						+ event.getClass().getName() + 
 						"] registerd ");
 		}
+		
+		for (Map.Entry<IEventHook, Object> hk : hooks.entrySet()) {
+			try {
+				IEventHook hook = hk.getKey();
+				if (hook != null) {
+					hook.catches(event);
+				}
+			} catch (Exception e) {					
+				LOG.log(Level.SEVERE, 
+					"error catching event[" 
+					+ event + "] on hook [" + hk + "]"
+					, e);
+			}
+		}
 	}
 
-	Class<? extends AppEvent> getEventClazz(AppListener<? extends AppEvent> listener) {
+	Class<? extends AppEvent> getEventClazz(IAppListener<? extends AppEvent> listener) {
 		
 		Type[] typeParams = listener.getClass().getGenericInterfaces();
+		for (Type type : typeParams) {
+			@SuppressWarnings("unchecked")
+			Class<? extends AppEvent> ec = (Class<? extends AppEvent>)
+												TypeTraits.getClass(type, 0);
+			if (AppEvent.class.isAssignableFrom(ec)) {
+				return ec;
+			}
+		}
+		throw new IllegalStateException(
+				"cannot find legal event type from lister class ["
+							+ listener.getClass().getName() + "]");
 		/**
 		 * a listener can listen one event only,
 		 * 
@@ -117,21 +233,23 @@ public class Broadcaster {
 		 * therefore, typeParams is of length 1.
 		 * 
 		 */
-		return (Class<? extends AppEvent>) TypeTraits.getClass(typeParams[0], 0);
+//		return (Class<? extends AppEvent>) TypeTraits.getClass(typeParams[0], 0);
 	}
 	
 	/**
 	 * visit bean factory and get listener beans registered.
 	 */
-	public IBeanFactory.Visitor listenerRetreiver = new IBeanFactory.Visitor(){
+	public IBeanAssembler.Visitor listenerRetreiver = new IBeanAssembler.Visitor(){
+		private static final long serialVersionUID = -750407111421138317L;
+
 		@Override
 		public void visit(Object bean) {
 
-			if (bean instanceof AppListener) {
+			if (bean instanceof IAppListener) {
 
 				@SuppressWarnings("unchecked")
-				AppListener<? extends AppEvent> ls = 
-						(AppListener<? extends AppEvent>) bean;
+				IAppListener<? extends AppEvent> ls = 
+						(IAppListener<? extends AppEvent>) bean;
 
 				Broadcaster.this.register(ls);
 			}

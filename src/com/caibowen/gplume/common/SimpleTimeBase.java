@@ -1,9 +1,27 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Bowen Cai.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributor:
+ *     Bowen Cai - initial API and implementation
+ ******************************************************************************/
 package com.caibowen.gplume.common;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
+/**
+ * simple date, precision is second.
+ * time starts from 1970-01-01 08:00:00
+ * @author BowenCai
+ *
+ */
 public class SimpleTimeBase implements Serializable {//, Cloneable {
 
 	private static final long serialVersionUID = 2906984517055778500L;
@@ -75,26 +93,44 @@ public class SimpleTimeBase implements Serializable {//, Cloneable {
 	};
 	
 	public static long toJDKTime(long s) {
-		return s * 1000L + META_OFFSET;
+		return s * 1000L + OFFSET;
 	}
-	public static int fromJDKTime(long date) {
-		return (int)((date- META_OFFSET) / 1000L);
+	
+	public static long fromJDKTime(long date) {
+		return ((date- OFFSET) / 1000L);
 	}
 	
 //-----------------------------------------------------------------------------
-
+	public static void main(String...args) throws ParseException {
+		System.out.println(
+				new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+							.parse("0001-01-01 00:00:00").getTime());
+		
+	}
 
 	/**
-	 * 708480000000L
-	 * 708550200000L
+	 * offset from
+	 * 63513504000000
+	 * 62135798400000L;
 	 */
-	public static final long META_OFFSET = 708550200000L;
+	public static final long OFFSET = calculateOffset();
+	private static long calculateOffset() {
+		long offset = 0L;
+		try {
+			offset = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("1970-01-01 08:00:00").getTime();
+		} catch (ParseException e) {
+			offset = 62135798400000L;
+		}
+		return offset;
+	}
 	
 	public static final int META_YEAR = 1992;
 	public static final int META_ZODIAC = 9;
 
-	public static final class Impl {
+	public static final class Impl implements Serializable {
 		
+		private static final long serialVersionUID = 8650738806242341565L;
+
 		long time;
 		
 		int second;
@@ -140,6 +176,15 @@ public class SimpleTimeBase implements Serializable {//, Cloneable {
 					);
 		}
 		
+		/**
+		 * to time::long
+		 * @param y
+		 * @param m
+		 * @param d
+		 * @param h
+		 * @param minu
+		 * @param s
+		 */
 		synchronized void up(int y, int m, int d, int h, int minu, int s) {
 			
 			time = secondFromYear(y) + secondFromMonthOfYear(y, m)
@@ -174,7 +219,7 @@ public class SimpleTimeBase implements Serializable {//, Cloneable {
 
 	/**
 	 * Chinese zodiac
-	 * °´ ¹«ÀúËãµÄ£¬ËùÒÔÔÚÀ°ÔÂµ½ÕýÔÂÕâ¶ÎÊ±¼äÓÐÎÊÌâ
+	 * ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Âµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * @return
 	 */
 	@Deprecated

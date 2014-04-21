@@ -1,9 +1,23 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Bowen Cai.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributor:
+ *     Bowen Cai - initial API and implementation
+ ******************************************************************************/
 package com.caibowen.gplume.common;
 
 import java.util.Date;
 
 /**
+ * 
+ * 
  * count time by second using 64-bit signed long integer
+ * 
+ * time starts from 1970-01-01 08:00:00
  * 
  * time range from 24855 B.C. to 24855 A.C.
  * 
@@ -56,9 +70,10 @@ public class SimpleTime extends SimpleTimeBase {
 		return impl.time > fromJDKTime(d.getTime());
 	}
 	
-	public void parse(String s) {
-		
-	}
+//	public void parse(String s) {
+//		
+//	}
+	
 	public long getTime() {
 		return impl.time;
 	}
@@ -80,15 +95,11 @@ public class SimpleTime extends SimpleTimeBase {
 	public int minute() {
 		return impl.minute;
 	}
+	
 	public int second() {
 		return impl.second;
 	}
 
-	public static void main(String[] args) {
-//		SimpleTime time = new SimpleTime(1, 1, 1, 0, 0, 30);
-//		System.err.println(time.getTime());
-		System.out.println("\n" + SimpleTimeBase.Impl.secondFromMonthOfYear(2003, 3));
-	}
 //	//1992-06-14T19:30:00.000Z
 //	public String timeFormatted() {
 //		

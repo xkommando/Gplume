@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Bowen Cai.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0
+ * which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/gpl.html
+ * 
+ * Contributor:
+ *     Bowen Cai - initial API and implementation
+ ******************************************************************************/
 package com.caibowen.gplume.core;
 
 import java.lang.reflect.Field;
@@ -16,7 +26,8 @@ import java.lang.reflect.TypeVariable;
 public final class TypeTraits {
 	
 	/**
-	 * no exception is thrown, but returns nullable getter
+	 * find setter by fieldName from public methods of the class
+	 * parameter type and number and return type is not checked
 	 * 
 	 * @param clazz
 	 * @param fielddName
@@ -27,7 +38,7 @@ public final class TypeTraits {
 
 		String setterName = String.format("set%C%s",
 				fieldName.charAt(0), fieldName.substring(1));
-		
+//System.out.println(fieldName + "   " + clazz.getName());
 		for (Method method : clazz.getMethods()) {
 
 			if(method.getName().equals(setterName)
@@ -97,15 +108,15 @@ public final class TypeTraits {
 	
 	public static Class<?> getClass(Type type, int i) {
 		
-        if (type instanceof ParameterizedType) { // ´¦Àí·ºÐÍÀàÐÍ
+        if (type instanceof ParameterizedType) { // ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         	
             return getGenericClass((ParameterizedType) type, i);
             
         } else if (type instanceof TypeVariable) {
         	
-            return (Class<?>) getClass(((TypeVariable<?>) type).getBounds()[0], 0); // ´¦Àí·ºÐÍ²ÁÊÃ¶ÔÏó<R>
+            return (Class<?>) getClass(((TypeVariable<?>) type).getBounds()[0], 0); // ï¿½ï¿½ï¿½?ï¿½Í²ï¿½ï¿½Ã¶ï¿½ï¿½ï¿½<R>
         
-        } else {// class±¾ÉíÒ²ÊÇtype£¬Ç¿ÖÆ×ªÐÍ
+        } else {// classï¿½ï¿½ï¿½ï¿½Ò²ï¿½ï¿½typeï¿½ï¿½Ç¿ï¿½ï¿½×ªï¿½ï¿½
             return (Class<?>) type;
         }
     }
@@ -114,13 +125,13 @@ public final class TypeTraits {
 
         Object genericClass = parameterizedType.getActualTypeArguments()[i];
         
-        if (genericClass instanceof ParameterizedType) { // ´¦Àí¶à¼¶·ºÐÍ
+        if (genericClass instanceof ParameterizedType) {
             return (Class<?>) ((ParameterizedType) genericClass).getRawType();
             
-        } else if (genericClass instanceof GenericArrayType) { // ´¦ÀíÊý×é·ºÐÍ
+        } else if (genericClass instanceof GenericArrayType) {
             return (Class<?>) ((GenericArrayType) genericClass).getGenericComponentType();
             
-        } else if (genericClass instanceof TypeVariable) { // ´¦Àí·ºÐÍ²ÁÊÃ¶ÔÏó<R>
+        } else if (genericClass instanceof TypeVariable) {
 
             return (Class<?>) getClass(((TypeVariable<?>) genericClass).getBounds()[0], 0);
             
@@ -131,7 +142,7 @@ public final class TypeTraits {
 
     public static void assignField(Object object,
     								String fieldName, 
-    								Object var) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
+    								Object var) throws IllegalAccessException, NoSuchFieldException {
     	
     	assignField(object, fieldName, var, false);
     }
@@ -139,7 +150,7 @@ public final class TypeTraits {
     public static void assignField(Object object,
     								String fieldName, 
     								Object var,
-    								boolean refPrivate) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
+    								boolean refPrivate) throws IllegalAccessException, NoSuchFieldException {
     	
     	Class<?> clazz = object.getClass();
     	Field[] fields = clazz.getDeclaredFields();
@@ -148,16 +159,17 @@ public final class TypeTraits {
 			if (field.getName().equals(fieldName)) {
 
 		    	Class<?> fieldClazz = field.getType();
+//System.out.println(" field class " + fieldClazz.getName());
 				Object realVar = null;
 				
 				if (var instanceof String) {
-					realVar = Converter.to((String)var, fieldClazz);
+					realVar = Converter.castStr((String)var, fieldClazz);
 				} else if (var instanceof Number) {
-					realVar = Converter.to((Number)var, fieldClazz);
+					realVar = Converter.castNumber((Number)var, fieldClazz);
 				} else {
 					realVar = var;
 				}
-				if (fieldClazz.isAssignableFrom(realVar.getClass())) {
+//				if (isAssignableFrom(fieldClazz, realVar.getClass())) {
 					if ( !field.isAccessible()) {
 						if (refPrivate) {
 							field.setAccessible(true);
@@ -166,10 +178,10 @@ public final class TypeTraits {
 						}
 					}
 					field.set(object, realVar);
-				} else {
-					throw new IllegalArgumentException(
-							"cannot assign " + realVar + " to field " + fieldName);
-				}
+//				} else {
+//					throw new IllegalArgumentException(
+//							"cannot assign " + realVar + " to field " + fieldName);
+//				}
 				return;
 			}
 		}
@@ -177,5 +189,26 @@ public final class TypeTraits {
     			"cannot find [" + fieldName + "] in class [" + clazz.getName() + "]");
 	}
     
+	public static boolean isAssignableFrom(Class<?> a, Class<?> b) {
+		
+		if (a.isAssignableFrom(b)) {
+			return true;
+		} else {
+			a.isAnnotation();
+			a.isArray();
+			a.isEnum();
+			a.isInterface();
+			a.isPrimitive();
+			a.isSynthetic();
+			return false;
+		}
+	}
 	private TypeTraits(){}
 }
+
+
+
+
+
+
+
