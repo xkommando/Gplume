@@ -53,10 +53,34 @@ A web Controller:
 		context.render("/index.jsp");
 	}
 ```
-For i18n, you need language packages such as 
+For i18n, you need language packages like
 `en.properties` where there is `gplumeIsRunning=Gplume is Running!`
-and `zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01` ascii for `Gplume跑起来了`
 
-Braoadcaster
+and `zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01` ascii for `Gplume跑起来了` and specify them in the manifest.xml
+
+There is a Broadcaster, you can register listeners and publish events like
+```Java
+AppContext.broadcaster.register(new IEventHook() {
+	@Override
+	public void catches(AppEvent event) {
+		LOG.info("cought event[" + event.getClass().getName() + "]"
+				+ "from source[" + event.getSource() + "]");
+	}
+});
+AppContext.broadcaster.register(new IAppListener<TimeChangedEvent>() {
+	@Override
+	public void onEvent(TimeChangedEvent event) {
+		LOG.info("time changed event");
+	}
+});
+TimeChangedEvent event = new TimeChangedEvent(this);
+event.setTime(new Date());
+AppContext.broadcaster.broadcast(event);
+```
+Overview
+![alt text](https://dl.dropboxusercontent.com/s/eb07qh9ypr24fmi/gplume_structure.jpg)
+
 ***************
+For more infomation, goto www.caibowen.com/blog/tag/pglume
+
 Project can be find at www.caibowen.com/work.html#id_gplume
