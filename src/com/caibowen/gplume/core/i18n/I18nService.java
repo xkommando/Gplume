@@ -1,12 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2014 Bowen Cai.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v3.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/gpl.html
+ * Copyright 2014 Bowen Cai
  * 
- * Contributor:
- *     Bowen Cai - initial API and implementation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ******************************************************************************/
 package com.caibowen.gplume.core.i18n;
 
@@ -17,7 +22,9 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 /**
@@ -28,6 +35,8 @@ import javax.inject.Inject;
 public class I18nService implements Serializable {
 	
 	private static final long serialVersionUID = 2823988842476726160L;
+
+	private static final Logger LOG = Logger.getLogger(I18nService.class.getName());
 	
 	@Inject Dialect defaultLang = Dialect.SimplifiedChinese;
 
@@ -46,15 +55,17 @@ public class I18nService implements Serializable {
 
 	public void loadResource(Dialect dialect, Properties properties) {
 		if (dialect == defaultLang) {
+			LOG.info("pkg for default dialect[" + defaultLang.nativeName + "] loaded");
 			pkgTable.put(dialect, new NativePackage(dialect, properties, null));
 		} else {
 			pkgTable.put(dialect, new NativePackage(dialect, 
 									properties, 
 									pkgTable.get(defaultLang)));
+			LOG.info("pkg for [" + dialect.nativeName + "] loaded");
 		}
-//System.out.println("added [" + dialect + "]");
 	}
 	
+	@Nullable
 	public NativePackage getPkg(String localeInfo) {
 		Dialect lang = resolve(localeInfo);
 		if (lang == Dialect.Unknown) {
@@ -69,7 +80,6 @@ public class I18nService implements Serializable {
 	private int cachedHash;
 	
 	public Set<Dialect> getAll() {
-//		return new HashSet<Dialect>(pkgTable.keySet());
 		if (cachedSet == null) {
 			cachedSet = new HashSet<Dialect>(pkgTable.keySet());
 			cachedHash = cachedSet.hashCode();
@@ -97,7 +107,11 @@ public class I18nService implements Serializable {
 //		Set<Dialect> set2 = service.getAll();
 //		System.out.println(set2);
 //	}
+	
 	/**
+	 * resolve ISO 639-1 name
+	 * zh_CN
+	 * en
 	 * @param localeInfo
 	 * @return
 	 */
@@ -124,6 +138,7 @@ public class I18nService implements Serializable {
 				return Dialect.parseISO639_1(localeInfo.substring(0, 2));
 			}
 		}
+		LOG.warning("failed to resolve dialect [" + localeInfo + "]. set as Unknown");
 		return Dialect.Unknown;
 	}
 

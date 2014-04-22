@@ -1,12 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2014 Bowen Cai.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v3.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/gpl.html
+ * Copyright 2014 Bowen Cai
  * 
- * Contributor:
- *     Bowen Cai - initial API and implementation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ******************************************************************************/
 package com.caibowen.gplume.web;
 
@@ -42,7 +47,9 @@ public class SimpleControlCenter extends ControlCenter {
 		Action action = actionFactory.findAction(requestContext.httpmMthod, uri);
 		
 		if (action == null) {
-			LOG.warning("no action for[" + uri + "]");
+			if (LOG.isLoggable(Level.INFO)) {
+				LOG.info("no action for URI[" + uri + "]");
+			}
 			errorHandler.http404(requestContext);
 			return;
 		}
@@ -59,23 +66,23 @@ public class SimpleControlCenter extends ControlCenter {
 
 		} catch (IOException ioex) {
 
-			LOG.log(Level.SEVERE, "I/O Exception :" + ioex.getCause(), ioex);
+			LOG.log(Level.WARNING, "I/O Exception :" + ioex.getCause(), ioex);
 			thrown = ioex;
 
 		} catch (ServletException servex) {
 
-			LOG.log(Level.SEVERE, "Servlet Exception : " + servex.getCause(), servex);
+			LOG.log(Level.WARNING, "Servlet Exception : " + servex.getCause(), servex);
 			thrown = servex;
 
 		} catch (Exception e) {
 
-			LOG.log(Level.SEVERE,
+			LOG.log(Level.WARNING,
 					e.getClass().getName() + " Exception: " + "\n" + e.getCause(), e);
 			thrown = e;
 
 		} catch (Throwable thr) {
 
-			LOG.log(Level.SEVERE, "Error: " + thr.getClass().getName()
+			LOG.log(Level.WARNING, "Error: " + thr.getClass().getName()
 					+ "\n Message"+ thr.getMessage()
 					+ "\n Cause: " + thr.getCause(), thr);
 			

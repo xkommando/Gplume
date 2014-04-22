@@ -39,7 +39,8 @@
         <property name="controlCenterCallBack" ref="controlCenter"/>
     </bean>
 
-	<bean id="birthdayCalculator" class="com.caibowen.gplume.sample.BirthdayCalculator"/>
+	<bean id="birthdayCalculator" class="com.caibowen.gplume.sample.feature.BirthdayCalculator"/>
+	
 </beans>
 
 
