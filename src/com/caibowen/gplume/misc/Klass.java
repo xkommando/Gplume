@@ -15,20 +15,63 @@
  ******************************************************************************/
 package com.caibowen.gplume.misc;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * 
  * @author BowenCai
  *
  */
-public final class Classes {
+public final class Klass {
+	
+	
+	/**
+	 * compare java.lang.reflect.field by its name, if two field, 
+	 * although at different levels of inheritance, have the same name and type,
+	 * are considered the same.
+	 * 
+	 * And during comparison, parent field will generally be covered (shadowed) by 
+	 * child field.
+	 */
+	private static final Comparator<Field> FIELD_COMP = new Comparator<Field>() {
+		@Override
+		public int compare(Field o1, Field o2) {
+			int cmp = o1.getName().compareTo(o2.getName());
+			return cmp != 0 ? cmp 
+					:  o1.getType().equals(o2.getType()) ? 0 : 1;
+		}
+	};
+	
+	/**
+	 * get all filed (public private) in the class inheritance tree
+	 * parent field with the same name and type will be covered (shadowed) by 
+	 * child field, only one copy is returned.
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public static final Set<Field> getEffectiveField(Class<?> clazz) {
+		
+		Class<?> clazRef = clazz;
+		TreeSet<Field> fieldSet = new TreeSet<Field>(FIELD_COMP);
+		while (!clazRef.equals(Object.class)) {
+			for (Field field : clazRef.getDeclaredFields()) {
+				fieldSet.add(field);
+			}
+			clazRef = clazRef.getSuperclass();
+		}
+		return fieldSet;
+	}
 	
     public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
     /**
@@ -782,7 +825,7 @@ public final class Classes {
      */
     public static Class<?> getClass(final String className, final boolean initialize) throws ClassNotFoundException {
         final ClassLoader contextCL = Thread.currentThread().getContextClassLoader();
-        final ClassLoader loader = contextCL == null ? Classes.class.getClassLoader() : contextCL;
+        final ClassLoader loader = contextCL == null ? Klass.class.getClassLoader() : contextCL;
         return getClass(loader, className, initialize);
     }
 
@@ -840,5 +883,5 @@ public final class Classes {
     }
 
     
-	private Classes(){}
+	private Klass(){}
 }

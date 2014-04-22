@@ -20,8 +20,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.caibowen.gplume.core.IBeanAssembler;
-import com.caibowen.gplume.core.XMLBeanAssembler;
+import com.caibowen.gplume.core.bean.IBeanAssembler;
+import com.caibowen.gplume.core.bean.XMLBeanAssembler;
 import com.caibowen.gplume.event.Broadcaster;
 
 

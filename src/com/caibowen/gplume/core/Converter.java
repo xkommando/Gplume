@@ -15,26 +15,27 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str;
 
 /**
- * No exception type convert.
  * 
- * why not exception?
- * Exception throwing is just too expensive in the web environment.
- * With hundreds/thousands concurrent request, constant exception is unacceptable.
- * 
- * Instead of throwing exceptions every where, 
- * null return value is used to indicate exception/error.
  * 
  * 
  * @author BowenCai
@@ -43,86 +44,238 @@ import com.caibowen.gplume.misc.Str;
 public class Converter {
 	
 	/**
-	 *  exception free string cast
-	 *  
-	 * @param var
-	 * @param type
-	 * @return value or null if cast failed
+	 * No exception type convert.
+	 * 
+	 * why not exception? Exception throwing is just too expensive in the web
+	 * environment. With hundreds/thousands concurrent request, constant
+	 * exception is unacceptable.
+	 * 
+	 * Instead of throwing exceptions every where, null return value is used to
+	 * indicate exception/error.
+	 * 
+	 * @author BowenCai
+	 *
 	 */
-	@Nullable
-	public static<T> Object castStr(String var, Class<T> type) {
+	public static final class slient {
 
-		if (var == null || type == null) {
-			return var;
+		@Nullable
+		public static Long toLong(String string) {
+			try {
+				return Converter.toLong(string);
+			} catch (Exception e) {
+				return null;
+			}
 		}
-		var = var.trim();
+
+		@Nullable
+		public static Integer toInteger(String string) {
+			Long var = slient.toLong(string);
+			return var == null ? null : var.intValue();
+		}
+
+		@Nullable
+		public static Short toShort(String string) {
+			Long var = slient.toLong(string);
+			return var == null ? null : var.shortValue();
+		}
+
+		@Nullable
+		public static Double toDouble(String string) {
+			try {
+				return Converter.toDouble(string);
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		@Nullable
+		public static Float toFloat(String string) {
+			Double var = slient.toDouble(string);
+			return var == null ? null : var.floatValue();
+		}
+
+		@Nullable
+		public static Boolean toBool(String string) {
+			try {
+				return Converter.toBool(string);
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		@Nullable
+		public static Date toDate(String text) {
+			try {
+				return Converter.toDate(text);
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		@Nullable
+		public static String toSimpleDate(Date date) {
+			try {
+				return Converter.toSimpleDate(date);
+			} catch (Exception e) {
+				return null;
+			}
+		}
 		
-		if (type == String.class) {
-			return var;
+		/**
+		 *  exception free string cast
+		 *  
+		 *  literal will be translated to:
+		 *  byte Byte Byte[]
+		 *  int Integer
+		 *  ...
+		 *  double Double
+		 *  BigDecimal
+		 *  BigInteger
+		 *  
+		 *  Enum, literal 'enum1' -> enumType.Enum1 // caseInSensitive
+		 *  
+		 *  java.lang.Class by 'Class.Forname'
+		 *  java.lang.Object by 'Class.Forname().newInstance'
+		 *  
+		 *  
+		 * @param var
+		 * @param type
+		 * @return value or null if cast failed
+		 */
+		@Nullable
+		public static<T> Object translateStr(String var, Class<T> type) {
+
+			if (var == null || type == null) {
+				return var;
+			}
+			var = var.trim();
 			
-		} else if (type == byte[].class || type == Byte[].class) {
-			return var.getBytes();
-		 
-		} else if (type == Boolean.class || type == boolean.class) {
-			return toBool(var);
-			
-		} else if (type == Character.class || type == char.class) {
-			if (var.length() == 1){
-				return var.charAt(0);
+			if (type == String.class) {
+				return var;
+				
+			} else if (type == byte[].class || type == Byte[].class) {
+				return var.getBytes();
+			 
+			} else if (type == Boolean.class || type == boolean.class) {
+				return toBool(var);
+				
+			} else if (type == Character.class || type == char.class) {
+				if (var.length() == 1){
+					return var.charAt(0);
+				} else {
+					return null;
+				}
+				
+			} else if (type == char[].class || type == Character[].class) {
+				return var.toCharArray();
+				
+			} else if (type == Short.class || type == short.class) {
+				return toShort(var);
+				
+			}  else if (type == Integer.class || type == int.class) {
+				return toInteger(var);
+				
+			}  else if (type == Long.class || type == long.class) {
+				return toLong(var);
+				
+			}  else if (type == Float.class || type == float.class) {
+				return toFloat(var);
+				
+			}  else if (type == Double.class || type == double.class) {
+				return toDouble(var);
+				
+			} else if (type == Date.class) {
+				return toDate(var);
+				
+			} else if (type == java.math.BigDecimal.class) {
+				try {
+					return new BigDecimal(var);
+				} catch (Exception e) {
+					return null;
+				}
+				
+			} else if (type == java.math.BigInteger.class) {
+				try {
+					return new BigInteger(var);
+				} catch (Exception e) {
+					return null;
+				}
+				
+			} else if (type.isEnum()) {
+				T[] es = type.getEnumConstants();
+				for (T t : es) {
+					if (t.toString().equalsIgnoreCase(var)) {
+						return t;
+					}
+				}
+				return null;
+				
+			} else if (type == Class.class) {
+				try {
+					return Class.forName(var);
+				} catch (Exception e) {
+					return null;
+				}
+				
+			} else if (type == Object.class) {
+				Object obj = null;
+				try {
+					Class<?> klass = Class.forName(var);
+					obj = klass.newInstance();
+				} catch (Exception e) {
+				}
+				return obj;
+				
 			} else {
-				return null;
+				return var;
 			}
-			
-		} else if (type == char[].class || type == Character[].class) {
-			return var.toCharArray();
-			
-		} else if (type == Short.class || type == short.class) {
-			return toShort(var);
-			
-		}  else if (type == Integer.class || type == int.class) {
-			return toInteger(var);
-			
-		}  else if (type == Long.class || type == long.class) {
-			return toLong(var);
-			
-		}  else if (type == Float.class || type == float.class) {
-			return toFloat(var);
-			
-		}  else if (type == Double.class || type == double.class) {
-			return toDouble(var);
-			
-		} else if (type == Date.class) {
-			return toDate(var);
-			
-		} else if (type == java.math.BigDecimal.class) {
-			try {
-				return new BigDecimal(var);
-			} catch (Exception e) {
-				return null;
-			}
-			
-		} else if (type == java.math.BigInteger.class) {
-			try {
-				return new BigInteger(var);
-			} catch (Exception e) {
-				return null;
-			}
-			
-		} else if (type.isEnum()) {
-			T[] es = type.getEnumConstants();
-			for (T t : es) {
-				if (t.toString().equalsIgnoreCase(var)) {
-					return t;
+		}
+		
+	}
+//-----------------------------------------------------------------------------
+
+
+	public static Object translateList(List<String> varList, 
+										Class<?> beanClass,
+										String propName) throws NoSuchFieldException {
+
+		Class<?> targetClass = null;
+		Set<Field> fieldset = Klass.getEffectiveField(beanClass);
+		boolean isArray = false;
+		for (Field field : fieldset) {
+			if (field.getName().equals(propName)) {
+				Class<?> propClass = field.getType();
+				if (propClass.isArray()) {
+					targetClass = propClass.getComponentType();
+					isArray = true;
+				} else {
+					List<Class<?>> argClasses = TypeTraits.findParamTypes(
+							beanClass, propName);
+					if (argClasses != null && argClasses.size() == 1) {
+						targetClass = argClasses.get(0);
+					} else {
+						throw new IllegalArgumentException(
+								"expect one generic type, get[" + argClasses + "]");
+					}
 				}
 			}
-			return null;
+		}
+
+		ArrayList<Object> coreVars = new ArrayList<>(varList.size());
+		for (String liter : varList) {
+			coreVars.add(slient.translateStr(liter, targetClass));
+		}
+		if (isArray) {
+			Object[] objs = (Object[]) Array.newInstance(targetClass, coreVars.size());
+			for (int i = 0; i < objs.length; i++) {
+				objs[i] = coreVars.get(i);
+			}
+			return objs;
 			
 		} else {
-			return var;
+			return coreVars;
 		}
 	}
-	
-
 	
 	@Nullable
 	public static Number castNumber(Number var, Class<?> type) {
@@ -164,68 +317,51 @@ public class Converter {
 //			exception free c-style conversion
 //-----------------------------------------------------------------------------
 	
-	@Nullable
+	@Nonnull
 	public static Long toLong(String string) {
 		if (string == null) {
-			return null;
+			throw new NullPointerException();
 		}
 		string = string.trim();
-		long var;
 		if (Str.Patterns.INTERGER.matcher(string).matches()) {
-			try {
-				var = Long.parseLong(string);
- 			} catch (Exception e) {
- 				return null;
- 			}
-			return new Long(var);
-			
+			return Long.parseLong(string);
 		} else {
-			return null;
+			throw new NumberFormatException("cannot parse [" + string + "] to integer");
 		}
 	}
 	
-	@Nullable
+	@Nonnull
 	public static Integer toInteger(String string) {
-		Long var = toLong(string);
-		return var == null ? null : var.intValue();
+		return toLong(string).intValue();
 	}
 	
-	@Nullable
+	@Nonnull
 	public static Short toShort(String string) {
-		Long var = toLong(string);
-		return var == null ? null : var.shortValue();
+		return toLong(string).shortValue();
 	}
 
-	@Nullable
+	@Nonnull
 	public static Double toDouble(String string) {
 		if (string == null) {
 			return null;
 		}
 		string = string.trim();
-		Double var;
 		if (Str.Patterns.FLOAT_NUMBER.matcher(string).matches()) {
-			try {
-				var = Double.valueOf(string);
- 			} catch (Exception e) {
- 				return null;
- 			}
-			return var;
-			
+			return Double.valueOf(string);
 		} else {
-			return null;
+			throw new NumberFormatException("cannot parse [" + string + "] to double");
 		}
 	}
 	
-	@Nullable
+	@Nonnull
 	public static Float toFloat(String string) {
-		Double var = toDouble(string);
-		return var == null ? null : var.floatValue();
+		return toDouble(string).floatValue();
 	}
 	
-	@Nullable
+	@Nonnull
 	public static Boolean toBool(String string) {
 		if (string == null) {
-			return null;
+			throw new NullPointerException();
 		}
 		string = string.trim();
 		
@@ -242,24 +378,14 @@ public class Converter {
 					|| string.equalsIgnoreCase("off")
 					|| string.equalsIgnoreCase("no") 
 					|| string.equalsIgnoreCase("0");
-			
 			if (isFalse) {
 				return Boolean.FALSE;
 			} else {
-				return null;
+				throw new IllegalArgumentException("cannot cast [" + string + "] to bool");
 			}
-			
 		}
 	}
-	
-//	public static boolean isLeapYear(int year) {
-//		return ((year & 3) == 0)
-//				&& ((year % 100) != 0 || (year % 400) == 0);
-//	}
-	
-//	public static void main(String...a) {
-//		
-//	}
+
 	/**
 	 * cast String to to date(year, month, day), not hour, minutes, or second !
 	 * 
@@ -274,35 +400,30 @@ public class Converter {
 	 * 
 	 * @param text
 	 * @return null if failed
+	 * @throws ParseException 
 	 */
-	public static Date toDate(String text) {
+	@Nonnull
+	public static Date toDate(String text) throws ParseException {
 		if (text == null) {
-			return null;
+			throw new NullPointerException();
 		}
 		text = text.trim();
 		if (text.length() > 7) {
 			if (PTN_FORMAT_DAY.matcher(text).matches()) {
-				try {
-					return FORMAT_DAY.parse(text);
-				} catch (Exception e) {}
+				return FORMAT_DAY.parse(text);
 			}
 			
 		} else if (text.length() > 5) {
 			if (PTN_FORMAT_MONTH.matcher(text).matches()) {
-				try {
-					return FORMAT_MONTH.parse(text);
-				} catch (Exception e) {}
+				return FORMAT_MONTH.parse(text);
 			}
 			
 		} else if (text.length() > 3) {
 			if (PTN_FORMAT_YEAR.matcher(text).matches()) {
-				try {
-					return FORMAT_YEAR.parse(text);
-				} catch (Exception e) {}
+				return FORMAT_YEAR.parse(text);
 			}
-			
 		}
-		return null;
+		throw new IllegalArgumentException("cannot cast["  + text + "]to date");
 	}
 	
 	/**
@@ -310,14 +431,12 @@ public class Converter {
 	 * @param date
 	 * @return yyyy-MM-dd
 	 */
+	@Nonnull
 	public static String toSimpleDate(Date date) {
-		
-		if (date != null) {
-			return FORMAT_DAY.format(date);
-			
-		} else {
-			return null;
+		if (date == null) {
+			throw new NullPointerException();
 		}
+		return FORMAT_DAY.format(date);
 	}
 	
 	private static final Pattern PTN_FORMAT_DAY;
@@ -399,6 +518,7 @@ public class Converter {
 		TYPE_TABLE.put("Void", Void.class);
 		TYPE_TABLE.put("void", void.class);
 		TYPE_TABLE.put("Object", Object.class);
+		TYPE_TABLE.put("Object[]", Object[].class);
 
 		TYPE_TABLE.put("Exception", Exception.class);
 		TYPE_TABLE.put("Error", Error.class);

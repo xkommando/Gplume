@@ -21,6 +21,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import com.caibowen.gplume.misc.Klass;
 
 /**
  * Traits type information, as well as providing reflection utilities
@@ -29,6 +34,30 @@ import java.lang.reflect.TypeVariable;
  *
  */
 public final class TypeTraits {
+	
+	
+	public static List<Class<?>> 
+	findParamTypes(Class<?> klass, String fieldName) throws NoSuchFieldException {
+		
+		Set<Field> fields = Klass.getEffectiveField(klass);
+		for (Field field : fields) {
+			if (field.getName().equals(fieldName)) {
+				Type type = field.getGenericType();
+				if (type instanceof ParameterizedType) {
+					Type[] argTps = ((ParameterizedType)type).getActualTypeArguments();
+					ArrayList<Class<?>> klasses = new ArrayList<>(argTps.length);
+					for (Type t : argTps) {
+						klasses.add((Class<?>)t);
+					}
+					return klasses;
+				}
+			}
+		}
+		// no such field
+		throw new NoSuchFieldException(
+				"cannnot find field of name[" + fieldName 
+				+ "] in class [" + klass.getName() + "]");
+	}
 	
 	/**
 	 * find setter by fieldName from public methods of the class
@@ -43,7 +72,6 @@ public final class TypeTraits {
 
 		String setterName = String.format("set%C%s",
 				fieldName.charAt(0), fieldName.substring(1));
-//System.out.println(fieldName + "   " + clazz.getName());
 		for (Method method : clazz.getMethods()) {
 
 			if(method.getName().equals(setterName)
@@ -113,15 +141,15 @@ public final class TypeTraits {
 	
 	public static Class<?> getClass(Type type, int i) {
 		
-        if (type instanceof ParameterizedType) { // ���?������
+        if (type instanceof ParameterizedType) {
         	
             return getGenericClass((ParameterizedType) type, i);
             
         } else if (type instanceof TypeVariable) {
         	
-            return (Class<?>) getClass(((TypeVariable<?>) type).getBounds()[0], 0); // ���?�Ͳ��ö���<R>
+            return (Class<?>) getClass(((TypeVariable<?>) type).getBounds()[0], 0);
         
-        } else {// class����Ҳ��type��ǿ��ת��
+        } else {
             return (Class<?>) type;
         }
     }
@@ -168,7 +196,7 @@ public final class TypeTraits {
 				Object realVar = null;
 				
 				if (var instanceof String) {
-					realVar = Converter.castStr((String)var, fieldClazz);
+					realVar = Converter.slient.translateStr((String)var, fieldClazz);
 				} else if (var instanceof Number) {
 					realVar = Converter.castNumber((Number)var, fieldClazz);
 				} else {
@@ -193,21 +221,7 @@ public final class TypeTraits {
     	throw new NoSuchFieldException(
     			"cannot find [" + fieldName + "] in class [" + clazz.getName() + "]");
 	}
-    
-	public static boolean isAssignableFrom(Class<?> a, Class<?> b) {
-		
-		if (a.isAssignableFrom(b)) {
-			return true;
-		} else {
-			a.isAnnotation();
-			a.isArray();
-			a.isEnum();
-			a.isInterface();
-			a.isPrimitive();
-			a.isSynthetic();
-			return false;
-		}
-	}
+
 	private TypeTraits(){}
 }
 

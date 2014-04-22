@@ -35,7 +35,7 @@ import com.caibowen.gplume.web.note.Handle;
  *
  */
 public class SimpleControlCenter extends ControlCenter {
-
+	
 	private static final long serialVersionUID = -1948249520836896853L;
 	
 	private static final Logger LOG = Logger.getLogger(SimpleControlCenter.class.getName());

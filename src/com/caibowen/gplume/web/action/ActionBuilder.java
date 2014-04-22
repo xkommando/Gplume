@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 import com.caibowen.gplume.core.Converter;
-import com.caibowen.gplume.misc.Classes;
+import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.Interception;
 import com.caibowen.gplume.web.RequestContext;
@@ -94,7 +94,7 @@ class ActionBuilder {
 
 		if (typParams.length == params.length) {
 			for (int i = 0; i < typParams.length; i++) {
-				if ( !Classes.isAssignable(params[i], typParams[i])) {
+				if ( !Klass.isAssignable(params[i], typParams[i])) {
 					throw new IllegalArgumentException(
 							"type mismatch, method param type[" + params[i] + "]"
 							+ " param type[" + typParams[i] + "]"

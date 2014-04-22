@@ -48,7 +48,7 @@ public class RestAction extends Action {
 	
 	@Override
 	public void perform(RequestContext requestContext) throws Throwable {
-		Object var = Converter.castStr(parseArg(requestContext.uri), argType);
+		Object var = Converter.slient.translateStr(parseArg(requestContext.uri), argType);
 		// System.out.println("name[" + argName + "]   type[" +
 		// argType.getSimpleName() + "] suffix[" + suffix + "]");
 		// System.out.println("  value  ["+parseArg(requestContext.uri)+"]  ");

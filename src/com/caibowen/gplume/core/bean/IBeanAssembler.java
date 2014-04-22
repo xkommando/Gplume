@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core;
+package com.caibowen.gplume.core.bean;
 
 
 import java.io.File;
@@ -42,6 +42,7 @@ public interface IBeanAssembler extends Serializable {
 	 */
 	public void 		assemble(final InputStream in) throws Exception;
 	public void			assemble(final File file) throws Exception;
+	
 	/**
 	 * 
 	 * @param id
@@ -68,8 +69,9 @@ public interface IBeanAssembler extends Serializable {
 	 * 
 	 * @param id
 	 * @return bean reference if found, null if not found
+	 * @throws Exception 
 	 */
-	public<T> T 		removeBean(String id);
+	public void 		removeBean(String id);
 	
 	/**
 	 * update singleton
@@ -77,7 +79,7 @@ public interface IBeanAssembler extends Serializable {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public<T> void 		updateBean(String id, T bean) throws Exception; 
+	public<T> void 		updateBean(String id, T bean); 
 	
 	/**
 	 * if contains bean of this id
@@ -94,6 +96,7 @@ public interface IBeanAssembler extends Serializable {
 		public void visit(Object bean);
 	}
 	
+
 	/**
 	 * 
 	 * @param visitor

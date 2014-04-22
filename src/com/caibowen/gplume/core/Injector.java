@@ -17,11 +17,13 @@ package com.caibowen.gplume.core;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Comparator;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.inject.Inject;
+
+import com.caibowen.gplume.core.bean.IBeanAssembler;
+import com.caibowen.gplume.core.bean.IBeanAssemblerAware;
+import com.caibowen.gplume.misc.Klass;
 
 /**
  * 
@@ -64,7 +66,7 @@ public class Injector implements IBeanAssemblerAware {
 		
 		Class<?> clazz = object.getClass();
 		
-		Set<Field> fields = getEffectiveField(clazz);
+		Set<Field> fields = Klass.getEffectiveField(clazz);
 		
 			
 		for (Field field : fields) {
@@ -91,44 +93,7 @@ public class Injector implements IBeanAssemblerAware {
 		} // foreach field
 		
 	}
-	
-	/**
-	 * compare java.lang.reflect.field by its name, if two field, 
-	 * although at different levels of inheritance, have the same name and type,
-	 * are considered the same.
-	 * 
-	 * And during comparison, parent field will generally be covered (shadowed) by 
-	 * child field.
-	 */
-	private static final Comparator<Field> FIELD_COMP = new Comparator<Field>() {
-		@Override
-		public int compare(Field o1, Field o2) {
-			int cmp = o1.getName().compareTo(o2.getName());
-			return cmp != 0 ? cmp 
-					:  o1.getType().equals(o2.getType()) ? 0 : 1;
-		}
-	};
-	
-	/**
-	 * get all filed (public private) in the class inheritance tree
-	 * parent field with the same name and type will be covered (shadowed) by 
-	 * child field, only one copy is returned.
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	public static final Set<Field> getEffectiveField(Class<?> clazz) {
-		
-		Class<?> clazRef = clazz;
-		TreeSet<Field> fieldSet = new TreeSet<Field>(FIELD_COMP);
-		while (!clazRef.equals(Object.class)) {
-			for (Field field : clazRef.getDeclaredFields()) {
-				fieldSet.add(field);
-			}
-			clazRef = clazRef.getSuperclass();
-		}
-		return fieldSet;
-	}
+
 
 //
 //

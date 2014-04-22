@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core;
+package com.caibowen.gplume.core.bean;
 
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,9 +35,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.caibowen.gplume.core.Converter;
-import com.caibowen.gplume.core.IBeanAssembler;
-import com.caibowen.gplume.core.IBeanAssemblerAware;
-import com.caibowen.gplume.core.TypeTraits;
 import com.caibowen.gplume.misc.Str;
 
 /**
@@ -90,30 +86,6 @@ import com.caibowen.gplume.misc.Str;
  * 
  */
 public class XMLBeanAssembler implements IBeanAssembler {
-
-	/**
-	 * these properties serves as the XLD
-	 */
-	public static final class XLD {
-
-		public static final String ROOT = "beans";
-		
-		public static final String BEAN = "bean";
-		public static final String BEAN_ID = "id";
-		public static final String BEAN_CLASS = "class";
-		public static final String BEAN_PROPERTY = "property";
-
-		/**
-		 * specify singleton bean, false by default
-		 */
-		public static final String BEAN_SINGLETON = "singleton";
-		
-		public static final String PROPERTY_NAME = "name";
-		public static final String PROPERTY_LIST = "list";
-		public static final String PROPERTY_VALUE = "value";
-		public static final String PROPERTY_REF = "ref";
-	}
-	
 	private static final long serialVersionUID = 1895612360389006713L;
 	
 //	private static final Logger LOG = Logger.getLogger(XMLBeanFactory.class.getName());
@@ -135,10 +107,10 @@ public class XMLBeanAssembler implements IBeanAssembler {
 	protected Map<String, Pod>	podMap = new ConcurrentHashMap<>(64);
 	protected ClassLoader classLoader;
 	
-	private static XMLBeanAssembler handle = null;
+	private static IBeanAssembler handle = null;
 	private XMLBeanAssembler() {}
 	
-	synchronized public static XMLBeanAssembler getInstance() {
+	synchronized public static IBeanAssembler getInstance() {
 		if(handle == null) {
 			handle = new XMLBeanAssembler();
 		}
@@ -203,17 +175,13 @@ public class XMLBeanAssembler implements IBeanAssembler {
 				continue;
 			}
 
-			String bnId = beanElem.getAttribute(XLD.BEAN_ID);
-			String bnScope = beanElem.getAttribute(XLD.BEAN_SINGLETON);
-			// System.out.println("id[" + bnId + "]");
-
+			String bnId = beanElem.getAttribute(XMLTags.BEAN_ID);
 			Pod pod = null;
 
+			String bnScope = beanElem.getAttribute(XMLTags.BEAN_SINGLETON);
 			boolean isSingleton = true;
 			if (Str.Utils.notBlank(bnScope)) {
-				if ("false".equalsIgnoreCase(bnScope.trim())) {
-					isSingleton = false;
-				}
+				isSingleton = Converter.toBool(bnScope);
 			}
 
 			if (isSingleton) {
@@ -223,7 +191,7 @@ public class XMLBeanAssembler implements IBeanAssembler {
 			} else {
 				pod = new Pod(bnId, beanElem, null);
 			}
-
+			
 			if (Str.Utils.notBlank(bnId)) {
 				podMap.put(bnId, pod);
 			}
@@ -253,15 +221,19 @@ public class XMLBeanAssembler implements IBeanAssembler {
 		}
 
 		Object beanObj = bnClass.newInstance();
-
+		
 		/**
-		 * All hooks here
+		 *   All hooks here
+		 *   for others (life circle management)
 		 */
 		if (beanObj instanceof IBeanAssemblerAware) {
 			((IBeanAssemblerAware) beanObj).setBeanAssembler(this);
 		}
-
-		NodeList propLs = beanElem.getElementsByTagName(XLD.BEAN_PROPERTY);
+		if (beanObj instanceof BeanClassLoaderAware) {
+			((BeanClassLoaderAware)beanObj).setBeanClassLoader(this.classLoader);
+		}
+		
+		NodeList propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROPERTY);
 		if (propLs == null || propLs.getLength() == 0) {
 			// no property
 			return beanObj;
@@ -279,7 +251,7 @@ public class XMLBeanAssembler implements IBeanAssembler {
 				continue;
 			}
 
-			String propName = prop.getAttribute(XLD.PROPERTY_NAME);
+			String propName = prop.getAttribute(XMLTags.PROPERTY_NAME);
 			if (!Str.Utils.notBlank(propName)) {
 				throw new NullPointerException(
 						"Property name is empty.Element: ["
@@ -287,21 +259,23 @@ public class XMLBeanAssembler implements IBeanAssembler {
 			}
 			propName = propName.trim();
 			
-//System.out.println("class [" + bnClass.getSimpleName() + "] prop[" + propName);
+//System.out.println("class [" + bnClass.getSimpleName() + "] prop[" + propName + "]");
 
 			NodeList varList = prop.getChildNodes();
 			if (varList == null || varList.getLength() == 0) {
 				// property inside, one string value or one ref
 				
-				String varStr = prop.getAttribute(XLD.PROPERTY_VALUE);
-				String varRef = prop.getAttribute(XLD.PROPERTY_REF);
-				
+				String varStr = prop.getAttribute(XMLTags.PROPERTY_VALUE);
+				String varRef = prop.getAttribute(XMLTags.PROPERTY_REF);
+				// str value will casted to param type if needed
+				// e.g., <property name="number" value="5"/>
 				if (Str.Utils.notBlank(varStr)) {
-					setStrProperty(bnClass, beanObj, propName, varStr.trim());
+					BeanEditor.setStrProperty(bnClass, beanObj, propName, varStr.trim());
 					continue;
 				} else if (Str.Utils.notBlank(varRef)) {
+					// e.g., <property name="bean" ref="someOtherBean"/>
 					Object ref = getBean(varRef.trim());
-					setBeanProperty(bnClass, beanObj, propName, ref);
+					BeanEditor.setBeanProperty(bnClass, beanObj, propName, ref);
 					continue;
 				} else {
 					throw new IllegalArgumentException("No value for property["
@@ -313,6 +287,7 @@ public class XMLBeanAssembler implements IBeanAssembler {
 				
 				// check if is list
 				boolean isList = false;
+				boolean isMap = false;
 				/**
 				 * 
 				 * prop
@@ -323,53 +298,94 @@ public class XMLBeanAssembler implements IBeanAssembler {
 				 */
 				Node iter = prop.getFirstChild().getNextSibling();
 
-				if (XLD.PROPERTY_LIST.equals(iter.getNodeName())) {
+				if (XMLTags.PROPERTY_LIST.equals(iter.getNodeName())) {
 					isList = true;
-					iter = iter.getFirstChild().getNextSibling();
+					isMap = false;
+				} else if (XMLTags.PROPERTY_MAP.equals(iter.getNodeName())) {
+					isList = false;
+					isMap = true;
 				}
-				
-//System.out.println(propName + "  " + isList);
-				
-				ArrayList<Object> beanList = new ArrayList<Object>(8);
 
-				while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
-					
-					Element elemBn = (Element) iter;
-					
-					if (XLD.BEAN.equals(elemBn.getNodeName())) {
-						beanList.add(buildBean(elemBn));
-
-					} else if (XLD.PROPERTY_REF.equals(elemBn.getNodeName())) {
-						beanList.add(getBean(elemBn.getTextContent().trim()));
-
-					} else if (XLD.PROPERTY_VALUE.equals(elemBn.getNodeName())) {
-						beanList.add(elemBn.getTextContent().trim());
-					} else {
-						throw new IllegalArgumentException("Unknown property["
-								+ iter.getNodeName() + "]");
+				if (isMap) {
+					/**
+					 * <list> or <map>
+					 * |
+					 * first child -> next
+					 * 					|
+					 * 				    <key> or <value>
+					 */
+					iter = iter.getFirstChild().getNextSibling();
+					Properties properties = new Properties();
+					while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
+						Element elemBn = (Element) iter;
+						if (!XMLTags.PROPERTY_MAP_PROP.equals(elemBn.getNodeName())) {
+							throw new IllegalArgumentException(
+							"cannot have [" + elemBn.getNodeName() + "] under tag <props>, must be <prop> only");
+						}
+						String mapK = elemBn.getAttribute(XMLTags.PROPERTY_MAP_KEY);
+						if (!Str.Utils.notBlank(mapK)) {
+							throw new NullPointerException("empty map key for property[" + propName + "]");
+						}
+						mapK = mapK.trim();
+						String mapV = elemBn.getTextContent();
+						if (!Str.Utils.notBlank(mapV)) {
+							mapV = elemBn.getAttribute(XMLTags.PROPERTY_VALUE);
+							if (!Str.Utils.notBlank(mapV)) {
+								throw new NullPointerException(
+										"empty map value of key [" 
+											+ mapK + "] for property[" + propName + "]");
+							}
+						}
+						mapV = mapV.trim();
+						properties.setProperty(mapK, mapV);
+						// skip node of #text
+						iter = iter.getNextSibling().getNextSibling();
 					}
-					// skip node of #text
-					iter = iter.getNextSibling().getNextSibling();
-				}// while
-				
-				if (isList) {
-					setListProperty(bnClass, beanObj, propName, beanList);
+					BeanEditor.setBeanProperty(bnClass, beanObj, propName, properties);
+				} else { // single value or list
+					if (isList) {
+						iter = iter.getFirstChild().getNextSibling();
+					}
+					ArrayList<Object> beanList = new ArrayList<Object>(8);
+					while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
+
+						Element elemBn = (Element) iter;
+						
+						if (XMLTags.BEAN.equals(elemBn.getNodeName())) {
+							beanList.add(buildBean(elemBn));
+
+						} else if (XMLTags.PROPERTY_REF.equals(elemBn.getNodeName())) {
+							beanList.add(getBean(elemBn.getTextContent().trim()));
+
+						} else if (XMLTags.PROPERTY_VALUE.equals(elemBn.getNodeName())) {
+							beanList.add(elemBn.getTextContent().trim());
+						} else {
+							throw new IllegalArgumentException("Unknown property["
+									+ iter.getNodeName() + "]");
+						}
+						// skip node of #text
+						iter = iter.getNextSibling().getNextSibling();
+					}// while
 					
-				} else {
-					if (beanList.size() == 1) {
-						setBeanProperty(bnClass, beanObj, propName, beanList.get(0));
+					if (isList) {
+						// set list or array
+						BeanEditor.setListProperty(bnClass, beanObj, propName, beanList);
 						
 					} else {
-						throw new IllegalArgumentException(
-								"Bean number miss match for property[" + propName
-										+ "] in class ["
-										+ bnClass.getName() + "]\n"
-										+ "needs 1 actual " + beanList.size()
-										+ "beans : " + beanList.toString());
+						if (beanList.size() == 1) {
+							BeanEditor.setBeanProperty(bnClass, beanObj, propName, beanList.get(0));
+							
+						} else {
+							throw new IllegalArgumentException(
+									"Bean number miss match for property[" + propName
+											+ "] in class ["
+											+ bnClass.getName() + "]\n"
+											+ "needs 1 actual " + beanList.size()
+											+ "beans : " + beanList.toString());
+						}
 					}
 				}
-				
-				
+
 			} // props
 
 		} // for properties
@@ -377,127 +393,15 @@ public class XMLBeanAssembler implements IBeanAssembler {
 		return beanObj;
 	}
 	
-	protected static void setBeanProperty(Class<?> bnClass,
-									Object bean,
-									String propName,
-									Object var) throws Exception {
-		
-		Method method = TypeTraits.findSetter(bnClass, propName);
-		if (method == null) {
-			if (REFLECT_ON_PRIVATE) {
-				TypeTraits.assignField(bean, propName, var, true);
-				return;
-			} else {
-				throw new IllegalStateException(
-						"in class [" + bnClass.getName()
-						+ "]  cannot find setter for [" + propName + "]");
-			}
-		}
-		Class<?>[] paramTypes = method.getParameterTypes();
-		if (paramTypes.length == 1) {
 
-			method.invoke(bean, var);
-
-		} else {
-			throw new IllegalStateException(
-					"in class [" + bnClass.getName()
-					 +"]   setter [" + method.getName()
-						+ "] has more than one parameters");
-		}
-	}
-	
-	protected static void setStrProperty(Class<?> bnClass,
-									Object bean,
-									String propName,
-									String varStr) throws Exception {
-
-		Method method = TypeTraits.findSetter(bnClass, propName);
-		
-		if (method == null) {
-			if (REFLECT_ON_PRIVATE) {
-				TypeTraits.assignField(bean, propName, varStr, true);
-				return;
-			} else {
-				throw new IllegalStateException(
-						"in class [" + bnClass.getName()
-						+ "]  cannot find setter for [" + propName + "]");
-			}
-		}
-		
-		Class<?>[] paramTypes = method.getParameterTypes();
-		
-		if (paramTypes.length == 1) {
-//System.out.println(bnClass.getSimpleName() + "   " + varStr + "    " + method.getName() + "   " + paramTypes[0].getName());
-			Object var = Converter.castStr(varStr, paramTypes[0]);
-			method.invoke(bean, var);
-
-		} else {
-			throw new IllegalStateException(
-					"in class [" + bnClass.getName()
-					 +"]  setter [" + method.getName()
-						+ "]  has more than one parameters");
-		}
-	}
-
-	protected static void setListProperty(Class<?> bnClass, Object bean,
-			String propName, List<?> varArray) throws Exception {
-		
-//		NodeList vars = elemList.getElementsByTagName(XLD.PROPERTY_VALUE);
-//		List<String> varArray = new ArrayList<>(vars.getLength());
-//		for (int i = 0; i < vars.getLength(); i++) {
-//			varArray.add(vars.item(i).getTextContent());
-//		}
-
-		Method method = TypeTraits.findSetter(bnClass, propName);
-
-		if (method == null) {
-			if (REFLECT_ON_PRIVATE) {
-				TypeTraits.assignField(bean, propName, varArray, REFLECT_ON_PRIVATE);
-				return;
-			} else {
-				throw new IllegalStateException(
-						"in class [" + bnClass.getName()
-						+ "]  cannot find setter for [" + propName + "]");
-			}
-		}
-
-		Class<?>[] paramTypes = method.getParameterTypes();
-
-		if (paramTypes != null && paramTypes.length == 1) {
-			if (paramTypes[0].isAssignableFrom(varArray.getClass())) {
-				// System.out.println("invoking " + method.getName());
-				method.invoke(bean, varArray);
-
-			} else {
-
-				if (REFLECT_ON_PRIVATE) {
-					TypeTraits.assignField(bean, propName, varArray, true);
-					return;
-				} else {
-					throw new IllegalStateException(
-							"in class "
-							+ bnClass.getName()
-							+ " cannot assign ArrayList to parameter ["
-							+ propName + "]");
-				}
-			}
-
-		} else {
-			throw new IllegalStateException(
-					"in class [" + bnClass.getName()
-					 +"], setter[" + method.getName()
-						+ "] has more than one parameters");
-		}
-
-	}
-	
 	protected  Class<?> getClass(Element element) throws ClassNotFoundException {
-		String clazzName = element.getAttribute(XLD.BEAN_CLASS).trim();
+		String clazzName = element.getAttribute(XMLTags.BEAN_CLASS).trim();
 		return this.classLoader.loadClass(clazzName);
 	}
 
 	/**
 	 * @return null if exception is thrown in creating non-singleton bean
+	 * @throws Exception 
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -508,16 +412,14 @@ public class XMLBeanAssembler implements IBeanAssembler {
 			return null;
 		}
 		if (pod.isSingleton()) {
-
 			return (T) pod.getInstance();
-
 		} else {
-			
 			try {
 				return (T) buildBean(pod.getDescription());
 			} catch (Exception e) {
+				throw new RuntimeException(
+						"faild building non-singleton bean of id[" + id + "]", e);
 			}
-			return null;
 		}
 	}
 
@@ -540,14 +442,16 @@ public class XMLBeanAssembler implements IBeanAssembler {
 	}
 
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public<T> T removeBean(String id) {
+	public void removeBean(String id) {
 		Pod pod = podMap.remove(id);
 		if (pod != null) {
-			return (T) pod.getInstance();
-		} else {
-			return null;
+			try {
+				pod.destroy();
+			} catch (Exception e) {
+				throw new RuntimeException(
+						"faild destroy bean of id[" + id + "]", e);
+			}
 		}
 	}
 
@@ -595,57 +499,29 @@ public class XMLBeanAssembler implements IBeanAssembler {
 	 */
 	@Override
 	public void inTake(Visitor visitor) {
-		
+		Exception ex = null;
+		String id = null;
 		for (Map.Entry<String, Pod> entry : podMap.entrySet()) {
 			Pod pod = entry.getValue();
 			/**
 			 * create singleton bean
 			 */
-			visitor.visit(getBean(pod.getBeanId()));
-		}
-	}
-	
-	protected static class Pod {
-
-		private String beanId;
-		
-		/**
-		 * if singleton, log description, instance == null
-		 */
-		private Element description;
-		
-		/**
-		 * if singleton, description == null
-		 */
-		private Object instance;
-
-		Pod(String id, Element d, Object instance) {
-			if (d != null && instance != null || d == null && instance == null) {
-				throw new IllegalStateException("cannot decide whether bean is singleton");
+			try {
+				visitor.visit(getBean(pod.getBeanId()));
+			} catch (Exception e) {
+				/**
+				 * continue visiting.
+				 * log only the first exception.
+				 */
+				if (ex != null) {
+					ex = e;
+					id = pod.getBeanId();
+				}
 			}
-			this.beanId = id;
-			this.description = d;
-			this.instance = instance;
 		}
-
-		void setInstance(Object instance) {
-			this.instance = instance;
-		}
-		
-		boolean isSingleton() {
-			return instance != null;
-		}
-
-		Object getInstance() {
-			return instance;
-		}
-
-		Element getDescription() {
-			return description;
-		}
-		
-		String getBeanId() {
-			return beanId;
+		if (ex != null) {
+			throw new RuntimeException(
+					"exception when visiting bean of id[" + id + "]", ex);
 		}
 	}
 

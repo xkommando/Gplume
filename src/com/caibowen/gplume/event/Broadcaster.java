@@ -24,8 +24,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caibowen.gplume.core.IBeanAssembler;
 import com.caibowen.gplume.core.TypeTraits;
+import com.caibowen.gplume.core.bean.IBeanAssembler;
 
 /**
  * Register listener and broadcast event.
@@ -216,7 +216,13 @@ public class Broadcaster implements Serializable{
 			}
 		}
 	}
-
+	/**
+	 * a listener can listen one event only,
+	 * 
+	 * that is, a listener class can implement AppListener once only,
+	 * therefore, typeParams is of length 1.
+	 * 
+	 */
 	Class<? extends AppEvent> getEventClazz(IAppListener<? extends AppEvent> listener) {
 		
 		Type[] typeParams = listener.getClass().getGenericInterfaces();
@@ -231,14 +237,7 @@ public class Broadcaster implements Serializable{
 		throw new IllegalStateException(
 				"cannot find legal event type from lister class ["
 							+ listener.getClass().getName() + "]");
-		/**
-		 * a listener can listen one event only,
-		 * 
-		 * that is, a listener class can implement AppListener once only,
-		 * therefore, typeParams is of length 1.
-		 * 
-		 */
-//		return (Class<? extends AppEvent>) TypeTraits.getClass(typeParams[0], 0);
+
 	}
 	
 	/**

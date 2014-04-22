@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import com.caibowen.gplume.core.bean.InitializingBean;
 import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.AbstractControlCenter;
@@ -48,13 +49,11 @@ import com.caibowen.gplume.web.note.Intercept;
  * @author BowenCai
  *
  */
-public class ControllerScanner {
-
+public class ControllerScanner implements InitializingBean {
+	
 	private static final Logger LOG = Logger.getLogger(ControllerScanner.class.getName());
 	
 	List<Object> controllers;
-	public List<String> pkgs;
-	private boolean callbacked = false;
 	AbstractControlCenter controlCenter;
 	
 	@Inject public void setPackages(List<String> packages) {
@@ -62,17 +61,7 @@ public class ControllerScanner {
 		for (String pkg : packages) {
 			ctrls.addAll(findControllers(pkg));
 		}
-		List<Object> tmp = new ArrayList<Object>(ctrls);
-		this.controllers = tmp;
-		
-		if (!callbacked) {
-			if (controlCenter != null) {
-				controlCenter.setControllers(this.controllers);
-				this.callbacked = true;
-				this.controllers = null;
-				this.controlCenter = null;
-			}
-		}
+		this.controllers = new ArrayList<Object>(ctrls);;
 	}
 
 	/**
@@ -82,17 +71,13 @@ public class ControllerScanner {
 	 */
 	@Inject
 	public void setControlCenterCallBack(AbstractControlCenter controlCenter) throws Exception {
-		if (controllers != null) {
-			controlCenter.setControllers(controllers);
-			callbacked = true;				
-			this.controllers = null;
-			this.controlCenter = null;
-		} else {
-			this.controlCenter = controlCenter;
-			callbacked = false;
-		}
+		this.controlCenter = controlCenter;
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		controlCenter.setControllers(controllers);
+	}
 	
 	private static List<Object> findControllers(String pkg) {
 		
@@ -146,4 +131,5 @@ public class ControllerScanner {
 		}
 		return false;
 	}
+
 }
