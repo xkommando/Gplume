@@ -49,7 +49,7 @@ public class SampleController {
 		return pkg.getStr(k);
 	}
 	
-	@Handle({"/Gplume/",
+	@Handle(value={"/Gplume/",
 			"/Gplume/index",
 			"/Gplume/index.html",
 			"/Gplume/index.jsp"})
@@ -75,7 +75,7 @@ public class SampleController {
 	 * @param date
 	 * @param context
 	 */
-	@Handle({"/Gplume/your-birthday/{date formate like 1992-6-14::Date}"})
+	@Handle(value = {"/Gplume/your-birthday/{date formate like 1992-6-14::Date}"})
 	public void happyBirthday(Date date, RequestContext context) {
 		if (date != null) {
 			int dist = birthdayCalculator.dateDistance(date);

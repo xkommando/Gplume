@@ -11,9 +11,9 @@ import com.caibowen.gplume.core.TypeTraits;
  * @author BowenCai
  *
  */
-class BeanEditor {
+public class BeanEditor {
 
-	static void setBeanProperty(Class<?> bnClass, Object bean,
+	public static void setBeanProperty(Class<?> bnClass, Object bean,
 			String propName, Object var) throws Exception {
 
 		Method method = TypeTraits.findSetter(bnClass, propName);
@@ -32,7 +32,7 @@ class BeanEditor {
 		}
 	}
 
-	static void setStrProperty(Class<?> bnClass, Object bean,
+	public static void setStrProperty(Class<?> bnClass, Object bean,
 			String propName, String varStr) throws Exception {
 
 		Method setter = TypeTraits.findSetter(bnClass, propName);
@@ -59,7 +59,7 @@ class BeanEditor {
 	 * @param varList
 	 * @throws Exception
 	 */
-	static void setListProperty(Class<?> bnClass, Object bean,
+	public static void setListProperty(Class<?> bnClass, Object bean,
 			String propName, List<?> varList) throws Exception {
 
 		Method setter = TypeTraits.findSetter(bnClass, propName);

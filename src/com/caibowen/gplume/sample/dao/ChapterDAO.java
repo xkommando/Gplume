@@ -16,5 +16,4 @@ public class ChapterDAO extends HibernateDaoSupport {
 	public List<Chapter> getAll() {
 		return getHibernateTemplate().find("from Chapter");
 	}
-
 }
