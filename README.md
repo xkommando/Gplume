@@ -94,8 +94,9 @@ Spring and Hibernate can be integrated with Gplume, just add few more lines in t
 	<property name="driverClass" value="com.mysql.jdbc.Driver" />
 	<!-- and other properties -->
 </bean>
-<!-- will set bean sessionFactory in afterPropertiesSet() -->
-<bean id="sessionFactoryBuilder" class="com.caibowen.gplume.sample.test.SessionFactoryBuilder">
+<!-- will set sessionFactory bean with id ${sessionFactoryID} in afterPropertiesSet() -->
+<bean class="com.caibowen.gplume.sample.test.SessionFactoryBuilder">
+	<property name="sessionFactoryID" value="sessionFactory"/>
 	<property name="dataSource" ref="dataSource" />
 	<property name="hibernateProperties">
 		<props>
