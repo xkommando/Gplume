@@ -31,13 +31,11 @@ Write app-manifest.xml, it is similar to spring applicationContext.xml :
 ```XML
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
 	    <property name="defaultLang" value="SimplifiedChinese"/>
-	</bean>
-	<bean id="bootHelper" class="com.caibowen.gplume.web.i18n.WebAppBootHelper">
 	    <property name="pkgFiles">
-	        <list>
-	            <value>/WEB-INF/i18n/en.properties</value>
-	            <value>/WEB-INF/i18n/zh_CN.properties</value>
-	        </list>
+	        <props>
+	            <prop key="en">/i18n/en.properties</prop>
+	            <prop key="zh_CN">/i18n/zh_CN.properties</prop>
+	        </props>
 	    </property>
 	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
 	</bean>
@@ -74,7 +72,7 @@ AppContext.broadcaster.register(new IEventHook() {
 		LOG.info("cought event[" + event.getClass().getName() + "]"
 				+ "from source[" + event.getSource() + "]");
 	}
-});
+},false);//maintain a weak ref to this listener
 AppContext.broadcaster.register(new IAppListener<TimeChangedEvent>() {
 	@Override
 	public void onEvent(TimeChangedEvent event) {
