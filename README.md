@@ -122,7 +122,7 @@ public class ChapterDAO extends HibernateDaoSupport {
 ```
 **************
 Gplume Overview
-![alt text](https://dl.dropboxusercontent.com/s/eb07qh9ypr24fmi/gplume_structure.jpg)
+![alt text](https://dl.dropboxusercontent.com/s/iklpmr1jdyktdn2/gplume_struture.jpg)
 
 ***************
 For more infomation, goto www.caibowen.com/blog/tag/pglume
