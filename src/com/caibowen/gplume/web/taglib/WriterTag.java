@@ -26,7 +26,7 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 import com.caibowen.gplume.core.context.AppContext;
-import com.caibowen.gplume.core.i18n.NativePackage;
+import com.caibowen.gplume.i18n.NativePackage;
 import com.caibowen.gplume.web.i18n.WebI18nService;
 
 /**

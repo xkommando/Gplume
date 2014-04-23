@@ -19,11 +19,20 @@ import java.io.InputStream;
 
 
 /**
+ * Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
  * 
  * @author BowenCai
- *
  */
-public interface InputStreamCallback {
-	
-	public void doInStream(InputStream stream) throws Exception;
+public class ThreadInputStreamProvider implements InputStreamProvider {
+
+	@Override
+	public InputStream getStream(String path) {
+		return Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+	}
+
+	@Override
+	public String getContextPath() {
+		throw new UnsupportedOperationException();
+	}
+
 }

@@ -29,7 +29,6 @@ import com.caibowen.gplume.core.context.InputStreamProvider;
 import com.caibowen.gplume.core.context.InputStreamSupport;
 import com.caibowen.gplume.core.context.ServletContextInputStreamProvider;
 import com.caibowen.gplume.misc.Str;
-import com.caibowen.gplume.web.i18n.WebAppBootHelper;
 import com.caibowen.gplume.web.i18n.WebI18nService;
 
 /**
@@ -44,14 +43,13 @@ import com.caibowen.gplume.web.i18n.WebI18nService;
  */
 public class WebAppBooter implements ServletContextListener {
 
-	private static final Logger LOG = Logger.getLogger(WebAppBooter.class
-			.getName());
+	private static final Logger LOG 
+					= Logger.getLogger(WebAppBooter.class.getName());
+
 	/**
 	 * bean name for internationalization
 	 */
 	private static final String I18N_SERVICE_BEAN_ID = "i18nService";
-	private static final String BOOT_HELPER_BEAN_ID = "bootHelper";
-	
 	/**
 	 * <li>set default locale, time zone</li> <li>build beans according to the
 	 * manifest file</li> <li>prepare localeService</li> <li>register all
@@ -78,9 +76,9 @@ public class WebAppBooter implements ServletContextListener {
 
 		if (Str.Utils.notBlank(manifestPath)) {
 			// build beans
-			streamSupport.doInStream(manifestPath, new InputStreamCallback() {
+			streamSupport.withPath(manifestPath, new InputStreamCallback() {
 				@Override
-				public void doWithStream(InputStream stream) throws Exception {
+				public void doInStream(InputStream stream) throws Exception {
 					AppContext.beanAssembler.assemble(stream);
 				}
 			});
@@ -95,33 +93,24 @@ public class WebAppBooter implements ServletContextListener {
 		AppContext.beanAssembler
 				.inTake(AppContext.broadcaster.listenerRetreiver);
 		
-		// load localization data if presented
-		WebI18nService service = AppContext.beanAssembler
-									.getBean(I18N_SERVICE_BEAN_ID);
-		
-		if (service == null) {
-			LOG.log(Level.INFO, "cannot find i18n servivce with bean id[i18nService]");
-			
-		} else {
-			WebAppBootHelper loader = AppContext.beanAssembler
-											.getBean(BOOT_HELPER_BEAN_ID);
-
-			if (loader == null) {
-				throw new NullPointerException(
-						"no WebAppBootHelper with bean id[" + I18N_SERVICE_BEAN_ID +  "]");
+		// load language packages
+		WebI18nService service = AppContext.beanAssembler.getBean(I18N_SERVICE_BEAN_ID);
+		if (service != null) {
+			try {
+				service.loadFiles(provider);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
 			}
-
-			loader.setStreamProvider(provider);
-			
-			loader.load(service);
-			AppContext.beanAssembler.removeBean(BOOT_HELPER_BEAN_ID);
-			AppContext.defaults.timeZone = loader.getDefaultTimeZone();
+			LOG.info(I18N_SERVICE_BEAN_ID + " ready to roll!");
+		} else {
+			LOG.warning("cannot find " + I18N_SERVICE_BEAN_ID);
 		}
 		
 		// emit signal
 		WebAppStartedEvent signal = new WebAppStartedEvent(this);
 		signal.setTime(AppContext.now().getTime());
 		AppContext.broadcaster.broadcast(signal);
+		
 	}
 
 	@Override

@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.context;
-
-import java.io.InputStream;
+package com.caibowen.gplume.core.bean;
 
 
 /**
@@ -23,7 +21,7 @@ import java.io.InputStream;
  * @author BowenCai
  *
  */
-public interface InputStreamCallback {
+public interface IAssemlberVisitor {
 	
-	public void doInStream(InputStream stream) throws Exception;
+	public void visit(Object bean);
 }

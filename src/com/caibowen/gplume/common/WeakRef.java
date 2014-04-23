@@ -17,45 +17,33 @@ package com.caibowen.gplume.common;
 
 import java.lang.ref.WeakReference;
 
+
 /**
+ * wrapper for java.lang.ref.WeakReference
+ * provided hashCode() and equals()
  * 
  * @author BowenCai
  *
+ * @param <T>
  */
-public class StrongRef<T> extends WeakReference<T> {
+public class WeakRef<T> extends WeakReference<T> {
 
-	private T ref;
-	public StrongRef(T referent) {
-		super(null);
-		ref = referent;
-	}
-
-    @Override
-	public T get() {
-        return this.ref;
-    }
-
-    @Override
-	public void clear() {
-        this.ref = null;
-    }
-
-    @Override
-	public boolean isEnqueued() {
-    	return false;
-    }
-
-    @Override
-	public boolean enqueue() {
-    	return false;
-    }
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * wrapper for java.lang.ref.WeakReference
+	 * provided hashCode() and equals()
+	 * @param referent
 	 */
+	public WeakRef(T referent) {
+		super(referent);
+	}
+	
 	@Override
 	public int hashCode() {
-		return ref.hashCode();
+		if (get() != null) {
+			return get().hashCode();
+		} else {
+			return super.hashCode();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -72,8 +60,13 @@ public class StrongRef<T> extends WeakReference<T> {
 		if (!(obj instanceof StrongRef)) {
 			return false;
 		}
-		StrongRef<?> other = (StrongRef<?>) obj;
-		return this.ref.equals(other.ref);
+		WeakRef<?> other = (WeakRef<?>) obj;
+		if (this.get() != null
+				&& other.get() != null) {
+			return this.get().equals(other.get());
+		} else {
+			return false;
+		}
 	}
 
 }

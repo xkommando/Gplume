@@ -23,10 +23,10 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import com.caibowen.gplume.core.context.AppContext;
-import com.caibowen.gplume.core.i18n.NativePackage;
 import com.caibowen.gplume.event.AppEvent;
 import com.caibowen.gplume.event.IAppListener;
 import com.caibowen.gplume.event.IEventHook;
+import com.caibowen.gplume.i18n.NativePackage;
 import com.caibowen.gplume.sample.feature.BirthdayCalculator;
 import com.caibowen.gplume.sample.feature.TimeChangedEvent;
 import com.caibowen.gplume.web.HttpMethod;
@@ -46,6 +46,9 @@ public class SampleController {
 		NativePackage pkg = 
 				(NativePackage) context.request.getSession(true)
 							.getAttribute(NativePackage.NAME);
+		if (pkg == null) {
+			pkg = context.getAttr(NativePackage.NAME);
+		}
 		return pkg.getStr(k);
 	}
 	
@@ -54,7 +57,6 @@ public class SampleController {
 			"/Gplume/index.html",
 			"/Gplume/index.jsp"})
 	public void index(RequestContext context) {
-		
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		context.render("/index.jsp");
 	}

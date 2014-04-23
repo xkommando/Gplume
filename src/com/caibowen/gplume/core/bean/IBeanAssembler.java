@@ -18,7 +18,6 @@ package com.caibowen.gplume.core.bean;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -27,7 +26,7 @@ import java.util.Set;
  * @author BowenCai
  *
  */
-public interface IBeanAssembler extends Serializable {
+public interface IBeanAssembler {
 	
 	public void setClassLoader(ClassLoader loader);
 	
@@ -51,6 +50,8 @@ public interface IBeanAssembler extends Serializable {
 	 */
 	public<T> T 		getBean(String id);
 	
+	
+	
 	/**
 	 * @param clazz
 	 * @return beans of this type
@@ -61,7 +62,15 @@ public interface IBeanAssembler extends Serializable {
 	 * the newly added bean is singleton
 	 * @param id
 	 * @param bean
+	 * @param lifeSpan bean lifes
 	 * @return true bean added, false cannot add bean(already exists)
+	 */
+	public boolean 		addBean(String id, Object bean, int lifeSpan);
+	/**
+	 * default life Integer.MAX_VALUE
+	 * @param id
+	 * @param bean
+	 * @return
 	 */
 	public boolean 		addBean(String id, Object bean);
 	
@@ -91,17 +100,12 @@ public interface IBeanAssembler extends Serializable {
 	public boolean 		isSingletion(String id);
 
 	public boolean 		contains(Class<?> clazz);
-	
-	public static interface Visitor extends Serializable {
-		public void visit(Object bean);
-	}
-	
 
 	/**
 	 * 
 	 * @param visitor
 	 * @throws Exception when creating beans (if bean is not singleton)
 	 */
-	public void inTake(Visitor visitor);
+	public void inTake(IAssemlberVisitor visitor);
 
 }

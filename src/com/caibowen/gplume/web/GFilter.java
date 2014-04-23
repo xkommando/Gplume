@@ -79,7 +79,11 @@ public class GFilter implements Filter {
 	
 	@Override
 	public void destroy() {
-		controlCenter.destroy();
+		try {
+			controlCenter.destroy();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		controlCenter = null;
 	}
 

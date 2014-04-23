@@ -24,6 +24,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caibowen.gplume.core.bean.DisposableBean;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 /**
  * 
@@ -34,7 +35,10 @@ import com.caibowen.gplume.web.misc.DefaultErrorHandler;
  * @author BowenCai
  *
  */
-public abstract class AbstractControlCenter implements IRequestProcessor, Serializable {
+public abstract class AbstractControlCenter 
+							implements IRequestProcessor,
+									DisposableBean,
+									Serializable {
 	
 	private static final long serialVersionUID = -5906639792037911875L;
 	private static final Logger LOG = Logger.getLogger("ControlCenter");
@@ -173,6 +177,4 @@ public abstract class AbstractControlCenter implements IRequestProcessor, Serial
 
 	abstract public boolean 	removeInterception(final String uri);
 	abstract public void 		removeInterception(Class<?> controllerClass);
-	
-	abstract public void 		destroy();
 }

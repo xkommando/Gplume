@@ -19,9 +19,9 @@ import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
-import com.caibowen.gplume.core.i18n.Dialect;
-import com.caibowen.gplume.core.i18n.I18nService;
-import com.caibowen.gplume.core.i18n.NativePackage;
+import com.caibowen.gplume.i18n.Dialect;
+import com.caibowen.gplume.i18n.I18nService;
+import com.caibowen.gplume.i18n.NativePackage;
 import com.caibowen.gplume.web.RequestContext;
 
 /**
@@ -44,7 +44,7 @@ public class WebI18nService extends I18nService {
 				if (dialect == Dialect.Unknown) {
 					dialect = Dialect.SimplifiedChinese;
 				}
-				Set<Dialect> all = getAll();
+				Set<Dialect> all = getSupportedDialects();
 				session.setAttribute(NativePackage.NAME, pkgTable.get(dialect));
 				session.setAttribute(ALTERNATIVE, all);
 			}
@@ -53,6 +53,7 @@ public class WebI18nService extends I18nService {
 			if (dialect == Dialect.Unknown) {
 				dialect = Dialect.SimplifiedChinese;
 			}
+			context.putAttr(ALTERNATIVE, getSupportedDialects());
 			context.putAttr(NativePackage.NAME, pkgTable.get(dialect));
 		}
 

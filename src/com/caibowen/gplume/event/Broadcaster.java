@@ -16,6 +16,7 @@
 package com.caibowen.gplume.event;
 
 import java.io.Serializable;
+import java.lang.ref.Reference;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,8 +25,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caibowen.gplume.common.StrongRef;
+import com.caibowen.gplume.common.WeakRef;
 import com.caibowen.gplume.core.TypeTraits;
-import com.caibowen.gplume.core.bean.IBeanAssembler;
+import com.caibowen.gplume.core.bean.IAssemlberVisitor;
 
 /**
  * Register listener and broadcast event.
@@ -48,14 +51,14 @@ public class Broadcaster implements Serializable{
 	 *how i wish there is a typedef here 
 	 */
 	private Map<Class< ? extends AppEvent>, 
-					Map<IAppListener<? extends AppEvent>, Object> > slots;
+					Map<Reference<? extends IAppListener<? extends AppEvent>>, Object> > slots;
 	
-	private Map<IEventHook, Object> hooks;
+	private Map< Reference<? extends IEventHook>, Object> hooks;
 	
 	private static Broadcaster handle = null;	
 	private Broadcaster() {
 		slots = new HashMap<>(16);
-		hooks = new LinkedHashMap<IEventHook, Object>();
+		hooks = new LinkedHashMap<>();
 	}
 	
 	synchronized public static Broadcaster getInstance() {
@@ -65,13 +68,29 @@ public class Broadcaster implements Serializable{
 		return handle;
 	}
 	
+
+	/**
+	 * strong ref to this hook
+	 * @param hook
+	 * @return
+	 */
+	public<T extends IEventHook> boolean 
+	register(T hook) {
+		return register(hook, true);
+	}
 	/**
 	 * add new event hook
 	 * @param hook
+	 * @param strongRef, maintain a strong ref or weakRef
 	 * @return true if this set did not already contain the specified element
 	 */
-	public boolean register(IEventHook hook) {
-		return	hooks.put(hook, PRESENT) == null;
+	public<T extends IEventHook> boolean 
+	register(T hook, boolean isStrongRef) {
+		Reference<? extends IEventHook> ref = 
+				isStrongRef ? new StrongRef<T>(hook) 
+							: new WeakRef<T>(hook);
+				
+		return	hooks.put(ref, PRESENT) == null;
 	}
 	
 	/**
@@ -79,26 +98,37 @@ public class Broadcaster implements Serializable{
 	 * listeners are stored in different slots
 	 * 
 	 * @param listener
+	 * @param isStrongRef 
 	 */
-	public void register(IAppListener<? extends AppEvent> listener) {
+	public<T extends IAppListener<? extends AppEvent>> void 
+	register(T listener, boolean isStrongRef) {
 
 		Class<? extends AppEvent> eventClazz = getEventClazz(listener);
-
-		Map<IAppListener<? extends AppEvent>, Object>
+		Reference<T> ref = isStrongRef ? new StrongRef<T>(listener)
+										: new WeakRef<T>(listener);
+				
+		Map<Reference<? extends IAppListener<? extends AppEvent> >, Object>
 			listeners = slots.get(eventClazz);
 
 		synchronized (slots) {
 			
 			if (listeners != null) {
-				listeners.put(listener, PRESENT);
+				listeners.put(ref, PRESENT);
 
 			} else {
-				Map<IAppListener<? extends AppEvent>, Object>
-					ls = new LinkedHashMap<IAppListener<? extends AppEvent>, Object>(16);
-				ls.put(listener, PRESENT);
-				slots.put(eventClazz, ls);
+				Map<Reference<? extends IAppListener<? extends AppEvent> >, Object>
+					ls = new LinkedHashMap<>(16);
+				ls.put(ref, PRESENT);
 			}
 		}
+	}
+	/**
+	 * 
+	 * @param listener
+	 */
+	public<T extends IAppListener<? extends AppEvent>> void 
+	register(T listener) {
+		register(listener, true);
 	}
 	
 	/**
@@ -106,26 +136,36 @@ public class Broadcaster implements Serializable{
 	 * @param eventClazz
 	 * @return
 	 */
-	public Set<IAppListener<? extends AppEvent>>
+	public Set<Reference<? extends IAppListener<? extends AppEvent> >>
 	getListener(Class<? extends AppEvent> eventClazz) {
-		return slots.get(eventClazz).keySet();
+		
+		Map<Reference<? extends IAppListener<? extends AppEvent> >, Object>
+		listeners = slots.get(eventClazz);
+		return listeners != null ? listeners.keySet() : null;
 	}
 	
 	/**
+	 * remove one listener
 	 * 
 	 * @param listener
 	 * @return
 	 */
-	public boolean remove(IAppListener<? extends AppEvent> listener) {
+	public<T extends IAppListener<? extends AppEvent>> boolean 
+	remove(T listener) {
 
 		Class<? extends AppEvent> eventClazz = getEventClazz(listener);
 
-		Map<IAppListener<? extends AppEvent>, Object>
+		Map<Reference<? extends IAppListener<? extends AppEvent> >, Object>
 			listeners = slots.get(eventClazz);
 		
 		if (listeners != null) {
+			WeakRef<IAppListener<? extends AppEvent>> 
+			wref = new WeakRef<IAppListener<? extends AppEvent>>(listener);
+			StrongRef<IAppListener<? extends AppEvent>> 
+			sref = new StrongRef<IAppListener<? extends AppEvent>>(listener);
 			synchronized (slots) {
-				listeners.remove(listener);
+				listeners.remove(sref);
+				listeners.remove(wref);
 			}
 			return true;
 		} else {
@@ -133,12 +173,21 @@ public class Broadcaster implements Serializable{
 		}
 	}
 	
+	/**
+	 * remove all listeners to this kind of event
+	 * @param eventClazz
+	 * @return
+	 */
 	public boolean removeListeners(Class<? extends AppEvent> eventClazz) {
 		synchronized (slots) {
 			return slots.remove(eventClazz) != null;
 		}
 	}
 	
+	/**
+	 * clear all listeners
+	 * @return
+	 */
 	public boolean clearAllListeners() {
 		synchronized (slots) {
 			slots.clear();
@@ -146,8 +195,13 @@ public class Broadcaster implements Serializable{
 		return true;
 	}
 	
-	public boolean containsHook(IEventHook hook) {
-		return hooks.containsKey(hook);
+	public<T extends IEventHook> boolean containsHook(T hook) {
+		WeakRef<? extends IEventHook> 
+		wref = new WeakRef<>(hook);
+		StrongRef<? extends IEventHook> 
+		sref = new StrongRef<>(hook);
+		return hooks.containsKey(wref)
+				|| hooks.containsKey(sref);
 	}
 	
 	/**
@@ -155,9 +209,14 @@ public class Broadcaster implements Serializable{
 	 * @param hook
 	 * @return true if hook removed
 	 */
-	public boolean remove(IEventHook hook) {
+	public<T extends IEventHook> boolean remove(T hook) {
+		WeakRef<? extends IEventHook> 
+		wref = new WeakRef<>(hook);
+		StrongRef<? extends IEventHook> 
+		sref = new StrongRef<>(hook);
 		synchronized (hooks) {
-			return this.hooks.remove(hook) != null;
+			return this.hooks.remove(wref) != null
+					|| this.hooks.remove(sref) != null;
 		}
 	}
 	
@@ -174,25 +233,29 @@ public class Broadcaster implements Serializable{
 	 * 
 	 * @param event
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void broadcast(AppEvent event) {
+	public<T extends AppEvent> void broadcast(T event) {
 		
 		if (event == null) {
 			return;
 		}
 		Class<? extends AppEvent> eventClazz = event.getClass();
 
-		Map<IAppListener<? extends AppEvent>, Object> listeners = slots.get(eventClazz);
+		Map<Reference<? extends IAppListener<? extends AppEvent> >, Object> 
+		listeners = slots.get(eventClazz);
 		
 		if (listeners != null) {
-			for (IAppListener listener : listeners.keySet()) {
-				try {
-					listener.onEvent(event);
-				} catch (Exception e) {
-					LOG.log(Level.SEVERE, 
-							"error broadcasting event[" 
-							+ event + "] on listener [" + listener + "]"
-							, e);
+			for (Reference<? extends IAppListener<? extends AppEvent>> 
+					listener : listeners.keySet()) {
+				
+				@SuppressWarnings("unchecked")
+				IAppListener<T> lsr = (IAppListener<T>) listener.get();
+				if (lsr != null) {
+					try {
+						lsr.onEvent(event);
+					} catch (Exception e) {
+						LOG.log(Level.SEVERE, "error broadcasting event["
+								+ event + "] on listener [" + listener + "]", e);
+					}
 				}
 			}
 		} else {
@@ -202,20 +265,23 @@ public class Broadcaster implements Serializable{
 						"] registerd ");
 		}
 		
-		for (Map.Entry<IEventHook, Object> hk : hooks.entrySet()) {
-			try {
-				IEventHook hook = hk.getKey();
-				if (hook != null) {
-					hook.catches(event);
+		for (Map.Entry<? extends Reference<? extends IEventHook>, Object> 
+				hk : hooks .entrySet()) {
+			
+			if (hk.getKey().get() != null) {
+				try {
+					IEventHook hook = hk.getKey().get();
+					if (hook != null) {
+						hook.catches(event);
+					}
+				} catch (Exception e) {
+					LOG.log(Level.SEVERE, "error catching event[" + event
+							+ "] on hook [" + hk + "]", e);
 				}
-			} catch (Exception e) {					
-				LOG.log(Level.SEVERE, 
-					"error catching event[" 
-					+ event + "] on hook [" + hk + "]"
-					, e);
 			}
 		}
 	}
+	
 	/**
 	 * a listener can listen one event only,
 	 * 
@@ -243,9 +309,8 @@ public class Broadcaster implements Serializable{
 	/**
 	 * visit bean factory and get listener beans registered.
 	 */
-	public IBeanAssembler.Visitor listenerRetreiver = new IBeanAssembler.Visitor(){
-		private static final long serialVersionUID = -750407111421138317L;
-
+	public IAssemlberVisitor listenerRetreiver = new IAssemlberVisitor() {
+		
 		@Override
 		public void visit(Object bean) {
 
@@ -260,7 +325,6 @@ public class Broadcaster implements Serializable{
 		}
 		
 	};
-
 
 }
 

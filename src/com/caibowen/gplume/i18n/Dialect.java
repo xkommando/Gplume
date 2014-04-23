@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.i18n;
+package com.caibowen.gplume.i18n;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -60,6 +60,8 @@ public enum Dialect {
 		this.iso639_2t = i639_2;
 		this.nativeName = nativeNameInASCI;
 	}
+	
+	public static final String NAME = Dialect.class.getName();
 	
 	public final int code;
 	public final String iso639_1;

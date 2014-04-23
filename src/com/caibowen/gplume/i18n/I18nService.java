@@ -13,55 +13,117 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.i18n;
+package com.caibowen.gplume.i18n;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+
+import com.caibowen.gplume.core.bean.DisposableBean;
+import com.caibowen.gplume.core.bean.InitializingBean;
+import com.caibowen.gplume.core.context.InputStreamCallback;
+import com.caibowen.gplume.core.context.InputStreamProvider;
+import com.caibowen.gplume.core.context.InputStreamSupport;
 
 /**
  * 
  * 
  * @author BowenCai
  */
-public class I18nService implements Serializable {
+public class I18nService implements Serializable, InitializingBean, DisposableBean {
 	
 	private static final long serialVersionUID = 2823988842476726160L;
 
 	private static final Logger LOG = Logger.getLogger(I18nService.class.getName());
 	
 	@Inject Dialect defaultLang = Dialect.SimplifiedChinese;
-
-	public final EnumMap<Dialect, NativePackage> pkgTable 
+	@Inject TimeZone defaultTimeZone;
+	@Inject Properties pkgFiles;
+	
+	protected final EnumMap<Dialect, NativePackage> pkgTable 
 			= new EnumMap<Dialect, NativePackage>(Dialect.class);
 	
-	public void loadResource(Dialect dialect, InputStream stream) {
-		Properties properties = new Properties();
-		try {
-			properties.load(stream);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		loadResource(dialect, properties);
+	/**
+	 * key: ISO 639-1 name
+	 * value: file path
+	 * @param pkgFiles the pkgFiles to set
+	 */
+	@Inject
+	public void setPkgFiles(Properties pkgFiles) {
+		this.pkgFiles = pkgFiles;
 	}
+	
+	/**
+	 * 
+	 * @param properties
+	 */
+	public void loadFiles(InputStreamProvider provider) throws Exception {
+		if (pkgFiles == null || pkgFiles.size() == 0) {
+			throw new NullPointerException("empty properties");
+		}
+		
+		InputStreamSupport support = new InputStreamSupport(provider);
 
-	public void loadResource(Dialect dialect, Properties properties) {
+		for (Map.Entry<Object, Object> e : pkgFiles.entrySet()) {
+			if (e.getKey() instanceof String && e.getValue() instanceof String) {
+				String k = (String) e.getKey();
+				String path = (String) e.getValue();
+				final Dialect dialect = resolve(k);
+				final Properties pkg = new Properties();
+				support.withPath(path, new InputStreamCallback() {
+					@Override
+					public void doInStream(InputStream stream) throws Exception {
+						pkg.load(stream);
+					}
+				});
+				addProperties(dialect, pkg);
+			}
+		}
+	}
+	
+//	public void loadResource(Dialect dialect, InputStream stream) {
+//		Properties properties = new Properties();
+//		try {
+//			properties.load(stream);
+//		} catch (IOException e) {
+//			throw new RuntimeException(e);
+//		}
+//		loadResource(dialect, properties);
+//	}
+
+	/**
+	 * 
+	 * @param dialect if is null, look for dialect in Properties
+	 * @param properties
+	 */
+	public void addProperties(@Nullable Dialect dialect, 
+								@Nonnull Properties properties) {
+		
+		if (dialect == null) {
+			if (null != properties.get(Dialect.NAME)) {
+				dialect = (Dialect)properties.get(Dialect.NAME);
+			} else {
+				throw new NullPointerException("no dialect specified");
+			}
+		}
 		if (dialect == defaultLang) {
-			LOG.info("pkg for default dialect[" + defaultLang.nativeName + "] loaded");
+			LOG.info("pkg for default dialect[" + defaultLang.nativeName + "] added");
 			pkgTable.put(dialect, new NativePackage(dialect, properties, null));
 		} else {
 			pkgTable.put(dialect, new NativePackage(dialect, 
 									properties, 
 									pkgTable.get(defaultLang)));
-			LOG.info("pkg for [" + dialect.nativeName + "] loaded");
+			LOG.info("pkg for [" + dialect.nativeName + "] added");
 		}
 	}
 	
@@ -79,7 +141,7 @@ public class I18nService implements Serializable {
 	private Set<Dialect> cachedSet;
 	private int cachedHash;
 	
-	public Set<Dialect> getAll() {
+	public Set<Dialect> getSupportedDialects() {
 		if (cachedSet == null) {
 			cachedSet = new HashSet<Dialect>(pkgTable.keySet());
 			cachedHash = cachedSet.hashCode();
@@ -153,11 +215,38 @@ public class I18nService implements Serializable {
 	 * @param defaultLang the defaultLang to set
 	 */
 	public void setDefaultLang(Dialect defaultLang) {
-//		System.out.println("I18nService.setDefaultLang()" + defaultLang);
 		this.defaultLang = defaultLang;
 	}
-	
+
+	/**
+	 * @param defaultTimeZone TimeZone.getTimeZone(defaultTimeZone);
+	 */
+	public void setDefaultTimeZone(String defaultTimeZone) {
+		this.defaultTimeZone = TimeZone.getTimeZone(defaultTimeZone);
+	}
+
 	public NativePackage getDefaultPkg() {
 		return pkgTable.get(defaultLang);
 	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		
+		for (Map.Entry<Dialect, NativePackage> e : pkgTable.entrySet()) {
+			if (e.getKey() != defaultLang
+					&& e.getValue().cadidate == null) {
+				e.getValue().cadidate = pkgTable.get(defaultLang);
+				LOG.config("set candidate of package[" 
+						+ e.getKey() + "] to [" + defaultLang  +"]");
+			}
+		}
+	}
+	
+	@Override
+	public void destroy() throws Exception {
+		pkgTable.clear();
+		this.cachedSet.clear();
+		LOG.config("i18nService destroyed");
+	}
+
 }

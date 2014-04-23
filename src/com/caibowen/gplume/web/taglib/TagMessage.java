@@ -18,7 +18,7 @@ package com.caibowen.gplume.web.taglib;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.caibowen.gplume.core.i18n.NativePackage;
+import com.caibowen.gplume.i18n.NativePackage;
 import com.caibowen.gplume.web.taglib.WriterTag;
 
 /**

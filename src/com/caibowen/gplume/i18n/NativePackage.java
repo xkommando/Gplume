@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.i18n;
+package com.caibowen.gplume.i18n;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -42,20 +42,25 @@ public class NativePackage implements Serializable {
 
 	public final NativeDateFmt dateFmt;
 	public final Dialect dialect;
+	public NativePackage cadidate;
 	
 	private HashMap<String, String> strMap;
 	private HashMap<Object, Object> objMap;
-	private NativePackage cadidate;
 	
 	/**
 	 * 
-	 * @param lang
+	 * @param lang not null, not Dialect.Unknown
 	 * @param prop
-	 * @param backup
+	 * @param backup: candidate package, when getStr or getObj faild, look up candidate
 	 */
 	public NativePackage(@Nonnull Dialect lang, 
 							@Nonnull Properties prop, 
 							@Nullable NativePackage backup) {
+		
+		if (lang == null || lang == Dialect.Unknown) {
+			throw new NullPointerException(
+				"must specify a dialect and it cannot be Dialect.Unknown");
+		}
 		
 		dialect = lang;
 		dateFmt = new NativeDateFmt(lang);
@@ -112,4 +117,5 @@ public class NativePackage implements Serializable {
 		}
 		return null;
 	}
+
 }

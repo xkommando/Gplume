@@ -43,7 +43,7 @@ public class InputStreamSupport {
 	}
 
 
-	public void doInStream(String path, InputStreamCallback callback) {
+	public void withPath(String path, InputStreamCallback callback) {
 		Exception ex = null;
 		InputStream inputStream = streamProvider.getStream(path);
 		if (inputStream == null) {
@@ -52,7 +52,7 @@ public class InputStreamSupport {
 					+ "]");
 		}
 		try {
-			callback.doWithStream(inputStream);
+			callback.doInStream(inputStream);
 		} catch (Exception e) {
 			ex = e;
 		} finally {

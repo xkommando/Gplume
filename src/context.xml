@@ -53,6 +53,8 @@
 	<bean id="chapterDao" class="com.caibowen.gplume.sample.dao.ChapterDAO">
 		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
+	-->
+	
 </beans>
 
 

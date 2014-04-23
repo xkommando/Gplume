@@ -39,7 +39,7 @@ public class FileInputStreamProvider implements InputStreamProvider{
 
 	@Override
 	public String getContextPath() {
-		return new File("").getParent();
+		return new File(".").getParent();
 	}
 
 }

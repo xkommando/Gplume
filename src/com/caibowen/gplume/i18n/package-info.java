@@ -13,17 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.context;
-
-import java.io.InputStream;
-
-
 /**
  * 
+ */
+/**
  * @author BowenCai
  *
  */
-public interface InputStreamCallback {
-	
-	public void doInStream(InputStream stream) throws Exception;
-}
+package com.caibowen.gplume.i18n;

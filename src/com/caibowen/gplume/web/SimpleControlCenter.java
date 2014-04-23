@@ -66,18 +66,18 @@ public class SimpleControlCenter extends ControlCenter {
 
 		} catch (IOException ioex) {
 
-			LOG.log(Level.WARNING, "I/O Exception :" + ioex.getCause(), ioex);
+			LOG.log(Level.WARNING, "I/O Exception :" + ioex.getMessage(), ioex);
 			thrown = ioex;
 
 		} catch (ServletException servex) {
 
-			LOG.log(Level.WARNING, "Servlet Exception : " + servex.getCause(), servex);
+			LOG.log(Level.WARNING, "Servlet Exception : " + servex.getMessage(), servex);
 			thrown = servex;
 
 		} catch (Exception e) {
 
 			LOG.log(Level.WARNING,
-					e.getClass().getName() + " Exception: " + "\n" + e.getCause(), e);
+					e.getClass().getName() + " Exception: " + "\n" + e.getMessage(), e);
 			thrown = e;
 
 		} catch (Throwable thr) {
