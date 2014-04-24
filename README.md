@@ -31,13 +31,11 @@ Write app-manifest.xml, it is similar to spring applicationContext.xml :
 ```XML
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
 	    <property name="defaultLang" value="SimplifiedChinese"/>
-	</bean>
-	<bean id="bootHelper" class="com.caibowen.gplume.web.i18n.WebAppBootHelper">
 	    <property name="pkgFiles">
-	        <list>
-	            <value>/WEB-INF/i18n/en.properties</value>
-	            <value>/WEB-INF/i18n/zh_CN.properties</value>
-	        </list>
+	        <props>
+	            <prop key="en">/i18n/en.properties</prop>
+	            <prop key="zh_CN">/i18n/zh_CN.properties</prop>
+	        </props>
 	    </property>
 	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
 	</bean>
@@ -74,7 +72,7 @@ AppContext.broadcaster.register(new IEventHook() {
 		LOG.info("cought event[" + event.getClass().getName() + "]"
 				+ "from source[" + event.getSource() + "]");
 	}
-});
+},false);//maintain a weak ref to this listener
 AppContext.broadcaster.register(new IAppListener<TimeChangedEvent>() {
 	@Override
 	public void onEvent(TimeChangedEvent event) {
@@ -86,7 +84,23 @@ event.setTime(new Date());
 AppContext.broadcaster.broadcast(event);
 ```
 
-**Step Five**. ORM. 
+***Step Five***. Test
+Run Junit4 with JunitPal, it will set up the AppContext and inject all properties for your test case
+```Java
+@RunWith(JunitPal.class)
+@ManifestPath("manifest.xml")
+public class TestNULL {
+	@Named("controlCenter")
+	public AbstractControlCenter controlCenter;
+	@Test
+	public void test() {
+		System.out.println(controlCenter);
+		AppContext.broadcaster.broadcast(new WebAppStartedEvent(this));
+	}
+}
+```
+
+**Step Six**. ORM. 
 Spring and Hibernate can be integrated with Gplume, just add few more lines in the xml:
 
 ``` XML
@@ -122,9 +136,10 @@ public class ChapterDAO extends HibernateDaoSupport {
 	}
 }
 ```
+
 **************
 Gplume Overview
-![alt text](https://dl.dropboxusercontent.com/s/eb07qh9ypr24fmi/gplume_structure.jpg)
+![alt text](https://dl.dropboxusercontent.com/s/iklpmr1jdyktdn2/gplume_struture.jpg)
 
 ***************
 For more infomation, goto www.caibowen.com/blog/tag/pglume
