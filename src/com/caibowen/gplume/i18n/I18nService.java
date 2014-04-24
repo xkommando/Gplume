@@ -29,6 +29,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import com.caibowen.gplume.context.ClassLoaderInputStreamProvider;
+import com.caibowen.gplume.context.FileInputStreamProvider;
 import com.caibowen.gplume.context.InputStreamCallback;
 import com.caibowen.gplume.context.InputStreamProvider;
 import com.caibowen.gplume.context.InputStreamSupport;
@@ -67,7 +69,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 	 * 
 	 * @param properties
 	 */
-	public void loadFiles(InputStreamProvider provider) throws Exception {
+	public void loadFiles(final InputStreamProvider provider) throws Exception {
 		if (pkgFiles == null || pkgFiles.size() == 0) {
 			throw new NullPointerException("empty properties");
 		}
@@ -80,6 +82,19 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 				String path = (String) e.getValue();
 				final Dialect dialect = resolve(k);
 				final Properties pkg = new Properties();
+				if (path.startsWith("classpath:")) {
+					support.setStreamProvider(
+							new ClassLoaderInputStreamProvider(
+								I18nService.class.getClassLoader()));
+					path = path.substring(0, path.length());
+					
+				} else if (path.startsWith("file:")) {
+					support.setStreamProvider(new FileInputStreamProvider());
+					path = path.substring(5, path.length());
+					
+				} else {
+					support.setStreamProvider(provider);
+				}
 				support.withPath(path, new InputStreamCallback() {
 					@Override
 					public void doInStream(InputStream stream) throws Exception {

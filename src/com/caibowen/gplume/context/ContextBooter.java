@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Bowen Cai
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.caibowen.gplume.context;
 
 import java.io.InputStream;
@@ -7,9 +22,21 @@ import java.util.logging.Logger;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.i18n.WebI18nService;
 
-
 /**
  * 
+ * For manifest.xml and i18n properties file:
+ * 
+ * 1. if read manifest.xml as file on file system
+ * write as "file:src/manifest.xml"
+ * 
+ * 2. if read manifest.xml is in class path(e.g. in src folder)
+ * write as "classpath:manifest.xml"
+ * 
+ * 3. if read as file in web root, a servlet context input stream provider is needed
+ * write as "/in_web_root" or "/WEB-INF/in_web_root"
+ * 
+ * 
+ *  
  * @author BowenCai
  *
  */
@@ -24,10 +51,13 @@ public class ContextBooter {
 	private static final String I18N_SERVICE_BEAN_ID = "i18nService";
 	
 
-	// optional
 	private InputStreamSupport streamSupport = new InputStreamSupport();
-	// optinal
+
+	// optional
 	private ClassLoader classLoader = ContextBooter.class.getClassLoader();
+	
+	// required if in web root
+	private InputStreamProvider streamProvider;
 	// required
 	private String manifestPath;
 	
@@ -37,10 +67,24 @@ public class ContextBooter {
 		
 		// set classloader for beanAssembler
 		AppContext.beanAssembler.setClassLoader(this.classLoader);
-
+		String path;
 		if (Str.Utils.notBlank(manifestPath)) {
 			// build beans
-			streamSupport.withPath(manifestPath, new InputStreamCallback() {
+			if (manifestPath.startsWith("classpath:")) {
+				streamSupport.setStreamProvider(
+						new ClassLoaderInputStreamProvider(getClassLoader()));
+				path = manifestPath.substring(10, manifestPath.length());
+				
+			} else if (manifestPath.startsWith("file:")) {
+				streamSupport.setStreamProvider(new FileInputStreamProvider());
+				path = manifestPath.substring(5, manifestPath.length());
+
+			} else {
+				streamSupport.setStreamProvider(streamProvider);
+				path = manifestPath;
+			}
+			
+			streamSupport.withPath(path, new InputStreamCallback() {
 				@Override
 				public void doInStream(InputStream stream) throws Exception {
 					AppContext.beanAssembler.assemble(stream);
@@ -61,7 +105,7 @@ public class ContextBooter {
 		WebI18nService service = AppContext.beanAssembler.getBean(I18N_SERVICE_BEAN_ID);
 		if (service != null) {
 			try {
-				service.loadFiles(streamSupport.getStreamProvider());
+				service.loadFiles(streamProvider);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -86,10 +130,10 @@ public class ContextBooter {
 	}
 
 	/**
-	 * @param provider the provider to set
+	 * @param streamProvider the streamProvider to set
 	 */
-	public void setProvider(InputStreamProvider provider) {
-		this.streamSupport.setStreamProvider(provider);
+	public void setStreamProvider(InputStreamProvider streamProvider) {
+		this.streamProvider = streamProvider;
 	}
 
 	/**

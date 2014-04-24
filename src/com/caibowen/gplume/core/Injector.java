@@ -29,6 +29,7 @@ import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str;
 
 /**
+ * Implementation of JSR 330 @Inject and @Named
  * 
  * Inject properties for objects based on @Inject and @Named
  * 
@@ -39,6 +40,16 @@ import com.caibowen.gplume.misc.Str;
  * Note that inherited fields that are marked @Inject and 
  * contains a correspondent public setter
  * will be injected as well. 
+ * 
+ * for non-public filed without public setter 
+ * throws IllegalAccessException 
+ * else try
+ * 1. @Named("id") 				-> get by ${id}
+ * 2. @Named() no value set  	-> get by field name
+ * 3. @Inject 					-> get by field class
+ * 4. @Inject 					-> get by field name
+ * 
+ * 	still not found -> failed !
  * 
  * @author BowenCai
  *
@@ -55,19 +66,17 @@ public class Injector implements IBeanAssemblerAware {
 
 	/**
 	 * 
-	 * for non-public filed without public setter 
-	 * throws IllegalAccessException 
+	 * for non-public filed without public setter throws IllegalAccessException
+	 * else try 
+	 * 1. @Named("id") 					-> get by ${id} 
+	 * 2. @Named() no value set 		-> get by field name 
+	 * 3. @Inject 						-> get by field class 
+	 * 4. @Inject 						-> get by field name
 	 * 
-	 * 1. Named -> get by id
-	 * 
-	 * 2. Inject -> get by field class
-	 * 
-	 * 3. Inject -> get by field name
-	 * 
-	 * 	 failed !
+	 * still not found -> failed !
 	 * 
 	 * @param object
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@Named
 	public void inject(Object object) throws Exception {
@@ -82,10 +91,7 @@ public class Injector implements IBeanAssemblerAware {
 				Named anno = field.getAnnotation(Named.class);
 				String id = anno.value();
 				if (!Str.Utils.notBlank(id)) {
-					throw new IllegalArgumentException(
-							"empty name for property ["
-							+ field.getName() + " in object [" 
-							+ object.getClass().getName() + "]");
+					id = field.getName();
 				}
 				Object var = beanAssembler.getBean(id);
 				if (var == null) {

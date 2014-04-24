@@ -52,7 +52,8 @@ public class WebAppBooter implements ServletContextListener {
 		// prepare
 		InputStreamProvider provider = new ServletContextInputStreamProvider(
 				servletContext);
-		bootstrap.setProvider(provider);
+		
+		bootstrap.setStreamProvider(provider);
 		
 		String manifestPath = servletContext.getInitParameter(AppContext.MANIFEST);
 		bootstrap.setManifestPath(manifestPath);
