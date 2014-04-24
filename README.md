@@ -84,7 +84,25 @@ event.setTime(new Date());
 AppContext.broadcaster.broadcast(event);
 ```
 
-**Step Five**. ORM. 
+***Step Six***. Test
+Run Junit4 with JunitPal, it will set up the AppContext and inject all properties for your test case
+```Java
+@RunWith(JunitPal.class)
+@ManifestPath("src/context.xml")
+public class TestNULL {
+
+	@Named("controlCenter")
+	public AbstractControlCenter controlCenter;
+
+	@Test
+	public void test() {
+		System.out.println(controlCenter);
+		AppContext.broadcaster.broadcast(new WebAppStartedEvent(this));
+	}
+}
+```
+
+**Step Six**. ORM. 
 Spring and Hibernate can be integrated with Gplume, just add few more lines in the xml:
 
 ``` XML
@@ -120,6 +138,7 @@ public class ChapterDAO extends HibernateDaoSupport {
 	}
 }
 ```
+
 **************
 Gplume Overview
 ![alt text](https://dl.dropboxusercontent.com/s/iklpmr1jdyktdn2/gplume_struture.jpg)
