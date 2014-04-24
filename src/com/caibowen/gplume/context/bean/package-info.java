@@ -13,33 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.context;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
-
 /**
  * 
+ */
+/**
  * @author BowenCai
  *
  */
-public class FileInputStreamProvider implements InputStreamProvider{
-
-	@Override
-	public InputStream getStream(String path) {
-		try {
-			return  new FileInputStream(path);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public String getContextPath() {
-		return new File(".").getParent();
-	}
-
-}
+package com.caibowen.gplume.context.bean;

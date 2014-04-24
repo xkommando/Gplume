@@ -13,34 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.context;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 /**
- * 
- * 
  * @author BowenCai
  *
  */
-public class URLInputStreamProvider implements InputStreamProvider{
-
-	@Override
-	public InputStream getStream(String path) {
-		try {
-			return new URI(path).toURL().openStream();
-		} catch (IOException | URISyntaxException e) {
-			throw new RuntimeException("", e);
-		}
-	}
-
-	@Override
-	public String getContextPath() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-}
+package com.caibowen.gplume.context;

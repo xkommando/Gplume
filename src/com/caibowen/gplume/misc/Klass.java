@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.annotation.Nonnull;
+
 /**
  * 
  * @author BowenCai
@@ -38,7 +40,7 @@ public final class Klass {
 	/**
 	 * compare java.lang.reflect.field by its name, if two field, 
 	 * although at different levels of inheritance, have the same name and type,
-	 * are considered the same.
+	 * pick the one in the low inheritance level.
 	 * 
 	 * And during comparison, parent field will generally be covered (shadowed) by 
 	 * child field.
@@ -48,10 +50,9 @@ public final class Klass {
 		public int compare(Field o1, Field o2) {
 			int cmp = o1.getName().compareTo(o2.getName());
 			return cmp != 0 ? cmp 
-					:  o1.getType().equals(o2.getType()) ? 0 : 1;
+					:  o1.getType().equals(o2.getType()) ? 0 : 1;// same name, compare type
 		}
 	};
-	
 	/**
 	 * get all filed (public private) in the class inheritance tree
 	 * parent field with the same name and type will be covered (shadowed) by 
@@ -60,7 +61,8 @@ public final class Klass {
 	 * @param clazz
 	 * @return
 	 */
-	public static final Set<Field> getEffectiveField(Class<?> clazz) {
+	@Nonnull
+	public static final Set<Field> getEffectiveField(@Nonnull Class<?> clazz) {
 		
 		Class<?> clazRef = clazz;
 		TreeSet<Field> fieldSet = new TreeSet<Field>(FIELD_COMP);

@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
-import com.caibowen.gplume.core.bean.InitializingBean;
+import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.AbstractControlCenter;
@@ -57,11 +57,12 @@ public class ControllerScanner implements InitializingBean {
 	AbstractControlCenter controlCenter;
 	
 	@Inject public void setPackages(List<String> packages) {
+		// avoid redundant obj
 		Set<Object> ctrls = new HashSet<Object>();
 		for (String pkg : packages) {
 			ctrls.addAll(findControllers(pkg));
 		}
-		this.controllers = new ArrayList<Object>(ctrls);;
+		this.controllers = new ArrayList<Object>(ctrls);
 	}
 
 	/**

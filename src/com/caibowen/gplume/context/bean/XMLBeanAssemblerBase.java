@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.bean;
+package com.caibowen.gplume.context.bean;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -21,11 +21,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nonnull;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Str;
 
@@ -47,6 +50,11 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 		this.classLoader = loader;
 	}
 	
+	@Nonnull
+	@Override
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
+	}
 	/**
 	 * xml bean factory being singleton implies that this function is not
 	 * reenterable, thus it is thread safe
@@ -187,13 +195,13 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 				if (Str.Utils.notBlank(varStr)) {
 					// e.g., <property name="number" value="5"/>
 					// str value will casted to param type if needed
-					BeanEditor.setStrProperty(bnClass, beanObj, propName, varStr.trim());
+					BeanEditor.setBeanProperty(beanObj, propName, varStr.trim());
 					continue;
 					
 				} else if (Str.Utils.notBlank(varRef)) {
 					// e.g., <property name="bean" ref="someOtherBean"/>
 					Object ref = getBean(varRef.trim());
-					BeanEditor.setBeanProperty(bnClass, beanObj, propName, ref);
+					BeanEditor.setBeanProperty(beanObj, propName, ref);
 					continue;
 					
 				} else if (Str.Utils.notBlank(varKlass)) {
@@ -201,7 +209,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 					Class<?> klass = this.classLoader.loadClass(varKlass.trim());
 					Object obj = klass.newInstance();
 					preprocess(obj);
-					BeanEditor.setBeanProperty(bnClass, beanObj, propName, obj);
+					BeanEditor.setBeanProperty(beanObj, propName, obj);
 					continue;
 					
 				} else {
@@ -243,6 +251,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 					 */
 					iter = iter.getFirstChild().getNextSibling();
 					Properties properties = new Properties();
+					
 					while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
 						Element elemBn = (Element) iter;
 						if (!XMLTags.PROPERTY_MAP_PROP.equals(elemBn.getNodeName())) {
@@ -268,11 +277,13 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 						// skip node of #text
 						iter = iter.getNextSibling().getNextSibling();
 					}
-					BeanEditor.setBeanProperty(bnClass, beanObj, propName, properties);
+					BeanEditor.setBeanProperty(beanObj, propName, properties);
+					
 				} else { // single value or list
 					if (isList) {
 						iter = iter.getFirstChild().getNextSibling();
 					}
+					// first get all no matter is string literal, ref or new beans
 					ArrayList<Object> beanList = new ArrayList<Object>(8);
 					while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
 
@@ -294,13 +305,14 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 						iter = iter.getNextSibling().getNextSibling();
 					}// while
 					
+					// second, use this list
 					if (isList) {
 						// set list or array
-						BeanEditor.setListProperty(bnClass, beanObj, propName, beanList);
+						BeanEditor.setListProperty(beanObj, propName, beanList);
 						
 					} else {
 						if (beanList.size() == 1) {
-							BeanEditor.setBeanProperty(bnClass, beanObj, propName, beanList.get(0));
+							BeanEditor.setBeanProperty(beanObj, propName, beanList.get(0));
 							
 						} else {
 							throw new IllegalArgumentException(

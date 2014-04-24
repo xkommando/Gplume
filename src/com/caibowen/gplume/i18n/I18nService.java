@@ -29,11 +29,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import com.caibowen.gplume.core.bean.DisposableBean;
-import com.caibowen.gplume.core.bean.InitializingBean;
-import com.caibowen.gplume.core.context.InputStreamCallback;
-import com.caibowen.gplume.core.context.InputStreamProvider;
-import com.caibowen.gplume.core.context.InputStreamSupport;
+import com.caibowen.gplume.context.InputStreamCallback;
+import com.caibowen.gplume.context.InputStreamProvider;
+import com.caibowen.gplume.context.InputStreamSupport;
+import com.caibowen.gplume.context.bean.DisposableBean;
+import com.caibowen.gplume.context.bean.InitializingBean;
 
 /**
  * 

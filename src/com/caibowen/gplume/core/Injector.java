@@ -16,24 +16,25 @@
 package com.caibowen.gplume.core;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
-import com.caibowen.gplume.core.bean.IBeanAssembler;
-import com.caibowen.gplume.core.bean.IBeanAssemblerAware;
+import com.caibowen.gplume.context.bean.IBeanAssembler;
+import com.caibowen.gplume.context.bean.IBeanAssemblerAware;
 import com.caibowen.gplume.misc.Klass;
+import com.caibowen.gplume.misc.Str;
 
 /**
  * 
- * Inject properties for objects based on @Inject.
+ * Inject properties for objects based on @Inject and @Named
  * 
  * The Injector set properties using public setters only.
  * 
- * The inject look up properties based on the field name,
- * e.g., @Inject prop123, will be injected with beans whose id is "prop123"
- * 
+ * The inject look up properties based on the field class, or name,
  * 
  * Note that inherited fields that are marked @Inject and 
  * contains a correspondent public setter
@@ -44,56 +45,91 @@ import com.caibowen.gplume.misc.Klass;
  */
 public class Injector implements IBeanAssemblerAware {
 
-	private IBeanAssembler beanFactory;
+	private static final Logger LOG = Logger.getLogger(Inject.class.getName());
+	
+	private IBeanAssembler beanAssembler;
 	@Override
 	public void setBeanAssembler(IBeanAssembler beanFactroy) {
-		this.beanFactory = beanFactroy;
+		this.beanAssembler = beanFactroy;
 	}
-
 
 	/**
 	 * 
-	 * NoSuchFieldException is impossible
-	 * 
-	 * for non-public setter 
+	 * for non-public filed without public setter 
 	 * throws IllegalAccessException 
 	 * 
+	 * 1. Named -> get by id
+	 * 
+	 * 2. Inject -> get by field class
+	 * 
+	 * 3. Inject -> get by field name
+	 * 
+	 * 	 failed !
 	 * 
 	 * @param object
 	 * @throws Exception 
 	 */
+	@Named
 	public void inject(Object object) throws Exception {
 		
 		Class<?> clazz = object.getClass();
 		
 		Set<Field> fields = Klass.getEffectiveField(clazz);
-		
 			
 		for (Field field : fields) {
-			if (field.isAnnotationPresent(Inject.class)) {
-
-				String fieldName = field.getName();
-				Method setter = TypeTraits.findSetter(clazz, fieldName);
-
-				if (setter != null) {
-					Object prop = beanFactory.getBean(fieldName);
-					if (prop != null) {
-						setter.invoke(object, prop);
-					} else {
-						throw new NullPointerException("no bean with id ["
-								+ fieldName + "] found. Class [" + clazz.getName() + "]");
-					}
-
-				} else {
-					throw new NoSuchMethodException("cannot find setter for ["
-							+ fieldName + "] in class [" + clazz.getName() + "]");
+			// first try Named, if successed, we continue to next field
+			if (field.isAnnotationPresent(Named.class)) {
+				Named anno = field.getAnnotation(Named.class);
+				String id = anno.value();
+				if (!Str.Utils.notBlank(id)) {
+					throw new IllegalArgumentException(
+							"empty name for property ["
+							+ field.getName() + " in object [" 
+							+ object.getClass().getName() + "]");
 				}
+				Object var = beanAssembler.getBean(id);
+				if (var == null) {
+					throw new NullPointerException("cannot find beans with id [" 
+							+ id + "] for property[" + field.getName() 
+							+ " in class [" + object.getClass().getName() + "]");
+				}
+				BeanEditor.setBeanProperty(object, field.getName(), var);
+				continue;
 			}
+			
+			// if Named failed, try inject, last attempt
+			if (field.isAnnotationPresent(Inject.class)) {
+				Set<Object> vars = beanAssembler.getBeans(field.getType());
+				if (vars.size() != 1) {
+					BeanEditor.setBeanProperty(object, field.getName(), 
+												vars.iterator().next());
+					
+				} else if (null != beanAssembler.getBean(field.getName())) {
+					Object var = beanAssembler.getBean(field.getName());
+					if (field.getType().isAssignableFrom(var.getClass())){
+						BeanEditor.setBeanProperty(object, field.getName(), var);
+						LOG.warning("cannot find bean for field [" 
+							+ field.getName() + "] in class [" 
+							+ object.getClass().getName() + "]"
+							+ "\r\n But find bean in beanAssemble with the same ID as the field name[" + field.getName()
+							+"]\r\n Setting field with this bean[" + var.getClass().getName() + "]");
+						continue;
+					}
+					
+				} else {
+					throw new NoSuchElementException("faild to set field[" 
+							+ field.getName() + "] in class[" + object.getClass().getName() +"]"
+							+ "\r\n cannot find bean with the assignale type or specified name for this field");
+				}	
+			}
+			
+			// pass not annotated fields
 			
 		} // foreach field
 		
 	}
 
+}
 
 //
 //
@@ -144,7 +180,6 @@ public class Injector implements IBeanAssemblerAware {
 //			System.out.println(field.getInt(d));
 //		}
 //	}
-}
 
 
 

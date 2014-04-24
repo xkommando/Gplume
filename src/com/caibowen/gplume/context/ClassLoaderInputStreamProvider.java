@@ -13,15 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.bean;
+package com.caibowen.gplume.context;
+
+import java.io.InputStream;
 
 
 /**
- * similar to Spring DisposableBean
+ * 
  * @author BowenCai
  *
  */
-public interface DisposableBean {
+public class ClassLoaderInputStreamProvider implements InputStreamProvider{
+	
+	ClassLoader classLoader;
+	
+	public ClassLoaderInputStreamProvider(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
 
-	void destroy() throws Exception;
+	@Override
+	public InputStream getStream(String path) {
+		return classLoader.getResourceAsStream(path);
+	}
+
+	@Override
+	public String getContextPath() {
+//		classLoader.
+		return null;
+	}
+
 }

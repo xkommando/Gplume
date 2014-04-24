@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.sample.test;
+package com.caibowen.gplume.orm.hibernate;
 
 import org.hibernate.SessionFactory;
 import org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean;
 
-import com.caibowen.gplume.core.bean.BeanIDAware;
-import com.caibowen.gplume.core.bean.IBeanAssembler;
-import com.caibowen.gplume.core.bean.IBeanAssemblerAware;
-import com.caibowen.gplume.core.bean.InitializingBean;
+import com.caibowen.gplume.context.bean.BeanIDAware;
+import com.caibowen.gplume.context.bean.IBeanAssembler;
+import com.caibowen.gplume.context.bean.IBeanAssemblerAware;
+import com.caibowen.gplume.context.bean.InitializingBean;
 
 /**
  * 

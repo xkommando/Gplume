@@ -15,16 +15,44 @@
  ******************************************************************************/
 package com.caibowen.gplume.misc;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class HtmlUtils {
 
+//	String str = "";
+//	Pattern patt = Pattern.compile(str);
+//	Matcher matcher = patt.matcher(plain);
+//	plain = matcher.replaceAll("<a href=\"$1\">$1</a>");
+	private static final Pattern PTN_LINK = Pattern.compile(
+			"(?i)\\b((?:https?://|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:\'\".,<>?«»“”‘’]))");
 
-    public static String escape(CharSequence text,
+	public static String txtToHtml(CharSequence text,
                                     int start, int end) {
     	StringBuilder out = new StringBuilder(text.length() * 3 / 2);
-    	escapeTo(out, text, start, end);
+    	txtToHtml(out, text, start, end);
     	return out.toString();
     }
-    
+	
+	/**
+	 * add <a href></a> to links
+	 * 
+	 * e.g.
+	 * 
+	 * look here http://www.caibowen.com/about.html
+	 * output
+	 * look here <a href="http://www.caibowen.com/about.html" target="_black" rel="nofollow" >
+	 * 	http://www.caibowen.com/about.html </a>
+	 * @param text
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public static String addHref(CharSequence text, int start, int end) {
+    	Matcher linkMatcher = PTN_LINK.matcher(text);
+    	return linkMatcher.replaceAll(
+    			"<a href=\"$1\" rel=\"nofollow\" target=\"_blank\">$1</a>");
+	}
     /**
      * escapt html
      * <pre>
@@ -40,7 +68,7 @@ public class HtmlUtils {
      * @param start
      * @param end
      */
-    public static void escapeTo(StringBuilder out, CharSequence text,
+    public static void txtToHtml(StringBuilder out, CharSequence text,
                                     int start, int end) {
     	
         for (int i = start; i < end; i++) {

@@ -282,11 +282,11 @@ System.out.println(_l + "   " + _r);
 		System.arraycopy(src, soffset, dest, doffset, n);
 		
 		final int dright = doffset + n;
-		int minIdx = min_index(dest,doffset, dright, cmp);
+		int minIdx = min_index(dest, doffset, dright, cmp);
 		for (int i = n; i < sright; i++) {
 			if (cmp.compare(src[i], dest[minIdx]) > 0) {
 				dest[minIdx] = src[i];
-				minIdx = min_index(dest,doffset, dright, cmp);
+				minIdx = min_index(dest, doffset, dright, cmp);
 			}
 		}
 		Arrays.sort(dest, doffset, dright, cmp);
@@ -301,6 +301,7 @@ System.out.println(_l + "   " + _r);
 		}
 		return idx;
 	}
+	
 	public static<T> void
 	partial_sort_copy(final List<T> src, final int soffset, final int sright,
 						List<T> dest, final int doffset,
@@ -313,14 +314,13 @@ System.out.println(_l + "   " + _r);
 		}
 		
 		final int dright = doffset + n;
-		int minIdx = min_index(dest,doffset, dright, cmp);
+		int minIdx = min_index(dest, doffset, dright, cmp);
 		for (int i = n; i < sright; i++) {
 			if (cmp.compare(src.get(i), dest.get(minIdx)) > 0) {
 				dest.set(minIdx, src.get(i));
-				minIdx = min_index(dest,doffset, dright, cmp);
+				minIdx = min_index(dest, doffset, dright, cmp);
 			}
 		}
-//		Arrays.sort(dest, doffset, dright, cmp);
 		Collections.sort(dest, cmp);
 	}
 	
@@ -333,6 +333,7 @@ System.out.println(_l + "   " + _r);
 		}
 		return idx;
 	}
+}
 //
 //	public static void main(String...args) {
 //		Comparator<Integer> cmp = new Comparator<Integer>() {
@@ -422,9 +423,8 @@ System.out.println(_l + "   " + _r);
 //	public static <T> T[] next_permutation(T[] v) {
 //		return v;
 //	}
-	
-	public static <T> T[] prev_permutation(T[] v) {
-		return v;
-	}
+//	
+//	public static <T> T[] prev_permutation(T[] v) {
+//		return v;
+//	}
 
-}

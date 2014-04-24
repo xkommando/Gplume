@@ -13,26 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.context;
-
-import java.io.InputStream;
+package com.caibowen.gplume.context.bean;
 
 
 /**
- * Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
  * 
+ * similar to Spring BeanNameAware
  * @author BowenCai
+ *
  */
-public class ThreadInputStreamProvider implements InputStreamProvider {
+public interface BeanIDAware {
 
-	@Override
-	public InputStream getStream(String path) {
-		return Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-	}
-
-	@Override
-	public String getContextPath() {
-		throw new UnsupportedOperationException();
-	}
+	void setBeanID(String id);
 
 }

@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.context;
+package com.caibowen.gplume.context;
 
 import java.io.InputStream;
+import java.io.Serializable;
+
+import javax.servlet.ServletContext;
+
 
 
 /**
@@ -23,7 +27,23 @@ import java.io.InputStream;
  * @author BowenCai
  *
  */
-public interface InputStreamCallback {
-	
-	public void doInStream(InputStream stream) throws Exception;
+public class ServletContextInputStreamProvider implements InputStreamProvider, Serializable {
+
+	private static final long serialVersionUID = -3973425249230485036L;
+	ServletContext context;
+
+	public ServletContextInputStreamProvider(ServletContext context) {
+		this.context = context;
+	}
+
+	@Override
+	public InputStream getStream(String path) {
+		return context.getResourceAsStream(path);
+	}
+
+	@Override
+	public String getContextPath() {
+		throw new UnsupportedOperationException();
+	}
+
 }

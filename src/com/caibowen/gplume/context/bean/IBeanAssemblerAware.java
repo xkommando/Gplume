@@ -13,11 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+package com.caibowen.gplume.context.bean;
+
+import com.caibowen.gplume.core.Injector;
+
+
 /**
+ * BeanAssemblerAware objects will retain a reference to the BeanFactory that created it
  * 
- */
-/**
  * @author BowenCai
  *
+ * @see Injector
  */
-package com.caibowen.gplume.core.bean;
+public interface IBeanAssemblerAware {
+	
+	public void setBeanAssembler(IBeanAssembler factory);
+}

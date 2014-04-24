@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.bean;
+package com.caibowen.gplume.context.bean;
 
 import java.io.File;
 import java.io.InputStream;
@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -107,7 +109,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	}
 
 	
-	public void assemble(final InputSource in) throws Exception {
+	public void assemble(@Nonnull final InputSource in) throws Exception {
 		
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document doc = builder.parse(in);
@@ -116,22 +118,22 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	}
 	
 	@Override
-	public void assemble(final InputStream in) throws Exception {
+	public void assemble(@Nonnull final InputStream in) throws Exception {
 		assemble(new InputSource(in));
 	}
 	
 	@Override
-	public void	assemble(final File file) throws Exception{
+	public void	assemble(@Nonnull final File file) throws Exception{
 		assemble(new InputSource(file.toURI().toASCIIString()));
 	}
 	
 	/**
-	 * @return null if exception is thrown in creating non-singleton bean
-	 * @throws Exception 
+	 * @return null if not found or exception is thrown in creating non-singleton bean
 	 */
 	@SuppressWarnings("unchecked")
+	@Nullable
 	@Override
-	public <T> T getBean(String id) {
+	public <T> T getBean(@Nonnull String id) {
 
 		Pod pod = super.podMap.get(id);
 		if (pod == null) {
@@ -149,12 +151,18 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		}
 	}
 
+	@Nullable
 	@Override
-	public Set<Object> getBeans(Class<?> clazz) {
+	public Pod 	getPod(@Nonnull String id) {
+		return podMap.get(id);
+	}
+	
+	@Override
+	public Set<Object> getBeans(@Nonnull Class<?> clazz) {
 		Set<Object> set = new HashSet<>(16);
 		for (Pod pod : super.podMap.values()) {
-			Object bean = pod.getInstance();
-			if (bean.getClass().equals(clazz)) {
+			Object bean = pod.getInternal();
+			if (clazz.isInstance(bean)) {
 				set.add(bean);
 			}
 		}
@@ -162,14 +170,14 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	}
 	
 	@Override
-	public boolean contains(Class<?> clazz) {
+	public boolean contains(@Nonnull Class<?> clazz) {
 		Set<Object> beans = getBeans(clazz);
 		return beans != null && beans.size() > 0;
 	}
 
 	
 	@Override
-	public void removeBean(String id) {
+	public void removeBean(@Nonnull String id) {
 		Pod pod = super.podMap.remove(id);
 		if (pod != null) {
 			try {
@@ -182,7 +190,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	}
 
 	@Override
-	public <T> void updateBean(String id, T bean) {
+	public <T> void updateBean(@Nonnull String id, @Nonnull T bean) {
 
 		Pod oldPod = super.podMap.get(id);
 		if (oldPod == null || oldPod.getInstance() == null) {
@@ -195,12 +203,15 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	}
 
 	@Override
-	public boolean addBean(String id, Object bean) {
+	public boolean addBean(@Nonnull String id, @Nonnull Object bean) {
 		return addBean(id, bean, Integer.MAX_VALUE);
 	}
 	
+	/**
+	 * new bean must not be non-singleton
+	 */
 	@Override
-	public boolean addBean(String id, Object bean, int lifeSpan) {
+	public boolean addBean(@Nonnull String id, @Nonnull Object bean, @Nonnull int lifeSpan) {
 		if (contains(id)) {
 			return false;
 		}

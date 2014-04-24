@@ -16,8 +16,11 @@
 package com.caibowen.gplume.common;
 
 /**
+ * build cache value
  * 
  * @author BowenCai
+ * @see SimpleCache
+ * @see WeakCache
  *
  * @param <V>
  */

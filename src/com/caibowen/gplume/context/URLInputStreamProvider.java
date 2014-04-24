@@ -13,19 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.bean;
+package com.caibowen.gplume.context;
 
-import com.caibowen.gplume.core.Injector;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
- * BeanAssemblerAware objects will retain a reference to the BeanFactory that created it
+ * 
  * 
  * @author BowenCai
  *
- * @see Injector
  */
-public interface IBeanAssemblerAware {
-	
-	public void setBeanAssembler(IBeanAssembler factory);
+public class URLInputStreamProvider implements InputStreamProvider{
+
+	@Override
+	public InputStream getStream(String path) {
+		try {
+			return new URI(path).toURL().openStream();
+		} catch (IOException | URISyntaxException e) {
+			throw new RuntimeException("", e);
+		}
+	}
+
+	@Override
+	public String getContextPath() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

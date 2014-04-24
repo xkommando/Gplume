@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.bean;
+package com.caibowen.gplume.context.bean;
 
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Assemble java beans
@@ -28,7 +31,9 @@ import java.util.Set;
  */
 public interface IBeanAssembler {
 	
-	public void setClassLoader(ClassLoader loader);
+	public void setClassLoader(@Nonnull ClassLoader loader);
+	@Nonnull
+	public ClassLoader getClassLoader();
 	
 	/**
 	 * build all beans.
@@ -39,24 +44,28 @@ public interface IBeanAssembler {
 	 * 
 	 * @throws Exception 
 	 */
-	public void 		assemble(final InputStream in) throws Exception;
-	public void			assemble(final File file) throws Exception;
+	public void 		assemble(@Nonnull final InputStream in) throws Exception;
+	public void			assemble(@Nonnull final File file) throws Exception;
 	
 	/**
 	 * 
 	 * @param id
-	 * @return
+	 * @return null if not found or exception is thrown in creating non-singleton bean
 	 * @throws Exception when creating beans (if bean is not singleton)
 	 */
-	public<T> T 		getBean(String id);
+	@Nullable
+	public<T> T 		getBean(@Nonnull String id);
 	
+	@Nullable
+	public Pod 			getPod(@Nonnull String id);
 	
 	
 	/**
 	 * @param clazz
-	 * @return beans of this type
+	 * @return a set of beans of that is instance of this class (including derived)
 	 */
-	public Set<Object>	getBeans(Class<?> clazz);
+	@Nullable
+	public Set<Object>	getBeans(@Nonnull Class<?> clazz);
 	
 	/**
 	 * the newly added bean is singleton
@@ -65,14 +74,14 @@ public interface IBeanAssembler {
 	 * @param lifeSpan bean lifes
 	 * @return true bean added, false cannot add bean(already exists)
 	 */
-	public boolean 		addBean(String id, Object bean, int lifeSpan);
+	public boolean addBean(@Nonnull String id, @Nonnull Object bean, @Nonnull int lifeSpan);
 	/**
 	 * default life Integer.MAX_VALUE
 	 * @param id
 	 * @param bean
 	 * @return
 	 */
-	public boolean 		addBean(String id, Object bean);
+	public boolean 		addBean(@Nonnull String id, @Nonnull Object bean);
 	
 	/**
 	 * 
@@ -80,7 +89,7 @@ public interface IBeanAssembler {
 	 * @return bean reference if found, null if not found
 	 * @throws Exception 
 	 */
-	public void 		removeBean(String id);
+	public void 		removeBean(@Nonnull String id);
 	
 	/**
 	 * update singleton
@@ -88,24 +97,24 @@ public interface IBeanAssembler {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public<T> void 		updateBean(String id, T bean); 
+	public<T> void 		updateBean(@Nonnull String id, @Nonnull T bean); 
 	
 	/**
 	 * if contains bean of this id
 	 * @param id
 	 * @return
 	 */
-	public boolean 		contains(String id);
+	public boolean 		contains(@Nonnull String id);
 	
-	public boolean 		isSingletion(String id);
+	public boolean 		isSingletion(@Nonnull String id);
 
-	public boolean 		contains(Class<?> clazz);
+	public boolean 		contains(@Nonnull Class<?> clazz);
 
 	/**
 	 * 
 	 * @param visitor
 	 * @throws Exception when creating beans (if bean is not singleton)
 	 */
-	public void inTake(IAssemlberVisitor visitor);
+	public void inTake(@Nonnull IAssemlberVisitor visitor);
 
 }

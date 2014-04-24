@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.bean;
+package com.caibowen.gplume.context.bean;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
@@ -27,8 +29,8 @@ import org.w3c.dom.Element;
  */
 public class Pod {
 
-	private int lifeSpan;
-	private int age;
+	private final int lifeSpan;
+	private AtomicInteger age;
 	private String beanId;
 	
 	/**
@@ -56,7 +58,7 @@ public class Pod {
 		this.description = d;
 		this.instance = instance;
 		this.lifeSpan = lifeSp;
-		this.age = 0;
+		this.age = new AtomicInteger(0);
 		process(beanId, instance);
 	}
 	
@@ -97,15 +99,17 @@ public class Pod {
 	 * get bean instance internal, with out add age
 	 * @return
 	 */
-	Object getInstanceINternal() {
+	Object getInternal() {
 		return instance;
 	}
 //---------------------------------------------------------
 	synchronized public Object getInstance() {
-		if(instance != null) {
-			age++;
+		if(age.get() < lifeSpan) {
+			age.incrementAndGet();
+			return instance;
+		} else {
+			return null;
 		}
-		return instance;
 	}
 
 	public String getBeanId() {
@@ -120,7 +124,7 @@ public class Pod {
 	 * @return the age
 	 */
 	public int getAge() {
-		return age;
+		return age.get();
 	}
 
 	/**

@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.bean;
+package com.caibowen.gplume.context.bean;
 
 
 /**
  * 
- * similar to Spring BeanNameAware
  * @author BowenCai
  *
  */
-public interface BeanIDAware {
-
-	void setBeanID(String id);
-
+public interface IAssemlberVisitor {
+	
+	public void visit(Object bean);
 }

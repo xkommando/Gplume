@@ -101,9 +101,7 @@ public class URITrie<V> implements Serializable {
 		TABLE_LEN = TABLE.length;//w /._-~#
 		PATTERN = Pattern.compile("^/[\\w\\-\\.~/_=#]{1,64}$");
 	}
-//	public static void main(String...a) {
-//		System.out.println(PATTERN.matcher("/param2=1").matches());
-//	}
+
 	protected int size;
 	protected TrieNode root;
 	

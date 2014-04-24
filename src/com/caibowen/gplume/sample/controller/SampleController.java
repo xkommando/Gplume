@@ -21,8 +21,9 @@ import java.util.Date;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
-import com.caibowen.gplume.core.context.AppContext;
+import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.event.AppEvent;
 import com.caibowen.gplume.event.IAppListener;
 import com.caibowen.gplume.event.IEventHook;
@@ -111,6 +112,7 @@ public class SampleController {
 	}
 	
 	@Inject
+	@Named("birthdayCalculator")
 	BirthdayCalculator birthdayCalculator;
 
 	public BirthdayCalculator getBirthdayCalculator() {

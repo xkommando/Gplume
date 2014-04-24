@@ -24,7 +24,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caibowen.gplume.core.bean.DisposableBean;
+import com.caibowen.gplume.context.bean.DisposableBean;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 /**
  * 

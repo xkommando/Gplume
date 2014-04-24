@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import com.caibowen.gplume.misc.Klass;
 
 /**
@@ -68,6 +70,7 @@ public final class TypeTraits {
 	 * @return
 	 * @throws NoSuchMethodException 
 	 */
+	@Nullable
 	public static Method findSetter(Class<?> clazz, String fieldName) throws NoSuchMethodException {
 
 		String setterName = String.format("set%C%s",
@@ -79,10 +82,7 @@ public final class TypeTraits {
 				return method;
 			}
 		}
-		// no such field
-		throw new NoSuchMethodException(
-				"cannnot find setter for [" + fieldName 
-				+ "] in class [" + clazz.getName() + "]");
+		return null;
 	}
 	
 	/**
@@ -91,6 +91,7 @@ public final class TypeTraits {
 	 * @return
 	 * @throws NoSuchMethodException 
 	 */
+	@Nullable
 	public static Method findGetter(Class<?> clazz, String fieldName) throws NoSuchMethodException {
 
 		Field[] fields = clazz.getDeclaredFields();
@@ -133,10 +134,8 @@ public final class TypeTraits {
 				}
 			} // else
 		}
-		// no such field
-		throw new NoSuchMethodException(
-				"cannnot find getter for [" + fieldName 
-				+ "] in class [" + clazz.getName() + "]");
+		
+		return null;
 	}
 	
 	public static Class<?> getClass(Type type, int i) {

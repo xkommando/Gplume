@@ -26,7 +26,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caibowen.gplume.core.context.AppContext;
+import com.caibowen.gplume.context.AppContext;
 
 
 /**

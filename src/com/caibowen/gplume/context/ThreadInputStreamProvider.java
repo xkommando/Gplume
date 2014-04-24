@@ -13,33 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core.context;
+package com.caibowen.gplume.context;
 
 import java.io.InputStream;
 
 
 /**
+ * Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
  * 
  * @author BowenCai
- *
  */
-public class ClassLoaderInputStreamProvider implements InputStreamProvider{
-	
-	ClassLoader classLoader;
-	
-	public ClassLoaderInputStreamProvider(ClassLoader classLoader) {
-		this.classLoader = classLoader;
-	}
+public class ThreadInputStreamProvider implements InputStreamProvider {
 
 	@Override
 	public InputStream getStream(String path) {
-		return classLoader.getResourceAsStream(path);
+		return Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
 	}
 
 	@Override
 	public String getContextPath() {
-//		classLoader.
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 }

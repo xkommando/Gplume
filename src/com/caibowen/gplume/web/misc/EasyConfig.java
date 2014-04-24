@@ -17,19 +17,17 @@ package com.caibowen.gplume.web.misc;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
+import com.caibowen.gplume.context.AppContext;
+import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.Injector;
-import com.caibowen.gplume.core.context.AppContext;
-import com.caibowen.gplume.event.IAppListener;
-import com.caibowen.gplume.web.ControlCenter;
+import com.caibowen.gplume.web.AbstractControlCenter;
 import com.caibowen.gplume.web.IErrorHandler;
 import com.caibowen.gplume.web.IRequestProcessor;
 import com.caibowen.gplume.web.SimpleControlCenter;
-import com.caibowen.gplume.web.WebAppStartedEvent;
 import com.caibowen.gplume.web.action.ActionFactory;
 
 
@@ -57,25 +55,13 @@ import com.caibowen.gplume.web.action.ActionFactory;
 	
 	<bean class="com.caibowen.gplume.web.EasyConfig">
 		<property name="preProcessor" ref="somePreprocessor"/>
-		<property name="errorHandler" ref=""/>
+		<property name="errorHandler" ref="someErrorHandler"/>
 		<property name="pkgs">
 			<list>
 				<value>package1<value>
 				<value>package2<value>
 			<list>
 		<property/>
-	</bean>
-	
-	
-		<bean class="com.caibowen.gplume.web.EasyConfig">
-		<property name="pkg" value="com.caibowen" />
-		<property name="preProcessor">
-			<bean class="com.caibowen.gplume.web.l10n.LocalePreProcessor">
-				<property name="localeResolver">
-					<bean class="com.caibowen.gplume.web.l10n.BilingualLocaleResolver" />
-				</property>
-			</bean>
-		</property>
 	</bean>
 */
 /**
@@ -86,23 +72,11 @@ import com.caibowen.gplume.web.action.ActionFactory;
  * @author BowenCai
  *
  */
-public class EasyConfig implements IAppListener<WebAppStartedEvent>, Serializable {
+public class EasyConfig implements InitializingBean, Serializable {
 	
 	private static final long serialVersionUID = 657513014059796966L;
 
 	Logger LOG = Logger.getLogger(EasyConfig.class.getName());
-	
-	public EasyConfig() {
-		AppContext.broadcaster.register(this);
-	}
-
-	
-	@Override
-	public void onEvent(WebAppStartedEvent event) {
-		ControlCenter center = build(pkgs);
-		AppContext.beanAssembler.addBean("controlCenter", center);		
-	}
-	
 	@Inject IRequestProcessor preProcessor;
 	public void setPreProcessor(IRequestProcessor preProcessor) {
 		this.preProcessor = preProcessor;
@@ -117,9 +91,19 @@ public class EasyConfig implements IAppListener<WebAppStartedEvent>, Serializabl
 	public void setErrorHandler(IErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
 	}
-
-
-	private ControlCenter build(List<String> pkgs) {
+	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		AbstractControlCenter center = build(pkgs);
+		if (center != null) {
+			AppContext.beanAssembler.addBean("controlCenter", center);
+			LOG.info("ControlCenter set up");
+		} else {
+			// exception in build()
+		}
+	}
+	
+	private AbstractControlCenter build(List<String> pkgs) {
 		try {
 			SimpleControlCenter center = new SimpleControlCenter();
 			
@@ -135,17 +119,13 @@ public class EasyConfig implements IAppListener<WebAppStartedEvent>, Serializabl
 			ControllerScanner scanner = new ControllerScanner();
 			scanner.setPackages(this.pkgs);
 			scanner.setControlCenterCallBack(center);
+			scanner.afterPropertiesSet();
 			
 			return center;
 			
 		} catch (Exception e) {
-			LOG.log(Level.SEVERE, "cannot build controlCenter", e);
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException("cannot build controlCenter ");
 		}
 	}
-	
 
-
-	
 }

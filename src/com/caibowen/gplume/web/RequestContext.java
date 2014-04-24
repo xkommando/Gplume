@@ -36,8 +36,8 @@ import com.caibowen.gplume.misc.Str;
 
 
 /**
- * RequestContext is a wrapper class of HttpServletRequest and HttpServletResponse
- * with access to ControlCenter
+ * RequestContext is a wrapper of HttpServletRequest and HttpServletResponse
+ * with a ref to ControlCenter
  * 
  * @author BowenCai
  * 
@@ -114,7 +114,18 @@ public class RequestContext implements Serializable {
 					+ this.uri + "] Error rendering [" + view + "]", e);
 		}
 	}
-
+	
+	/**
+	 * reject this request
+	 * return 503
+	 */
+	public void reject() {
+		try {
+			response.sendError(503);
+		} catch (Exception e) {
+			throw new RuntimeException("Error rejecting [" + this.uri + "]", e);
+		}
+	}
 
 	public void jumpTo(final String url) {
 		try {
@@ -359,7 +370,7 @@ public class RequestContext implements Serializable {
 
 	@Nullable
 	public Integer getIntParam(String name) {
-		return Converter.toInteger(request.getParameter(name));
+		return Converter.slient.toInteger(request.getParameter(name));
 	}
 	
 	public int getIntParam(String name, int defaultVar) {
@@ -393,7 +404,7 @@ public class RequestContext implements Serializable {
 // ------------------------------------
 	@Nullable
 	public Long getLongParam(String name) {
-		return Converter.toLong(request.getParameter(name));
+		return Converter.slient.toLong(request.getParameter(name));
 	}
 	
 	public long getLongParam(String name, long defaultVar) {
@@ -408,7 +419,7 @@ public class RequestContext implements Serializable {
 		if (s != null) {
 			long[] vars = new long[s.length];
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.toLong(s[i]);
+				vars[i] = Converter.slient.toLong(s[i]);
 			}
 			return vars;
 		} else {
@@ -428,7 +439,7 @@ public class RequestContext implements Serializable {
 // -------------------------------------
 	@Nullable
 	public Float getFloatParam(String name) {
-		return Converter.toFloat(request.getParameter(name));
+		return Converter.slient.toFloat(request.getParameter(name));
 	}
 	
 	public float getFloatParam(String name, float defaultVar) {
@@ -442,7 +453,7 @@ public class RequestContext implements Serializable {
 		if (s != null) {
 			float[] vars = new float[s.length];
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.toFloat(s[i]);
+				vars[i] = Converter.slient.toFloat(s[i]);
 			}
 			return vars;
 		} else {
@@ -461,7 +472,7 @@ public class RequestContext implements Serializable {
 // -------------------------------------
 	@Nullable
 	public Double getDoubleParam(String name) {
-		return Converter.toDouble(request.getParameter(name));
+		return Converter.slient.toDouble(request.getParameter(name));
 	}
 	
 	public double getDoubleParam(String name, double defaultVar) {
@@ -475,7 +486,7 @@ public class RequestContext implements Serializable {
 		if (s != null) {
 			double[] vars = new double[s.length];
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.toDouble(s[i]);
+				vars[i] = Converter.slient.toDouble(s[i]);
 			}
 			return vars;
 		} else {
@@ -494,7 +505,7 @@ public class RequestContext implements Serializable {
 // ---------------------------------------
 	@Nullable
 	public Boolean getBoolParam(String name) {
-		return Converter.toBool(request.getParameter(name));
+		return Converter.slient.toBool(request.getParameter(name));
 	}
 	
 	public boolean getBoolParam(String name, boolean defaultVar) {
@@ -509,7 +520,7 @@ public class RequestContext implements Serializable {
 		if (s != null) {
 			boolean[] vars = new boolean[s.length];
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.toBool(s[i]);
+				vars[i] = Converter.slient.toBool(s[i]);
 			}
 			return vars;
 		} else {
