@@ -11,7 +11,7 @@ in your web.xml:
 ```XML
 	<context-param>
         <param-name>manifest</param-name>
-        <param-value>/WEB-INF/app-manifest.xml</param-value>
+        <param-value>classpath:app-manifest.xml</param-value><!-- in your class path -->
     </context-param>
 	<listener>
 		<listener-class>com.caibowen.gplume.web.WebAppBooter</listener-class>
@@ -33,7 +33,7 @@ Write app-manifest.xml, it is similar to spring applicationContext.xml :
 	    <property name="defaultLang" value="SimplifiedChinese"/>
 	    <property name="pkgFiles">
 	        <props>
-	            <prop key="en">/i18n/en.properties</prop>
+	            <prop key="en">/i18n/en.properties</prop><!-- in your web root -->
 	            <prop key="zh_CN">/i18n/zh_CN.properties</prop>
 	        </props>
 	    </property>
@@ -88,7 +88,7 @@ AppContext.broadcaster.broadcast(event);
 Run Junit4 with JunitPal, it will set up the AppContext and inject all properties for your test case
 ```Java
 @RunWith(JunitPal.class)
-@ManifestPath("manifest.xml")
+@ManifestPath("file:src/manifest.xml") // as file
 public class TestNULL {
 	@Named("controlCenter")
 	public AbstractControlCenter controlCenter;
