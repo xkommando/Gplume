@@ -43,7 +43,8 @@ public abstract class WriterTag extends SimpleTagSupport {
 	
 	protected Logger LOG = Logger.getLogger(WriterTag.class.getName());
 
-	public static final String SUCCESS = "SUCCESS"; // success return
+	public static final String SUCCESS = "SUCCESS;"
+			+ "Do not try to return your own 'SUCCESS', it will fail 'str == str' and be treated as error"; // success return
 	
 	protected NativePackage getNatives() {
 		NativePackage pkg = (NativePackage) 
@@ -56,8 +57,12 @@ public abstract class WriterTag extends SimpleTagSupport {
 		}
 		if (pkg == null) {//unlikely
 			WebI18nService service = AppContext.beanAssembler.getBean("i18nService");
-			pkg = service.getDefaultPkg();
-			LOG.log(Level.SEVERE, "cannot get localProperties from session or request, using default");
+			if (service != null) {
+				pkg = service.getDefaultPkg();
+				LOG.log(Level.SEVERE, "cannot get localProperties from session or request, using default");
+			} else {
+				LOG.log(Level.SEVERE, "cannot get localProperties from session or request, null i18nService");
+			}
 		}
 		return pkg;
 	}
@@ -78,7 +83,6 @@ public abstract class WriterTag extends SimpleTagSupport {
 							+ "]  </font> </h1>"
 							+ "<br/>\r\nMessage:<pre>\r\n" + ret + "\r\n</pre>");
 				}
-				writer.flush();
 				
 			} catch (Exception e) {
 				LOG.log(Level.SEVERE, "error writing jsp", e);

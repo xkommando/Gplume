@@ -237,7 +237,7 @@ public class Converter {
 
 	public static Object translateList(List<String> varList, 
 										Class<?> beanClass,
-										String propName) throws NoSuchFieldException {
+										String propName) throws Exception {
 
 		Class<?> targetClass = null;
 		Set<Field> fieldset = Klass.getEffectiveField(beanClass);
@@ -260,7 +260,9 @@ public class Converter {
 				}
 			}
 		}
-
+		if (targetClass == null) {
+			throw new NoSuchMethodException("failed deduce list generic parameter");
+		}
 		ArrayList<Object> coreVars = new ArrayList<>(varList.size());
 		for (String liter : varList) {
 			coreVars.add(slient.translateStr(liter, targetClass));

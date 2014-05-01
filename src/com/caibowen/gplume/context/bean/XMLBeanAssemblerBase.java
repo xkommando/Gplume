@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
@@ -104,9 +105,9 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 			if (Str.Utils.notBlank(bnScope)) {
 				isSingleton = Converter.toBool(bnScope);
 			}
-			
+			Object bean = null;
 			if (isSingleton) {
-				Object bean = buildBean(beanElem);
+				bean = buildBean(beanElem);
 				pod = new Pod(bnId, null, bean, lifeSpan);
 			} else {
 				pod = new Pod(bnId, beanElem, null, lifeSpan);
@@ -115,6 +116,14 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 			if (Str.Utils.notBlank(bnId)) {
 				podMap.put(bnId, pod);
 			}
+			
+			Logger.getLogger(LOGGER_NAME).info("Add Bean: id[" 
+					+ bnId + "] class[" + 
+					(bean != null ? bean.getClass().getName() : "unknown")
+					+ "] singleton[" + isSingleton 
+					+ "] lifeSpan[" + lifeSpan + "]"
+					);
+			
 		}
 	}
 	
@@ -126,9 +135,17 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 	protected void preprocess(Object beanObj) {
 		if (beanObj instanceof IBeanAssemblerAware) {
 			((IBeanAssemblerAware) beanObj).setBeanAssembler(this);
+			Logger.getLogger(LOGGER_NAME).info(
+					"IBeanAssemblerAware bean[" 
+					+ beanObj.getClass().getSimpleName() 
+					+ "] beanAssembler setted");
 		}
 		if (beanObj instanceof BeanClassLoaderAware) {
 			((BeanClassLoaderAware)beanObj).setBeanClassLoader(this.classLoader);
+			Logger.getLogger(LOGGER_NAME).info(
+					"BeanClassLoaderAware bean[" 
+					+ beanObj.getClass().getSimpleName() 
+					+ "] ClassLoader setted");
 		}
 	}
 	
@@ -156,6 +173,11 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 
 		Object beanObj = bnClass.newInstance();
 		preprocess(beanObj);
+		
+		Logger.getLogger(LOGGER_NAME).info(
+				"bean class[" 
+				+ bnClass.getSimpleName() 
+				+ "] created");
 		
 		NodeList propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROPERTY);
 		if (propLs == null || propLs.getLength() == 0) {
@@ -188,7 +210,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 			NodeList varList = prop.getChildNodes();
 			if (varList == null || varList.getLength() == 0) {
 				// property inside, one string value or one ref
-				String varKlass = prop.getAttribute(XMLTags.BEAN_CLASS);
+				String varObj = prop.getAttribute(XMLTags.PROPERTY_OBJ);
 				String varStr = prop.getAttribute(XMLTags.PROPERTY_VALUE);
 				String varRef = prop.getAttribute(XMLTags.PROPERTY_REF);
 				
@@ -204,9 +226,9 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 					BeanEditor.setBeanProperty(beanObj, propName, ref);
 					continue;
 					
-				} else if (Str.Utils.notBlank(varKlass)) {
-					// e.g. <property name="injector" class="com.caibowen.gplume.core.Injector"/>
-					Class<?> klass = this.classLoader.loadClass(varKlass.trim());
+				} else if (Str.Utils.notBlank(varObj)) {
+					// e.g. <property name="injector" object="com.caibowen.gplume.core.Injector"/>
+					Class<?> klass = this.classLoader.loadClass(varObj.trim());
 					Object obj = klass.newInstance();
 					preprocess(obj);
 					BeanEditor.setBeanProperty(beanObj, propName, obj);

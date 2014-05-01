@@ -27,8 +27,8 @@ import java.io.InputStream;
 public class InputStreamSupport {
 	
 	private InputStreamProvider streamProvider;
-
-	public InputStreamSupport() {}
+	
+	public InputStreamSupport(){}
 	
 	public InputStreamSupport(InputStreamProvider streamProvider) {
 		this.streamProvider = streamProvider;
@@ -63,7 +63,7 @@ public class InputStreamSupport {
 			}
 		}
 		if (ex != null) {
-			throw new RuntimeException("Exception In I/O Operation\r\n", ex);
+			throw new RuntimeException(ex);
 		}
 	}
 }

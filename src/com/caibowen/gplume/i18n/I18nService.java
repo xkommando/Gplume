@@ -102,20 +102,10 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 					}
 				});
 				addProperties(dialect, pkg);
-			}
-		}
+			}// if is string
+		}// for each pkg
 	}
 	
-//	public void loadResource(Dialect dialect, InputStream stream) {
-//		Properties properties = new Properties();
-//		try {
-//			properties.load(stream);
-//		} catch (IOException e) {
-//			throw new RuntimeException(e);
-//		}
-//		loadResource(dialect, properties);
-//	}
-
 	/**
 	 * 
 	 * @param dialect if is null, look for dialect in Properties
@@ -142,6 +132,11 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 		}
 	}
 	
+	/**
+	 * 
+	 * @param localeInfo
+	 * @return
+	 */
 	@Nullable
 	public NativePackage getPkg(String localeInfo) {
 		Dialect lang = resolve(localeInfo);
@@ -151,7 +146,20 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 			return pkgTable.get(lang);
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @param lang
+	 * @return
+	 */
+	@Nullable
+	public NativePackage getPkg(Dialect lang) {
+		if (lang == Dialect.Unknown) {
+			return pkgTable.get(defaultLang);
+		} else {
+			return pkgTable.get(lang);
+		}
+	}
 	
 	private Set<Dialect> cachedSet;
 	private int cachedHash;

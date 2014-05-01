@@ -70,9 +70,12 @@ class ActionBuilder {
 	// from java.lang.invoke
 	protected static final Lookup LOOKUP = MethodHandles.publicLookup();
 
-	protected static final MethodType HANDLE_TYPE = MethodType.methodType(
+	protected static final MethodType SIMPLE_TYPE = MethodType.methodType(
 			void.class, RequestContext.class);
-
+	
+	protected static final MethodType RET_JSP_TYPE = MethodType.methodType(
+			String.class, RequestContext.class);
+	
 	protected static final MethodType INTERCEPT_TYPE = MethodType.methodType(
 			void.class, RequestContext.class, Action.class);
 	
@@ -113,6 +116,7 @@ class ActionBuilder {
 					+ "\n check your method type and @Handle uri");
 		}
 	}
+	
 	/**
 	 * @Handle(uri={"/abc/{erf::date}"})
 	 * void handle(RequestContext req); OK, value put to request attribute
@@ -206,14 +210,18 @@ class ActionBuilder {
 			}
 			
 		} else {// average action
-			
-			MethodHandle handle = findMethodeHandle(method, HANDLE_TYPE);
+			MethodHandle handle = method.getReturnType().equals(String.class) 
+								? findMethodeHandle(method, RET_JSP_TYPE)
+								: findMethodeHandle(method, SIMPLE_TYPE);
+
 			if (handle != null) {
-				handle = object == null ?
-							handle : handle.bindTo(object);
 				
-				return new Action(uri, handle);
-				
+				handle = object == null ? handle : handle.bindTo(object);
+
+				return method.getReturnType().equals(String.class)
+						? new JspAction(uri, handle)
+						: new Action(uri, handle);
+						
 			} else {
 				throw new NullPointerException(
 						"null uri || null controller object || null method handle");
@@ -222,6 +230,17 @@ class ActionBuilder {
 	}
 
 	/**
+	 * 
+	 * four type:
+	 * 
+	 * String 	func(Arg arg, RequestContext context);
+	 * void 	func(Arg arg, RequestContext context);
+	 * 
+	 * 
+	 * String 	func(RequestContext context);
+	 * void 	func(RequestContext context);
+	 * 
+	 * for uri:
 	 * <pre><code>
 	 * uri={"/param2={number}*"}  
 	 * 			=> /param2=abcdefgetiji...
@@ -242,7 +261,7 @@ class ActionBuilder {
 	 * @param method
 	 * @return
 	 */
-	private static final RestAction buildRest(String uri, Object object, Method method) {
+	protected static final RestAction buildRest(String uri, Object object, Method method) {
 
 		final int lq = uri.indexOf('{');
 		final int rq = uri.lastIndexOf('}');
@@ -253,9 +272,9 @@ class ActionBuilder {
 		}
 		builder.append('*');
 		final String effectiveURI = builder.toString();
+		builder.setLength(0);
 		//------------------------------- effectiveURI
 		
-		builder.setLength(0);
 		int stop = uri.lastIndexOf('*');
 		stop = stop == -1 ? uri.length() : stop;
 		for (int i = rq + 1; i < stop; i++) {
@@ -280,37 +299,67 @@ class ActionBuilder {
 		}
 		if (argType.isPrimitive()) {
 			LOG.warning(
-					"Handle argument type is primitive, which may cause NullPointerException with invalid input" +
-					"\r\nhttp handle [" + uri + "], in class[" + method.getDeclaringClass().getName() + "] method [" + method.getName()  +"]");
+			"Handle argument type is primitive, which may cause NullPointerException with invalid input" +
+			"\r\nhttp handle [" + uri + "], in class[" 
+					+ method.getDeclaringClass().getName() 
+					+ "] method [" 
+					+ method.getName()  +"]");
 		}
-		
 		
 		//------------------------------- argName  MethodType
-		if (Str.Utils.notBlank(argName)) {
-			
-			MethodType type = MethodType.methodType(void.class,
-													argType, RequestContext.class);
-			/**
-			 * cotrollerMethod(Type arg, RequestContext c)
-			 * or
-			 * cotrollerMethod(RequestContext c)
-			 */
-			final boolean isMatch = isTypeMatch(method, type);
-			MethodType mType = isMatch ? type : HANDLE_TYPE;
-			
-			MethodHandle handle = findMethodeHandle(method, mType);
-			
-			handle = object == null ? handle : handle.bindTo(object);
+		
+		
+		// whether put arg as parameter or put arg as attribute
+		MethodHandle handle = getRestHandle(method, argType, object);
+		boolean inMethodCall = handle.type().parameterCount() > 1;
 
-			return new RestAction(effectiveURI, handle,
-								lq, argName, argType, suffix, 
-								isMatch);
-			
-		} else {
-			throw new IllegalArgumentException(
-					"arg name cannot be empty. class[" 
-						+ object.getClass().getName() 
-						+ "] method  [" + method + "]");
-		}
+		// god this is ugly!
+		return handle.type().returnType().equals(String.class)
+				? new JspRestAction(effectiveURI, handle, lq, 
+									argName, argType, suffix, inMethodCall)
+				: new RestAction(effectiveURI, handle, lq, 
+								argName, argType, suffix, inMethodCall);		
+	}
+	
+	
+	/**
+	 * <pre>
+	 * String 	func(Arg arg, RequestContext context);
+	 * void 	func(Arg arg, RequestContext context);
+	 * 
+	 * 
+	 * String 	func(RequestContext context);
+	 * void 	func(RequestContext context);
+	 * </pre>
+	 * 
+	 * @param method
+	 * @param argClass
+	 * @param obj
+	 * @return
+	 */
+	protected static MethodHandle getRestHandle(Method method, 
+											Class<?> argClass, 
+											Object obj) {
+		
+		Class<?> retClass = method.getReturnType().equals(String.class) 
+							? String.class 
+							: void.class;
+		
+		MethodType mType = MethodType.methodType(
+								retClass, 
+								argClass, 
+								RequestContext.class);
+		/**
+		 * Ret cotrollerMethod(Type arg, RequestContext c) or
+		 * Ret cotrollerMethod(RequestContext c)
+		 */
+		boolean isMatch = isTypeMatch(method, mType);
+		mType = isMatch ? mType : retClass.equals(String.class) ?  RET_JSP_TYPE : SIMPLE_TYPE;
+		MethodHandle handle = findMethodeHandle(method, mType);
+		return obj != null ? handle.bindTo(obj) : handle;
 	}
 }
+
+
+
+

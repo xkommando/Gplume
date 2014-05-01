@@ -90,6 +90,7 @@ public class ContextBooter {
 					AppContext.beanAssembler.assemble(stream);
 				}
 			});
+			
 		} else {
 			LOG.log(Level.WARNING, "no manifest file specified in web.xml, "
 					+ "check your web.xml for context-param["

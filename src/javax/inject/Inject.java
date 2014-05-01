@@ -1,18 +1,3 @@
-/*******************************************************************************
- * Copyright 2014 Bowen Cai
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
 /*
  * Copyright (C) 2009 The JSR-330 Expert Group
  *
@@ -46,9 +31,7 @@ import static java.lang.annotation.ElementType.FIELD;
  * injected first, followed by fields, and then methods. Fields and methods
  * in superclasses are injected before those in subclasses. Ordering of
  * injection among fields and among methods in the same class is not specified.
- * Which values are injected depends upon the injector implementation and its
- * configuration.
- * 
+ *
  * <p>Injectable constructors are annotated with {@code @Inject} and accept
  * zero or more dependencies as arguments. {@code @Inject} can apply to at most
  * one constructor per class.
@@ -102,7 +85,7 @@ import static java.lang.annotation.ElementType.FIELD;
  * non-{@code void} return types are allowed to support use of the method in
  * other contexts (builder-style method chaining, for example).
  *
- * <p>For example:
+ * <p>Examples:
  *
  * <pre>
  *   public class Car {
@@ -132,7 +115,7 @@ import static java.lang.annotation.ElementType.FIELD;
  *
  * <p>A {@linkplain Qualifier qualifier} may annotate an injectable field
  * or parameter and, combined with the type, identify the implementation to
- * inject. Qualifiers are optional, and when used with {@code @Inject} in 
+ * inject. Qualifiers are optional, and when used with {@code @Inject} in
  * injector-independent classes, no more than one qualifier should annotate a
  * single field or parameter. The qualifiers are bold in the following example:
  *
@@ -147,6 +130,20 @@ import static java.lang.annotation.ElementType.FIELD;
  * <p>If one injectable method overrides another, the overriding method's
  * parameters do not automatically inherit qualifiers from the overridden
  * method's parameters.
+ *
+ * <h3>Injectable Values</h3>
+ *
+ * <p>For a given type T and optional qualifier, an injector must be able to
+ * inject a user-specified class that:
+ *
+ * <ol type="a">
+ *   <li>is assignment compatible with T and</li>
+ *   <li>has an injectable constructor.</li>
+ * </ol>
+ *
+ * <p>For example, the user might use external configuration to pick an
+ * implementation of T. Beyond that, which values are injected depend upon the
+ * injector implementation and its configuration.
  *
  * <h3>Circular Dependencies</h3>
  *

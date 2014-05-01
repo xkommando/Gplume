@@ -17,7 +17,7 @@ package com.caibowen.gplume.context.bean;
 
 
 /**
- * similar to Spring DisposableBean
+ * similar to Spring::DisposableBean
  * @author BowenCai
  *
  */

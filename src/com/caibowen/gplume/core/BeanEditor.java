@@ -16,12 +16,15 @@
 package com.caibowen.gplume.core;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import com.caibowen.gplume.misc.Klass;
 
 /**
  * 
@@ -67,39 +70,112 @@ public class BeanEditor {
 	 * @param varList
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public static void setListProperty(@Nullable Object bean,
 										@Nonnull String propName, 
 										List<?> varList) throws Exception {
 
-		Class<?> bnClass = bean.getClass(); 
+		Class<?> bnClass = bean.getClass();
+		// try get setter
 		Method setter = TypeTraits.findSetter(bnClass, propName);
-
-		if (setter == null) {
-			Field field = bnClass.getField(propName);
-			if (field.getType().isAssignableFrom(varList.getClass())) {
-				setField(bean, propName, varList);
-				
+		// try convert list as String list
+		Object var = null;
+		try {
+			var = Converter.translateList((List<String>)varList, bnClass, propName);
+		} catch (Exception e) {
+			var = null;
+		}
+		
+		// get right var
+		if (var != null) {
+			if (setter != null) {
+				invokeIfValid(setter, bean, var);
 			} else {
-				@SuppressWarnings("unchecked")
-				Object var = Converter.translateList((List<String>) varList,
-														bnClass, propName);
+				// no setter, try set public field
 				setField(bean, propName, var);
 			}
 			
-		} else {
-			Class<?>[] paramTypes = setter.getParameterTypes();
-			if (paramTypes != null && paramTypes.length == 1) {
-				if (paramTypes[0].isAssignableFrom(varList.getClass())) {
-					setter.invoke(bean, varList);
-				} else {
-					@SuppressWarnings("unchecked")
-					Object var = Converter.translateList((List<String>) varList,
-															bnClass, propName);
-					callSetter(bean, propName, var);
-				}
+		} else {// failed convert list
+			if (setter != null) {
+				invokeIfValid(setter, bean, varList);
+			} else {
+				throw new IllegalArgumentException(
+						"no public setter or filed found for [" + propName + "] in object[" + bean);
 			}
+			
 		}
-		
+	}
+//		
+//		
+//		
+//		
+//		if (setter == null) {
+//			Field field = bnClass.getField(propName);
+//			if (field.getType().isAssignableFrom(varList.getClass())) {
+//				setField(bean, propName, varList);
+//			} else {
+//				@SuppressWarnings("unchecked")
+//				Object var = Converter.translateList((List<String>) varList,
+//														bnClass, propName);
+//				setField(bean, propName, var);
+//			}
+//			
+//		} else {
+//			Class<?>[] paramTypes = setter.getParameterTypes();
+//			if (paramTypes != null && paramTypes.length == 1) {
+//				Class<?> targetClass = null;
+//				try {
+//					targetClass = bnClass.getDeclaredField(propName).getType();
+//				} catch (Exception e) {}
+//				if (targetClass == null) {
+//					targetClass = paramTypes[0];
+//				}
+//				
+//				if (Klass.isAssignable(varList.getClass(), targetClass)) {
+//					setter.invoke(bean, varList);
+//System.out.println("1BeanEditor.setListProperty()");
+//				} else {
+//					@SuppressWarnings("unchecked")
+//					Object var = Converter.translateList((List<String>) varList,
+//															bnClass, propName);
+//					callSetter(bean, propName, var);
+//System.out.println("2BeanEditor.setListProperty()");
+//				}
+//			} else {
+//				throw new IllegalArgumentException(
+//					"more than one parameter in setter[" + setter.getName() +"]"
+//					+ "in class[" + bean.getClass().getName() + "]");
+//			}
+//		}
+//	}
+	
+	
+	public static void invokeIfValid(@Nonnull Method setter, 
+										@Nullable Object obj, 
+										@Nonnull Object var) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		// get setter, check again
+		Class<?>[] paramTypes = setter.getParameterTypes();
+		if (paramTypes != null && paramTypes.length == 1) {
+			if (Klass.isAssignable(var.getClass(), paramTypes[0])) {
+				// every thing is OK
+				if (Modifier.isStatic(setter.getModifiers())) {
+					setter.invoke(null, var);
+				} else {
+					setter.invoke(obj, var);
+				}
+			} else {
+				throw new IllegalArgumentException(
+					"cannot call setter[" 
+						+ setter.getName() + "] in object [" 
+						+ obj + "]"
+						+ "] setter parameter type[" + paramTypes[0].getName()
+						+ "] value type [" + var.getClass().getName() + "]");
+			}
+		} else {
+			throw new IllegalArgumentException(
+				"more than one parameter in setter[" + setter.getName() +"]"
+				+ "in object [" + obj + "]");
+		}
 	}
 	
 	/**
@@ -136,7 +212,9 @@ public class BeanEditor {
 	}
 
 	/**
+	 * find setter by name
 	 * set property by public setter
+	 * 
 	 * @param obj
 	 * @param propName
 	 * @param var

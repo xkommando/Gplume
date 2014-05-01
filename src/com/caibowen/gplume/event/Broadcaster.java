@@ -41,7 +41,7 @@ public class Broadcaster implements Serializable{
 	
 	private static final long serialVersionUID = -247132524218855841L;
 
-	private static final Logger LOG = Logger.getLogger(Broadcaster.class.getName());
+	static final Logger LOG = Logger.getLogger(Broadcaster.class.getName());
 	
 	private static final Object PRESENT = new Object();
 	/**
@@ -321,6 +321,8 @@ public class Broadcaster implements Serializable{
 						(IAppListener<? extends AppEvent>) bean;
 
 				Broadcaster.this.register(ls);
+				LOG.info("Add listener[" 
+					+ ls.getClass().getName() + "]");
 			}
 		}
 		

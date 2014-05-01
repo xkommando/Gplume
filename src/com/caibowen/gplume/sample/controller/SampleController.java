@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.caibowen.gplume.context.AppContext;
@@ -57,9 +56,9 @@ public class SampleController {
 			"/Gplume/index",
 			"/Gplume/index.html",
 			"/Gplume/index.jsp"})
-	public void index(RequestContext context) {
+	public String index(RequestContext context) {
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
-		context.render("/index.jsp");
+		return "/index.jsp";
 	}
 	
 //	         /Gplume/act/post/date
@@ -79,7 +78,7 @@ public class SampleController {
 	 * @param context
 	 */
 	@Handle(value = {"/Gplume/your-birthday/{date formate like 1992-6-14::Date}"})
-	public void happyBirthday(Date date, RequestContext context) {
+	public String happyBirthday(Date date, RequestContext context) {
 		if (date != null) {
 			int dist = birthdayCalculator.dateDistance(date);
 			if (dist == 0) {
@@ -108,10 +107,10 @@ public class SampleController {
 			
 			context.putAttr("msg", nativeStr("dateIsWrong", context));
 		}
-		context.render("/happy.jsp");
+		context.putAttr("date", date);
+		return "/happy.jsp";
 	}
-	
-	@Inject
+
 	@Named("birthdayCalculator")
 	BirthdayCalculator birthdayCalculator;
 

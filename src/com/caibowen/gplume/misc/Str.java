@@ -59,6 +59,9 @@ public class Str {
 				+"@[a-z0-9-]+(\\.[a-z0-9-]+)*\\.([a-z]{2}|aero|arpa|asia|biz|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|nato|net|org|pro|tel|travel|xxx)$\\b"
 		);
 
+		public static void main(String...a) {
+			System.out.println(EMAIL.matcher("hzzyxxx@163.com").matches());
+		}
 		public static final Pattern INTERGER = Pattern.compile("(-?[0-9]*)");
 		
 		public static final Pattern FLOAT_NUMBER = Pattern.compile(

@@ -31,6 +31,8 @@ import javax.annotation.Nullable;
  */
 public interface IBeanAssembler {
 	
+	public static final String LOGGER_NAME = "IBeanAssembler";
+	
 	public void setClassLoader(@Nonnull ClassLoader loader);
 	@Nonnull
 	public ClassLoader getClassLoader();
@@ -75,6 +77,7 @@ public interface IBeanAssembler {
 	 * @return true bean added, false cannot add bean(already exists)
 	 */
 	public boolean addBean(@Nonnull String id, @Nonnull Object bean, @Nonnull int lifeSpan);
+	
 	/**
 	 * default life Integer.MAX_VALUE
 	 * @param id

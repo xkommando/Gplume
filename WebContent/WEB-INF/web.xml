@@ -6,7 +6,7 @@
   </welcome-file-list>
 	<context-param>
         <param-name>manifest</param-name>
-        <param-value>/WEB-INF/app-manifest.xml</param-value>
+        <param-value>classpath:app-manifest.xml</param-value>
     </context-param>
 
 	<listener>

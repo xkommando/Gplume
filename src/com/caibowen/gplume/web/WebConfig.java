@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.misc;
+package com.caibowen.gplume.web;
 
 import java.io.Serializable;
 import java.util.List;
@@ -24,11 +24,9 @@ import javax.inject.Inject;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.Injector;
-import com.caibowen.gplume.web.AbstractControlCenter;
-import com.caibowen.gplume.web.IErrorHandler;
-import com.caibowen.gplume.web.IRequestProcessor;
-import com.caibowen.gplume.web.SimpleControlCenter;
 import com.caibowen.gplume.web.action.ActionFactory;
+import com.caibowen.gplume.web.misc.ControllerScanner;
+import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 
 
 /*
@@ -72,11 +70,11 @@ import com.caibowen.gplume.web.action.ActionFactory;
  * @author BowenCai
  *
  */
-public class EasyConfig implements InitializingBean, Serializable {
+public class WebConfig implements InitializingBean, Serializable {
 	
 	private static final long serialVersionUID = 657513014059796966L;
 
-	Logger LOG = Logger.getLogger(EasyConfig.class.getName());
+	Logger LOG = Logger.getLogger(WebConfig.class.getName());
 	@Inject IRequestProcessor preProcessor;
 	public void setPreProcessor(IRequestProcessor preProcessor) {
 		this.preProcessor = preProcessor;

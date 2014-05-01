@@ -70,16 +70,30 @@ public enum Dialect {
 	
 	private static final HashMap<String, Dialect> ISO639_1_TABLE;
 	private static final HashMap<String, Dialect> ISO639_2T_MA_TABLE;
+
+	private static final HashMap<String, Dialect> STR_CODE_TABLE;
+	private static final HashMap<Integer, Dialect> INT_CODE_TABLE;
+	
 	static {
-		ISO639_1_TABLE = new HashMap<String, Dialect>(32);
+		ISO639_1_TABLE = new HashMap<String, Dialect>(48);
 		for (Dialect dia : Dialect.class.getEnumConstants()) {
 			ISO639_1_TABLE.put(dia.iso639_1, dia);
 		}
 		
-		ISO639_2T_MA_TABLE = new HashMap<String, Dialect>(32);
+		ISO639_2T_MA_TABLE = new HashMap<String, Dialect>(48);
 		for (Dialect dia : Dialect.class.getEnumConstants()) {
 			ISO639_1_TABLE.put(dia.iso639_2t, dia);
-		}		
+		}
+		
+		STR_CODE_TABLE = new HashMap<>(48);
+		for (Dialect d : Dialect.class.getEnumConstants()) {
+			STR_CODE_TABLE.put(Integer.toString(d.code), d);
+		}
+		
+		INT_CODE_TABLE = new HashMap<>(48);
+		for (Dialect d : Dialect.class.getEnumConstants()) {
+			INT_CODE_TABLE.put(d.code, d);
+		}
 	}
 	
 	/**
@@ -106,7 +120,35 @@ public enum Dialect {
 			throw new NullPointerException(" empty string to parse");
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @param code
+	 * @return
+	 */
+	public static Dialect parseCode(String code) {
+		if (Str.Utils.notBlank(code)) {
+			Dialect cl = STR_CODE_TABLE.get(code);
+			return cl != null ? cl : Dialect.Unknown;
+		} else {
+			throw new NullPointerException(" empty string to parse");
+		}
+	}
+	
+	/**
+	 * 
+	 * @param code
+	 * @return
+	 */
+	public static Dialect parseCode(Integer code) {
+		if (code != null) {
+			Dialect cl = INT_CODE_TABLE.get(code);
+			return cl != null ? cl : Dialect.Unknown;
+		} else {
+			throw new NullPointerException(" empty string to parse");
+		}
+	}
+	
 	/**
 	 * 
 	 * @param str

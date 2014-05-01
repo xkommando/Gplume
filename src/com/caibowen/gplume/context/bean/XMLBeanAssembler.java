@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -83,8 +84,6 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	
 	private static final long serialVersionUID = 1895612360389006713L;
 	
-//	private static final Logger LOG = Logger.getLogger(XMLBeanFactory.class.getName());
-
 	/**
 	 * This is a compile flag.
 	 * When this flag is enabled,fields that do not have a correspondent setter 
@@ -108,13 +107,13 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		return handle;
 	}
 
-	
 	public void assemble(@Nonnull final InputSource in) throws Exception {
 		
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document doc = builder.parse(in);
 		doc.getDocumentElement().normalize();
 		super.doAssemble(doc);
+		Logger.getLogger(LOGGER_NAME).info("Created [" + podMap.size() + "] beans");
 	}
 	
 	@Override
@@ -140,7 +139,13 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 			return null;
 		}
 		if (pod.isSingleton()) {
-			return (T) pod.getInstance();
+			Object bn = pod.getInstance();
+			if (bn == null) {
+				super.podMap.remove(id);
+				return null;
+			} else {
+				return (T)bn;
+			}
 		} else {
 			try {
 				return (T) buildBean(pod.getDescription());
@@ -163,6 +168,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		for (Pod pod : super.podMap.values()) {
 			Object bean = pod.getInternal();
 			if (clazz.isInstance(bean)) {
+				pod.addAge(1);
 				set.add(bean);
 			}
 		}
@@ -199,7 +205,6 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		
 		oldPod.setInstance(bean);
 		super.podMap.put(id, oldPod);
-
 	}
 
 	@Override
@@ -211,7 +216,10 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	 * new bean must not be non-singleton
 	 */
 	@Override
-	public boolean addBean(@Nonnull String id, @Nonnull Object bean, @Nonnull int lifeSpan) {
+	public boolean addBean(@Nonnull String id, 
+							@Nonnull Object bean, 
+							@Nonnull int lifeSpan) {
+		
 		if (contains(id)) {
 			return false;
 		}

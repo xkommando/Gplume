@@ -17,6 +17,7 @@ package com.caibowen.gplume.web.i18n;
 
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpSession;
 
 import com.caibowen.gplume.i18n.Dialect;
@@ -34,6 +35,23 @@ public class WebI18nService extends I18nService {
 	private static final long serialVersionUID = 4782972973617957393L;
 
 	public static final String ALTERNATIVE = "gplume_web_alternative_dialect";
+	
+	/**
+	 * attach this package to the session or request
+	 * @param pkg
+	 * @param context
+	 */
+	public void attachPkgTo(@Nonnull NativePackage pkg, RequestContext context) {
+
+		HttpSession session = context.request.getSession(true);
+		if (session != null) {
+			session.setAttribute(NativePackage.NAME, pkg);
+			session.setAttribute(ALTERNATIVE, getSupportedDialects());
+		} else {
+			context.putAttr(NativePackage.NAME, pkg);
+			context.putAttr(ALTERNATIVE, getSupportedDialects());
+		}
+	}
 	
 	public void attachPkgTo(RequestContext context) {
 		

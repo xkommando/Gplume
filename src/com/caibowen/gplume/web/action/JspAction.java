@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.task;
+package com.caibowen.gplume.web.action;
+
+import java.lang.invoke.MethodHandle;
+
+import com.caibowen.gplume.web.RequestContext;
 
 
 /**
@@ -21,6 +25,19 @@ package com.caibowen.gplume.task;
  * @author BowenCai
  *
  */
-public interface TaskQueue {
+public class JspAction extends Action {
+
+	private static final long serialVersionUID = -5228310514106204080L;
+	
+	public JspAction(String u, MethodHandle handle) {
+		super(u, handle);
+	}
+	
+	@Override
+	public void perform(RequestContext context) throws Throwable {
+		context.putAttr(ACTION_NAME, this);
+		String jsp = (String)methodHandle.invoke(context);
+		context.render(jsp);
+	}
 
 }

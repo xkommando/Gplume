@@ -117,13 +117,14 @@ public class RequestContext implements Serializable {
 	
 	/**
 	 * reject this request
-	 * return 503
+	 * return 503, e.g., service unavailable
 	 */
 	public void reject() {
 		try {
 			response.sendError(503);
 		} catch (Exception e) {
-			throw new RuntimeException("Error rejecting [" + this.uri + "]", e);
+			throw new RuntimeException("In request for [" 
+					+ this.uri + "] Error sending 503 service unavailable error", e);
 		}
 	}
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans>
 
-<!-- web app infrastracture 
+<!-- web app infrastracture -->
 
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
 	    <property name="defaultLang" value="SimplifiedChinese"/>
@@ -13,15 +13,15 @@
 	        </props>
 	    </property>
 	</bean>
- -->
+	
 	<bean id="controlCenter" class="com.caibowen.gplume.web.SimpleControlCenter">
 		<property name="preProcessor">
 			<bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">
 				  <property name="i18nService" ref="i18nService"/>
 			</bean>
 		</property>
-		<property name="actionFactory" class="com.caibowen.gplume.web.action.ActionFactory" />
-		<property name="injector" class="com.caibowen.gplume.core.Injector"/>
+		<property name="actionFactory" instance="com.caibowen.gplume.web.action.ActionFactory" />
+		<property name="injector" instance="com.caibowen.gplume.core.Injector"/>
 	</bean>
 	
     <bean class="com.caibowen.gplume.web.misc.ControllerScanner">

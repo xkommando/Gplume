@@ -16,6 +16,7 @@
 package com.caibowen.gplume.context.bean;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 
@@ -75,16 +76,35 @@ public class Pod {
 		if (bean != null && bean instanceof InitializingBean) {
 			try {
 				((InitializingBean)bean).afterPropertiesSet();
+				Logger.getLogger(IBeanAssembler.LOGGER_NAME).info(
+						"bean [" + bean.getClass().getSimpleName() 
+						+ "] initialized");
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
 	}
 	
+	void addAge(int i) {
+		this.age.addAndGet(i);
+	}
+	/**
+	 * destroy this bean
+	 * @throws Exception
+	 */
 	void destroy() throws Exception {
+		
+		Logger.getLogger(IBeanAssembler.LOGGER_NAME).info(
+		"bean id[" + beanId 
+		+ "] class[" + (instance != null ? instance.getClass().getSimpleName() : "unknown")
+		+ "] destroyed");
+		
 		if (instance != null && instance instanceof DisposableBean) {
 			((DisposableBean)instance).destroy();
 		}
+		instance = null;
+		description = null;
+		this.beanId = null;
 	}
 	
 	void setInstance(Object instance) {
@@ -103,11 +123,18 @@ public class Pod {
 		return instance;
 	}
 //---------------------------------------------------------
-	synchronized public Object getInstance() {
+	
+	public Object getInstance() {
 		if(age.get() < lifeSpan) {
 			age.incrementAndGet();
 			return instance;
 		} else {
+			try {
+				this.destroy();
+			} catch (Exception e) {
+				throw new RuntimeException(
+						"Error destroying bean pod id[" + beanId +"]", e);
+			}
 			return null;
 		}
 	}
