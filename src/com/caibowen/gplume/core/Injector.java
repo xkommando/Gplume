@@ -95,9 +95,9 @@ public class Injector implements IBeanAssemblerAware {
 				}
 				Object var = beanAssembler.getBean(id);
 				if (var == null) {
-					throw new NullPointerException("cannot find beans with id [" 
+					throw new NullPointerException("cannot find bean with id [" 
 							+ id + "] for property[" + field.getName() 
-							+ " in class [" + object.getClass().getName() + "]");
+							+ "] in class [" + object.getClass().getName() + "]");
 				}
 				BeanEditor.setBeanProperty(object, field.getName(), var);
 				continue;

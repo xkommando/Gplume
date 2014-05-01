@@ -37,12 +37,6 @@ import com.caibowen.gplume.web.HttpMethod;
 @Documented
 public @interface Handle {
 	
-	/**
-	 * indicate the number of request per minutes, approximately.
-	 * 
-	 */
-	int freq() default 0;
-	
 	String[] value();
 
 	HttpMethod[] httpMethods() default {HttpMethod.GET};

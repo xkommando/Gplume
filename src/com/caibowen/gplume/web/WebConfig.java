@@ -92,37 +92,33 @@ public class WebConfig implements InitializingBean, Serializable {
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		AbstractControlCenter center = build(pkgs);
-		if (center != null) {
-			AppContext.beanAssembler.addBean("controlCenter", center);
-			LOG.info("ControlCenter set up");
-		} else {
-			// exception in build()
-		}
-	}
-	
-	private AbstractControlCenter build(List<String> pkgs) {
 		try {
 			SimpleControlCenter center = new SimpleControlCenter();
 			
-			Injector injector = new Injector();
-			injector.setBeanAssembler(AppContext.beanAssembler);
+			Injector injector = AppContext.beanAssembler.getBean("injector");
+			if (injector == null) {
+				injector = new Injector();
+				injector.setBeanAssembler(AppContext.beanAssembler);
+				AppContext.beanAssembler.addBean("injector", injector);
+			}
 			center.setInjector(injector);
 			
 			center.setActionFactory(new ActionFactory());
 			center.setPreProcessor(this.preProcessor);
 			center.setErrorHandler(this.errorHandler != null ? errorHandler
 									: new DefaultErrorHandler());
-
+			
+			boolean boo = AppContext.beanAssembler.addBean("controlCenter", center);
+			LOG.info(boo ? "ControlCenter set up" 
+						: "cannot add [controlCenter] to beanAssembler");
+		
 			ControllerScanner scanner = new ControllerScanner();
 			scanner.setPackages(this.pkgs);
 			scanner.setControlCenterCallBack(center);
 			scanner.afterPropertiesSet();
 			
-			return center;
-			
 		} catch (Exception e) {
-			throw new RuntimeException("cannot build controlCenter ");
+			throw new RuntimeException("cannot build controlCenter", e);
 		}
 	}
 

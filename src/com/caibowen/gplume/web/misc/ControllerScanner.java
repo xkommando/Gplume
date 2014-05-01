@@ -112,16 +112,15 @@ public class ControllerScanner implements InitializingBean {
 		
 		for (Method method : clazz.getMethods()) {
 			
-			if (method.isAnnotationPresent(Handle.class)
-				&& method.getReturnType().equals(void.class)) {
-				
-				Class<?> params[] = method.getParameterTypes();
-				for (Class<?> class1 : params) {
-					if (class1.equals(RequestContext.class)) {
-						return true;
-					}
-				}
-				return false;
+			if (method.isAnnotationPresent(Handle.class)) {
+				return true;
+//				Class<?> params[] = method.getParameterTypes();
+//				for (Class<?> class1 : params) {
+//					if (class1.equals(RequestContext.class)) {
+//						return true;
+//					}
+//				}
+//				return false;
 				
 			} else if (method.isAnnotationPresent(Intercept.class)) {
 				Class<?> params[] = method.getParameterTypes();
