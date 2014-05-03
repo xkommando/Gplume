@@ -16,7 +16,6 @@
 package com.caibowen.gplume.orm.hibernate;
 
 import org.hibernate.SessionFactory;
-import org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean;
 
 import com.caibowen.gplume.context.bean.BeanIDAware;
 import com.caibowen.gplume.context.bean.IBeanAssembler;
@@ -28,10 +27,11 @@ import com.caibowen.gplume.context.bean.InitializingBean;
  *@author BowenCai
  *@since 9:16:10 PM
  */
-public class SessionFactoryBuilder extends AnnotationSessionFactoryBean 
-										implements IBeanAssemblerAware, 
-										InitializingBean,
-										BeanIDAware{
+public class SessionFactoryBuilder 
+	extends org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBeanAnnotationSessionFactoryBean 
+	implements com.caibowen.gplume.context.bean.IBeanAssemblerAware, 
+			,com.caibowen.gplume.context.bean.InitializingBean,
+			,com.caibowen.gplume.context.bean.BeanIDAware{
 	
 	private IBeanAssembler beanAssembler;
 	@Override

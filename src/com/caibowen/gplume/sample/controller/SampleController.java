@@ -52,17 +52,20 @@ public class SampleController {
 		return pkg.getStr(k);
 	}
 	
-	@Handle(value={"/Gplume/",
-			"/Gplume/index",
-			"/Gplume/index.html",
-			"/Gplume/index.jsp"})
+	@Handle({"/",
+			"/index",
+			"/index.html",
+			"/index.jsp"})
 	public String index(RequestContext context) {
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
+		
+		System.out.println(context.request.getContextPath());
+		
 		return "/index.jsp";
 	}
 	
-//	         /Gplume/act/post/date
-	@Handle(value={"/Gplume/act/post/date"},httpMethods=HttpMethod.POST)
+//	         /act/post/date
+	@Handle(value={"/act/post/date"},httpMethods=HttpMethod.POST)
 	public void getTime(RequestContext context) {
 		int y = context.getIntParam("year", 0);
 		int m = context.getIntParam("month", 0);
@@ -77,7 +80,8 @@ public class SampleController {
 	 * @param date
 	 * @param context
 	 */
-	@Handle(value = {"/Gplume/your-birthday/{date formate like 1992-6-14::Date}"})
+	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"}
+			, httpMethods={HttpMethod.GET, HttpMethod.POST})
 	public String happyBirthday(Date date, RequestContext context) {
 		if (date != null) {
 			int dist = birthdayCalculator.dateDistance(date);

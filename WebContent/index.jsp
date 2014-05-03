@@ -11,7 +11,7 @@
 <title>Gplume Sample Page</title>
 </head>
 <body>
-<div style="text-align:center; margin-top: 120px;">
+<div style="text-align:center; margin-top: 30px;">
 <h1>${msg}</h1>
 <hr/>
 <h3><gp:msg k="authorName" /></h3>

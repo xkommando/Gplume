@@ -85,7 +85,8 @@ public class RequestContext implements Serializable {
 			int end = _u.lastIndexOf(';', idx + 12);
 			_u = end != -1 ? prefix + _u.substring(end) : prefix;
 		}
-		this.uri = _u;
+		
+		this.uri = _u.substring(request.getContextPath().length());
 		
 		timeModified = System.currentTimeMillis();
 	}

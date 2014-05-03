@@ -44,10 +44,10 @@ Write app-manifest.xml, it is similar to spring applicationContext.xml :
 A web Controller is like:
 
 ```Java
-	@Handle(value={"/Gplume/",
-			"/Gplume/index",
-			"/Gplume/index.html",
-			"/Gplume/index.jsp"},
+	@Handle(value={"/",
+			"/index",
+			"/index.html",
+			"/index.jsp"},
 			httpMethods={HttpMethod.GET, HttpMethod.POST})
 	public void index(RequestContext context) {
 		
