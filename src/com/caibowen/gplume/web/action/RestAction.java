@@ -35,7 +35,7 @@ public class RestAction extends Action {
 	final String suffix;
 	final boolean inMethodCall;
 	
-	public RestAction(String uri, MethodHandle handle, 
+	RestAction(String uri, MethodHandle handle, 
 						int start, String name, Class<?> type, String s, boolean call) {
 		
 		super(uri, handle);
@@ -48,7 +48,7 @@ public class RestAction extends Action {
 	
 	@Override
 	public void perform(RequestContext requestContext) throws Throwable {
-		Object var = Converter.slient.translateStr(parseArg(requestContext.uri), argType);
+		Object var = Converter.slient.translateStr(parseArg(requestContext.path), argType);
 		requestContext.putAttr(ACTION_NAME, this);
 
 		if (inMethodCall) {
@@ -66,7 +66,7 @@ public class RestAction extends Action {
 	 * @return
 	 * @see ActionBuilder
 	 */
-	public String parseArg(String uri) {
+	protected String parseArg(String uri) {
 		
 		String argVar;
 		if (suffix.endsWith("*")) {

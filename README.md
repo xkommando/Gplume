@@ -49,10 +49,16 @@ A web Controller is like:
 			"/index.html",
 			"/index.jsp"},
 			httpMethods={HttpMethod.GET, HttpMethod.POST})
-	public void index(RequestContext context) {
+	public String index(RequestContext context) {
 		
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
-		context.render("/index.jsp");
+		return "/index.jsp";
+	}
+	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"}
+			, httpMethods={HttpMethod.GET, HttpMethod.POST})
+	public FreeMarkerView happyBirthday(Date date, RequestContext context) {
+		process(date);
+		return new FreeMarkerView(date);
 	}
 ```
 **Step Three**. Internationalization. 

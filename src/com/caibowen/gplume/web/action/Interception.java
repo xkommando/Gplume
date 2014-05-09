@@ -13,27 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.dynamic;
+package com.caibowen.gplume.web.action;
 
-import java.io.Serializable;
-import java.util.Properties;
+import java.lang.invoke.MethodHandle;
 
+import com.caibowen.gplume.web.RequestContext;
 /**
- * 
- * compiled script
  * 
  * @author BowenCai
  *
  */
-public interface BinScript extends Serializable, Runnable {
+public class Interception extends Action {
 	
-	public static final int RUNNABLE = 1;
-	public static final int RUNNING = 2;
-	public static final int FINISHED = 3;
-	//....
+	private static final long serialVersionUID = 254538927443500914L;
+
+	Interception(String u, MethodHandle handle) {
+		super(u, handle);
+	}
 	
-	public void init(Properties config);
-	@Override
-	public void run();
-	public Properties endState();
+	public void intercept(RequestContext requestContext, Action action) throws Throwable {
+		methodHandle.invoke(requestContext, action);
+	}
 }

@@ -179,6 +179,15 @@ public final class TypeTraits {
     	assignField(object, fieldName, var, false);
     }
 	
+    /**
+     * set field of this name with this var
+     * @param object
+     * @param fieldName
+     * @param var
+     * @param refPrivate whether set accessble or not
+     * @throws IllegalAccessException
+     * @throws NoSuchFieldException
+     */
     public static void assignField(Object object,
     								String fieldName, 
     								Object var,
@@ -201,7 +210,7 @@ public final class TypeTraits {
 				} else {
 					realVar = var;
 				}
-//				if (isAssignableFrom(fieldClazz, realVar.getClass())) {
+				if (Klass.isAssignable(fieldClazz, realVar.getClass())) {
 					if ( !field.isAccessible()) {
 						if (refPrivate) {
 							field.setAccessible(true);
@@ -210,10 +219,10 @@ public final class TypeTraits {
 						}
 					}
 					field.set(object, realVar);
-//				} else {
-//					throw new IllegalArgumentException(
-//							"cannot assign " + realVar + " to field " + fieldName);
-//				}
+				} else {
+					throw new IllegalArgumentException(
+							"cannot assign " + realVar + " to field " + fieldName);
+				}
 				return;
 			}
 		}

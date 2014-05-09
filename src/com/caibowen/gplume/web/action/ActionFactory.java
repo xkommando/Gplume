@@ -21,7 +21,6 @@ import java.lang.reflect.Modifier;
 
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.HttpMethod;
-import com.caibowen.gplume.web.Interception;
 import com.caibowen.gplume.web.note.Handle;
 import com.caibowen.gplume.web.note.Intercept;
 

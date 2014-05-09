@@ -18,8 +18,6 @@ package com.caibowen.gplume.web;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 import javax.servlet.RequestDispatcher;
@@ -30,8 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
-import com.caibowen.gplume.core.TypeTraits;
 import com.caibowen.gplume.misc.Str;
 
 
@@ -46,7 +44,7 @@ public class RequestContext implements Serializable {
 
 	private static final long serialVersionUID = -8169661246935054100L;
 
-	private static final Logger LOG = Logger.getLogger(RequestContext.class.getName());
+//	private static final Logger LOG = Logger.getLogger(RequestContext.class.getName());
 	
 	public final AbstractControlCenter controlCenter;
 	
@@ -54,7 +52,7 @@ public class RequestContext implements Serializable {
 	public final HttpServletResponse 	response;
 	public final ServletContext			context;
 	public final HttpMethod 			httpmMthod;
-	public final String 				uri;
+	public final String 				path;
 	
 	private long timeModified;
 
@@ -86,7 +84,7 @@ public class RequestContext implements Serializable {
 			_u = end != -1 ? prefix + _u.substring(end) : prefix;
 		}
 		
-		this.uri = _u.substring(request.getContextPath().length());
+		this.path = _u.substring(request.getContextPath().length());
 		
 		timeModified = System.currentTimeMillis();
 	}
@@ -103,7 +101,7 @@ public class RequestContext implements Serializable {
 		} catch (ServletException | IOException e) {
 			
 			throw new RuntimeException("In request for [" 
-					+ this.uri + "] Error forwarding[" + jspView + "]", e);
+					+ this.path + "] Error forwarding[" + jspView + "]", e);
 		}
 	}
 	
@@ -112,7 +110,7 @@ public class RequestContext implements Serializable {
 			view.resolve(this);
 		} catch (Exception e) {
 			throw new RuntimeException("In request for [" 
-					+ this.uri + "] Error rendering [" + view + "]", e);
+					+ this.path + "] Error rendering [" + view + "]", e);
 		}
 	}
 	
@@ -125,7 +123,7 @@ public class RequestContext implements Serializable {
 			response.sendError(503);
 		} catch (Exception e) {
 			throw new RuntimeException("In request for [" 
-					+ this.uri + "] Error sending 503 service unavailable error", e);
+					+ this.path + "] Error sending 503 service unavailable error", e);
 		}
 	}
 
@@ -141,7 +139,7 @@ public class RequestContext implements Serializable {
 
 	/**
 	 * pass this request to other handle
-	 * @WARN: short circuit!
+	 * @WARN short circuit!
 	 * @param actionName
 	 */
 	public void passOff(String actionName) {
@@ -178,13 +176,23 @@ public class RequestContext implements Serializable {
 	
 	public void addCookie(final String name, final String value, final int ageInSecond) {
 		
-		if (Str.Patterns.COOKIE_NAME.matcher(name).matches()) {
+		if (Str.Patterns.COOKIE_NAME.matcher(name).matches()
+			&& !name.equalsIgnoreCase("Comment") // rfc2019
+			&& !name.equalsIgnoreCase("Discard") // 2019++
+			&& !name.equalsIgnoreCase("Domain")
+			&& !name.equalsIgnoreCase("Expires") // (old cookies)
+			&& !name.equalsIgnoreCase("Max-Age") // rfc2019
+			&& !name.equalsIgnoreCase("Path")
+			&& !name.equalsIgnoreCase("Secure") 
+			&& !name.equalsIgnoreCase("Version")
+			&& !name.startsWith("$")) {
 			Cookie cookie = new Cookie(name, value);
 			cookie.setMaxAge(ageInSecond);
 			response.addCookie(cookie);
+			
 		} else {
 			throw new IllegalArgumentException(
-					"illegal cookie name[" + name 
+					"illegal cookie name or name is token[" + name 
 					+"]\nname pattern [" + Str.Patterns.COOKIE_NAME.pattern() + "]");
 		}
 	}
@@ -284,7 +292,7 @@ public class RequestContext implements Serializable {
 	}
 	
 	public void setCacheControl(int second) {
-		String info =  "max-age=" + second + ", private";
+		String info =  "max-age=" + second;
 		response.setHeader("Cache-Control",info);
 		response.setHeader("Expires", Long.toString(timeModified + second * 1000L));
 	}
@@ -306,7 +314,7 @@ public class RequestContext implements Serializable {
 			response.sendRedirect(uri);
 		} catch (Exception e) {
 			throw new RuntimeException("In request for [" 
-					+ this.uri + "] Error sending redirect [" + uri + "]", e);
+					+ this.path + "] Error sending redirect [" + uri + "]", e);
 			
 		}
 	}
@@ -317,16 +325,14 @@ public class RequestContext implements Serializable {
 			while (params.hasMoreElements()) {
 				String paramName = params.nextElement();
 				String var = request.getParameter(paramName);
-				TypeTraits.assignField(object, paramName, var, reflectPrivate);
+				BeanEditor.setBeanProperty(object, paramName, var);
 			}
 			return object;
-		} catch (IllegalArgumentException | IllegalAccessException
-				| NoSuchFieldException e) {
-			LOG.log(Level.SEVERE, "error setting field for object of class[" 
+		} catch (Exception e) {
+			throw new RuntimeException("error setting field for object of class[" 
 								+ object.getClass().getName()
 								+ "]. Cause: " + e.getCause(), e);
 		}
-		return null;
 	}
 	
 	public Object mapFromSession(Object object, boolean reflectPrivate) {
@@ -340,16 +346,14 @@ public class RequestContext implements Serializable {
 			while (params.hasMoreElements()) {
 				String paramName = params.nextElement();
 				Object var = session.getAttribute(paramName);
-				TypeTraits.assignField(object, paramName, var, reflectPrivate);
+				BeanEditor.setBeanProperty(object, paramName, var);
 			}
 			return object;
-		} catch (IllegalArgumentException | IllegalAccessException
-				| NoSuchFieldException e) {
-			LOG.log(Level.SEVERE, "error setting field for object of class[" 
+		} catch (Exception e) {
+			throw new RuntimeException("error setting field for object of class[" 
 								+ object.getClass().getName()
 								+ "]. Cause: " + e.getCause(), e);
 		}
-		return null;
 	}
 	
 // -------------------------------------------------------------------
@@ -569,28 +573,3 @@ public class RequestContext implements Serializable {
 //private static final String METHOD_HEAD		= "HEAD";
 //private static final String METHOD_OPTIONS	= "OPTIONS";
 //private static final String METHOD_TRACE	= "TRACE";
-
-
-//
-// @Inject
-// public void setErrorHandler(String clazzName) {
-//
-// try {
-// Object _handler = Class.forName(clazzName).newInstance();
-// if (_handler instanceof IErrorHandler) {
-// this.errorHandler = (IErrorHandler)_handler;
-// } else {
-// throw new IllegalArgumentException(
-// "class [" + clazzName + "] is not IErrorHandler"
-// +"\nrather it is [" + _handler.getClass().getName() + "]");
-// }
-// } catch (InstantiationException | IllegalAccessException
-// | ClassNotFoundException e) {
-// e.printStackTrace();
-//
-// throw new RuntimeException(
-// "cannot instantiate error handler class[" + clazzName + "]"
-// + "\nError:" + e.getMessage(),
-// e);
-// }
-// }

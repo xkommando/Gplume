@@ -21,7 +21,7 @@ import com.caibowen.gplume.web.RequestContext;
 
 
 /**
- * 
+ * web handle return String
  * @author BowenCai
  *
  */
@@ -29,15 +29,20 @@ public class JspAction extends Action {
 
 	private static final long serialVersionUID = -5228310514106204080L;
 	
-	public JspAction(String u, MethodHandle handle) {
+	JspAction(String u, MethodHandle handle) {
 		super(u, handle);
 	}
 	
 	@Override
 	public void perform(RequestContext context) throws Throwable {
 		context.putAttr(ACTION_NAME, this);
-		String jsp = (String)methodHandle.invoke(context);
-		context.render(jsp);
+		Object o = methodHandle.invoke(context);
+		if(o != null) {
+			/**
+			 * o must be String, this has been check in the construction of this action
+			 */
+			context.render((String)o);
+		}
 	}
 
 }

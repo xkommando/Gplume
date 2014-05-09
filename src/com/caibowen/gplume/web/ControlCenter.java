@@ -26,9 +26,11 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
+
 import com.caibowen.gplume.core.Injector;
 import com.caibowen.gplume.web.action.Action;
 import com.caibowen.gplume.web.action.IActionFactory;
+import com.caibowen.gplume.web.action.Interception;
 import com.caibowen.gplume.web.note.Handle;
 import com.caibowen.gplume.web.note.Intercept;
 
@@ -62,7 +64,7 @@ public class ControlCenter extends AbstractControlCenter {
 
 		Throwable thrown = null;
 		
-		Action action = actionFactory.findAction(context.httpmMthod, context.uri);
+		Action action = actionFactory.findAction(context.httpmMthod, context.path);
 		
 		if (action == null) {
 			errorHandler.http404(context);

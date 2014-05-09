@@ -18,7 +18,6 @@ package com.caibowen.gplume.web.action;
 import java.lang.reflect.Method;
 
 import com.caibowen.gplume.web.HttpMethod;
-import com.caibowen.gplume.web.Interception;
 
 /**
  * manage all actions

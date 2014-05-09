@@ -27,9 +27,8 @@ import javax.annotation.Nullable;
 
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Klass;
-import com.caibowen.gplume.misc.Str;
-import com.caibowen.gplume.web.Interception;
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.View;
 
 
 /**
@@ -210,18 +209,20 @@ class ActionBuilder {
 			}
 			
 		} else {// average action
-			MethodHandle handle = method.getReturnType().equals(String.class) 
-								? findMethodeHandle(method, RET_JSP_TYPE)
-								: findMethodeHandle(method, SIMPLE_TYPE);
-
-			if (handle != null) {
+			Class<?> retKlass = method.getReturnType();
+			if (retKlass.equals(String.class)) {
+				MethodHandle handle = findMethodeHandle(method, RET_JSP_TYPE);
+				handle = object != null ? handle.bindTo(object) : handle;
+				return new JspAction(uri, handle);
 				
-				handle = object == null ? handle : handle.bindTo(object);
-
-				return method.getReturnType().equals(String.class)
-						? new JspAction(uri, handle)
-						: new Action(uri, handle);
-						
+			} else if (retKlass.equals(void.class)) {
+				MethodHandle handle = findMethodeHandle(method, SIMPLE_TYPE);
+				handle = object != null ? handle.bindTo(object) : handle;
+				return new Action(uri, handle);
+				
+			} else if (View.class.isAssignableFrom(retKlass)){
+				
+				return new ViewAction(uri, method, object);
 			} else {
 				throw new NullPointerException(
 						"null uri || null controller object || null method handle");
@@ -311,14 +312,22 @@ class ActionBuilder {
 		
 		// whether put arg as parameter or put arg as attribute
 		MethodHandle handle = getRestHandle(method, argType, object);
-		boolean inMethodCall = handle.type().parameterCount() > 1;
+		boolean inMethodCall = method.getParameterTypes().length > 1;
+		Class<?> retKalss = method.getReturnType();
+		if (retKalss.equals(String.class)) {
+			return new JspRestAction(effectiveURI, handle, lq, argName, argType, suffix, inMethodCall);
+		
+		} else if (retKalss.equals(void.class)) {
+			return new RestAction(effectiveURI, handle, lq, argName, argType, suffix, inMethodCall);
+		
+		} else if (View.class.isAssignableFrom(retKalss)) {
+			return new ViewRestAction(effectiveURI, method, object, lq, argName, argType, suffix, inMethodCall);
 
-		// god this is ugly!
-		return handle.type().returnType().equals(String.class)
-				? new JspRestAction(effectiveURI, handle, lq, 
-									argName, argType, suffix, inMethodCall)
-				: new RestAction(effectiveURI, handle, lq, 
-								argName, argType, suffix, inMethodCall);		
+		} else {
+			throw new IllegalArgumentException(
+			"unidentified method[" + method + "] in object[" + object + "]");
+		}
+	
 	}
 	
 	
@@ -331,19 +340,22 @@ class ActionBuilder {
 	 * String 	func(RequestContext context);
 	 * void 	func(RequestContext context);
 	 * </pre>
+	 * returns null if 
+	 * SomeCustomerView 	func(RequestContext context);
 	 * 
 	 * @param method
 	 * @param argClass
 	 * @param obj
 	 * @return
 	 */
-	protected static MethodHandle getRestHandle(Method method, 
+	private static MethodHandle getRestHandle(Method method, 
 											Class<?> argClass, 
 											Object obj) {
 		
-		Class<?> retClass = method.getReturnType().equals(String.class) 
-							? String.class 
-							: void.class;
+		Class<?> retClass = method.getReturnType();
+		if (!retClass.equals(String.class) && !retClass.equals(void.class)) {
+			return null;
+		}
 		
 		MethodType mType = MethodType.methodType(
 								retClass, 

@@ -128,7 +128,7 @@ public abstract class AbstractControlCenter
 	
 	@Override
 	public void process(RequestContext context) {
-		handle(context.uri, context);
+		handle(context.path, context);
 	}
 	/**
 	 * any requseContext can enter this function at any time.

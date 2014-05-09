@@ -31,7 +31,7 @@ public class QoSAction extends Action{
 
 	final int limit;
 	
-	public QoSAction(String u, 
+	QoSAction(String u, 
 						MethodHandle handle,
 						int limit) {
 		

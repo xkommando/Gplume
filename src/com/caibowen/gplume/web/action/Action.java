@@ -46,7 +46,7 @@ public class Action implements Serializable {
 	 */
 	protected final MethodHandle		methodHandle;
 	
-	public Action(String u, MethodHandle handle) {
+	Action(String u, MethodHandle handle) {
 		effectiveURI = u;
 		this.methodHandle = handle;
 	}

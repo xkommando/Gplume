@@ -21,7 +21,7 @@ public class RestQoSAction extends QoSAction {
 
 	private static final long serialVersionUID = -3117262195337455584L;
 
-	public RestQoSAction(String u, MethodHandle handle, int limit) {
+	RestQoSAction(String u, MethodHandle handle, int limit) {
 		super(u, handle, limit);
 	}
 

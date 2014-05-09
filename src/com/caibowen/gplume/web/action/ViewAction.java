@@ -15,44 +15,44 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.action;
 
-import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 
-import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.View;
 
 
 /**
- * RestAction with method returning JSP view
  * 
- * why another Action class?
- * to speed up!
+ * web handle returns String
+ * 
+ * ViewAction, includinf ViewRestAction
+ * use java.lang.reflect.Method instead of MethodHandle,
+ * for invoking, this is because function that View Action
+ * may serve functions that return objects that is derived from the interface View,
+ * thus its return types various and cannot be resolved by MethodHandle
  * 
  * @author BowenCai
  *
  */
-public class JspRestAction extends RestAction {
+public class ViewAction extends Action {
 
-	private static final long serialVersionUID = -7671427896241639360L;
-
-	JspRestAction(String uri, MethodHandle handle, int start,
-			String name, Class<?> type, String s, boolean call) {
-		super(uri, handle, start, name, type, s, call);
+	private static final long serialVersionUID = 2075886979686649253L;
+	private final Method method;
+	private final Object controller;
+	
+	ViewAction(String u, Method m, Object ctrl) {
+		super(u, null);
+		method = m;
+		controller = ctrl;
 	}
-
+	
 	@Override
 	public void perform(RequestContext context) throws Throwable {
-		Object var = Converter.slient.translateStr(parseArg(context.path), argType);
 		context.putAttr(ACTION_NAME, this);
-		Object jsp = null;
-		if (inMethodCall) {
-			jsp = methodHandle.invoke(var, context);
-			
-		} else {
-			context.putAttr(argName, var);
-			jsp = methodHandle.invoke(context);
-		}
-		if (jsp != null) {
-			context.render((String)jsp);
+		Object v = null;
+		v = method.invoke(controller, context);
+		if (v != null) {
+			((View)v).resolve(context);
 		}
 	}
 }

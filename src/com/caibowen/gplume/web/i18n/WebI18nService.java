@@ -62,8 +62,12 @@ public class WebI18nService extends I18nService {
 				if (dialect == Dialect.Unknown) {
 					dialect = Dialect.SimplifiedChinese;
 				}
+				NativePackage pkg = pkgTable.get(dialect);
+				if (pkg == null) {
+					pkg = getDefaultPkg();
+				}
 				Set<Dialect> all = getSupportedDialects();
-				session.setAttribute(NativePackage.NAME, pkgTable.get(dialect));
+				session.setAttribute(NativePackage.NAME, pkg);
 				session.setAttribute(ALTERNATIVE, all);
 			}
 		} else {

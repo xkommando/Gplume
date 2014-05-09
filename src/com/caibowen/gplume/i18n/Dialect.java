@@ -120,7 +120,10 @@ public enum Dialect {
 			throw new NullPointerException(" empty string to parse");
 		}
 	}
-	
+	public static void main(String...a) {
+		String head = "nl,es-es;q=0.8,zh-cn;q=0.6,zh-tw;q=0.4,en-us;q=0.2";
+		System.out.println(I18nService.resolve(head));
+	}
 	/**
 	 * 
 	 * @param code

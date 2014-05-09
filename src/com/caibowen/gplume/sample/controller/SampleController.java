@@ -58,13 +58,17 @@ public class SampleController {
 			"/index.jsp"})
 	public String index(RequestContext context) {
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
-		
-		System.out.println(context.request.getContextPath());
-		
 		return "/index.jsp";
 	}
+	@Handle({"/s/",
+		"/s/index",
+		"/s/index.html",
+		"/s/index.jsp"})
+	public static void sindex(RequestContext context) {
+		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
+		context.render("/index.jsp");
+	}
 	
-//	         /act/post/date
 	@Handle(value={"/act/post/date"},httpMethods=HttpMethod.POST)
 	public void getTime(RequestContext context) {
 		int y = context.getIntParam("year", 0);
@@ -75,6 +79,13 @@ public class SampleController {
 		happyBirthday(calendar.getTime(), context);
 	}
 	
+
+	@Handle(value={"/s/your-birthday/{date formate like 1992-6-14::Date}"}
+			, httpMethods=HttpMethod.ALL)
+	public static String happyBirthday(RequestContext context) {
+		Date date = context.getAttr("date formate like 1992-6-14");
+		return new SampleController().happyBirthday(date, context);
+	}
 	/**
 	 * 
 	 * @param date
