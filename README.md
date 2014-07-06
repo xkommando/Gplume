@@ -1,12 +1,15 @@
 Gplume
 ======
 
-light-weight Java web framework that cross-cloud
+Light-weight multiparadigmatic Java web framework. Features:
+**easy to learn and use,**
+**mixed Spring styled request handling,**
+**high performance,**
+**cross cloud.**
 
-Quick Start:
+**Quick Start:**
 
-**Step Zero**. Prepare. 
-in your web.xml:
+####Step Zero: The web.xml:
 
 ```XML
 	<context-param>
@@ -25,8 +28,8 @@ in your web.xml:
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 ```
-**Step One**. IoC Container. 
-Write app-manifest.xml, it is similar to spring applicationContext.xml :
+####Step One: The IoC Container.
+Spring-like configuration file :
 
 ```XML
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
@@ -40,9 +43,7 @@ Write app-manifest.xml, it is similar to spring applicationContext.xml :
 	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
 	</bean>
 ```
-**Step Two**. Web. 
-A web Controller is like:
-
+####Step Two: Handle request
 ```Java
 	@Handle(value={"/",
 			"/index",
@@ -61,14 +62,14 @@ A web Controller is like:
 		return new FreeMarkerView(date);
 	}
 ```
-**Step Three**. Internationalization. 
+####Step Three: Internationalization. 
 Lets get cultural! For i18n, you need language packages like  
 `en.properties` where there is `gplumeIsRunning=Gplume is Running!` 
 and  
 `zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01`(ascii for `Gplume跑起来了`)  
 and specify them in the manifest.xml
 
-**Step Four**. Event. 
+####Step Four. Event handling. 
 There is a Broadcaster, you can register listeners and publish events like:
 
 ```Java
@@ -90,24 +91,8 @@ event.setTime(new Date());
 AppContext.broadcaster.broadcast(event);
 ```
 
-***Step Five***. Test
-Run Junit4 with JunitPal, it will set up the AppContext and inject all properties for your test case
-```Java
-@RunWith(JunitPal.class)
-@ManifestPath("file:src/manifest.xml") // as file
-public class TestNULL {
-	@Named("controlCenter")
-	public AbstractControlCenter controlCenter;
-	@Test
-	public void test() {
-		System.out.println(controlCenter);
-		AppContext.broadcaster.broadcast(new WebAppStartedEvent(this));
-	}
-}
-```
-
-**Step Six**. ORM. 
-Spring and Hibernate can be integrated with Gplume, just add few more lines in the xml:
+####Step Five: ORM using Hibernate.
+Spring and Hibernate can be integrated with Gplume, just a few lines in the xml:
 
 ``` XML
 <bean id="datasource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
@@ -143,6 +128,21 @@ public class ChapterDAO extends HibernateDaoSupport {
 }
 ```
 
+####Step Six. Test with Junit
+```Java
+@RunWith(JunitPal.class)
+@ManifestPath("file:src/manifest.xml") // as file
+public class TestNULL {
+	@Named("controlCenter")
+	public AbstractControlCenter controlCenter;
+	@Test
+	public void test() {
+		System.out.println(controlCenter);
+		AppContext.broadcaster.broadcast(new WebAppStartedEvent(this));
+	}
+}
+```
+===========
 **************
 Gplume Overview
 ![alt text](https://dl.dropboxusercontent.com/s/iklpmr1jdyktdn2/gplume_struture.jpg)
