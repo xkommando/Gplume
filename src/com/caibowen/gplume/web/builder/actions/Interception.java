@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package javax.annotation.meta;
+package com.caibowen.gplume.web.builder.actions;
 
-import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
 
-import javax.annotation.Nonnull;
+import com.caibowen.gplume.web.RequestContext;
+/**
+ * 
+ * @author BowenCai
+ *
+ */
+public class Interception extends SimpleAction {
+	
+	private static final long serialVersionUID = 254538927443500914L;
 
-public interface TypeQualifierValidator<A extends Annotation> {
-    /**
-     * Given a type qualifier, check to see if a known specific constant value
-     * is an instance of the set of values denoted by the qualifier.
-     * 
-     * @param annotation
-     *                the type qualifier
-     * @param value
-     *                the value to check
-     * @return a value indicating whether or not the value is an member of the
-     *         values denoted by the type qualifier
-     */
-    public @Nonnull
-    When forConstantValue(@Nonnull A annotation, Object value);
+	public Interception(String u, MethodHandle handle) {
+		super(u, handle);
+	}
+	
+	public void intercept(RequestContext requestContext, SimpleAction action) throws Throwable {
+		methodHandle.invoke(requestContext, action);
+	}
 }

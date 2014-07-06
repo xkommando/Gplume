@@ -35,5 +35,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Intercept {
-	String[] uri();
+	String[] value();
 }

@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder;
 
 import java.io.Serializable;
 import java.util.HashMap;
 
 import com.caibowen.gplume.common.URITrie;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
 
 /**
  * 
  * 
- * handlers manage actors, and pass request, 
+ * handlers manage actions, and pass request, 
  * along with its response, to the correspondent actor and the actor performs
  * 
  * @author BowenCai
  *
  */
-public class ActionMapper<T extends Action> implements Serializable {
+public class ActionMapper<T extends SimpleAction> implements Serializable {
 
 	private static final long serialVersionUID = 9039999917329134916L;
 

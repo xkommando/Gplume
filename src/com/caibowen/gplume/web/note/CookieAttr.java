@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.note;
 
-import java.lang.invoke.MethodHandle;
-
-import com.caibowen.gplume.web.RequestContext;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 /**
@@ -25,25 +27,23 @@ import com.caibowen.gplume.web.RequestContext;
  * @author BowenCai
  *
  */
-public class QoSAction extends Action{
+@Target({ElementType.PARAMETER, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface CookieAttr {
+	
+	/**
+	 * The name of the cookie attribute to bind to.
+	 */
+	String value() default "";
 
-	private static final long serialVersionUID = 542208480144382166L;
-
-	final int limit;
+	/**
+	 * Whether the parameter is nullable.
+	 */
+	boolean nullable() default true;
 	
-	QoSAction(String u, 
-						MethodHandle handle,
-						int limit) {
-		
-		super(u, handle);
-		this.limit = limit;
-	}
-	
-	
-	@Override
-	public void perform(RequestContext context) {
-		
-	}
-	
-
+	/**
+	 * alternative/default value of this attribute, used if is null
+	 */
+	String alternative() default "";
 }

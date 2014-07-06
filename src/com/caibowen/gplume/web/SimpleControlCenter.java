@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import com.caibowen.gplume.web.action.Action;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
 import com.caibowen.gplume.web.note.Handle;
 
 /**
@@ -44,7 +44,7 @@ public class SimpleControlCenter extends ControlCenter {
 	public void handle(final String uri, RequestContext requestContext) {
 		Throwable thrown = null;
 		
-		Action action = actionFactory.findAction(requestContext.httpmMthod, uri);
+		SimpleAction action = actionFactory.findAction(requestContext.httpmMthod, uri);
 		
 		if (action == null) {
 			if (LOG.isLoggable(Level.INFO)) {

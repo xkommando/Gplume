@@ -18,6 +18,7 @@ package com.caibowen.gplume.sample.controller;
 import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -40,6 +41,26 @@ import com.caibowen.gplume.web.note.Handle;
  */
 public class SampleController {
 	
+	@Handle({"/test"})
+	public void name(RequestContext context) {
+		System.out.println("SampleController.name()");
+		Map<String, Object> map = context.request.getParameterMap();
+		for (Map.Entry<String, Object> e : map.entrySet()) {
+			System.out.print("[" + e.getKey() + "]  ");
+			String[] strs = (String[]) e.getValue();
+			for (String string : strs) {
+				System.out.print("[" + string + "]");
+			}
+			System.out.println();
+		}
+		context.render("/index.jsp");
+	}
+	
+	
+	
+	
+	
+	
 	static final Logger LOG = Logger.getLogger(SampleController.class.getName());
 	
 	public static String nativeStr(String k, RequestContext context) {
@@ -60,6 +81,7 @@ public class SampleController {
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		return "/index.jsp";
 	}
+	
 	@Handle({"/s/",
 		"/s/index",
 		"/s/index.html",
@@ -125,7 +147,18 @@ public class SampleController {
 		context.putAttr("date", date);
 		return "/happy.jsp";
 	}
-
+	
+//	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"},
+//			httpMethods={HttpMethod.GET, HttpMethod.POST})
+//	public FreemarkerView name(Date date, RequestContext context) {
+//		return new FreemarkerView("/index.", date);
+//	}
+	
+	public static class FreemarkerView {
+		FreemarkerView(String a, Date b){
+			
+		}
+	}
 	@Named("birthdayCalculator")
 	BirthdayCalculator birthdayCalculator;
 

@@ -17,7 +17,6 @@ package com.caibowen.gplume.web.taglib;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,7 +67,7 @@ public abstract class WriterTag extends SimpleTagSupport {
 	}
 	
 	
-	abstract public String write(Writer writer) throws IOException;
+	abstract public String write(JspWriter writer) throws IOException;
 	
 	@Override
 	public void doTag() {
@@ -89,9 +88,8 @@ public abstract class WriterTag extends SimpleTagSupport {
 			}
 			
 		} else {
-			PrintWriter writer = new PrintWriter(System.out);
 			try {
-				String ret = write(writer);
+				String ret = write(new JspWritorMock());
 				if (SUCCESS != ret) {
 					PrintWriter errWriter = new PrintWriter(System.err);
 					errWriter.write("\nError in tag[" + getClass().getSimpleName() + "]\n"
@@ -105,7 +103,6 @@ public abstract class WriterTag extends SimpleTagSupport {
 				errWriter.write("\r\n");
 				errWriter.flush();
 			}
-			writer.flush();
 		}
 	}
 }

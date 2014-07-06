@@ -2,6 +2,7 @@
 <%@page import="java.util.Date"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="gp" uri="com.caibowen.gplume.taglib"%>
 <%@ page isELIgnored="false" %>
 <!DOCTYPE html>
@@ -12,7 +13,7 @@
 </head>
 <body>
 <div style="text-align:center; margin-top: 30px;">
-<h1>${msg}</h1>
+<h1><gp:msg k="gplumeIsRunning"/></h1>
 <hr/>
 <h3><gp:msg k="authorName" /></h3>
 <h3><gp:link nativeName="projectWebSite" url="http://www.caibowen.com/work.html#id_gplume" target="_blank"/></h3>
@@ -43,7 +44,29 @@
 <input type="submit" value="<gp:msg k="submit"/>"/>
 </form>
 
-</div>
 
+
+
+</div>
+<a href=" 
+<c:url value="/test">
+<c:param name="category" value="1"/>
+<c:param name="tag" value="2"/>
+<c:param name="tag" value="3"/>
+<c:param name="max_price" value="99"/>
+<c:param name="min_price" value="9"/>
+<c:param name="sort" value="asd"/>
+</c:url>
+" >
+<c:url value="/test">
+<c:param name="category" value="1"/>
+<c:param name="tag" value="2"/>
+<c:param name="tag" value="3"/>
+<c:param name="max_price" value="99"/>
+<c:param name="min_price" value="9"/>
+<c:param name="sort" value="asd"/>
+<c:param name="page" value="2"/>
+</c:url>
+</a>
 </body>
 </html>

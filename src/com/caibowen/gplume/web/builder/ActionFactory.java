@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -21,6 +21,8 @@ import java.lang.reflect.Modifier;
 
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.HttpMethod;
+import com.caibowen.gplume.web.builder.actions.Interception;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
 import com.caibowen.gplume.web.note.Handle;
 import com.caibowen.gplume.web.note.Intercept;
 
@@ -36,18 +38,18 @@ public class ActionFactory implements IActionFactory, Serializable {
 	// -----------------------------------------------------------------------------
 	// GET, POST, HEAD, PUT, PATCH, DELETE, OPTIONS, TRACE
 	// -----------------------------------------------------------------------------
-	private ActionMapper<Action> getMapper = new ActionMapper<Action>();
-	private ActionMapper<Action> postMapper = new ActionMapper<Action>();
-	private ActionMapper<Action> headMapper = new ActionMapper<Action>();
-	private ActionMapper<Action> putMapper = new ActionMapper<Action>();
-	private ActionMapper<Action> patchMapper = new ActionMapper<Action>();
-	private ActionMapper<Action> deleteMapper = new ActionMapper<Action>();
-	private ActionMapper<Action> optionMapper = new ActionMapper<Action>();
+	private ActionMapper<SimpleAction> getMapper = new ActionMapper<SimpleAction>();
+	private ActionMapper<SimpleAction> postMapper = new ActionMapper<SimpleAction>();
+	private ActionMapper<SimpleAction> headMapper = new ActionMapper<SimpleAction>();
+	private ActionMapper<SimpleAction> putMapper = new ActionMapper<SimpleAction>();
+	private ActionMapper<SimpleAction> patchMapper = new ActionMapper<SimpleAction>();
+	private ActionMapper<SimpleAction> deleteMapper = new ActionMapper<SimpleAction>();
+	private ActionMapper<SimpleAction> optionMapper = new ActionMapper<SimpleAction>();
 
 	private ActionMapper<Interception> interceptMapper = new ActionMapper<Interception>();
 	
 	@Override
-	public Action findAction(HttpMethod httpmMthod, String uri) {
+	public SimpleAction findAction(HttpMethod httpmMthod, String uri) {
 		
 		switch (httpmMthod) {
 		
@@ -86,7 +88,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 		} else {
 			ctrl = controller;
 		}
-		String[] uris = method.getAnnotation(Intercept.class).uri();
+		String[] uris = method.getAnnotation(Intercept.class).value();
 		if (uris != null && uris.length > 0) {
 			for (String uri : uris) {
 				checkURI(uri);
@@ -123,8 +125,8 @@ public class ActionFactory implements IActionFactory, Serializable {
 		}
 		
 		for (String uri : uris) {
-			Action action = ActionBuilder.buildAction(uri, ctrl, func);
-			checkURI(action.effectiveURI);
+			SimpleAction action = ActionBuilder.buildAction(uri, ctrl, func);
+			checkURI(action.getEffectiveURI());
 			HttpMethod[] methods = info.httpMethods();
 			
 			for (HttpMethod method : methods) {

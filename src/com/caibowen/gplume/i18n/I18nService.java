@@ -172,14 +172,12 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 			
 		} else {
 			final int newHash = cachedSet.hashCode();
-			if (cachedHash == newHash) {
-				return cachedSet;
-			} else {
-				cachedHash = newHash;
+			if (cachedHash != newHash) {
 				cachedSet = new HashSet<Dialect>(pkgTable.keySet());
-				return cachedSet;
+				cachedHash = cachedSet.hashCode();
 			}
 		}
+		return cachedSet;
 	}
 
 //	public static void main(String...a) {

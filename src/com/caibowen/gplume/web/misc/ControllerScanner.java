@@ -30,7 +30,8 @@ import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.AbstractControlCenter;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.action.Action;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
+import com.caibowen.gplume.web.note.Controller;
 import com.caibowen.gplume.web.note.Handle;
 import com.caibowen.gplume.web.note.Intercept;
 
@@ -109,6 +110,19 @@ public class ControllerScanner implements InitializingBean {
 	
 	
 	private static boolean mayBeController(Class<?> clazz) {
+		/**
+		 * example:
+		 * 
+		 *  @Controller("base_path")
+		 * 	class WebHandler {}
+		 * 
+		 * @Handle(value={"/test"})
+		 * class WebHandler {}
+		 */
+		if (clazz.isAnnotationPresent(Controller.class)
+				|| clazz.isAnnotationPresent(Handle.class)) {
+			return true;
+		}
 		
 		for (Method method : clazz.getMethods()) {
 			
@@ -126,7 +140,7 @@ public class ControllerScanner implements InitializingBean {
 				Class<?> params[] = method.getParameterTypes();
 				return params.length == 2 
 						&& params[0].equals(RequestContext.class)
-						&& params[1].equals(Action.class);
+						&& params[1].equals(SimpleAction.class);
 			}
 		}
 		return false;

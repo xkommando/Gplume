@@ -13,36 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder.actions;
 
 import java.lang.invoke.MethodHandle;
 
+import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.web.RequestContext;
 
 
 /**
- * web handle return String
+ * RestAction with method returning JSP view
+ * 
+ * why another Action class?
+ * to speed up!
+ * 
  * @author BowenCai
  *
  */
-public class JspAction extends Action {
+public class JspRestAction extends RestAction {
 
-	private static final long serialVersionUID = -5228310514106204080L;
-	
-	JspAction(String u, MethodHandle handle) {
-		super(u, handle);
+	private static final long serialVersionUID = -7671427896241639360L;
+
+	public JspRestAction(String uri, MethodHandle handle, int start,
+			String name, Class<?> type, String s, boolean call) {
+		super(uri, handle, start, name, type, s, call);
 	}
-	
+
 	@Override
 	public void perform(RequestContext context) throws Throwable {
+		Object var = Converter.slient.translateStr(parseArg(context.path), argType);
 		context.putAttr(ACTION_NAME, this);
-		Object o = methodHandle.invoke(context);
-		if(o != null) {
-			/**
-			 * o must be String, this has been check in the construction of this action
-			 */
-			context.render((String)o);
+		Object jsp = null;
+		if (inMethodCall) {
+			jsp = methodHandle.invoke(var, context);
+			
+		} else {
+			context.putAttr(argName, var);
+			jsp = methodHandle.invoke(context);
+		}
+		if (jsp != null) {
+			context.render((String)jsp);
 		}
 	}
-
 }

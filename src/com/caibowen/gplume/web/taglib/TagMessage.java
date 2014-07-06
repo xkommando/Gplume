@@ -18,6 +18,8 @@ package com.caibowen.gplume.web.taglib;
 import java.io.IOException;
 import java.io.Writer;
 
+import javax.servlet.jsp.JspWriter;
+
 import com.caibowen.gplume.i18n.NativePackage;
 import com.caibowen.gplume.web.taglib.WriterTag;
 
@@ -31,7 +33,7 @@ public class TagMessage extends WriterTag {
 	String k;
 	
 	@Override
-	public String write(Writer writer) throws IOException {
+	public String write(JspWriter writer) throws IOException {
 		NativePackage pkg = getNatives();
 		if (k != null && pkg != null) {
 			writer.write(pkg.getStr(k));

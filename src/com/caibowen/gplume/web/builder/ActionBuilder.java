@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -29,6 +29,13 @@ import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.View;
+import com.caibowen.gplume.web.builder.actions.Interception;
+import com.caibowen.gplume.web.builder.actions.JspAction;
+import com.caibowen.gplume.web.builder.actions.JspRestAction;
+import com.caibowen.gplume.web.builder.actions.RestAction;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
+import com.caibowen.gplume.web.builder.actions.ViewAction;
+import com.caibowen.gplume.web.builder.actions.ViewRestAction;
 
 
 /**
@@ -62,7 +69,7 @@ import com.caibowen.gplume.web.View;
  * @author BowenCai
  *
  */
-class ActionBuilder {
+public class ActionBuilder {
 	
 	private static final Logger LOG = Logger.getLogger(ActionBuilder.class.getName());
 
@@ -76,7 +83,7 @@ class ActionBuilder {
 			String.class, RequestContext.class);
 	
 	protected static final MethodType INTERCEPT_TYPE = MethodType.methodType(
-			void.class, RequestContext.class, Action.class);
+			void.class, RequestContext.class, SimpleAction.class);
 	
 	/**
 	 * real method params has arg and value is assignable
@@ -195,7 +202,7 @@ class ActionBuilder {
 	 * @return Action or RestAction
 	 * @see RestAction
 	 */
-	static Action buildAction(String uri, @Nullable Object object, Method method) {
+	static SimpleAction buildAction(String uri, @Nullable Object object, Method method) {
 		
 		if (uri.indexOf('{') != -1) {// rest uri
 			if (uri.lastIndexOf('}') != -1) {
@@ -218,7 +225,7 @@ class ActionBuilder {
 			} else if (retKlass.equals(void.class)) {
 				MethodHandle handle = findMethodeHandle(method, SIMPLE_TYPE);
 				handle = object != null ? handle.bindTo(object) : handle;
-				return new Action(uri, handle);
+				return new SimpleAction(uri, handle);
 				
 			} else if (View.class.isAssignableFrom(retKlass)){
 				

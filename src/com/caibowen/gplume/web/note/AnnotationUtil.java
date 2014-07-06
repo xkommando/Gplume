@@ -47,7 +47,7 @@ public class AnnotationUtil {
 		
 		StringBuilder builder = new StringBuilder(48);
 		builder.append("URIs{ ");
-		for (String uri : anno.uri()) {
+		for (String uri : anno.value()) {
 			builder.append('[').append(uri).append(']').append(' ');
 		}
 		builder.append('}').append('\n');

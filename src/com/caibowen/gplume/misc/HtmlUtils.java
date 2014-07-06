@@ -105,34 +105,33 @@ public class HtmlUtils {
 
 		long out = def;
 		
-		int left = content.indexOf("<p>", 0);
+		final int left = content.indexOf("<p>", 0);
 		int right = -1;
 
 		if (left != -1) {
-			int niddle = left + 3;
-			right = content.indexOf("</p>", niddle);
+			return out;
+		}
+		
+		int niddle = left + 3;
+		right = content.indexOf("</p>", niddle);
+		if (right < 0) {
+			return out;
+		}
+		while (right < lowerBound) {
+			niddle = content.indexOf("<p>", right + 4);
+			if (niddle < 0) {
+				return out;
+			} else {
+				right = content.indexOf("</p>", niddle + 3);
+			}
 			if (right < 0) {
 				return out;
 			}
-			while (right < lowerBound) {
-				niddle = content.indexOf("<p>", right + 4);
-				if (niddle < 0) {
-					return out;
-				} else {
-					right = content.indexOf("</p>", niddle + 3);
-				}
-				
-				if (right < 0) {
-					return out;
-				} else {
-					continue;
-				}
-			}
-			right += 4; // include the </p>
-			out = ((long)left) << 32 | ((long)right) & 0xffffffffL;
-			return out;
 		}
+		right += 4; // include the </p>
+		out = ((long) left) << 32 | ((long) right) & 0xffffffffL;
 		return out;
+		
 	}
 
 }

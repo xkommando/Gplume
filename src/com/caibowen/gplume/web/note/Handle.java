@@ -28,11 +28,11 @@ import com.caibowen.gplume.web.HttpMethod;
 /**
  * 
  * to identify a HTTP request handler(function)
- * 
+ * the handler can be a method(spring) or an object(struts)
  * @author BowenCai
  *
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Handle {

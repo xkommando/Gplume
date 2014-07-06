@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder.actions;
 
 import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.ActionBuilder;
 
 /**
  * 
  * @author BowenCai
  *
  */
-public class RestAction extends Action {
+public class RestAction extends SimpleAction {
 	
 	private static final long serialVersionUID = 7479824844662522176L;
 
@@ -35,7 +36,7 @@ public class RestAction extends Action {
 	final String suffix;
 	final boolean inMethodCall;
 	
-	RestAction(String uri, MethodHandle handle, 
+	public RestAction(String uri, MethodHandle handle, 
 						int start, String name, Class<?> type, String s, boolean call) {
 		
 		super(uri, handle);

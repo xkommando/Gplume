@@ -13,24 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package javax.annotation.meta;
+package com.caibowen.gplume.web.builder.actions;
 
-import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
 
-import javax.annotation.Nonnull;
+import com.caibowen.gplume.web.RequestContext;
 
-public interface TypeQualifierValidator<A extends Annotation> {
-    /**
-     * Given a type qualifier, check to see if a known specific constant value
-     * is an instance of the set of values denoted by the qualifier.
-     * 
-     * @param annotation
-     *                the type qualifier
-     * @param value
-     *                the value to check
-     * @return a value indicating whether or not the value is an member of the
-     *         values denoted by the type qualifier
-     */
-    public @Nonnull
-    When forConstantValue(@Nonnull A annotation, Object value);
+
+/**
+ * 
+ * @author BowenCai
+ *
+ */
+public class QoSAction extends SimpleAction{
+
+	private static final long serialVersionUID = 542208480144382166L;
+
+	final int limit;
+	
+	QoSAction(String u, 
+						MethodHandle handle,
+						int limit) {
+		
+		super(u, handle);
+		this.limit = limit;
+	}
+	
+	
+	@Override
+	public void perform(RequestContext context) {
+		
+	}
+	
+
 }

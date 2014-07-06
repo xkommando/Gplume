@@ -13,28 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder.actions;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.IAction;
 
 
 /**
- * Actor = Controller  + one handler function of this controller
  * 
- * each controller has one and only one instance, 
- * whereas the handler of which are many
- * 
+ * fixed path non-binding action
  * @author BowenCai
  *
  */
-public class Action implements Serializable {
+public class SimpleAction implements IAction {
 
 	private static final long serialVersionUID = 5581602597667250526L;
 
-	public static final String ACTION_NAME = Action.class.getName();
+	public static final String ACTION_NAME = SimpleAction.class.getName();
 	
 	/**
 	 * uri for mapping
@@ -46,7 +44,7 @@ public class Action implements Serializable {
 	 */
 	protected final MethodHandle		methodHandle;
 	
-	Action(String u, MethodHandle handle) {
+	public SimpleAction(String u, MethodHandle handle) {
 		effectiveURI = u;
 		this.methodHandle = handle;
 	}

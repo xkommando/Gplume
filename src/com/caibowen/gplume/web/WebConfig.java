@@ -24,7 +24,7 @@ import javax.inject.Inject;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.Injector;
-import com.caibowen.gplume.web.action.ActionFactory;
+import com.caibowen.gplume.web.builder.ActionFactory;
 import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 

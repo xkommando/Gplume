@@ -13,36 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package javax.annotation.meta;
+package com.caibowen.gplume.web.note;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+
 
 /**
  * 
- * This annotation is applied to a annotation, and marks the annotation as being
- * a qualifier nickname. Applying a nickname annotation X to a element Y should
- * be interpreted as having the same meaning as applying all of annotations of X
- * (other than QualifierNickname) to Y.
- * 
- * <p>
- * Thus, you might define a qualifier SocialSecurityNumber as follows:
- * </p>
- * 
- * 
- * <code>
- @Documented
- @TypeQualifierNickname @Pattern("[0-9]{3}-[0-9]{2}-[0-9]{4}") 
- @Retention(RetentionPolicy.RUNTIME)
- public @interface SocialSecurityNumber {
- }
- </code>
- * 
- * 
+ * @author BowenCai
+ *
  */
+@Target({ElementType.PARAMETER, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Target(ElementType.ANNOTATION_TYPE)
-public @interface TypeQualifierNickname {
-
+public @interface PathValue {
+	/**
+	 * The name of the request attribute to bind to.
+	 */
+	String value() default "";
 }

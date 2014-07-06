@@ -16,8 +16,9 @@
 package com.caibowen.gplume.web.taglib;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.logging.Logger;
+
+import javax.servlet.jsp.JspWriter;
 
 import com.caibowen.gplume.misc.Str;
 
@@ -31,7 +32,7 @@ public class TagLink extends WriterTag {
 	private String target;
 	
 	@Override
-	public String write(Writer writer) throws IOException {
+	public String write(JspWriter writer) throws IOException {
 		
 		if (displayName != null && nativeName != null) {
 			return "dunplicated display name: displayName["

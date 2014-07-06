@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder.actions;
 
 import java.lang.reflect.Method;
 
@@ -23,9 +23,9 @@ import com.caibowen.gplume.web.View;
 
 /**
  * 
- * web handle returns String
+ * web handle returns View
  * 
- * ViewAction, includinf ViewRestAction
+ * ViewAction, including ViewRestAction
  * use java.lang.reflect.Method instead of MethodHandle,
  * for invoking, this is because function that View Action
  * may serve functions that return objects that is derived from the interface View,
@@ -34,13 +34,13 @@ import com.caibowen.gplume.web.View;
  * @author BowenCai
  *
  */
-public class ViewAction extends Action {
+public class ViewAction extends SimpleAction {
 
 	private static final long serialVersionUID = 2075886979686649253L;
 	private final Method method;
 	private final Object controller;
 	
-	ViewAction(String u, Method m, Object ctrl) {
+	public ViewAction(String u, Method m, Object ctrl) {
 		super(u, null);
 		method = m;
 		controller = ctrl;

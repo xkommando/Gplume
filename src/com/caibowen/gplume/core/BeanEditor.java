@@ -48,7 +48,7 @@ public class BeanEditor {
 	 * @param var
 	 * @throws Exception
 	 */
-	public static void setBeanProperty(@Nullable Object bean,
+	public static void setBeanProperty(@Nonnull Object bean,
 										@Nonnull String propName, 
 										Object var) throws Exception {
 

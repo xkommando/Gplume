@@ -28,9 +28,9 @@ import javax.inject.Inject;
 import javax.servlet.ServletException;
 
 import com.caibowen.gplume.core.Injector;
-import com.caibowen.gplume.web.action.Action;
-import com.caibowen.gplume.web.action.IActionFactory;
-import com.caibowen.gplume.web.action.Interception;
+import com.caibowen.gplume.web.builder.IActionFactory;
+import com.caibowen.gplume.web.builder.actions.Interception;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
 import com.caibowen.gplume.web.note.Handle;
 import com.caibowen.gplume.web.note.Intercept;
 
@@ -64,7 +64,7 @@ public class ControlCenter extends AbstractControlCenter {
 
 		Throwable thrown = null;
 		
-		Action action = actionFactory.findAction(context.httpmMthod, context.path);
+		SimpleAction action = actionFactory.findAction(context.httpmMthod, context.path);
 		
 		if (action == null) {
 			errorHandler.http404(context);
@@ -275,7 +275,7 @@ public class ControlCenter extends AbstractControlCenter {
 		for (Method method : methods) {
 			if (method.isAnnotationPresent(Intercept.class)) {
 				Intercept intercept = method.getAnnotation(Intercept.class);				
-				String[] uris = intercept.uri();
+				String[] uris = intercept.value();
 				
 				if (uris != null && uris.length > 0) {
 					urilist.addAll(Arrays.asList(uris));

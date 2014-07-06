@@ -70,7 +70,7 @@ public class Codecs {
          * @return  A newly-allocated byte array containing the resulting
          *          encoded bytes.
          */
-        public byte[] encode(byte[] src) {
+        public static byte[] encode(byte[] src) {
         	return Base64.getEncoder().encode(src);
         }
 
@@ -88,7 +88,7 @@ public class Codecs {
          * @throws  IllegalArgumentException
          *          if {@code src} is not in valid Base64 scheme
          */
-        public byte[] decode(byte[] src) {
+        public static byte[] decode(byte[] src) {
         	return Base64.getDecoder().decode(src);
         }
         
@@ -109,7 +109,7 @@ public class Codecs {
          *          the byte array to encode
          * @return  A String containing the resulting Base64 encoded characters
          */
-        public String encodeToString(byte[] src) {
+        public static String encodeToString(byte[] src) {
         	return Base64.getEncoder().encodeToString(src);
         }
         
@@ -128,7 +128,7 @@ public class Codecs {
          * @throws  IllegalArgumentException
          *          if {@code src} is not in valid Base64 scheme
          */
-        public byte[] decode(String src) {
+        public static byte[] decode(String src) {
         	return Base64.getDecoder().decode(src);
         }
 	}

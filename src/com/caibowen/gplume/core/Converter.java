@@ -234,7 +234,6 @@ public class Converter {
 	}
 //-----------------------------------------------------------------------------
 
-
 	public static Object translateList(List<String> varList, 
 										Class<?> beanClass,
 										String propName) throws Exception {

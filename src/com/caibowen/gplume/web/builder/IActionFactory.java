@@ -13,25 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder;
 
-import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 
-import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.HttpMethod;
+import com.caibowen.gplume.web.builder.actions.Interception;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
+
 /**
- * 
+ * manage all actions
  * @author BowenCai
  *
  */
-public class Interception extends Action {
-	
-	private static final long serialVersionUID = 254538927443500914L;
+public interface IActionFactory {
 
-	Interception(String u, MethodHandle handle) {
-		super(u, handle);
-	}
+	/**
+	 * @param controller
+	 * @param method
+	 */
+	public void 			registerHandle(Object controller, Method method);
+	public void 			registerIntercept(Object controller, Method method);
 	
-	public void intercept(RequestContext requestContext, Action action) throws Throwable {
-		methodHandle.invoke(requestContext, action);
-	}
+	public SimpleAction 			findAction(HttpMethod httpmMthod, String uri);
+
+	public Interception 	findInterception(String uri);
+
+	public boolean 			removeHandle(String uri);
+
+	public boolean 			removeInterception(final String uri);
+
+	public void 			destroy();
 }

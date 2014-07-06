@@ -17,7 +17,9 @@ package com.caibowen.gplume.web;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.servlet.RequestDispatcher;
@@ -50,7 +52,6 @@ public class RequestContext implements Serializable {
 	
 	public final HttpServletRequest 	request;
 	public final HttpServletResponse 	response;
-	public final ServletContext			context;
 	public final HttpMethod 			httpmMthod;
 	public final String 				path;
 	
@@ -68,7 +69,6 @@ public class RequestContext implements Serializable {
 		
 		this.request = in;
 		this.response = out;
-		this.context = c.getServletContext();
 		this.controlCenter = c;
 		this.httpmMthod = HttpMethod.lookup(in.getMethod());
 		
@@ -105,6 +105,10 @@ public class RequestContext implements Serializable {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param view
+	 */
 	public void render(View view) {
 		try {
 			view.resolve(this);
@@ -127,6 +131,10 @@ public class RequestContext implements Serializable {
 		}
 	}
 
+	/**
+	 * sendRedirect
+	 * @param url
+	 */
 	public void jumpTo(final String url) {
 		try {
 			response.sendRedirect(url);
@@ -309,15 +317,6 @@ public class RequestContext implements Serializable {
 		return false;
 	}
 	
-	public void redirect(String uri) {
-		try {
-			response.sendRedirect(uri);
-		} catch (Exception e) {
-			throw new RuntimeException("In request for [" 
-					+ this.path + "] Error sending redirect [" + uri + "]", e);
-			
-		}
-	}
 //-----------------------------------------------------------------------------
 	public Object mapFromRequest(Object object, boolean reflectPrivate) {
 		Enumeration<String> params = request.getParameterNames();
@@ -383,14 +382,15 @@ public class RequestContext implements Serializable {
 		Integer integer = getIntParam(name);
 		return integer == null ? defaultVar : integer.intValue();
 	}
+	
 	@Nullable
-	public int[] getIntsParam(String name) {
+	public List<Integer> getIntsParam(String name) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
-			int[] vars = new int[s.length];
+			 List<Integer> vars = new ArrayList<Integer>(s.length);
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.toInteger(s[i]);
+				vars.add(Converter.toInteger(s[i]));
 			}
 			return vars;
 		} else {
@@ -398,7 +398,7 @@ public class RequestContext implements Serializable {
 		}
 	}
 	
-	public int[] getIntsParam(String name, int[] defaultVar) {
+	public List<Integer> getIntsParam(String name, List<Integer> defaultVar) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
@@ -419,13 +419,13 @@ public class RequestContext implements Serializable {
 	}
 	
 	@Nullable
-	public long[] getLongsParam(String name) {
+	public List<Long> getLongsParam(String name) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
-			long[] vars = new long[s.length];
+			List<Long> vars = new ArrayList<>(s.length);
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.slient.toLong(s[i]);
+				vars.add(Converter.slient.toLong(s[i]));
 			}
 			return vars;
 		} else {
@@ -433,7 +433,7 @@ public class RequestContext implements Serializable {
 		}
 	}
 	
-	public long[] getLongsParam(String name, long[] defaultVar) {
+	public List<Long> getLongsParam(String name, List<Long> defaultVar) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
@@ -442,6 +442,7 @@ public class RequestContext implements Serializable {
 			return defaultVar;
 		}
 	}
+	
 // -------------------------------------
 	@Nullable
 	public Float getFloatParam(String name) {
@@ -452,21 +453,22 @@ public class RequestContext implements Serializable {
 		Float var = getFloatParam(name);
 		return var == null ? defaultVar : var.floatValue();
 	}
+	
 	@Nullable
-	public float[] getFloatsParam(String name) {
+	public List<Float> getFloatsParam(String name) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
-			float[] vars = new float[s.length];
+			List<Float> vars = new ArrayList<>(s.length);
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.slient.toFloat(s[i]);
+				vars.add(Converter.slient.toFloat(s[i]));
 			}
 			return vars;
 		} else {
 			return null;
 		}
 	}
-	public float[] getFloatsParam(String name, float[] defaultVar) {
+	public List<Float> getFloatsParam(String name, List<Float> defaultVar) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
@@ -486,20 +488,20 @@ public class RequestContext implements Serializable {
 		return var == null ? defaultVar : var.doubleValue();
 	}
 	@Nullable
-	public double[] getDoublesParam(String name) {
+	public List<Double> getDoublesParam(String name) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
-			double[] vars = new double[s.length];
+			List<Double> vars = new ArrayList<>(s.length);
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.slient.toDouble(s[i]);
+				vars.add(Converter.slient.toDouble(s[i]));
 			}
 			return vars;
 		} else {
 			return null;
 		}
 	}
-	public double[] getDoublesParam(String name, double[] defaultVar) {
+	public List<Double> getDoublesParam(String name, List<Double> defaultVar) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
@@ -520,20 +522,20 @@ public class RequestContext implements Serializable {
 	}
 	
 	@Nullable
-	public boolean[] getBoolsParam(String name) {
+	public List<Boolean> getBoolsParam(String name) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {
-			boolean[] vars = new boolean[s.length];
+			List<Boolean> vars = new ArrayList<>(s.length);
 			for (int i = 0; i < s.length; i++) {
-				vars[i] = Converter.slient.toBool(s[i]);
+				vars.add(Converter.slient.toBool(s[i]));
 			}
 			return vars;
 		} else {
 			return null;
 		}
 	}
-	public boolean[] getBoolsParam(String name, boolean[] defaultVar) {
+	public List<Boolean> getBoolsParam(String name, List<Boolean> defaultVar) {
 
 		String[] s = request.getParameterValues(name);
 		if (s != null) {

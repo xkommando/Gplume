@@ -13,33 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
-
-import java.lang.reflect.Method;
-
-import com.caibowen.gplume.web.HttpMethod;
-
 /**
- * manage all actions
+ * build actions out of controllers and handles
  * @author BowenCai
  *
  */
-public interface IActionFactory {
-
-	/**
-	 * @param controller
-	 * @param method
-	 */
-	public void 			registerHandle(Object controller, Method method);
-	public void 			registerIntercept(Object controller, Method method);
-	
-	public Action 			findAction(HttpMethod httpmMthod, String uri);
-
-	public Interception 	findInterception(String uri);
-
-	public boolean 			removeHandle(String uri);
-
-	public boolean 			removeInterception(final String uri);
-
-	public void 			destroy();
-}
+package com.caibowen.gplume.web.builder;

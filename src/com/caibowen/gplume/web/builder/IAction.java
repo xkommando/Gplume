@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package javax.annotation.meta;
+package com.caibowen.gplume.web.builder;
 
-import java.lang.annotation.Annotation;
+import java.io.Serializable;
 
-import javax.annotation.Nonnull;
+import com.caibowen.gplume.web.RequestContext;
 
-public interface TypeQualifierValidator<A extends Annotation> {
-    /**
-     * Given a type qualifier, check to see if a known specific constant value
-     * is an instance of the set of values denoted by the qualifier.
-     * 
-     * @param annotation
-     *                the type qualifier
-     * @param value
-     *                the value to check
-     * @return a value indicating whether or not the value is an member of the
-     *         values denoted by the type qualifier
-     */
-    public @Nonnull
-    When forConstantValue(@Nonnull A annotation, Object value);
+
+/**
+ * Action = Controller  + one handler function of this controller
+ * 
+ * each controller has one and only one instance, 
+ * whereas the handler of which are many
+ * 
+ * @author BowenCai
+ *
+ */
+public interface IAction extends Serializable {
+
+	public void perform(RequestContext requestContext) throws Throwable;
 }

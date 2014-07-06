@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
-
-import java.lang.invoke.MethodHandle;
-
-public class RestQoSAction extends QoSAction {
-
-	private static final long serialVersionUID = -3117262195337455584L;
-
-	RestQoSAction(String u, MethodHandle handle, int limit) {
-		super(u, handle, limit);
-	}
-
-}
+/**
+ * 
+ */
+/**
+ * @author BowenCai
+ *
+ */
+package com.caibowen.gplume.note;

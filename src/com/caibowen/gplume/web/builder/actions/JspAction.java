@@ -13,45 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.action;
+package com.caibowen.gplume.web.builder.actions;
 
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
 
-import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.View;
+
 
 /**
+ * web handle returning String
  * 
- * web handle returns View
  * @author BowenCai
  *
  */
-public class ViewRestAction extends RestAction {
+public class JspAction extends SimpleAction {
 
-	private static final long serialVersionUID = -2365881998002360893L;
-	private final Method method;
-	private final Object controller;
-	public ViewRestAction(String uri,  Method m, Object ctrl, int start,
-			String name, Class<?> type, String s, boolean inM) {
-		super(uri, null, start, name, type, s, inM);
-		method = m;
-		controller = ctrl;
+	private static final long serialVersionUID = -5228310514106204080L;
+	
+	public JspAction(String u, MethodHandle handle) {
+		super(u, handle);
 	}
-
+	
 	@Override
 	public void perform(RequestContext context) throws Throwable {
-		Object var = Converter.slient.translateStr(parseArg(context.path), argType);
 		context.putAttr(ACTION_NAME, this);
-		Object v = null;
-		if (inMethodCall) {
-			v = method.invoke(controller, var, context);
-		} else {
-			context.putAttr(argName, var);
-			v = method.invoke(controller, var);
-		}
-		if (v != null) {
-			((View)v).resolve(context);
+		Object o = methodHandle.invoke(context);
+		if(o != null) {
+			/**
+			 * o must be String, this has been check in the construction of this action
+			 */
+			context.render((String)o);
 		}
 	}
 
