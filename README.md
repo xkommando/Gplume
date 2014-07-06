@@ -2,15 +2,16 @@ Gplume
 ======
 
 Light-weight multiparadigmatic Java web framework.
-**Features:**
+
+Features:
  - easy to learn and use
  - mixed Spring styled and Struts2 styled request handling
  - high performance.
  - cross cloud.
 
-**Quick Start:**
-
-####Part Zero: The web.xml:
+----------------------------
+Quick Start:
+#####Part Zero: The web.xml:
 
 ```XML
 	<context-param>
@@ -29,7 +30,7 @@ Light-weight multiparadigmatic Java web framework.
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 ```
-####Part One: The IoC Container.
+#####Part One: The IoC Container.
 Spring-like configuration file :
 ```XML
 	<bean class="com.caibowen.gplume.web.WebConfig" >
@@ -42,7 +43,7 @@ Spring-like configuration file :
 		</property>
 	</bean>
 ```
-####Part Two: Handle request
+#####Part Two: Handle request
 handle request with a method
 ```Java
 	@Handle(value={"/",
@@ -65,7 +66,7 @@ handle request with a method
 handle request with an object
 ```Java
 ```
-####Part Three: Internationalization. 
+#####Part Three: Internationalization. 
 language packages 
 `en.properties=gplumeIsRunning=Gplume is Running!` 
 and  
@@ -84,7 +85,7 @@ and specify them in the manifest.xml
 	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
 	</bean>
 ```
-####Part Four. Event handling. 
+#####Part Four. Event handling. 
 register listeners and publish events as:
 
 ```Java
@@ -106,7 +107,7 @@ event.setTime(new Date());
 AppContext.broadcaster.broadcast(event);
 ```
 
-####Part Five: ORM using Hibernate.
+#####Part Five: ORM using Hibernate.
 Spring and Hibernate can be integrated to Gplume with just a few lines configuration:
 
 ``` XML
@@ -139,7 +140,7 @@ public class ChapterDAO extends HibernateDaoSupport {
 }
 ```
 
-####Part Six. Test with Junit
+#####Part Six. Test with Junit
 ```Java
 @RunWith(JunitPal.class)
 @ManifestPath("file:src/manifest.xml") // read as file
