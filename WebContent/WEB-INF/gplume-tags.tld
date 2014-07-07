@@ -12,7 +12,7 @@
 
 	<tag>
 		<name>msg</name>
-		<tag-class>com.caibowen.gplume.web.taglib.TagMessage</tag-class>
+		<tag-class>com.caibowen.gplume.web.view.jsptag.TagMessage</tag-class>
 		<body-content>empty</body-content>
 		<attribute>
 			<name>k</name>
@@ -23,7 +23,7 @@
 	
 	<tag>
 		<name>link</name>
-		<tag-class>com.caibowen.gplume.web.taglib.TagLink</tag-class>
+		<tag-class>com.caibowen.gplume.web.view.jsptag.TagLink</tag-class>
 		<body-content>empty</body-content>
 		<attribute>
 			<name>nativeName</name>

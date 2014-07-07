@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.builder.actions;
 
-import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
@@ -31,8 +30,6 @@ import com.caibowen.gplume.web.builder.IAction;
 public class SimpleAction implements IAction {
 
 	private static final long serialVersionUID = 5581602597667250526L;
-
-	public static final String ACTION_NAME = SimpleAction.class.getName();
 	
 	/**
 	 * uri for mapping
@@ -49,15 +46,19 @@ public class SimpleAction implements IAction {
 		this.methodHandle = handle;
 	}
 	
+	@Override
 	public void perform(RequestContext requestContext) throws Throwable {
 		
 		requestContext.putAttr(ACTION_NAME, this);
 		methodHandle.invoke(requestContext);
 	}
 
+	@Override
 	public MethodHandle getMethodHandle() {
 		return methodHandle;
 	}
+	
+	@Override
 	public String getEffectiveURI() {
 		return effectiveURI;
 	}

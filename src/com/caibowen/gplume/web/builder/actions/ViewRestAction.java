@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.View;
+import com.caibowen.gplume.web.view.IView;
 
 /**
  * 
@@ -30,11 +30,16 @@ import com.caibowen.gplume.web.View;
 public class ViewRestAction extends RestAction {
 
 	private static final long serialVersionUID = -2365881998002360893L;
-	private final Method method;
-	private final Object controller;
+	
+	protected final Method method;
+	protected final Object controller;
+
+	protected final boolean hasRequest;
+	
 	public ViewRestAction(String uri,  Method m, Object ctrl, int start,
-			String name, Class<?> type, String s, boolean inM) {
+			String name, Class<?> type, String s, boolean inM, boolean req) {
 		super(uri, null, start, name, type, s, inM);
+		hasRequest = req;
 		method = m;
 		controller = ctrl;
 	}
@@ -51,7 +56,7 @@ public class ViewRestAction extends RestAction {
 			v = method.invoke(controller, var);
 		}
 		if (v != null) {
-			((View)v).resolve(context);
+			((IView)v).resolve(context);
 		}
 	}
 

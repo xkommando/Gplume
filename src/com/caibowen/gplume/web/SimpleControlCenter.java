@@ -24,8 +24,9 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import com.caibowen.gplume.web.builder.actions.SimpleAction;
-import com.caibowen.gplume.web.note.Handle;
+import com.caibowen.gplume.web.builder.IAction;
+import com.caibowen.gplume.web.meta.Controller;
+import com.caibowen.gplume.web.meta.Handle;
 
 /**
  * 
@@ -44,7 +45,7 @@ public class SimpleControlCenter extends ControlCenter {
 	public void handle(final String uri, RequestContext requestContext) {
 		Throwable thrown = null;
 		
-		SimpleAction action = actionFactory.findAction(requestContext.httpmMthod, uri);
+		IAction action = actionFactory.findAction(requestContext.httpmMthod, uri);
 		
 		if (action == null) {
 			if (LOG.isLoggable(Level.INFO)) {
@@ -103,11 +104,18 @@ public class SimpleControlCenter extends ControlCenter {
 		}
 		
 		Class<?> clazz = controller.getClass();
+		String prefix = null;
+		Controller anno = clazz.getAnnotation(Controller.class);
+		if (anno != null) {
+			prefix = anno.value();
+		}
 		// public only
 		Method[] methods = clazz.getMethods();
+//		System.out.println("SimpleControlCenter.addController()");
 		for (Method method : methods) {
+//			System.out.println(method.isAnnotationPresent(Handle.class) + "   " + method.toString());
 			if (method.isAnnotationPresent(Handle.class)) {
-				actionFactory.registerHandle(controller, method);
+				actionFactory.registerHandles(prefix, controller, method);
 			}
 		} // for method
 		if (controllers == null) {

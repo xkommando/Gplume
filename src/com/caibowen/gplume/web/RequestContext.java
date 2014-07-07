@@ -23,7 +23,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +32,7 @@ import javax.servlet.http.HttpSession;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.web.view.IView;
 
 
 /**
@@ -109,7 +109,7 @@ public class RequestContext implements Serializable {
 	 * 
 	 * @param view
 	 */
-	public void render(View view) {
+	public void render(IView view) {
 		try {
 			view.resolve(this);
 		} catch (Exception e) {

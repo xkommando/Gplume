@@ -28,11 +28,12 @@ import javax.inject.Inject;
 import javax.servlet.ServletException;
 
 import com.caibowen.gplume.core.Injector;
+import com.caibowen.gplume.web.builder.IAction;
 import com.caibowen.gplume.web.builder.IActionFactory;
 import com.caibowen.gplume.web.builder.actions.Interception;
-import com.caibowen.gplume.web.builder.actions.SimpleAction;
-import com.caibowen.gplume.web.note.Handle;
-import com.caibowen.gplume.web.note.Intercept;
+import com.caibowen.gplume.web.meta.Controller;
+import com.caibowen.gplume.web.meta.Handle;
+import com.caibowen.gplume.web.meta.Intercept;
 
 /**
  * 
@@ -64,7 +65,7 @@ public class ControlCenter extends AbstractControlCenter {
 
 		Throwable thrown = null;
 		
-		SimpleAction action = actionFactory.findAction(context.httpmMthod, context.path);
+		IAction action = actionFactory.findAction(context.httpmMthod, context.path);
 		
 		if (action == null) {
 			errorHandler.http404(context);
@@ -156,13 +157,18 @@ public class ControlCenter extends AbstractControlCenter {
 		}
 		
 		Class<?> clazz = controller.getClass();
+		String prefix = null;
+		Controller anno = clazz.getAnnotation(Controller.class);
+		if (anno != null) {
+			prefix = anno.value();
+		}
 		// public only
 		Method[] methods = clazz.getMethods();
 		for (Method method : methods) {
 			if (method.isAnnotationPresent(Handle.class)) {
-				actionFactory.registerHandle(controller, method);
+				actionFactory.registerHandles(prefix, controller, method);
 			} else if (method.isAnnotationPresent(Intercept.class)) {
-				actionFactory.registerIntercept(controller, method);
+				actionFactory.registerIntercept(prefix, controller, method);
 			}
 		} // for method
 		if (controllers == null) {

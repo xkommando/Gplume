@@ -19,7 +19,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import com.caibowen.gplume.common.URITrie;
-import com.caibowen.gplume.web.builder.actions.SimpleAction;
 
 /**
  * 
@@ -30,7 +29,7 @@ import com.caibowen.gplume.web.builder.actions.SimpleAction;
  * @author BowenCai
  *
  */
-public class ActionMapper<T extends SimpleAction> implements Serializable {
+public class ActionMapper<T extends IAction> implements Serializable {
 
 	private static final long serialVersionUID = 9039999917329134916L;
 
@@ -40,7 +39,8 @@ public class ActionMapper<T extends SimpleAction> implements Serializable {
 	// versatile actors, match /xyz/* or /sadfj*
 	private URITrie<T> multiURIMap = new URITrie<>();
 	
-	public void add(final T action)throws IllegalArgumentException {
+	public void 
+	add(final T action)throws IllegalArgumentException {
 
 		String s = action.getEffectiveURI();
 		int len = s.length();
@@ -77,22 +77,10 @@ public class ActionMapper<T extends SimpleAction> implements Serializable {
 		}
 	}
 	
-//	public boolean remove(Object ctrlObj) {
-//		
-//		Actor actor = new Actor(ctrlObj, null);
-//		boolean fixedURI = actorMap.values().remove(actor);
-//		/**
-//		 * @see Actor equals
-//		 */
-//			String uri = versatileActorMap.getPrefix(actor);
-//		boolean multiURI = uri ==  null ? false : null == versatileActorMap.disjoin(uri);
-//		
-//		return fixedURI | multiURI;
-//	}
 
-	public T getAction(String actionName){
+	public IAction getAction(String actionName){
 
-		T action = fixedURIMap.get(actionName);
+		IAction action = fixedURIMap.get(actionName);
 		
 		if (action == null) {
 			action = multiURIMap.matchPrefix(actionName);

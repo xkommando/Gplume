@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.note;
+package com.caibowen.gplume.web.meta;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -21,28 +21,24 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.caibowen.gplume.web.HttpMethod;
+
+
+
 /**
  * 
+ * to identify a HTTP request handler(function)
+ * the handler can be a method(spring) or an object(struts)
  * @author BowenCai
  *
  */
-@Target({ElementType.PARAMETER, ElementType.FIELD})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ReqParam {
-
-	/**
-	 * The name of the request parameter to bind to.
-	 */
-	String value() default "";
-
-	/**
-	 * Whether the parameter is required.
-	 */
-	boolean nullable() default true;
+public @interface Handle {
 	
-	/**
-	 * alternative/default value of this attribute, used if is null
-	 */
-	String alternative() default "";
+	String[] value();
+
+	HttpMethod[] httpMethods() default {HttpMethod.GET};
+	
 }

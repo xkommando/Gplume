@@ -13,42 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.taglib;
+package com.caibowen.gplume.web.meta;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import javax.servlet.jsp.JspWriter;
 
-import com.caibowen.gplume.i18n.NativePackage;
-import com.caibowen.gplume.web.taglib.WriterTag;
 
 /**
  * 
  * @author BowenCai
  *
  */
-public class TagMessage extends WriterTag {
+@Target({ElementType.PARAMETER, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface ContextAttri {
 	
-	String k;
+	/**
+	 * The name of the session attribute to bind to.
+	 * default name is the parameter/field name
+	 */
+	String value() default "";
 	
-	@Override
-	public String write(JspWriter writer) throws IOException {
-		NativePackage pkg = getNatives();
-		if (k != null && pkg != null) {
-			writer.write(pkg.getStr(k));
-			return SUCCESS;
-		} else {
-			return "key or properties is NULL";
-		}
-	}
 
-	public String getK() {
-		return k;
-	}
-
-	public void setK(String k) {
-		this.k = k;
-	}
-
+	/**
+	 * Whether the parameter is required.
+	 */
+	boolean nullable() default true;
+	
+	/**
+	 * alternative/default value of this attribute, used if is null
+	 */
+	String alternative() default "";
 }

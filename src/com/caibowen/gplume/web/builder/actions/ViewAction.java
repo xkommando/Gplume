@@ -15,10 +15,13 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.builder.actions;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.View;
+import com.caibowen.gplume.web.builder.IAction;
+import com.caibowen.gplume.web.view.IView;
 
 
 /**
@@ -34,14 +37,23 @@ import com.caibowen.gplume.web.View;
  * @author BowenCai
  *
  */
-public class ViewAction extends SimpleAction {
+public class ViewAction implements IAction {
 
 	private static final long serialVersionUID = 2075886979686649253L;
-	private final Method method;
-	private final Object controller;
 	
-	public ViewAction(String u, Method m, Object ctrl) {
-		super(u, null);
+	protected final Method method;
+	protected final Object controller;
+
+	/**
+	 * uri for mapping
+	 */
+	protected final String	effectiveURI;
+	
+	protected final boolean hasRequest;
+	
+	public ViewAction(String u, Method m, Object ctrl, boolean req) {
+		effectiveURI = u;
+		hasRequest = req;
 		method = m;
 		controller = ctrl;
 	}
@@ -52,7 +64,26 @@ public class ViewAction extends SimpleAction {
 		Object v = null;
 		v = method.invoke(controller, context);
 		if (v != null) {
-			((View)v).resolve(context);
+			((IView)v).resolve(context);
 		}
+	}
+
+	MethodHandle handle;
+	@Override
+	public MethodHandle getMethodHandle() {
+		if (handle == null) {
+			try {
+				handle = MethodHandles.lookup().unreflect(method);
+				handle = controller == null ? handle : handle.bindTo(controller);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return handle;
+	}
+
+	@Override
+	public String getEffectiveURI() {
+		return effectiveURI;
 	}
 }

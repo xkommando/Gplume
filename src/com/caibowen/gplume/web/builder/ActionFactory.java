@@ -22,9 +22,10 @@ import java.lang.reflect.Modifier;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.builder.actions.Interception;
-import com.caibowen.gplume.web.builder.actions.SimpleAction;
-import com.caibowen.gplume.web.note.Handle;
-import com.caibowen.gplume.web.note.Intercept;
+import com.caibowen.gplume.web.meta.Handle;
+import com.caibowen.gplume.web.meta.Intercept;
+import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 
 /**
  * container for action,interception
@@ -38,18 +39,18 @@ public class ActionFactory implements IActionFactory, Serializable {
 	// -----------------------------------------------------------------------------
 	// GET, POST, HEAD, PUT, PATCH, DELETE, OPTIONS, TRACE
 	// -----------------------------------------------------------------------------
-	private ActionMapper<SimpleAction> getMapper = new ActionMapper<SimpleAction>();
-	private ActionMapper<SimpleAction> postMapper = new ActionMapper<SimpleAction>();
-	private ActionMapper<SimpleAction> headMapper = new ActionMapper<SimpleAction>();
-	private ActionMapper<SimpleAction> putMapper = new ActionMapper<SimpleAction>();
-	private ActionMapper<SimpleAction> patchMapper = new ActionMapper<SimpleAction>();
-	private ActionMapper<SimpleAction> deleteMapper = new ActionMapper<SimpleAction>();
-	private ActionMapper<SimpleAction> optionMapper = new ActionMapper<SimpleAction>();
+	private ActionMapper<IAction> getMapper = new ActionMapper<>();
+	private ActionMapper<IAction> postMapper = new ActionMapper<>();
+	private ActionMapper<IAction> headMapper = new ActionMapper<>();
+	private ActionMapper<IAction> putMapper = new ActionMapper<>();
+	private ActionMapper<IAction> patchMapper = new ActionMapper<>();
+	private ActionMapper<IAction> deleteMapper = new ActionMapper<>();
+	private ActionMapper<IAction> optionMapper = new ActionMapper<>();
 
-	private ActionMapper<Interception> interceptMapper = new ActionMapper<Interception>();
+	private ActionMapper<Interception> interceptMapper = new ActionMapper<>();
 	
 	@Override
-	public SimpleAction findAction(HttpMethod httpmMthod, String uri) {
+	public IAction findAction(HttpMethod httpmMthod, String uri) {
 		
 		switch (httpmMthod) {
 		
@@ -75,12 +76,14 @@ public class ActionFactory implements IActionFactory, Serializable {
 	
 	@Override
 	public Interception findInterception(String uri) {
-		return interceptMapper.getAction(uri);
+		return (Interception) interceptMapper.getAction(uri);
 	}
 	
 
 	@Override
-	public void registerIntercept(Object controller, Method method) {
+	public void registerIntercept(@Nullable String prefix, 
+									@NotNull Object controller, 
+									@NotNull Method method) {
 
 		Object ctrl;
 		if (Modifier.isStatic(method.getModifiers())) {
@@ -91,6 +94,9 @@ public class ActionFactory implements IActionFactory, Serializable {
 		String[] uris = method.getAnnotation(Intercept.class).value();
 		if (uris != null && uris.length > 0) {
 			for (String uri : uris) {
+				if (Str.Utils.notBlank(prefix))
+					uri = prefix + uri;
+				
 				checkURI(uri);
 				Interception i = ActionBuilder.buildInterception(uri, ctrl, method);
 				interceptMapper.add(i);
@@ -104,18 +110,17 @@ public class ActionFactory implements IActionFactory, Serializable {
 	}
 
 	@Override
-	public void registerHandle(Object controller, Method method) {
-//System.out.println("add class[" + controller.getClass().getSimpleName() + "] method[" + method.getName() + ']');
-
-		Object ctrl = null;
-
-		if (!Modifier.isStatic(method.getModifiers())) {
-			ctrl = controller;
+	public void registerHandles(@Nullable String prefix, 
+								@Nullable Object ctrl,
+								@NotNull Method method) {
+		/**
+		 * set to null to indicate the static method and avoid methodhandle binding
+		 */
+		if (Modifier.isStatic(method.getModifiers())) {
+			ctrl = null;
 		}
-		toHandle(ctrl, method, method.getAnnotation(Handle.class));
-	}
-	
-	private void toHandle(Object ctrl, Method func, Handle info) {
+		
+		Handle info = method.getAnnotation(Handle.class);
 		String[] uris = info.value();
 		
 		if (uris == null || uris.length == 0) {
@@ -124,14 +129,20 @@ public class ActionFactory implements IActionFactory, Serializable {
 					+ ctrl.getClass().getName() + "]");
 		}
 		
+		boolean addPrefix = Str.Utils.notBlank(prefix);
 		for (String uri : uris) {
-			SimpleAction action = ActionBuilder.buildAction(uri, ctrl, func);
+			if (addPrefix)
+				uri = prefix + uri;
+			
+			IAction action = ActionBuilder.buildAction(uri, ctrl, method);
 			checkURI(action.getEffectiveURI());
 			HttpMethod[] methods = info.httpMethods();
 			
-			for (HttpMethod method : methods) {
+//			System.out.print(uri);
+			for (HttpMethod hm : methods) {
+//				System.out.println(hm);
 				// do dispatch
-				switch (method) {
+				switch (hm) {
 
 				case GET:
 					getMapper.add(action);

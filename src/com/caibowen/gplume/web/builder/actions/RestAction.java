@@ -23,6 +23,11 @@ import com.caibowen.gplume.web.builder.ActionBuilder;
 
 /**
  * 
+ * 
+ * public void action(Date date, RequestContext context) {
+ * 		context.render("xxx.jsp");
+ * }
+ * returns void, must has requestContext
  * @author BowenCai
  *
  */

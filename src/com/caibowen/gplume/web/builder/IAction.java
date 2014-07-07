@@ -16,6 +16,7 @@
 package com.caibowen.gplume.web.builder;
 
 import java.io.Serializable;
+import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
 
@@ -26,10 +27,33 @@ import com.caibowen.gplume.web.RequestContext;
  * each controller has one and only one instance, 
  * whereas the handler of which are many
  * 
+ * Note that for ViewActions, the method invking is doen by Method instead of MethodHandle
+ * 
  * @author BowenCai
  *
  */
 public interface IAction extends Serializable {
 
+	public static final String ACTION_NAME = IAction.class.getName();
+	
+	/**
+	 * 
+	 * @param requestContext
+	 * @throws Throwable
+	 */
 	public void perform(RequestContext requestContext) throws Throwable;
+
+	/**
+	 * if this method is not static, the returned method handle is binded to the object
+	 * and can be invoked without object parameter
+	 * 
+	 * @return method handle
+	 */
+	public MethodHandle getMethodHandle();
+	
+	/**
+	 * 
+	 * @return the uri for mapping
+	 */
+	public String getEffectiveURI();
 }

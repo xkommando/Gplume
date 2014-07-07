@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.note;
+package com.caibowen.gplume.web.meta;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -30,10 +30,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface CookieAttr {
+public @interface ReqAttr {
 	
 	/**
-	 * The name of the cookie attribute to bind to.
+	 * The name of the request attribute to bind to.
 	 */
 	String value() default "";
 

@@ -32,7 +32,7 @@ import com.caibowen.gplume.sample.feature.BirthdayCalculator;
 import com.caibowen.gplume.sample.feature.TimeChangedEvent;
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.note.Handle;
+import com.caibowen.gplume.web.meta.Handle;
 
 /**
  * 
@@ -57,10 +57,6 @@ public class SampleController {
 	}
 	
 	
-	
-	
-	
-	
 	static final Logger LOG = Logger.getLogger(SampleController.class.getName());
 	
 	public static String nativeStr(String k, RequestContext context) {
@@ -82,14 +78,6 @@ public class SampleController {
 		return "/index.jsp";
 	}
 	
-	@Handle({"/s/",
-		"/s/index",
-		"/s/index.html",
-		"/s/index.jsp"})
-	public static void sindex(RequestContext context) {
-		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
-		context.render("/index.jsp");
-	}
 	
 	@Handle(value={"/act/post/date"},httpMethods=HttpMethod.POST)
 	public void getTime(RequestContext context) {
@@ -103,7 +91,7 @@ public class SampleController {
 	
 
 	@Handle(value={"/s/your-birthday/{date formate like 1992-6-14::Date}"}
-			, httpMethods=HttpMethod.ALL)
+			, httpMethods={HttpMethod.GET, HttpMethod.POST})
 	public static String happyBirthday(RequestContext context) {
 		Date date = context.getAttr("date formate like 1992-6-14");
 		return new SampleController().happyBirthday(date, context);

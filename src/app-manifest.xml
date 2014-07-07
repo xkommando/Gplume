@@ -20,7 +20,7 @@
 				  <property name="i18nService" ref="i18nService"/>
 			</bean>
 		</property>
-		<property name="actionFactory" instance="com.caibowen.gplume.web.action.ActionFactory" />
+		<property name="actionFactory" instance="com.caibowen.gplume.web.builder.ActionFactory" />
 		<property name="injector" instance="com.caibowen.gplume.core.Injector"/>
 	</bean>
 	

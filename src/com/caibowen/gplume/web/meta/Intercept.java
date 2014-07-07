@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.builder.actions;
-
-import java.lang.invoke.MethodHandle;
-
-import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.IAction;
 /**
+ * 
+ */
+package com.caibowen.gplume.web.meta;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * 
+ * identify an interception function
  * 
  * @author BowenCai
  *
  */
-public class Interception extends SimpleAction {
-	
-	private static final long serialVersionUID = 254538927443500914L;
-
-	public Interception(String u, MethodHandle handle) {
-		super(u, handle);
-	}
-	
-	public void intercept(RequestContext requestContext, IAction action) throws Throwable {
-		methodHandle.invoke(requestContext, action);
-	}
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Intercept {
+	String[] value();
 }

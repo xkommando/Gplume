@@ -49,16 +49,14 @@ handle request with a method
 	@Handle(value={"/",
 			"/index",
 			"/index.html",
-			"/index.jsp"},
-			httpMethods={HttpMethod.GET, HttpMethod.POST})
+			"/index.jsp"}})
 	public String index(RequestContext context) {
-		
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		return "/index.jsp";
 	}
 	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"}
 			, httpMethods={HttpMethod.GET, HttpMethod.POST})
-	public FreeMarkerView happyBirthday(Date date, RequestContext context) {
+	public FreeMarkerView happyBirthday(Date date) {
 		process(date);
 		return new FreeMarkerView(date);
 	}

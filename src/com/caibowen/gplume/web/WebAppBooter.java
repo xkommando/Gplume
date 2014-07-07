@@ -21,7 +21,6 @@ import javax.servlet.ServletContextListener;
 
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.ContextBooter;
-import com.caibowen.gplume.context.InputStreamProvider;
 import com.caibowen.gplume.context.ServletContextInputStreamProvider;
 
 /**
@@ -50,10 +49,8 @@ public class WebAppBooter implements ServletContextListener {
 		ContextBooter bootstrap = new ContextBooter();
 		bootstrap.setClassLoader(this.getClass().getClassLoader());
 		// prepare
-		InputStreamProvider provider = new ServletContextInputStreamProvider(
-				servletContext);
-		
-		bootstrap.setStreamProvider(provider);
+		bootstrap.setStreamProvider(
+				new ServletContextInputStreamProvider(servletContext));
 		
 		String manifestPath = servletContext.getInitParameter(AppContext.MANIFEST);
 		bootstrap.setManifestPath(manifestPath);

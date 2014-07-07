@@ -23,6 +23,11 @@ import com.caibowen.gplume.web.RequestContext;
 
 /**
  * RestAction with method returning JSP view
+ * @Handle(...)
+ * public action(Date date) {
+ * 
+ * 		return "index.jsp";
+ * }
  * 
  * why another Action class?
  * to speed up!
@@ -34,9 +39,13 @@ public class JspRestAction extends RestAction {
 
 	private static final long serialVersionUID = -7671427896241639360L;
 
+
+	protected final boolean hasRequest;
+	
 	public JspRestAction(String uri, MethodHandle handle, int start,
-			String name, Class<?> type, String s, boolean call) {
+			String name, Class<?> type, String s, boolean call, boolean req) {
 		super(uri, handle, start, name, type, s, call);
+		hasRequest = req;
 	}
 
 	@Override
@@ -45,12 +54,19 @@ public class JspRestAction extends RestAction {
 		context.putAttr(ACTION_NAME, this);
 		Object jsp = null;
 		if (inMethodCall) {
-			jsp = methodHandle.invoke(var, context);
-			
+			if (hasRequest)
+				jsp = methodHandle.invoke(var, context);
+			else
+				jsp = methodHandle.invoke(var);
 		} else {
 			context.putAttr(argName, var);
-			jsp = methodHandle.invoke(context);
+
+			if (hasRequest)
+				jsp = methodHandle.invoke(context);
+			else
+				jsp = methodHandle.invoke();
 		}
+		
 		if (jsp != null) {
 			context.render((String)jsp);
 		}

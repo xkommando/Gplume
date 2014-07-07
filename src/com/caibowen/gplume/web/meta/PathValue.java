@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.note;
+package com.caibowen.gplume.web.meta;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 
 
 /**
@@ -30,20 +31,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ReqAttr {
-	
+public @interface PathValue {
 	/**
 	 * The name of the request attribute to bind to.
 	 */
 	String value() default "";
-
-	/**
-	 * Whether the parameter is nullable.
-	 */
-	boolean nullable() default true;
-	
-	/**
-	 * alternative/default value of this attribute, used if is null
-	 */
-	String alternative() default "";
 }

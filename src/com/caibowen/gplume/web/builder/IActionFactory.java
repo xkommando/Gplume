@@ -19,7 +19,8 @@ import java.lang.reflect.Method;
 
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.builder.actions.Interception;
-import com.caibowen.gplume.web.builder.actions.SimpleAction;
+import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 
 /**
  * manage all actions
@@ -32,10 +33,15 @@ public interface IActionFactory {
 	 * @param controller
 	 * @param method
 	 */
-	public void 			registerHandle(Object controller, Method method);
-	public void 			registerIntercept(Object controller, Method method);
+	public void 			registerHandles(@Nullable String prefix, 
+											@Nullable Object ctrl,
+											@NotNull Method method);
 	
-	public SimpleAction 			findAction(HttpMethod httpmMthod, String uri);
+	public void 			registerIntercept(@Nullable String prefix, 
+											@Nullable Object ctrl,
+											@NotNull Method method);
+	
+	public IAction 			findAction(HttpMethod httpmMthod, String uri);
 
 	public Interception 	findInterception(String uri);
 
