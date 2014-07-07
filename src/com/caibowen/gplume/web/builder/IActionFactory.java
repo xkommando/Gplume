@@ -17,10 +17,11 @@ package com.caibowen.gplume.web.builder;
 
 import java.lang.reflect.Method;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.builder.actions.Interception;
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 
 /**
  * manage all actions
@@ -35,11 +36,11 @@ public interface IActionFactory {
 	 */
 	public void 			registerHandles(@Nullable String prefix, 
 											@Nullable Object ctrl,
-											@NotNull Method method);
+											@Nonnull Method method);
 	
 	public void 			registerIntercept(@Nullable String prefix, 
 											@Nullable Object ctrl,
-											@NotNull Method method);
+											@Nonnull Method method);
 	
 	public IAction 			findAction(HttpMethod httpmMthod, String uri);
 

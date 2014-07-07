@@ -21,6 +21,8 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.caibowen.gplume.web.RequestContext;
@@ -30,7 +32,6 @@ import com.caibowen.gplume.web.builder.actions.RestAction;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
 import com.caibowen.gplume.web.builder.actions.ViewAction;
 import com.caibowen.gplume.web.view.IView;
-import com.sun.istack.internal.NotNull;
 
 
 /**
@@ -96,7 +97,7 @@ public class ActionBuilder {
 	 * @param typ
 	 * @return
 	 */
-	protected static @NotNull MethodHandle 
+	protected static @Nonnull MethodHandle 
 	findMethodeHandle(Method method, MethodType typ) {
 
 		String mName = method.getName();

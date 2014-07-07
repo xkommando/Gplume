@@ -19,13 +19,14 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.meta.Handle;
 import com.caibowen.gplume.web.meta.Intercept;
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 
 /**
  * container for action,interception
@@ -82,8 +83,8 @@ public class ActionFactory implements IActionFactory, Serializable {
 
 	@Override
 	public void registerIntercept(@Nullable String prefix, 
-									@NotNull Object controller, 
-									@NotNull Method method) {
+									@Nonnull Object controller, 
+									@Nonnull Method method) {
 
 		Object ctrl;
 		if (Modifier.isStatic(method.getModifiers())) {
@@ -112,7 +113,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 	@Override
 	public void registerHandles(@Nullable String prefix, 
 								@Nullable Object ctrl,
-								@NotNull Method method) {
+								@Nonnull Method method) {
 		/**
 		 * set to null to indicate the static method and avoid methodhandle binding
 		 */

@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.view.IView;
@@ -316,44 +315,7 @@ public class RequestContext implements Serializable {
 		}
 		return false;
 	}
-	
-//-----------------------------------------------------------------------------
-	public Object mapFromRequest(Object object, boolean reflectPrivate) {
-		Enumeration<String> params = request.getParameterNames();
-		try {
-			while (params.hasMoreElements()) {
-				String paramName = params.nextElement();
-				String var = request.getParameter(paramName);
-				BeanEditor.setBeanProperty(object, paramName, var);
-			}
-			return object;
-		} catch (Exception e) {
-			throw new RuntimeException("error setting field for object of class[" 
-								+ object.getClass().getName()
-								+ "]. Cause: " + e.getCause(), e);
-		}
-	}
-	
-	public Object mapFromSession(Object object, boolean reflectPrivate) {
-		
-		HttpSession session = request.getSession(false);
-		if (session == null) {
-			return null;
-		}
-		Enumeration<String> params = session.getAttributeNames();
-		try {
-			while (params.hasMoreElements()) {
-				String paramName = params.nextElement();
-				Object var = session.getAttribute(paramName);
-				BeanEditor.setBeanProperty(object, paramName, var);
-			}
-			return object;
-		} catch (Exception e) {
-			throw new RuntimeException("error setting field for object of class[" 
-								+ object.getClass().getName()
-								+ "]. Cause: " + e.getCause(), e);
-		}
-	}
+
 	
 // -------------------------------------------------------------------
 

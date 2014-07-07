@@ -27,6 +27,9 @@ import javax.annotation.Nullable;
 import com.caibowen.gplume.misc.Klass;
 
 /**
+ * set static or non-static property based on name,
+ * if there is a public setter, invoke it
+ * if no setter is found, find the public or private field with the same name, and set it
  * 
  * @author BowenCai
  *
@@ -43,12 +46,12 @@ public class BeanEditor {
 	 *      // there is no Type prop.
 	 * 		// doSomeThingElse
 	 * }
-	 * @param bean
+	 * @param bean can be null if is static property
 	 * @param propName
 	 * @param var
 	 * @throws Exception
 	 */
-	public static void setBeanProperty(@Nonnull Object bean,
+	public static void setBeanProperty(@Nullable Object bean,
 										@Nonnull String propName, 
 										Object var) throws Exception {
 
@@ -65,7 +68,7 @@ public class BeanEditor {
 	 * assign list or array
 	 * 
 	 * @param bnClass
-	 * @param bean
+	 * @param bean can be null if is static property
 	 * @param propName
 	 * @param varList
 	 * @throws Exception
@@ -179,17 +182,20 @@ public class BeanEditor {
 	}
 	
 	/**
-	 * set property by set public filed
+	 * set property by set public or private filed
 	 * @param obj
 	 * @param fieldName
 	 * @param var
 	 */
-	public static void setField(@Nonnull Object obj, 
+	public static void setField(@Nullable Object obj, 
 								@Nonnull String fieldName, 
 								Object var) {
 
 		try {
-			Field field = obj.getClass().getField(fieldName);
+			Field field = obj.getClass().getDeclaredField(fieldName);
+			if (!field.isAccessible()) {
+				field.setAccessible(true);
+			}
 			if (var instanceof String) {
 				var = Converter.slient.translateStr((String)var, field.getType());
 				if (var == null) {
@@ -212,8 +218,8 @@ public class BeanEditor {
 	}
 
 	/**
-	 * find setter by name
-	 * set property by public setter
+	 * find setter by name and
+	 * set property with the public setter
 	 * 
 	 * @param obj
 	 * @param propName
