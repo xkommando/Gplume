@@ -13,8 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+package com.caibowen.gplume.web.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import com.caibowen.gplume.web.HttpMethod;
+
+
+
 /**
+ * 
+ * to identify a HTTP request handler(function)
+ * the handler can be a method(spring) or an object(struts)
  * @author BowenCai
  *
  */
-package com.caibowen.gplume.web.taglib;
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Handle {
+	
+	String[] value();
+
+	HttpMethod[] httpMethods() default {HttpMethod.GET};
+	
+}

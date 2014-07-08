@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.meta;
+/**
+ * 
+ */
+package com.caibowen.gplume.web.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -21,29 +24,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
+ * 
+ * identify an interception function
  * 
  * @author BowenCai
  *
  */
-@Target({ElementType.PARAMETER, ElementType.FIELD})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ReqAttr {
-	
-	/**
-	 * The name of the request attribute to bind to.
-	 */
-	String value() default "";
-
-	/**
-	 * Whether the parameter is nullable.
-	 */
-	boolean nullable() default true;
-	
-	/**
-	 * alternative/default value of this attribute, used if is null
-	 */
-	String alternative() default "";
+public @interface Intercept {
+	String[] value();
 }

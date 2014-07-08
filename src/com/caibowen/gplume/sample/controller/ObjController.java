@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Bowen Cai
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package com.caibowen.gplume.sample.controller;
 
 import java.security.PublicKey;
@@ -9,14 +24,18 @@ import com.caibowen.gplume.sample.feature.PublicKeyService;
 import com.caibowen.gplume.sample.feature.Validator;
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.meta.Controller;
-import com.caibowen.gplume.web.meta.Handle;
-import com.caibowen.gplume.web.meta.ReqParam;
-import com.caibowen.gplume.web.meta.SessionAttr;
+import com.caibowen.gplume.web.annotation.Controller;
+import com.caibowen.gplume.web.annotation.Handle;
+import com.caibowen.gplume.web.annotation.ReqParam;
+import com.caibowen.gplume.web.annotation.SessionAttr;
 import com.caibowen.gplume.web.view.IView;
-import com.caibowen.gplume.web.view.TextView;
 
-
+/**
+ * 
+ * @author BowenCai
+ *
+ */
+//this sample login function is for demo only and is insecure
 @Controller("/async/")
 public class ObjController {
 	@Inject Validator validator;
@@ -28,15 +47,12 @@ public class ObjController {
 		String passwordCipher;
 		@ReqParam(value="email_address", nullable = false)
 		String email;
-		@SessionAttr(nullable = false)
-		String publikKeyId;
+		@SessionAttr(value="this_pubkey",nullable = false)
+		PublicKey key;
 		
 		User user;
 		boolean ok() {
-			PublicKey pk = keyService.getPublicKey(publikKeyId);
-			if (pk == null)
-				return false;			
-			String psw = keyService.decrypt(pk, passwordCipher);
+			String psw = keyService.decrypt(key, passwordCipher);
 			if (!Str.Utils.notBlank(psw))
 				return false;
 			if (!validator.matchEmail(email, psw))
@@ -47,17 +63,14 @@ public class ObjController {
 			}
 		}
 	}
-// sample login function, insecure in real application
+	
 	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
 	public IView login(MyState requestScop, RequestContext req) {
-		if (requestScop == null)
-			return new TextView()
-					.setContent("no public key in session");
+		if (requestScop == null) //non-null requirements are not met.
+			return IView.get.textView("no public key in session");
 		else if (!requestScop.ok())
-			return new TextView()
-					.setContent("password email mismatch");
-		req.getSession(true).setAttribute("this-user", requestScop.user);
-		req.jumpTo("/user/" + requestScop.user.getNameURL());
-		return null;
+			return IView.get.textView("password and email mismatch");
+		req.session(true).setAttribute("this-user", requestScop.user);
+		return IView.get.jump("/user/" + requestScop.user.getNameURL());
 	}
 }

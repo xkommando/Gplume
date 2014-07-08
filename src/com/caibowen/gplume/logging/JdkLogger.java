@@ -19,13 +19,15 @@ import java.text.MessageFormat;
 import java.util.logging.Level;
 
 /**
+ * wrapper of JDK logger
+ * 
+ * @author BowenCai
+ *
  */
 public class JdkLogger implements Logger {
 
-
 //-----------------------------------------------------------------------------
 //					Logger Impl
-    
     
     private java.util.logging.Logger log;
 
@@ -47,7 +49,6 @@ public class JdkLogger implements Logger {
 	public void trace(String msg, Throwable ex, Object... args) {
         log.log(Level.FINEST, MessageFormat.format(msg, args), ex);
     }
-
 
     
     @Override

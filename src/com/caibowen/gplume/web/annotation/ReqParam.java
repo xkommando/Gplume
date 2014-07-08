@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.meta;
+package com.caibowen.gplume.web.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-
 
 /**
  * 
@@ -31,14 +29,13 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ContextAttri {
-	
+public @interface ReqParam {
+
 	/**
-	 * The name of the session attribute to bind to.
+	 * The name of the request parameter to bind to.
 	 * default name is the parameter/field name
 	 */
 	String value() default "";
-	
 
 	/**
 	 * Whether the parameter is required.

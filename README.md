@@ -65,26 +65,24 @@ handle request with a method
 ```
 handle request with an object storing current state
 ```Java
+//this sample login function is for demo only and is insecure
 @Controller("/async/")
 public class ObjController {
 	@Inject Validator validator;
 	@Inject PublicKeyService keyService;
 	@Inject UserService userService;
-	// date for this request stored here, and they are auto-binded
+	
 	class MyState {
 		@ReqParam("psw_cipher")
 		String passwordCipher;
 		@ReqParam(value="email_address", nullable = false)
 		String email;
-		@SessionAttr(nullable = false)
-		String publikKeyId;
+		@SessionAttr(value="this_pubkey",nullable = false)
+		PublicKey key;
 		
 		User user;
 		boolean ok() {
-			PublicKey pk = keyService.getPublicKey(publikKeyId);
-			if (pk == null)
-				return false;			
-			String psw = keyService.decrypt(pk, passwordCipher);
+			String psw = keyService.decrypt(key, passwordCipher);
 			if (!Str.Utils.notBlank(psw))
 				return false;
 			if (!validator.matchEmail(email, psw))
@@ -95,19 +93,25 @@ public class ObjController {
 			}
 		}
 	}
-// sample login function, insecure in real application
+	/** @param requestScop null if non-null requirements are not met. */
 	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
-	@Semaphored(permit=60)
 	public IView login(MyState requestScop, RequestContext req) {
 		if (requestScop == null)
-			return new TextView()
-					.setContent("no public key in session");
+			return IView.get.textView("no public key in session");
 		else if (!requestScop.ok())
-			return new TextView()
-					.setContent("password email mismatch");
-		req.getSession(true).setAttribute("this-user", requestScop.user);
-		req.jumpTo("/user/" + requestScop.user.getNameURL());
-		return null;
+			return IView.get.textView("password email mismatch");
+		req.session(true).setAttribute("this-user", requestScop.user);
+		return IView.get.jump("/user/" + requestScop.user.getNameURL());
+	}
+
+	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
+	public IView login(MyState requestScop, RequestContext req) {
+		if (requestScop == null) //non-null requirements are not met.
+			return IView.get.textView("no public key in session");
+		else if (!requestScop.ok())
+			return IView.get.textView("password and email mismatch");
+		req.session(true).setAttribute("this-user", requestScop.user);
+		return IView.get.jump("/user/" + requestScop.user.getNameURL());
 	}
 }
 ```

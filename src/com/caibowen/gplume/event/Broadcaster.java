@@ -37,7 +37,7 @@ import com.caibowen.gplume.logging.LoggerFactory;
  * @author BowenCai
  *
  */
-public class Broadcaster implements Serializable{
+public class Broadcaster implements Serializable {
 	
 	private static final long serialVersionUID = -247132524218855841L;
 
@@ -51,17 +51,20 @@ public class Broadcaster implements Serializable{
 	 *how i wish there is a typedef here 
 	 */
 	private Map<Class< ? extends AppEvent>, 
-					Map<Reference<? extends IAppListener<? extends AppEvent>>, Object> > slots;
+					Map<Reference<? extends IAppListener<? extends AppEvent>>, 
+								Object> > 
+	slots;
 	
 	private Map< Reference<? extends IEventHook>, Object> hooks;
 	
 	private static Broadcaster handle = null;	
 	private Broadcaster() {
-		slots = new HashMap<>(16);
-		hooks = new LinkedHashMap<>();
+		slots = new HashMap<>(64);
+		hooks = new LinkedHashMap<>(32);
 	}
 	
-	synchronized public static Broadcaster getInstance() {
+	synchronized public static Broadcaster 
+	getInstance() {
 		if(handle == null) {
 			handle = new Broadcaster();
 		}
@@ -195,7 +198,8 @@ public class Broadcaster implements Serializable{
 		return true;
 	}
 	
-	public<T extends IEventHook> boolean containsHook(T hook) {
+	public<T extends IEventHook> boolean 
+	containsHook(T hook) {
 		WeakRef<? extends IEventHook> 
 		wref = new WeakRef<>(hook);
 		StrongRef<? extends IEventHook> 
@@ -209,7 +213,8 @@ public class Broadcaster implements Serializable{
 	 * @param hook
 	 * @return true if hook removed
 	 */
-	public<T extends IEventHook> boolean remove(T hook) {
+	public<T extends IEventHook> boolean 
+	remove(T hook) {
 		WeakRef<? extends IEventHook> 
 		wref = new WeakRef<>(hook);
 		StrongRef<? extends IEventHook> 
@@ -220,7 +225,8 @@ public class Broadcaster implements Serializable{
 		}
 	}
 	
-	public boolean clearHooks() {
+	public boolean 
+	clearHooks() {
 		synchronized (hooks) {
 			hooks.clear();
 		}
@@ -233,11 +239,14 @@ public class Broadcaster implements Serializable{
 	 * 
 	 * @param event
 	 */
-	public<T extends AppEvent> void broadcast(T event) {
-		
+	public<T extends AppEvent> void 
+	broadcast(T event) {
 		if (event == null) {
+			if (LOG.isDebugEnabled())
+				LOG.debug("null event");
 			return;
 		}
+		
 		Class<? extends AppEvent> eventClazz = event.getClass();
 
 		Map<Reference<? extends IAppListener<? extends AppEvent> >, Object> 
@@ -274,8 +283,7 @@ public class Broadcaster implements Serializable{
 						hook.catches(event);
 					}
 				} catch (Exception e) {
-					LOG.error("error catching event[" + event
-							+ "] on hook [" + hk + "]", e);
+					LOG.error("hook {0} catching event {1}", e, hk, event);
 				}
 			}
 		}
@@ -288,7 +296,8 @@ public class Broadcaster implements Serializable{
 	 * therefore, typeParams is of length 1.
 	 * 
 	 */
-	Class<? extends AppEvent> getEventClazz(IAppListener<? extends AppEvent> listener) {
+	Class<? extends AppEvent> 
+	getEventClazz(IAppListener<? extends AppEvent> listener) {
 		
 		Type[] typeParams = listener.getClass().getGenericInterfaces();
 		for (Type type : typeParams) {

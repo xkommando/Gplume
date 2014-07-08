@@ -89,7 +89,7 @@ public abstract class WriterTag extends SimpleTagSupport {
 			
 		} else {
 			try {
-				String ret = write(new JspWritorMock());
+				String ret = write(new JspWriterMock());
 				if (SUCCESS != ret) {
 					PrintWriter errWriter = new PrintWriter(System.err);
 					errWriter.write("\nError in tag[" + getClass().getSimpleName() + "]\n"

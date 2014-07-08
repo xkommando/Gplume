@@ -144,7 +144,7 @@ public class DefaultErrorHandler implements IErrorHandler {
 			out.format("<body>");
 			out.format("<br><br><br><br><center><h1> %s </center></h1>", 
 					"HTTP 500 : Internal server error");
-			Throwable throwable = requestContext.getAttr(java.lang.Throwable.class.getName());
+			Throwable throwable = requestContext.attr(java.lang.Throwable.class.getName());
 			if (throwable != null) {
 
 				out.println("\n\n"

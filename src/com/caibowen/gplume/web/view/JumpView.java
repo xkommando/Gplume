@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-/**
- * 
- */
-package com.caibowen.gplume.web.meta;
+package com.caibowen.gplume.web.view;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.caibowen.gplume.web.RequestContext;
 
 /**
- * 
- * identify an interception function
- * 
+ * this is not a real View object, it will return 301 
+ * 	and lead the agent jump to other page
  * @author BowenCai
  *
  */
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Intercept {
-	String[] value();
+public class JumpView implements IView {
+
+	final String newURL;
+	
+	public JumpView(String newURL) {
+		this.newURL = newURL;
+	}
+
+	@Override
+	public void resolve(RequestContext context) {
+		context.jumpTo(newURL);
+	}
+
 }

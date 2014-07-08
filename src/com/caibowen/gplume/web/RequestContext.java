@@ -52,7 +52,7 @@ public class RequestContext implements Serializable {
 	public final HttpMethod 			httpmMthod;
 	public final String 				path;
 	
-	private long timeModified;
+	private long _timeModified;
 
 	/**
 	 *  created by ControlCenter controlCenter only
@@ -83,7 +83,7 @@ public class RequestContext implements Serializable {
 		
 		this.path = _u.substring(request.getContextPath().length());
 		
-		timeModified = System.currentTimeMillis();
+		_timeModified = System.currentTimeMillis();
 	}
 	
 	/**
@@ -226,14 +226,14 @@ public class RequestContext implements Serializable {
 		return null;
 	}
 
-	public HttpSession getSession(boolean boo) {
+	public HttpSession session(boolean boo) {
 		return request.getSession(boo);
 	}
 // -------------------------------------------------------------------
 //				web cache utilities
 //-------------------------------------------------------------------
 	@Nullable
-	public String getETag() {
+	public String eTag() {
 		
 		String tag = request.getHeader("If-None-Match");
 		
@@ -254,11 +254,11 @@ public class RequestContext implements Serializable {
 		}
 	}
 	
-	public long getLastModified() {
+	public long lastModified() {
 
-		String lastModified = request.getHeader("If-Modified-Since");
-		if (Str.Utils.notBlank(lastModified)) {
-			return Long.parseLong(lastModified.trim());
+		String _lastModified = request.getHeader("If-Modified-Since");
+		if (Str.Utils.notBlank(_lastModified)) {
+			return Long.parseLong(_lastModified.trim());
 		} else {
 			return -1L;
 		}
@@ -267,7 +267,7 @@ public class RequestContext implements Serializable {
 	//012345678
 	//max-age=0
 	//max-age=10
-	public int getCacheControl() {
+	public int cacheControl() {
 		
 		String cacheCtrl = request.getHeader("Cache-Control");
 		if (Str.Utils.notBlank(cacheCtrl)) {
@@ -287,19 +287,19 @@ public class RequestContext implements Serializable {
 		response.setHeader("ETag", tag);
 	}
 
-	public long getTimeModified() {
-		return timeModified;
+	public long timeModified() {
+		return _timeModified;
 	}
 	
 	public void setTimeModified(long timeModified) {
-		this.timeModified = timeModified;
+		this._timeModified = timeModified;
 		response.setHeader("Last-Modified", Long.toString(timeModified));
 	}
 	
 	public void setCacheControl(int second) {
 		String info =  "max-age=" + second;
 		response.setHeader("Cache-Control",info);
-		response.setHeader("Expires", Long.toString(timeModified + second * 1000L));
+		response.setHeader("Expires", Long.toString(_timeModified + second * 1000L));
 	}
 	
 	public boolean canBeGZipped() {
@@ -323,7 +323,7 @@ public class RequestContext implements Serializable {
 	
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public<T> T getAttr(String key) {
+	public<T> T attr(String key) {
 		return (T) request.getAttribute(key);
 	}
 	

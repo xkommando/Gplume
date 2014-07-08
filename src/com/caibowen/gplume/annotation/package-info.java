@@ -13,41 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.view.jsptag;
-
-import java.io.IOException;
-
-import javax.servlet.jsp.JspWriter;
-
-import com.caibowen.gplume.i18n.NativePackage;
-
 /**
- * i18n message writer
  * 
+ */
+/**
  * @author BowenCai
  *
  */
-public class TagMessage extends WriterTag {
-	
-	String k;
-	
-	@Override
-	public String write(JspWriter writer) throws IOException {
-		NativePackage pkg = getNatives();
-		if (k != null && pkg != null) {
-			writer.write(pkg.getStr(k));
-			return SUCCESS;
-		} else {
-			return "key or properties is NULL";
-		}
-	}
-
-	public String getK() {
-		return k;
-	}
-
-	public void setK(String k) {
-		this.k = k;
-	}
-
-}
+package com.caibowen.gplume.annotation;

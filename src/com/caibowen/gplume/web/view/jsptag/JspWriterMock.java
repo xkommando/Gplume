@@ -20,9 +20,9 @@ import java.io.IOException;
 import javax.servlet.jsp.JspWriter;
 
 
-class JspWritorMock extends JspWriter {
+class JspWriterMock extends JspWriter {
 
-	protected JspWritorMock() {
+	protected JspWriterMock() {
 		super(4096, true);
 	}
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.meta;
+package com.caibowen.gplume.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -21,24 +21,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.caibowen.gplume.web.HttpMethod;
-
-
 
 /**
- * 
- * to identify a HTTP request handler(function)
- * the handler can be a method(spring) or an object(struts)
- * @author BowenCai
- *
+ * indicate that on any condition this method will not throw exception.
+ * similar to C++ noexcept keyword
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Handle {
-	
-	String[] value();
-
-	HttpMethod[] httpMethods() default {HttpMethod.GET};
-	
-}
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NoExcept {}

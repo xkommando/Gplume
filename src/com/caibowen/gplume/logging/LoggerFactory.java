@@ -31,9 +31,9 @@ public abstract class LoggerFactory {
 	
     public static LoggerFactory getLoggerFactory() {
 		if (factory != null)
-			return factory;
-		else
-			return new JdkLoggerFactory();
+			factory = new JdkLoggerFactory();
+		
+		return factory;
 	}
     
     public static Logger getLogger(Class<?> cls) {

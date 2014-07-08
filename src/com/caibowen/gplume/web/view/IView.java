@@ -28,9 +28,23 @@ public interface IView {
 	
 	void resolve(RequestContext context);
 	
-	static class build{
+	static class get{
+		
 		public static TextView textView(String encoding, String type) {
 			return new TextView(encoding, type);
 		}
+		public static TextView textView(String encoding, String type, String cnt) {
+			return new TextView(encoding, type).setContent(cnt);
+		}
+		
+		public static TextView textView(String cnt) {
+			return new TextView().setContent(cnt);
+		}
+		
+		public static IView jump(String cnt) {
+			return new JumpView(cnt);
+		}
+		
 	}
+	
 }
