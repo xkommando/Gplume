@@ -13,20 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.note;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.caibowen.gplume.logging;
 
 
 /**
- * indicate that on any condition this method will not throw exception.
- * similar to C++ noexcept keyword
+ * 
+ * @author BowenCai
+ *
  */
-@Documented
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface NoExcept {}
+public abstract class LoggerFactory {
+
+	private static LoggerFactory factory;
+    
+	synchronized public static void setLoggerFactory(LoggerFactory f) {
+    	factory = f;
+    }
+	
+    public static LoggerFactory getLoggerFactory() {
+		if (factory != null)
+			return factory;
+		else
+			return new JdkLoggerFactory();
+	}
+    
+    public static Logger getLogger(Class<?> cls) {
+    	return getLoggerFactory().getLoggerImpl(cls);
+    }
+
+    public static Logger getLogger(String name) {
+    	return getLoggerFactory().getLoggerImpl(name);
+    }
+    
+
+
+    protected abstract Logger getLoggerImpl(Class<?> cls);
+
+    protected abstract Logger getLoggerImpl(String name);
+}

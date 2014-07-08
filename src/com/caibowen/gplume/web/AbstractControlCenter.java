@@ -17,7 +17,6 @@ package com.caibowen.gplume.web;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
@@ -25,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caibowen.gplume.context.bean.DisposableBean;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 /**
  * 
@@ -41,7 +42,8 @@ public abstract class AbstractControlCenter
 									Serializable {
 	
 	private static final long serialVersionUID = -5906639792037911875L;
-	private static final Logger LOG = Logger.getLogger("ControlCenter");
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractControlCenter.class);// Logger.getLogger("ControlCenter");
 	
 	private ServletContext servletContext;
 	public void setServletContext(ServletContext servletContext) {
@@ -112,7 +114,7 @@ public abstract class AbstractControlCenter
 			p.setNext(this);
 		}
 
-		LOG.config("\t>>>>> Ready to roll! ");
+		LOG.info("\t>>>>> Ready to roll! ");
 	}
 	/**
 	 * entery

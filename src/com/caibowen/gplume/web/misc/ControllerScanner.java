@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
 import com.caibowen.gplume.context.bean.InitializingBean;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.AbstractControlCenter;
@@ -52,7 +52,7 @@ import com.caibowen.gplume.web.meta.Intercept;
  */
 public class ControllerScanner implements InitializingBean {
 	
-	private static final Logger LOG = Logger.getLogger(ControllerScanner.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(ControllerScanner.class.getName());
 	
 	List<Object> controllers;
 	AbstractControlCenter controlCenter;
@@ -96,8 +96,7 @@ public class ControllerScanner implements InitializingBean {
 			
 			for (Class<?> class1 : allClazz) {
 				if (mayBeController(class1)) {
-					LOG.log(Level.CONFIG,
-							"\t>>> find controller[" + class1.getName() + "]");
+					LOG.debug("\t>>> find controller[" + class1.getName() + "]");
 					ctrls.add(class1.newInstance());
 				}
 			}

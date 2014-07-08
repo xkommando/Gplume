@@ -16,11 +16,13 @@
 package com.caibowen.gplume.context.bean;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 
 import org.w3c.dom.Element;
+
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 
 /**
  * manage bean life circle
@@ -29,7 +31,10 @@ import org.w3c.dom.Element;
  *
  */
 public class Pod {
-
+	
+	private static final Logger LOG 
+		= LoggerFactory.getLogger(IBeanAssembler.LOGGER_NAME);
+	
 	private final int lifeSpan;
 	private AtomicInteger age;
 	private String beanId;
@@ -76,7 +81,7 @@ public class Pod {
 		if (bean != null && bean instanceof InitializingBean) {
 			try {
 				((InitializingBean)bean).afterPropertiesSet();
-				Logger.getLogger(IBeanAssembler.LOGGER_NAME).info(
+				LOG.info(
 						"bean [" + bean.getClass().getSimpleName() 
 						+ "] initialized");
 			} catch (Exception e) {
@@ -94,10 +99,9 @@ public class Pod {
 	 */
 	void destroy() throws Exception {
 		
-		Logger.getLogger(IBeanAssembler.LOGGER_NAME).info(
-		"bean id[" + beanId 
-		+ "] class[" + (instance != null ? instance.getClass().getSimpleName() : "unknown")
-		+ "] destroyed");
+		LOG.info(
+		"bean id[{0}] class[" + (instance != null ? instance.getClass().getSimpleName() : "unknown")
+		+ "] destroyed", beanId);
 		
 		if (instance != null && instance instanceof DisposableBean) {
 			((DisposableBean)instance).destroy();

@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,6 +29,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 
 /**
  * Usage:
@@ -83,7 +85,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 								implements Serializable {
 	
 	private static final long serialVersionUID = 1895612360389006713L;
-	
+	private static final Logger LOG = LoggerFactory.getLogger(IBeanAssembler.LOGGER_NAME);
 	/**
 	 * This is a compile flag.
 	 * When this flag is enabled,fields that do not have a correspondent setter 
@@ -113,7 +115,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		Document doc = builder.parse(in);
 		doc.getDocumentElement().normalize();
 		super.doAssemble(doc);
-		Logger.getLogger(LOGGER_NAME).info("Created [" + podMap.size() + "] beans");
+		LOG.info("Created {0} beans", podMap.size());
 	}
 	
 	@Override

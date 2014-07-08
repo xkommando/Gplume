@@ -16,15 +16,16 @@
 package com.caibowen.gplume.web.view.jsptag;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import javax.servlet.jsp.JspWriter;
 
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Str;
 
 public class TagLink extends WriterTag {
 
-	private static final Logger THIS_LOG = Logger.getLogger(TagLink.class.getName());
+	private static final Logger THIS_LOG = LoggerFactory.getLogger(TagLink.class.getName());
 
 	private String displayName;
 	private String nativeName;
@@ -49,10 +50,10 @@ public class TagLink extends WriterTag {
 		// more validation in test mode
 		if (TEST_MODE) {
 			if (!Str.Utils.notBlank(testName)) {
-				THIS_LOG.warning("url[" + url + "] name is empty");
+				THIS_LOG.warn("url[" + url + "] name is empty");
 			}
 			if (!Str.Utils.notBlank(target)) {
-				THIS_LOG.warning("target field is empty");
+				THIS_LOG.warn("target field is empty");
 			}
 			if (Str.Utils.notBlank(url)) {
 				if (!Str.Patterns.URL.matcher(url).matches()) {

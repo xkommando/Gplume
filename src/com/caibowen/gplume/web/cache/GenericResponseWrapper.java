@@ -42,12 +42,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 
 
 
@@ -67,7 +69,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
 
     private static final long serialVersionUID = -5976708169031065497L;
 
-    private static final Logger LOG = Logger.getLogger(GenericResponseWrapper.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(GenericResponseWrapper.class.getName());
 
     private int statusCode = SC_OK;
     private int contentLength;
@@ -148,7 +150,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     @Override
 	public void setStatus(final int code, final String msg) {
         statusCode = code;
-        LOG.warning("Discarding message because this method is deprecated.");
+        LOG.warn("Discarding message because this method is deprecated.");
         super.setStatus(code);
     }
 

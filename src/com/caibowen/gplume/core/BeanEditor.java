@@ -51,7 +51,7 @@ public class BeanEditor {
 	 * @param var
 	 * @throws Exception
 	 */
-	public static void setBeanProperty(@Nullable Object bean,
+	public static void setProperty(@Nullable Object bean,
 										@Nonnull String propName, 
 										Object var) throws Exception {
 
@@ -60,7 +60,7 @@ public class BeanEditor {
 		if (setter == null) {
 			setField(bean, propName, var);
 		} else {
-			callSetter(bean, propName, var);
+			callSetter(bean, setter, var);
 		}
 	}
 
@@ -227,10 +227,8 @@ public class BeanEditor {
 	 * @throws NoSuchMethodException
 	 */
 	public static void callSetter(@Nullable Object obj, 
-									@Nonnull String propName, 
+									@Nonnull Method setter,
 									Object var) throws NoSuchMethodException {
-		
-		Method setter = TypeTraits.findSetter(obj.getClass(), propName);
 		
 		Class<?>[] paramTypes = setter.getParameterTypes();
 		if (paramTypes.length != 1) {
@@ -246,7 +244,7 @@ public class BeanEditor {
 					throw new IllegalArgumentException("cannot translate["
 							+ var + "] to ["
 							+ paramTypes[0].getClass().getName()
-							+ "] in field[" + propName + "] in class["
+							+ "] in field[" + setter.getName() + "] in class["
 							+ obj.getClass().getName() + "]");
 				}
 			}

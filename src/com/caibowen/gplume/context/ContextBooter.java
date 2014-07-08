@@ -16,9 +16,9 @@
 package com.caibowen.gplume.context;
 
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.i18n.WebI18nService;
 
@@ -43,7 +43,7 @@ import com.caibowen.gplume.web.i18n.WebI18nService;
 public class ContextBooter {
 
 	private static final Logger LOG 
-					= Logger.getLogger(ContextBooter.class.getName());
+					= LoggerFactory.getLogger(ContextBooter.class);
 
 	/**
 	 * bean name for internationalization
@@ -92,9 +92,9 @@ public class ContextBooter {
 			});
 			
 		} else {
-			LOG.log(Level.WARNING, "no manifest file specified in web.xml, "
-					+ "check your web.xml for context-param["
-					+ AppContext.MANIFEST + "]");
+			LOG.warn("no manifest file specified "
+					+ "For web application, check your web.xml for context-param[{0}]"
+					+ AppContext.MANIFEST);
 			return;
 		}
 
@@ -112,7 +112,7 @@ public class ContextBooter {
 			}
 			LOG.info(I18N_SERVICE_BEAN_ID + " ready to roll!");
 		} else {
-			LOG.warning("cannot find " + I18N_SERVICE_BEAN_ID);
+			LOG.warn("cannot find " + I18N_SERVICE_BEAN_ID);
 		}
 	}
 	

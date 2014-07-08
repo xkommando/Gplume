@@ -18,9 +18,10 @@ package com.caibowen.gplume.web.builder;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
-import java.util.logging.Logger;
 
 import com.caibowen.gplume.core.Converter;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.JspRestAction;
@@ -31,7 +32,7 @@ import com.sun.istack.internal.Nullable;
 
 public class RestActionBuilder {
 
-	private static final Logger LOG = Logger.getLogger(RestActionBuilder.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(RestActionBuilder.class.getName());
 
 	/**
 	 * 
@@ -103,7 +104,7 @@ public class RestActionBuilder {
 			argType = String.class;
 		}
 		if (argType.isPrimitive()) {
-			LOG.warning(
+			LOG.warn(
 			"Handle argument type is primitive, which may cause NullPointerException with invalid input" +
 			"\r\nhttp handle [" + uri + "], in class[" 
 					+ method.getDeclaringClass().getName() 

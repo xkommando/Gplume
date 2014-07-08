@@ -18,13 +18,13 @@ package com.caibowen.gplume.web.jspengin;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.AbstractControlCenter;
 
 
@@ -35,7 +35,7 @@ import com.caibowen.gplume.web.AbstractControlCenter;
  */
 public class JspEngine {
 
-	private static final Logger LOG  = Logger.getLogger(JspEngine.class.getName());
+	private static final Logger LOG  = LoggerFactory.getLogger(JspEngine.class.getName());
 	
 	@Inject AbstractControlCenter controlCenter;
 	
@@ -58,7 +58,7 @@ public class JspEngine {
 					"Error Compiling JSP [" + jspFile
 					+"]\r\n StackTrace:\r\n" + writer.toString();
 
-			LOG.log(Level.SEVERE, errMsg, e);
+			LOG.error(errMsg, e);
 			
 			errWriter.print(errMsg);
 			return errMsg;

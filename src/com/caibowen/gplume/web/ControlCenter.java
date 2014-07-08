@@ -21,13 +21,13 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
 
 import com.caibowen.gplume.core.Injector;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.builder.IAction;
 import com.caibowen.gplume.web.builder.IActionFactory;
 import com.caibowen.gplume.web.builder.actions.Interception;
@@ -50,7 +50,7 @@ public class ControlCenter extends AbstractControlCenter {
 
 	private static final long serialVersionUID = -5848401100999563548L;
 	
-	private static final Logger LOG = Logger.getLogger(ControlCenter.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(ControlCenter.class.getName());
 	
 	@Inject
 	protected IActionFactory actionFactory;
@@ -69,8 +69,8 @@ public class ControlCenter extends AbstractControlCenter {
 		
 		if (action == null) {
 			errorHandler.http404(context);
-			if (LOG.isLoggable(Level.INFO)) {
-				LOG.info("no action for URI[" + uri + "]");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("no action for URI[" + uri + "]");
 			}
 			return;
 		}
@@ -87,30 +87,29 @@ public class ControlCenter extends AbstractControlCenter {
 			
 		} catch (UndeclaredThrowableException udefe) {
 
-			LOG.log(Level.SEVERE, "Invokation Error " + udefe.getMessage(),
+			LOG.error("Invokation Error " + udefe.getMessage(),
 					udefe.getUndeclaredThrowable());
 			thrown = udefe;
 
 		} catch (IOException ioex) {
 
-			LOG.log(Level.SEVERE, "I/O Error :" + ioex.getCause(), ioex);
+			LOG.error("I/O Error :" + ioex.getCause(), ioex);
 			thrown = ioex;
 
 		} catch (ServletException servex) {
 
-			LOG.log(Level.SEVERE, "Servlet Error : " + servex.getCause(), servex);
+			LOG.error("Servlet Error : " + servex.getCause(), servex);
 			thrown = servex;
 
 		} catch (Exception e) {
 
-			LOG.log(Level.SEVERE,
-					"Exception: " + e.getClass().getName() + "\n Message: "
+			LOG.error("Exception: " + e.getClass().getName() + "\n Message: "
 							+ e.getMessage() + "\n Cause: " + e.getCause(), e);
 			thrown = e;
 
 		} catch (Throwable thr) {
 
-			LOG.log(Level.SEVERE, "Other Error: " + thr.getClass().getName()
+			LOG.error("Other Error: " + thr.getClass().getName()
 					+ "\n Message"+ thr.getMessage()
 					+ "\n Cause: " + thr.getCause(), thr);
 			

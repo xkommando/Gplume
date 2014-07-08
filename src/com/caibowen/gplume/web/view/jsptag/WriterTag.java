@@ -17,15 +17,17 @@ package com.caibowen.gplume.web.view.jsptag;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
+import org.apache.naming.java.javaURLContextFactory;
+
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.i18n.NativePackage;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.i18n.WebI18nService;
 
 /**
@@ -40,7 +42,7 @@ public abstract class WriterTag extends SimpleTagSupport {
 	 */
 	protected static final boolean TEST_MODE = false;
 	
-	protected Logger LOG = Logger.getLogger(WriterTag.class.getName());
+	protected Logger LOG = LoggerFactory.getLogger(WriterTag.class.getName());
 
 	public static final String SUCCESS = "SUCCESS;"
 			+ "Do not try to return your own 'SUCCESS', it will fail 'str == str' and be treated as error"; // success return
@@ -52,15 +54,15 @@ public abstract class WriterTag extends SimpleTagSupport {
 		if (pkg == null) {// unlikely
 			pkg = (NativePackage) getJspContext().getAttribute(NativePackage.NAME, 
 					PageContext.REQUEST_SCOPE);
-			LOG.log(Level.WARNING, "cannot get localProperties from session, try get from request");
+			LOG.warn("cannot get localProperties from session, try get from request");
 		}
 		if (pkg == null) {//unlikely
 			WebI18nService service = AppContext.beanAssembler.getBean("i18nService");
 			if (service != null) {
 				pkg = service.getDefaultPkg();
-				LOG.log(Level.SEVERE, "cannot get localProperties from session or request, using default");
+				LOG.error("cannot get localProperties from session or request, using default");
 			} else {
-				LOG.log(Level.SEVERE, "cannot get localProperties from session or request, null i18nService");
+				LOG.error("cannot get localProperties from session or request, null i18nService");
 			}
 		}
 		return pkg;
@@ -84,7 +86,7 @@ public abstract class WriterTag extends SimpleTagSupport {
 				}
 				
 			} catch (Exception e) {
-				LOG.log(Level.SEVERE, "error writing jsp", e);
+				LOG.error("writing jsp", e);
 			}
 			
 		} else {

@@ -20,4 +20,4 @@
  * @author BowenCai
  *
  */
-package com.caibowen.gplume.orm;
+package com.caibowen.gplume.meta;

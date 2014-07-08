@@ -44,8 +44,6 @@ import com.caibowen.gplume.web.view.IView;
 public class RequestContext implements Serializable {
 
 	private static final long serialVersionUID = -8169661246935054100L;
-
-//	private static final Logger LOG = Logger.getLogger(RequestContext.class.getName());
 	
 	public final AbstractControlCenter controlCenter;
 	

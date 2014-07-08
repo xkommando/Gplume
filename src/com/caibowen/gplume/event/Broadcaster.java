@@ -22,13 +22,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.caibowen.gplume.common.StrongRef;
 import com.caibowen.gplume.common.WeakRef;
 import com.caibowen.gplume.context.bean.IAssemlberVisitor;
 import com.caibowen.gplume.core.TypeTraits;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 
 /**
  * Register listener and broadcast event.
@@ -41,7 +41,7 @@ public class Broadcaster implements Serializable{
 	
 	private static final long serialVersionUID = -247132524218855841L;
 
-	static final Logger LOG = Logger.getLogger(Broadcaster.class.getName());
+	static final Logger LOG = LoggerFactory.getLogger(Broadcaster.class);
 	
 	private static final Object PRESENT = new Object();
 	/**
@@ -253,14 +253,13 @@ public class Broadcaster implements Serializable{
 					try {
 						lsr.onEvent(event);
 					} catch (Exception e) {
-						LOG.log(Level.SEVERE, "error broadcasting event["
+						LOG.error("broadcasting event["
 								+ event + "] on listener [" + listener + "]", e);
 					}
 				}
 			}
 		} else {
-				LOG.log(Level.WARNING,
-						"no listener for event [" 
+				LOG.warn( "no listener for event [" 
 						+ event.getClass().getName() + 
 						"] registerd ");
 		}
@@ -275,7 +274,7 @@ public class Broadcaster implements Serializable{
 						hook.catches(event);
 					}
 				} catch (Exception e) {
-					LOG.log(Level.SEVERE, "error catching event[" + event
+					LOG.error("error catching event[" + event
 							+ "] on hook [" + hk + "]", e);
 				}
 			}

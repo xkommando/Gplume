@@ -16,9 +16,9 @@
 package com.caibowen.gplume.web.misc;
 
 import java.io.PrintWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.IErrorHandler;
 import com.caibowen.gplume.web.RequestContext;
 
@@ -31,7 +31,7 @@ import com.caibowen.gplume.web.RequestContext;
  */
 public class DefaultErrorHandler implements IErrorHandler {
 	
-	private static final Logger LOG = Logger.getLogger(DefaultErrorHandler.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultErrorHandler.class.getName());
 	
 //	5. HTTP error 401 (unauthorized)
 //	This error happens when a website visitor tries to access a restricted web page 
@@ -70,7 +70,7 @@ public class DefaultErrorHandler implements IErrorHandler {
 			try {
 				requestContext.response.sendError(403, "error handling 403: response has been committed");
 			} catch (Exception e) {
-				LOG.log(Level.SEVERE, "error setting response to 403: response already committed\n"
+				LOG.error("error setting response to 403: response already committed\n"
 										+ "error sending error response; Message[" + e.getMessage() + "]");
 			}
 		}
@@ -99,7 +99,7 @@ public class DefaultErrorHandler implements IErrorHandler {
 			try {
 				requestContext.response.sendError(404, "error handling 404: response has been committed");
 			} catch (Exception e) {
-				LOG.log(Level.SEVERE, "error setting response to 404: response already committed\n"
+				LOG.error("error setting response to 404: response already committed\n"
 										+ "error sending error response; Message[" + e.getMessage() + "]");
 			}
 		}
@@ -132,7 +132,7 @@ public class DefaultErrorHandler implements IErrorHandler {
 			try {
 				requestContext.response.sendError(500, "error handling 500: response has been committed");
 			} catch (Exception e) {
-				LOG.log(Level.SEVERE, "error setting response to 500: response already committed\n"
+				LOG.error("error setting response to 500: response already committed\n"
 										+ "error sending error response; Message[" + e.getMessage() + "]");
 			}
 		}

@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,6 +35,8 @@ import com.caibowen.gplume.context.InputStreamProvider;
 import com.caibowen.gplume.context.InputStreamSupport;
 import com.caibowen.gplume.context.bean.DisposableBean;
 import com.caibowen.gplume.context.bean.InitializingBean;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 
 /**
  * 
@@ -46,7 +47,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 	
 	private static final long serialVersionUID = 2823988842476726160L;
 
-	private static final Logger LOG = Logger.getLogger(I18nService.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(I18nService.class.getName());
 	
 	@Inject Dialect defaultLang = Dialect.SimplifiedChinese;
 	@Inject TimeZone defaultTimeZone;
@@ -221,7 +222,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 				return Dialect.parseISO639_1(localeInfo.substring(0, 2));
 			}
 		}
-		LOG.warning("failed to resolve dialect [" + localeInfo + "]. set as Unknown");
+		LOG.warn("failed to resolve dialect [" + localeInfo + "]. set as Unknown");
 		return Dialect.Unknown;
 	}
 
@@ -257,7 +258,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 			if (e.getKey() != defaultLang
 					&& e.getValue().cadidate == null) {
 				e.getValue().cadidate = pkgTable.get(defaultLang);
-				LOG.config("set candidate of package[" 
+				LOG.info("set candidate of package[" 
 						+ e.getKey() + "] to [" + defaultLang  +"]");
 			}
 		}
@@ -267,7 +268,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 	public void destroy() throws Exception {
 		pkgTable.clear();
 		this.cachedSet.clear();
-		LOG.config("i18nService destroyed");
+		LOG.info("i18nService destroyed");
 	}
 
 }

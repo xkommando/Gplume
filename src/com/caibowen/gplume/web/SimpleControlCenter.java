@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.builder.IAction;
 import com.caibowen.gplume.web.meta.Controller;
 import com.caibowen.gplume.web.meta.Handle;
@@ -39,7 +39,7 @@ public class SimpleControlCenter extends ControlCenter {
 	
 	private static final long serialVersionUID = -1948249520836896853L;
 	
-	private static final Logger LOG = Logger.getLogger(SimpleControlCenter.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(SimpleControlCenter.class);
 	
 	@Override
 	public void handle(final String uri, RequestContext requestContext) {
@@ -48,8 +48,8 @@ public class SimpleControlCenter extends ControlCenter {
 		IAction action = actionFactory.findAction(requestContext.httpmMthod, uri);
 		
 		if (action == null) {
-			if (LOG.isLoggable(Level.INFO)) {
-				LOG.info("no action for URI[" + uri + "]");
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("no action for URI[" + uri + "]");
 			}
 			errorHandler.http404(requestContext);
 			return;
@@ -61,29 +61,28 @@ public class SimpleControlCenter extends ControlCenter {
 			
 		} catch (UndeclaredThrowableException udefe) {
 
-			LOG.log(Level.SEVERE, "Invokation Exception " + udefe.getMessage(),
+			LOG.error("Invokation Exception " + udefe.getMessage(),
 					udefe.getUndeclaredThrowable());
 			thrown = udefe;
 
 		} catch (IOException ioex) {
 
-			LOG.log(Level.WARNING, "I/O Exception :" + ioex.getMessage(), ioex);
+			LOG.error("I/O Exception :" + ioex.getMessage(), ioex);
 			thrown = ioex;
 
 		} catch (ServletException servex) {
 
-			LOG.log(Level.WARNING, "Servlet Exception : " + servex.getMessage(), servex);
+			LOG.error("Servlet Exception : " + servex.getMessage(), servex);
 			thrown = servex;
 
 		} catch (Exception e) {
 
-			LOG.log(Level.WARNING,
-					e.getClass().getName() + " Exception: " + "\n" + e.getMessage(), e);
+			LOG.error(e.getClass().getName() + " Exception: " + "\n" + e.getMessage(), e);
 			thrown = e;
 
 		} catch (Throwable thr) {
 
-			LOG.log(Level.WARNING, "Error: " + thr.getClass().getName()
+			LOG.error("Error: " + thr.getClass().getName()
 					+ "\n Message"+ thr.getMessage()
 					+ "\n Cause: " + thr.getCause(), thr);
 			

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
@@ -31,6 +30,8 @@ import org.w3c.dom.NodeList;
 
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Str;
 
 
@@ -42,7 +43,9 @@ import com.caibowen.gplume.misc.Str;
  *
  */
 public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(IBeanAssembler.LOGGER_NAME);
+
 	protected Map<String, Pod> podMap = new ConcurrentHashMap<>(64);
 	protected ClassLoader classLoader;
 
@@ -117,11 +120,10 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 				podMap.put(bnId, pod);
 			}
 			
-			Logger.getLogger(LOGGER_NAME).info("Add Bean: id[" 
-					+ bnId + "] class[" + 
-					(bean != null ? bean.getClass().getName() : "unknown")
-					+ "] singleton[" + isSingleton 
-					+ "] lifeSpan[" + lifeSpan + "]"
+			LOG.info("Add Bean: id[{0}] of class[{1}] singleton ? {2}  lifeSpan {3}",
+					bnId, (bean != null ? bean.getClass().getName() : "unknown")
+					, isSingleton
+					, lifeSpan
 					);
 			
 		}
@@ -135,14 +137,14 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 	protected void preprocess(Object beanObj) {
 		if (beanObj instanceof IBeanAssemblerAware) {
 			((IBeanAssemblerAware) beanObj).setBeanAssembler(this);
-			Logger.getLogger(LOGGER_NAME).info(
+			LOG.info(
 					"IBeanAssemblerAware bean[" 
 					+ beanObj.getClass().getSimpleName() 
 					+ "] beanAssembler setted");
 		}
 		if (beanObj instanceof BeanClassLoaderAware) {
 			((BeanClassLoaderAware)beanObj).setBeanClassLoader(this.classLoader);
-			Logger.getLogger(LOGGER_NAME).info(
+			LOG.info(
 					"BeanClassLoaderAware bean[" 
 					+ beanObj.getClass().getSimpleName() 
 					+ "] ClassLoader setted");
@@ -174,10 +176,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 		Object beanObj = bnClass.newInstance();
 		preprocess(beanObj);
 		
-		Logger.getLogger(LOGGER_NAME).info(
-				"bean class[" 
-				+ bnClass.getSimpleName() 
-				+ "] created");
+		LOG.info("bean class[{0}] created", bnClass.getSimpleName());
 		
 		NodeList propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROPERTY);
 		if (propLs == null || propLs.getLength() == 0) {
@@ -217,13 +216,13 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 				if (Str.Utils.notBlank(varStr)) {
 					// e.g., <property name="number" value="5"/>
 					// str value will casted to param type if needed
-					BeanEditor.setBeanProperty(beanObj, propName, varStr.trim());
+					BeanEditor.setProperty(beanObj, propName, varStr.trim());
 					continue;
 					
 				} else if (Str.Utils.notBlank(varRef)) {
 					// e.g., <property name="bean" ref="someOtherBean"/>
 					Object ref = getBean(varRef.trim());
-					BeanEditor.setBeanProperty(beanObj, propName, ref);
+					BeanEditor.setProperty(beanObj, propName, ref);
 					continue;
 					
 				} else if (Str.Utils.notBlank(varObj)) {
@@ -231,7 +230,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 					Class<?> klass = this.classLoader.loadClass(varObj.trim());
 					Object obj = klass.newInstance();
 					preprocess(obj);
-					BeanEditor.setBeanProperty(beanObj, propName, obj);
+					BeanEditor.setProperty(beanObj, propName, obj);
 					continue;
 					
 				} else {
@@ -299,7 +298,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 						// skip node of #text
 						iter = iter.getNextSibling().getNextSibling();
 					}
-					BeanEditor.setBeanProperty(beanObj, propName, properties);
+					BeanEditor.setProperty(beanObj, propName, properties);
 					
 				} else { // single value or list
 					if (isList) {
@@ -334,7 +333,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 						
 					} else {
 						if (beanList.size() == 1) {
-							BeanEditor.setBeanProperty(beanObj, propName, beanList.get(0));
+							BeanEditor.setProperty(beanObj, propName, beanList.get(0));
 							
 						} else {
 							throw new IllegalArgumentException(

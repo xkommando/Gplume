@@ -17,13 +17,14 @@ package com.caibowen.gplume.web;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.Injector;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.builder.ActionFactory;
 import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
@@ -74,7 +75,7 @@ public class WebConfig implements InitializingBean, Serializable {
 	
 	private static final long serialVersionUID = 657513014059796966L;
 
-	Logger LOG = Logger.getLogger(WebConfig.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class.getName());
 	@Inject IRequestProcessor preProcessor;
 	public void setPreProcessor(IRequestProcessor preProcessor) {
 		this.preProcessor = preProcessor;
@@ -109,7 +110,7 @@ public class WebConfig implements InitializingBean, Serializable {
 									: new DefaultErrorHandler());
 			
 			boolean boo = AppContext.beanAssembler.addBean("controlCenter", center);
-			LOG.info(boo ? "ControlCenter set up" 
+			LOG.debug(boo ? "ControlCenter set up" 
 						: "cannot add [controlCenter] to beanAssembler");
 		
 			ControllerScanner scanner = new ControllerScanner();

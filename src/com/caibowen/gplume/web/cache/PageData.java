@@ -40,12 +40,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServletResponse;
+
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 
 /**
  * A Serializable representation of a {@link HttpServletResponse}.
@@ -60,7 +61,7 @@ public class PageData implements Serializable {
 	
 	private static final long serialVersionUID = 3106703683898635651L;
 
-	private static final Logger LOG = Logger.getLogger(PageData.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(PageData.class.getName());
 
     private static final int FOUR_KB = 4196;
     private static final int GZIP_MAGIC_NUMBER_BYTE_1 = 31;
@@ -126,7 +127,7 @@ public class PageData implements Serializable {
                 }
             }
         } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Error ungzipping gzipped body", e);
+            LOG.error("Error ungzipping gzipped body", e);
         }
 
 

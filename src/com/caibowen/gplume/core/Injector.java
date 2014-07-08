@@ -18,13 +18,14 @@ package com.caibowen.gplume.core;
 import java.lang.reflect.Field;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.caibowen.gplume.context.bean.IBeanAssembler;
 import com.caibowen.gplume.context.bean.IBeanAssemblerAware;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str;
 
@@ -56,7 +57,7 @@ import com.caibowen.gplume.misc.Str;
  */
 public class Injector implements IBeanAssemblerAware {
 
-	private static final Logger LOG = Logger.getLogger(Inject.class.getName());
+	private static final Logger LOG = LoggerFactory.getLogger(Inject.class);
 	
 	private IBeanAssembler beanAssembler;
 	@Override
@@ -99,7 +100,7 @@ public class Injector implements IBeanAssemblerAware {
 							+ id + "] for property[" + field.getName() 
 							+ "] in class [" + object.getClass().getName() + "]");
 				}
-				BeanEditor.setBeanProperty(object, field.getName(), var);
+				BeanEditor.setProperty(object, field.getName(), var);
 				continue;
 			}
 			
@@ -107,18 +108,21 @@ public class Injector implements IBeanAssemblerAware {
 			if (field.isAnnotationPresent(Inject.class)) {
 				Set<Object> vars = beanAssembler.getBeans(field.getType());
 				if (vars.size() != 1) {
-					BeanEditor.setBeanProperty(object, field.getName(), 
+					BeanEditor.setProperty(object, field.getName(), 
 												vars.iterator().next());
 					
 				} else if (null != beanAssembler.getBean(field.getName())) {
 					Object var = beanAssembler.getBean(field.getName());
 					if (field.getType().isAssignableFrom(var.getClass())){
-						BeanEditor.setBeanProperty(object, field.getName(), var);
-						LOG.warning("cannot find bean for field [" 
-							+ field.getName() + "] in class [" 
-							+ object.getClass().getName() + "]"
-							+ "\r\n But find bean in beanAssemble with the same ID as the field name[" + field.getName()
-							+"]\r\n Setting field with this bean[" + var.getClass().getName() + "]");
+						BeanEditor.setProperty(object, field.getName(), var);
+						LOG.warn("cannot find bean for field [{0}] in class [{1}]"
+							+ "\r\n But find bean in beanAssemble with the same ID as the field name[{2}]"
+							+ "\r\n Setting field with this bean[{4}]"
+							, field.getName()
+							, object.getClass().getName()
+							, field.getName()
+							, var.getClass().getName());
+
 						continue;
 					}
 					
