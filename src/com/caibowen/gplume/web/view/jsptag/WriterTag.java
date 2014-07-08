@@ -22,8 +22,6 @@ import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
-import org.apache.naming.java.javaURLContextFactory;
-
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.i18n.NativePackage;
 import com.caibowen.gplume.logging.Logger;
@@ -101,7 +99,7 @@ public abstract class WriterTag extends SimpleTagSupport {
 			} catch (Exception e) {
 				PrintWriter errWriter = new PrintWriter(System.err);
 				errWriter.write("Exception\r\n");
-				e.printStackTrace(errWriter);
+				LOG.error("", e);
 				errWriter.write("\r\n");
 				errWriter.flush();
 			}

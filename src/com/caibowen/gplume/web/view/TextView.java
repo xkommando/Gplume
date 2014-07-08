@@ -8,7 +8,11 @@ public class TextView implements IView {
 
 	private final String encoding;
 	private final String type;
-
+	public TextView() {
+		this.encoding = PageAttributes.Encoding.UTF_8;
+		this.type = PageAttributes.Type.TEXT;
+	}
+	
 	public TextView(String encoding, String type) {
 		this.encoding = encoding;
 		this.type = type;
@@ -16,8 +20,9 @@ public class TextView implements IView {
 
 	private String content;
 
-	public void setContent(String content) {
+	public TextView setContent(String content) {
 		this.content = content;
+		return this;
 	}
 
 	@Override

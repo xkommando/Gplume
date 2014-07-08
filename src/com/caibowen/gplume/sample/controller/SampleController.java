@@ -23,7 +23,10 @@ import java.util.logging.Logger;
 
 import javax.inject.Named;
 
+import org.apache.taglibs.standard.lang.jstl.test.beans.Factory;
+
 import com.caibowen.gplume.context.AppContext;
+import com.caibowen.gplume.core.Semaphored;
 import com.caibowen.gplume.event.AppEvent;
 import com.caibowen.gplume.event.IAppListener;
 import com.caibowen.gplume.event.IEventHook;
@@ -41,6 +44,7 @@ import com.caibowen.gplume.web.meta.Handle;
  */
 public class SampleController {
 	
+	@Semaphored(permit=100, fair=false)
 	@Handle({"/test"})
 	public void name(RequestContext context) {
 		System.out.println("SampleController.name()");

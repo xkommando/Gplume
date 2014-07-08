@@ -5,6 +5,7 @@ package com.caibowen.gplume.web.view;
 public interface PageAttributes {
 
 	static class Type {
+		static final String TEXT = "application/text";
 		static final String XML = "application/xml";
 		static final String RSS = "application/rss+xml";
 		static final String ATOM = "application/atom+xml";
