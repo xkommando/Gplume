@@ -11,7 +11,7 @@ Features:
 
 ----------------------------
 Quick Start:
-#####Part Zero: The web.xml:
+#####Part Zero: Configurate the web.xml:
 
 ```XML
 	<context-param>
@@ -31,7 +31,7 @@ Quick Start:
 	</filter-mapping>
 ```
 #####Part One: The IoC Container.
-Spring-like configuration file :
+Spring-like schema :
 ```XML
 	<bean class="com.caibowen.gplume.web.WebConfig" >
 		<property name="preProcessor" ref="headPrePrcessor"/>
@@ -45,9 +45,9 @@ Spring-like configuration file :
 ```
 #####Part Two: Internationalization. 
 add language packages 
-`en.properties` where there is `gplumeIsRunning=Gplume is Running!` 
+	`en.properties` where there is `gplumeIsRunning=Gplume is Running!` 
 and add
-`zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01`(ascii for `Gplume跑起来了`)  
+	`zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01`(ascii for `Gplume跑起来了`)  
 
 specify them in the manifest.xml
 ```XML
@@ -123,7 +123,6 @@ public class SampleController {
 	}
 }
 ```
-
 #####Part Four. handle Event. 
 register listeners and publish events as:
 ```Java
@@ -145,7 +144,6 @@ TimeChangedEvent event = new TimeChangedEvent(this);
 event.setTime(new Date());
 AppContext.broadcaster.broadcast(event);
 ```
-
 #####Part Five: ORM using Hibernate.
 Spring and Hibernate can be integrated to Gplume with just a few lines configuration:
 
@@ -178,7 +176,6 @@ public class ChapterDAO extends HibernateDaoSupport {
 	}
 }
 ```
-
 #####Part Six. Test with Junit
 ```Java
 @RunWith(JunitPal.class)
