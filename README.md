@@ -43,18 +43,35 @@ Spring-like configuration file :
 		</property>
 	</bean>
 ```
-#####Part Two: Handle request
+#####Part Two: Internationalization. 
+add language packages 
+`en.properties` where there is `gplumeIsRunning=Gplume is Running!` 
+and add
+`zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01`(ascii for `Gplume跑起来了`)  
+
+specify them in the manifest.xml
+```XML
+	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
+	    <property name="defaultLang" value="SimplifiedChinese"/>
+	    <property name="pkgFiles">
+	        <props>
+	            <prop key="en">/i18n/en.properties</prop><!-- in your web root -->
+	            <prop key="zh_CN">/i18n/zh_CN.properties</prop>
+	        </props>
+	    </property>
+	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
+	</bean>
+```
+#####Part Three: Handle HTTP Request
 handle request with a method
 ```Java
-	@Handle(value={"/",
-			"/index",
-			"/index.html",
-			"/index.jsp"}})
+	@Handle(value={"/", "/index",
+			"/index.html", "/index.jsp"}})
 	public String index(RequestContext context) {
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		return "/index.jsp";
 	}
-	//concurrent request number is limited with a semapher
+	//number concurrent requests is limited by this semapher
 	@Semaphored(permit=100, fair=false)
 	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"}
 			, httpMethods={HttpMethod.GET, HttpMethod.POST})
@@ -66,7 +83,7 @@ handle request with a method
 handle request with an object storing current state
 ```Java
 //Note: this sample login function is for demo only and is insecure
-@Controller("/async/")
+@Controller("/async/")// the base path
 public class SampleController {
 	@Inject Validator validator;
 	@Inject PublicKeyService keyService;
@@ -106,26 +123,8 @@ public class SampleController {
 	}
 }
 ```
-#####Part Three: Internationalization. 
-add language packages 
-`en.properties` where there is `gplumeIsRunning=Gplume is Running!` 
-and add
-`zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01`(ascii for `Gplume跑起来了`)  
 
-specify them in the manifest.xml
-```XML
-	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
-	    <property name="defaultLang" value="SimplifiedChinese"/>
-	    <property name="pkgFiles">
-	        <props>
-	            <prop key="en">/i18n/en.properties</prop><!-- in your web root -->
-	            <prop key="zh_CN">/i18n/zh_CN.properties</prop>
-	        </props>
-	    </property>
-	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
-	</bean>
-```
-#####Part Four. Event handling. 
+#####Part Four. handle Event. 
 register listeners and publish events as:
 ```Java
 AppContext.broadcaster.register(new IEventHook() {
