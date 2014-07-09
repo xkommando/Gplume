@@ -65,9 +65,9 @@ handle request with a method
 ```
 handle request with an object storing current state
 ```Java
-//this sample login function is for demo only and is insecure
+//Note: this sample login function is for demo only and is insecure
 @Controller("/async/")
-public class ObjController {
+public class SampleController {
 	@Inject Validator validator;
 	@Inject PublicKeyService keyService;
 	@Inject UserService userService;
@@ -83,9 +83,8 @@ public class ObjController {
 		User user;
 		boolean ok() {
 			String psw = keyService.decrypt(key, passwordCipher);
-			if (!Str.Utils.notBlank(psw))
-				return false;
-			if (!validator.matchEmail(email, psw))
+			if (!Str.Utils.notBlank(psw)
+					||!validator.matchEmail(email, psw))
 				return false;
 			else {
 				user = userService.getUser(email);
@@ -93,35 +92,27 @@ public class ObjController {
 			}
 		}
 	}
-	/** @param requestScop null if non-null requirements are not met. */
+	
 	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
-	public IView login(MyState requestScop, RequestContext req) {
-		if (requestScop == null)
+	public IView login(MyState reqScope, RequestContext req) {
+		if (reqScope == null) //non-null requirements are not met.
 			return IView.get.textView("no public key in session");
-		else if (!requestScop.ok())
-			return IView.get.textView("password email mismatch");
-		req.session(true).setAttribute("this-user", requestScop.user);
-		return IView.get.jump("/user/" + requestScop.user.getNameURL());
-	}
-
-	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
-	public IView login(MyState requestScop, RequestContext req) {
-		if (requestScop == null) //non-null requirements are not met.
-			return IView.get.textView("no public key in session");
-		else if (!requestScop.ok())
+		else if (!reqScope.ok())
 			return IView.get.textView("password and email mismatch");
-		req.session(true).setAttribute("this-user", requestScop.user);
-		return IView.get.jump("/user/" + requestScop.user.getNameURL());
+		else {
+			req.session(true).setAttribute("this-user", reqScope.user);
+			return IView.get.jump("/user/" + reqScope.user.getNameURL());
+		}
 	}
 }
 ```
 #####Part Three: Internationalization. 
-language packages 
-`en.properties=gplumeIsRunning=Gplume is Running!` 
-and  
-`zh_CN.properties=gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01`(ascii for `Gplume跑起来了`)  
-and specify them in the manifest.xml
+add language packages 
+`en.properties` where there is `gplumeIsRunning=Gplume is Running!` 
+and add
+`zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01`(ascii for `Gplume跑起来了`)  
 
+specify them in the manifest.xml
 ```XML
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
 	    <property name="defaultLang" value="SimplifiedChinese"/>
@@ -136,19 +127,19 @@ and specify them in the manifest.xml
 ```
 #####Part Four. Event handling. 
 register listeners and publish events as:
-
 ```Java
 AppContext.broadcaster.register(new IEventHook() {
-	@Override
-	public void catches(AppEvent event) {
-		LOG.info("cought event[" + event.getClass().getName() + "]"
-				+ "from source[" + event.getSource() + "]");
+@Override
+public void catches(AppEvent event) {
+		LOG.info("cought event {0} from source {1}"
+				, event.getClass().getSimpleName()
+				, event.getSource());
 	}
-},false);//maintain a weak ref to this listener
+});
 AppContext.broadcaster.register(new IAppListener<TimeChangedEvent>() {
-	@Override
-	public void onEvent(TimeChangedEvent event) {
-		LOG.info("time changed event");
+@Override
+public void onEvent(TimeChangedEvent event) {
+		LOG.info("time changed {0}", event.getTime());
 	}
 });
 TimeChangedEvent event = new TimeChangedEvent(this);
@@ -170,7 +161,7 @@ Spring and Hibernate can be integrated to Gplume with just a few lines configura
 		</props>
 	</property>
 	<property name="annotatedClasses">
-		<list>
+		<list> <!-- set field "Class[] annotatedClasses" -->
 			<value>com.caibowen.gplume.sample.model.Chapter</value>
 		</list>
 	</property>

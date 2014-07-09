@@ -87,30 +87,28 @@ public class ControlCenter extends AbstractControlCenter {
 			
 		} catch (UndeclaredThrowableException udefe) {
 
-			LOG.error("Invokation Error " + udefe.getMessage(),
+			LOG.error(udefe.getMessage(),
 					udefe.getUndeclaredThrowable());
 			thrown = udefe;
 
 		} catch (IOException ioex) {
 
-			LOG.error("I/O Error :" + ioex.getCause(), ioex);
+			LOG.error("I/O :" + ioex.getCause(), ioex);
 			thrown = ioex;
 
 		} catch (ServletException servex) {
 
-			LOG.error("Servlet Error : " + servex.getCause(), servex);
+			LOG.error("Servlet : " + servex.getCause(), servex);
 			thrown = servex;
 
 		} catch (Exception e) {
 
-			LOG.error("Exception: " + e.getClass().getName() + "\n Message: "
-							+ e.getMessage() + "\n Cause: " + e.getCause(), e);
+			LOG.error(e.getMessage() + "\n Cause: " + e.getCause(), e);
 			thrown = e;
 
 		} catch (Throwable thr) {
 
-			LOG.error("Other Error: " + thr.getClass().getName()
-					+ "\n Message"+ thr.getMessage()
+			LOG.error(thr.getMessage()
 					+ "\n Cause: " + thr.getCause(), thr);
 			
 			thrown = thr;
@@ -171,7 +169,7 @@ public class ControlCenter extends AbstractControlCenter {
 			}
 		} // for method
 		if (controllers == null) {
-			controllers = new ArrayList<Object>(16);
+			controllers = new ArrayList<Object>(32);
 		}
 		if (!controllers.contains(controller)) {
 			controllers.add(controller);

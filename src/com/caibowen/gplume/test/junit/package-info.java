@@ -15,7 +15,7 @@
  ******************************************************************************/
 /**
  * 
- * utilities for Junit4
+ * utilities for testing with Junit4
  */
 /**
  * @author BowenCai

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.core;
+package com.caibowen.gplume.test.junit;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -21,19 +21,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 /**
- * 
- * control number of threads entering a procedure
- *  
- * @see SemaphoreKeeper
+ * specify manifest file path
+ * file will be read using classLoader.getResourceAsStream
+ * @see JunitPal
  * 
  * @author BowenCai
  *
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Semaphored {
-	int permit() default 32;
-	boolean fair() default true;
+public @interface ManifestPath {
+	String value();
 }

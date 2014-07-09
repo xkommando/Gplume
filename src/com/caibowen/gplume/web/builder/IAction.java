@@ -45,7 +45,7 @@ public interface IAction extends Serializable {
 
 	/**
 	 * if this method is not static, the returned method handle is binded to the object
-	 * and can be invoked without object parameter
+	 * and can be invoked without the object parameter
 	 * 
 	 * @return method handle
 	 */
@@ -53,7 +53,7 @@ public interface IAction extends Serializable {
 	
 	/**
 	 * 
-	 * @return the uri for mapping
+	 * @return the uri for routing
 	 */
 	public String getEffectiveURI();
 }

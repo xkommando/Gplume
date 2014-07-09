@@ -37,7 +37,8 @@ import com.caibowen.gplume.web.view.IView;
  */
 //this sample login function is for demo only and is insecure
 @Controller("/async/")
-public class ObjController {
+public class SampleController2 {
+	
 	@Inject Validator validator;
 	@Inject PublicKeyService keyService;
 	@Inject UserService userService;
@@ -53,9 +54,8 @@ public class ObjController {
 		User user;
 		boolean ok() {
 			String psw = keyService.decrypt(key, passwordCipher);
-			if (!Str.Utils.notBlank(psw))
-				return false;
-			if (!validator.matchEmail(email, psw))
+			if (!Str.Utils.notBlank(psw)
+					||!validator.matchEmail(email, psw))
 				return false;
 			else {
 				user = userService.getUser(email);
@@ -65,12 +65,14 @@ public class ObjController {
 	}
 	
 	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
-	public IView login(MyState requestScop, RequestContext req) {
-		if (requestScop == null) //non-null requirements are not met.
+	public IView login(MyState reqScope, RequestContext req) {
+		if (reqScope == null) //non-null requirements are not met.
 			return IView.get.textView("no public key in session");
-		else if (!requestScop.ok())
+		else if (!reqScope.ok())
 			return IView.get.textView("password and email mismatch");
-		req.session(true).setAttribute("this-user", requestScop.user);
-		return IView.get.jump("/user/" + requestScop.user.getNameURL());
+		else {
+			req.session(true).setAttribute("this-user", reqScope.user);
+			return IView.get.jump("/user/" + reqScope.user.getNameURL());
+		}
 	}
 }

@@ -56,7 +56,7 @@ public class ContextBooter {
 	// optional
 	private ClassLoader classLoader = ContextBooter.class.getClassLoader();
 	
-	// required if in web root
+	// required if in web root, set by caller
 	private InputStreamProvider streamProvider;
 	// required
 	private String manifestPath;
@@ -80,6 +80,7 @@ public class ContextBooter {
 				path = manifestPath.substring(5, manifestPath.length());
 
 			} else {
+				// set by caller, can be servlet context inputstream provider
 				streamSupport.setStreamProvider(streamProvider);
 				path = manifestPath;
 			}

@@ -19,18 +19,21 @@ import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.inject.Named;
 
-import org.apache.taglibs.standard.lang.jstl.test.beans.Factory;
 
+
+
+
+import com.caibowen.gplume.annotation.Semaphored;
 import com.caibowen.gplume.context.AppContext;
-import com.caibowen.gplume.core.Semaphored;
 import com.caibowen.gplume.event.AppEvent;
 import com.caibowen.gplume.event.IAppListener;
 import com.caibowen.gplume.event.IEventHook;
 import com.caibowen.gplume.i18n.NativePackage;
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.sample.feature.BirthdayCalculator;
 import com.caibowen.gplume.sample.feature.TimeChangedEvent;
 import com.caibowen.gplume.web.HttpMethod;
@@ -61,7 +64,7 @@ public class SampleController {
 	}
 	
 	
-	static final Logger LOG = Logger.getLogger(SampleController.class.getName());
+	static final Logger LOG = LoggerFactory.getLogger(SampleController.class.getName());
 	
 	public static String nativeStr(String k, RequestContext context) {
 		NativePackage pkg = 
@@ -120,14 +123,15 @@ public class SampleController {
 			AppContext.broadcaster.register(new IEventHook() {
 				@Override
 				public void catches(AppEvent event) {
-					LOG.info("cought event[" + event.getClass().getName() + "]"
-							+ "from source[" + event.getSource() + "]");
+					LOG.info("cought event{0} from source {1}"
+							, event.getClass().getSimpleName()
+							, event.getSource());
 				}
 			});
 			AppContext.broadcaster.register(new IAppListener<TimeChangedEvent>() {
 				@Override
 				public void onEvent(TimeChangedEvent event) {
-					LOG.info("time changed event");
+					LOG.info("time changed {0}", event.getTime());
 				}
 			});
 			TimeChangedEvent event = new TimeChangedEvent(this);

@@ -34,7 +34,7 @@ public class ActionMapper<T extends IAction> implements Serializable {
 	private static final long serialVersionUID = 9039999917329134916L;
 
 	// strict match
-	private HashMap<String, T> fixedURIMap = new HashMap<>(80);
+	private HashMap<String, T> fixedURIMap = new HashMap<>(128);
 
 	// versatile actors, match /xyz/* or /sadfj*
 	private URITrie<T> multiURIMap = new URITrie<>();
@@ -93,7 +93,6 @@ public class ActionMapper<T extends IAction> implements Serializable {
 		multiURIMap.clear();
 	}
 }
-
 
 
 

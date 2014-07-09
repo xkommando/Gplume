@@ -52,7 +52,7 @@ public class RequestContext implements Serializable {
 	public final HttpMethod 			httpmMthod;
 	public final String 				path;
 	
-	private long _timeModified;
+	private long timeModified;
 
 	/**
 	 *  created by ControlCenter controlCenter only
@@ -83,7 +83,7 @@ public class RequestContext implements Serializable {
 		
 		this.path = _u.substring(request.getContextPath().length());
 		
-		_timeModified = System.currentTimeMillis();
+		timeModified = System.currentTimeMillis();
 	}
 	
 	/**
@@ -288,18 +288,18 @@ public class RequestContext implements Serializable {
 	}
 
 	public long timeModified() {
-		return _timeModified;
+		return timeModified;
 	}
 	
 	public void setTimeModified(long timeModified) {
-		this._timeModified = timeModified;
+		this.timeModified = timeModified;
 		response.setHeader("Last-Modified", Long.toString(timeModified));
 	}
 	
 	public void setCacheControl(int second) {
 		String info =  "max-age=" + second;
 		response.setHeader("Cache-Control",info);
-		response.setHeader("Expires", Long.toString(_timeModified + second * 1000L));
+		response.setHeader("Expires", Long.toString(timeModified + second * 1000L));
 	}
 	
 	public boolean canBeGZipped() {
