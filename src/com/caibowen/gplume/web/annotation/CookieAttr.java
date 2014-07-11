@@ -43,7 +43,7 @@ public @interface CookieAttr {
 	boolean nullable() default true;
 	
 	/**
-	 * alternative/default value of this attribute, used if is null
+	 * default value of this attribute, used if is null
 	 */
-	String alternative() default "";
+	String defaultVal() default "";
 }

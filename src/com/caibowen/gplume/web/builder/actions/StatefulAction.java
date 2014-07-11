@@ -13,9 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.sample.controller;
+package com.caibowen.gplume.web.builder.actions;
 
-public interface User {
+import java.lang.invoke.MethodHandle;
 
-	public String getNameURL();
+
+
+/**
+ * 
+ * @author BowenCai
+ *
+ */
+public class StatefulAction extends SimpleAction {
+
+	private static final long serialVersionUID = -8968416219169871432L;
+	
+	public StatefulAction(String u, MethodHandle handle) {
+		super(u, handle);
+	}
+
 }

@@ -13,9 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.sample.controller;
+package com.caibowen.gplume.misc;
 
-public interface User {
 
-	public String getNameURL();
+/**
+ * 
+ * @author BowenCai
+ *
+ */
+public class Hash {
+
+	
+	public static int hash(Object...args) {
+		int h = 1;
+		for (int i = 0; i < args.length; i++) {
+			Object object = args[i];
+			h = 31 * h + (object == null ? 0 : object.hashCode());
+		}
+		return h;
+	}
 }

@@ -39,8 +39,13 @@ import com.caibowen.gplume.common.CacheBuilder;
  */
 public final class WeakCache<K, V> implements Serializable {
 
-	public transient WeakHashMap<K, WeakReference<V>> map = new WeakHashMap<K, WeakReference<V>>();
-	
+	public transient WeakHashMap<K, WeakReference<V>> map;
+	public WeakCache () {
+		map = new WeakHashMap<K, WeakReference<V>>();
+	}
+	public WeakCache (int capacity) {
+		map = new WeakHashMap<K, WeakReference<V>>(capacity * 4 / 3);
+	}
 	public boolean contains(K key) {
 		if (map == null) {
 			return false;

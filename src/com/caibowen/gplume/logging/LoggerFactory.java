@@ -30,7 +30,7 @@ public abstract class LoggerFactory {
     }
 	
     public static LoggerFactory getLoggerFactory() {
-		if (factory != null)
+		if (factory == null)
 			factory = new JdkLoggerFactory();
 		
 		return factory;

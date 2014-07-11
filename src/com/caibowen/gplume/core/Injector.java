@@ -16,9 +16,11 @@
 package com.caibowen.gplume.core;
 
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -79,66 +81,90 @@ public class Injector implements IBeanAssemblerAware {
 	 * @param object
 	 * @throws Exception
 	 */
-	@Named
-	public void inject(Object object) throws Exception {
+	public void inject(@Nonnull Object object) {
 		
-		Class<?> clazz = object.getClass();
+		Set<Field> fields = Klass.getEffectiveField(object.getClass());
 		
-		Set<Field> fields = Klass.getEffectiveField(clazz);
-			
 		for (Field field : fields) {
 			// first try Named, if successed, we continue to next field
 			if (field.isAnnotationPresent(Named.class)) {
-				Named anno = field.getAnnotation(Named.class);
-				String id = anno.value();
-				if (!Str.Utils.notBlank(id)) {
-					id = field.getName();
-				}
-				Object var = beanAssembler.getBean(id);
-				if (var == null) {
-					throw new NullPointerException("cannot find bean with id [" 
-							+ id + "] for property[" + field.getName() 
-							+ "] in class [" + object.getClass().getName() + "]");
-				}
-				BeanEditor.setProperty(object, field.getName(), var);
-				continue;
+				withNamed(object, field);
 			}
 			
 			// if Named failed, try inject, last attempt
-			if (field.isAnnotationPresent(Inject.class)) {
-				Set<Object> vars = beanAssembler.getBeans(field.getType());
-				if (vars.size() != 1) {
-					BeanEditor.setProperty(object, field.getName(), 
-												vars.iterator().next());
-					
-				} else if (null != beanAssembler.getBean(field.getName())) {
-					Object var = beanAssembler.getBean(field.getName());
-					if (field.getType().isAssignableFrom(var.getClass())){
-						BeanEditor.setProperty(object, field.getName(), var);
-						LOG.warn("cannot find bean for field [{0}] in class [{1}]"
-							+ "\r\n But find bean in beanAssemble with the same ID as the field name[{2}]"
-							+ "\r\n Setting field with this bean[{4}]"
-							, field.getName()
-							, object.getClass().getName()
-							, field.getName()
-							, var.getClass().getName());
-
-						continue;
-					}
-					
-				} else {
-					throw new NoSuchElementException("faild to set field[" 
-							+ field.getName() + "] in class[" + object.getClass().getName() +"]"
-							+ "\r\n cannot find bean with the assignale type or specified name for this field");
-				}	
+			else if (field.isAnnotationPresent(Inject.class)) {
+				withInject(object, field);
 			}
 			
-			// pass not annotated fields
-			
+			// pass off not annotated fields
 		} // foreach field
 		
 	}
 
+	void withInject(Object object, Field field) {
+		
+		Object var = null;
+		Set<Object> vars = beanAssembler.getBeans(field.getType());
+		if (vars.size() != 1) {
+			try {
+				BeanEditor.setProperty(object, field.getName(), 
+											vars.iterator().next());
+			} catch (Exception e) {
+				throw new RuntimeException(
+						MessageFormat.format("error inject field {0} of type {1}  in class {2}"
+								, field.getName(), field.getType()
+								, field.getDeclaringClass()));
+			}
+			
+		} else if (null != (var = beanAssembler.getBean(field.getName()))) {
+			if (field.getType().isAssignableFrom(var.getClass())){
+				LOG.warn("cannot find bean for field [{0}] in class [{1}]"
+						+ "\r\n But find bean in beanAssemble with the same ID as the field name[{2}]"
+						+ "\r\n Setting field with this bean[{4}]"
+						, field.getName()
+						, object.getClass().getName()
+						, field.getName()
+						, var.getClass().getName());
+				
+				try {
+					BeanEditor.setProperty(object, field.getName(), var);
+				} catch (Exception e) {
+					throw new RuntimeException(
+							MessageFormat.format("error inject field {0} of type {1}  in class {2}"
+									, field.getName(), field.getType()
+									, field.getDeclaringClass()));
+				}
+			}
+		} else {
+			throw new NoSuchElementException("faild to set field[" 
+					+ field.getName() + "] in class[" + object.getClass().getName() +"]"
+					+ "\r\n cannot find bean with the assignale type or specified name for this field");
+		}	
+	}
+	
+	void withNamed(@Nonnull Object object, @Nonnull Field field) {
+		Named anno = field.getAnnotation(Named.class);
+		String curID = anno.value();
+		if (!Str.Utils.notBlank(curID)) {
+			curID = field.getName();
+		}					
+		Object var = beanAssembler.getBean(curID);
+		if (var == null) {
+			throw new NullPointerException("cannot find bean with id [" 
+					+ curID + "] for property[" + field.getName() 
+					+ "] in class [" + object.getClass().getName() + "]");
+		}
+		
+		try {
+			BeanEditor.setProperty(object, field.getName(), var);
+		} catch (Exception e) {
+			throw new RuntimeException(
+					MessageFormat.format("error inject field {0} of type {1} named {2} in class {3}"
+							, field.getName(), field.getType(), curID
+							, field.getDeclaringClass()));
+		}
+	}
+	
 }
 
 //

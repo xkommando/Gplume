@@ -17,40 +17,28 @@ package com.caibowen.gplume.web.builder;
 
 import java.lang.reflect.Method;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.builder.actions.Interception;
 
 /**
- * manage all actions
+ * <pre>
+ * Build Action Object base on handle method and uri.
+ * 
+ * if the method is non-static, controller object will be binded to the methodHandle
+ * 
+ * it is highly recommended that you use no primitive class in the method declaration
+ * since the string arg extracted from actual URL will be convert to a non-primitive value first, 
+ * and if the conversion failed, null is returned, 
+ * which will cause a NullPointerException in the auto-boxing
+ * </pre>
  * @author BowenCai
  *
  */
-public interface IActionFactory {
-
-	void setActionBuilder(IActionBuilder actionBuilder);
+public interface IActionBuilder {
 	
-	/**
-	 * @param controller
-	 * @param method
-	 */
-	 void 			registerHandles(@Nullable String prefix, 
-											@Nullable Object ctrl,
-											@Nonnull Method method);
-	
-	 void 			registerIntercept(@Nullable String prefix, 
-											@Nullable Object ctrl,
-											@Nonnull Method method);
-	
-	 IAction 			findAction(HttpMethod httpmMthod, String uri);
+	Interception buildInterception(String u, Object object, Method method);
 
-	 Interception 	findInterception(String uri);
+	IAction buildAction(final String uri, @Nullable Object object, Method method);
 
-	 boolean 			removeHandle(String uri);
-
-	 boolean 			removeInterception(final String uri);
-
-	 void 			destroy();
 }

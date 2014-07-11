@@ -17,8 +17,6 @@ package com.caibowen.gplume.sample.controller;
 
 import java.security.PublicKey;
 
-import javax.inject.Inject;
-
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.sample.feature.PublicKeyService;
 import com.caibowen.gplume.sample.feature.Validator;
@@ -39,10 +37,12 @@ import com.caibowen.gplume.web.view.IView;
 @Controller("/async/")
 public class SampleController2 {
 	
-	@Inject Validator validator;
-	@Inject PublicKeyService keyService;
-	@Inject UserService userService;
-	
+//	@Inject Validator validator;
+//	@Inject PublicKeyService keyService;
+//	@Inject UserService userService;
+	Validator validator;
+	PublicKeyService keyService;
+	UserService userService;
 	class MyState {
 		@ReqParam("psw_cipher")
 		String passwordCipher;

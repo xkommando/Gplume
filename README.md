@@ -46,7 +46,7 @@ Spring-like schema :
 #####Part Two: Internationalization. 
 add language packages 
 	`en.properties` where there is `gplumeIsRunning=Gplume is Running!` 
-and add
+and 
 	`zh_CN.properties` where there is `gplumeIsRunning=Gplume \u8DD1\u8D77\u6765\u4E86\uFF01`(ascii for `Gplume跑起来了`)  
 
 specify them in the manifest.xml
@@ -61,6 +61,10 @@ specify them in the manifest.xml
 	    </property>
 	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
 	</bean>
+```
+use message tag in JSP
+```HTML
+<gp:msg k="gplumeIsRunning" />
 ```
 #####Part Three: Handle HTTP Request
 handle request with a method
@@ -133,13 +137,13 @@ public void catches(AppEvent event) {
 				, event.getClass().getSimpleName()
 				, event.getSource());
 	}
-});
+}, false);//set false to keep a weak reference to this listener
 AppContext.broadcaster.register(new IAppListener<TimeChangedEvent>() {
 @Override
 public void onEvent(TimeChangedEvent event) {
 		LOG.info("time changed {0}", event.getTime());
 	}
-});
+});// default is true
 TimeChangedEvent event = new TimeChangedEvent(this);
 event.setTime(new Date());
 AppContext.broadcaster.broadcast(event);

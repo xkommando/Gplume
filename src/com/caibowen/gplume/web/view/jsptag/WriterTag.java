@@ -89,6 +89,7 @@ public abstract class WriterTag extends SimpleTagSupport {
 			
 		} else {
 			try {
+				@SuppressWarnings("resource")
 				String ret = write(new JspWriterMock());
 				if (SUCCESS != ret) {
 					PrintWriter errWriter = new PrintWriter(System.err);

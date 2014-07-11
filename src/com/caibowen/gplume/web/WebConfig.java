@@ -25,7 +25,10 @@ import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.Injector;
 import com.caibowen.gplume.logging.Logger;
 import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.web.builder.ActionBuilder;
 import com.caibowen.gplume.web.builder.ActionFactory;
+import com.caibowen.gplume.web.builder.IActionBuilder;
+import com.caibowen.gplume.web.builder.IActionFactory;
 import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 
@@ -76,6 +79,7 @@ public class WebConfig implements InitializingBean, Serializable {
 	private static final long serialVersionUID = 657513014059796966L;
 
 	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class.getName());
+	
 	@Inject IRequestProcessor preProcessor;
 	public void setPreProcessor(IRequestProcessor preProcessor) {
 		this.preProcessor = preProcessor;
@@ -104,8 +108,13 @@ public class WebConfig implements InitializingBean, Serializable {
 			}
 			center.setInjector(injector);
 			
-			center.setActionFactory(new ActionFactory());
+			IActionFactory factory = new ActionFactory();
+			IActionBuilder builder = new ActionBuilder();
+			factory.setActionBuilder(builder);
+			center.setActionFactory(factory);
+			
 			center.setPreProcessor(this.preProcessor);
+			
 			center.setErrorHandler(this.errorHandler != null ? errorHandler
 									: new DefaultErrorHandler());
 			

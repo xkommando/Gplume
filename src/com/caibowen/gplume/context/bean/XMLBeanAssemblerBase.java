@@ -16,6 +16,7 @@
 package com.caibowen.gplume.context.bean;
 
 import java.lang.reflect.Modifier;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
@@ -354,8 +355,15 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 	}
 	
 
-	protected  Class<?> getClass(Element element) throws ClassNotFoundException {
+	protected @Nonnull Class<?> getClass(Element element) {
 		String clazzName = element.getAttribute(XMLTags.BEAN_CLASS).trim();
-		return this.classLoader.loadClass(clazzName);
+		try {
+			return this.classLoader.loadClass(clazzName);
+		} catch (Exception e) {
+			throw new RuntimeException(
+				MessageFormat.format("cannot load class defined in XML " + element,
+								clazzName)
+								, e);
+		}
 	}
 }

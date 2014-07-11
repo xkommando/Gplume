@@ -30,7 +30,14 @@ import com.caibowen.gplume.web.builder.actions.ViewRestAction;
 import com.caibowen.gplume.web.view.IView;
 import com.sun.istack.internal.Nullable;
 
-public class RestActionBuilder {
+/**
+ * 
+ * middle class between base and real-impl, providing support for rest
+ * 
+ * @author BowenCai
+ *
+ */
+class RestActionBuilder extends ActionBuilderBase {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestActionBuilder.class.getName());
 
@@ -66,8 +73,8 @@ public class RestActionBuilder {
 	 * @param method
 	 * @return
 	 */
-	protected static final RestAction 
-	build(String uri, Object object, Method method) {
+	protected final RestAction 
+	buildRest(String uri, Object object, Method method) {
 
 		final int lq = uri.indexOf('{');
 		final int rq = uri.lastIndexOf('}');
@@ -159,7 +166,7 @@ public class RestActionBuilder {
 	 * @param obj
 	 * @return null if not found
 	 */
-	private static @Nullable MethodHandle getRestHandle(Method method, 
+	private @Nullable MethodHandle getRestHandle(Method method, 
 											Class<?> argClass, 
 											Object obj,
 											boolean hasRequest) {
@@ -202,13 +209,13 @@ public class RestActionBuilder {
 			}
 			
 			if (retClass.equals(String.class)) {
-				mType = ActionBuilder.RET_JSP_TYPE;
+				mType = RET_JSP_TYPE;
 			} else {
-				mType = ActionBuilder.SIMPLE_TYPE;
+				mType = SIMPLE_TYPE;
 			}
 		}
 //		mType = isMatch ? mType : retClass.equals(String.class) ?  RET_JSP_TYPE : SIMPLE_TYPE;
-		MethodHandle handle = ActionBuilder.findMethodeHandle(method, mType);
+		MethodHandle handle = findMethodeHandle(method, mType);
 		return obj != null ? handle.bindTo(obj) : handle;
 	}
 	

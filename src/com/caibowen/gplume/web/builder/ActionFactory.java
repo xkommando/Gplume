@@ -21,6 +21,7 @@ import java.lang.reflect.Modifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.HttpMethod;
@@ -29,7 +30,7 @@ import com.caibowen.gplume.web.annotation.Intercept;
 import com.caibowen.gplume.web.builder.actions.Interception;
 
 /**
- * container for action,interception
+ * container for action, interception
  * 
  * @author BowenCai
  *
@@ -50,6 +51,13 @@ public class ActionFactory implements IActionFactory, Serializable {
 
 	private ActionMapper<Interception> interceptMapper = new ActionMapper<>();
 	
+	@Inject
+	private IActionBuilder actionBuilder;
+	@Override
+	public void setActionBuilder(IActionBuilder actionBuilder) {
+		this.actionBuilder = actionBuilder;
+	}
+
 	@Override
 	public IAction findAction(HttpMethod httpmMthod, String uri) {
 		
@@ -99,7 +107,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 					uri = prefix + uri;
 				
 				checkURI(uri);
-				Interception i = ActionBuilder.buildInterception(uri, ctrl, method);
+				Interception i = actionBuilder.buildInterception(uri, ctrl, method);
 				interceptMapper.add(i);
 			}
 		} else {
@@ -135,7 +143,8 @@ public class ActionFactory implements IActionFactory, Serializable {
 			if (addPrefix)
 				uri = prefix + uri;
 			
-			IAction action = ActionBuilder.buildAction(uri, ctrl, method);
+			IAction action = actionBuilder.buildAction(uri, ctrl, method);
+			
 			checkURI(action.getEffectiveURI());
 			HttpMethod[] methods = info.httpMethods();
 			
@@ -222,4 +231,5 @@ public class ActionFactory implements IActionFactory, Serializable {
 		interceptMapper.clear();
 		interceptMapper = null;
 	}
+
 }

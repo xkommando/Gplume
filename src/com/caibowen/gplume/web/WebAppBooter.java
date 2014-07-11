@@ -28,7 +28,7 @@ import com.caibowen.gplume.context.ServletContextInputStreamProvider;
  * 
  * 
  * <li>build beans according to the manifest file</li> 
- * <li>prepare localeService </li> 
+ * <li>prepare I18Service </li> 
  * <li>register all listeners in the bean factory</li>
  * 
  * @author BowenCai
