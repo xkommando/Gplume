@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.misc;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,10 +32,10 @@ import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.AbstractControlCenter;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.annotation.Controller;
 import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.annotation.Intercept;
-import com.caibowen.gplume.web.builder.actions.SimpleAction;
+import com.caibowen.gplume.web.builder.IAction;
+import com.sun.jndi.url.corbaname.corbanameURLContextFactory;
 
 
 /**
@@ -95,8 +97,10 @@ public class ControllerScanner implements InitializingBean {
 		try {
 			
 			for (Class<?> class1 : allClazz) {
+				
 				if (mayBeController(class1)) {
 					LOG.debug("\t>>> find controller[" + class1.getName() + "]");
+					Constructor<?> ctor = class1.getConstructor();
 					ctrls.add(class1.newInstance());
 				}
 			}
@@ -107,41 +111,100 @@ public class ControllerScanner implements InitializingBean {
 		return ctrls;
 	}
 	
-	
+	/**
+	 * has method annotated with @Handle
+	 * private classes and private methods will be set accessible
+	 * @param clazz
+	 * @return
+	 */
 	private static boolean mayBeController(Class<?> clazz) {
-		/**
-		 * example:
-		 * 
-		 *  @Controller("base_path")
-		 * 	class WebHandler {}
-		 * 
-		 * @Handle(value={"/test"})
-		 * class WebHandler {}
-		 */
-		if (clazz.isAnnotationPresent(Controller.class)
-				|| clazz.isAnnotationPresent(Handle.class)) {
-			return true;
-		}
+		
+//		/**
+//		 * example:
+//		 * 
+//		 *  @Controller("base_path")
+//		 * 	class WebHandler {}
+//		 * 
+//		 * @Handle(value={"/test"})
+//		 * class WebHandler {}
+//		 */
+//		if (clazz.isAnnotationPresent(Controller.class)) {
+//			return true;
+//		}
+		final int mod = clazz.getModifiers();
+		final boolean isAbstract = Modifier.isAbstract(mod);
+		final boolean isNonStaticInner = 
+				clazz.isMemberClass() && !Modifier.isStatic(mod);
 		
 		for (Method method : clazz.getMethods()) {
 			
 			if (method.isAnnotationPresent(Handle.class)) {
-				return true;
-//				Class<?> params[] = method.getParameterTypes();
-//				for (Class<?> class1 : params) {
-//					if (class1.equals(RequestContext.class)) {
-//						return true;
-//					}
-//				}
-//				return false;
+				
+				if (isAbstract) {
+				 	String urls = Str.Utils.join(method.getAnnotation(Handle.class).value(), " ");
+				 	LOG.warn(
+				 			"handle for [{0}] of method [{1}] "
+				 			+ "in class [{0}] is not accessible "
+				 			+ "because the class is abstract"
+				 			, urls
+				 			, method.toString()
+				 			, clazz.getName());
+					 return false;
+					 
+				} else if (isNonStaticInner) {
+					 String urls = Str.Utils.join(method.getAnnotation(Handle.class).value(), " ");
+					 LOG.warn(
+							 "handle for [{0}] of method [{1}] "
+							 + "in class [{0}] is not accessible "
+							 + "becase the class is a non-static nested class"
+							 , urls
+							 , method.toString()
+							 , clazz.getName());
+					 return false;
+					 
+				} else {
+					return true;
+				}
 				
 			} else if (method.isAnnotationPresent(Intercept.class)) {
 				Class<?> params[] = method.getParameterTypes();
-				return params.length == 2 
+				boolean paramOK = params.length == 2 
 						&& params[0].equals(RequestContext.class)
-						&& params[1].equals(SimpleAction.class);
+						&& params[1].equals(IAction.class);
+				
+				if (!paramOK) {
+					return false;
+					
+				} else if (isAbstract) {
+				 	String urls = Str.Utils.join(method.getAnnotation(Handle.class).value(), " ");
+				 	LOG.warn(
+				 			"Intercept for [{0}] of method [{1}] "
+				 			+ "in class [{0}] is not accessible "
+				 			+ "because the class is abstract"
+				 			, urls
+				 			, method.toString()
+				 			, clazz.getName());
+					 return false;
+					 
+				} else if (isNonStaticInner) {
+					 String urls = Str.Utils.join(method.getAnnotation(Handle.class).value(), " ");
+					 LOG.warn(
+							 "Intercept for [{0}] of method [{1}] "
+							 + "in class [{0}] is not accessible "
+							 + "becase the class is a non-static nested class"
+							 , urls
+							 , method.toString()
+							 , clazz.getName());
+					 return false;
+					 
+				} else {
+					return true;
+				}
+				
 			}
 		}
+
+		
 		return false;
 	}
 

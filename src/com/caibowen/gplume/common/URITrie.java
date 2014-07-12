@@ -18,6 +18,10 @@ package com.caibowen.gplume.common;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
+
+import com.sun.istack.internal.Nullable;
+
 /*
  *  benchmark
   K/V : String Integer
@@ -99,7 +103,7 @@ public class URITrie<V> implements Serializable {
 //		-._~:/?#[]@!$&'()*+,;=
 		OFFSET = TABLE[0];
 		TABLE_LEN = TABLE.length;//w /._-~#
-		PATTERN = Pattern.compile("^/[\\w\\-\\.~/_=#]{1,64}$");
+		PATTERN = Pattern.compile("^[\\w\\-\\.~/_=#]{1,512}$");
 	}
 
 	protected int size;
@@ -128,10 +132,10 @@ public class URITrie<V> implements Serializable {
 	 * @param v
 	 * @return true value added, false value already exists at the branch(position is taken)
 	 */
-	synchronized public boolean branch(final String k, V v) {
+	synchronized public boolean branch(@Nonnull final String k, @Nullable V v) {
 		
 		if (!PATTERN.matcher(k).matches()) {
-			throw new IllegalArgumentException("string must matches regex " +
+			throw new IllegalArgumentException("string [" + k +"] must matches regex " +
 					PATTERN.pattern());
 		}
 		/**

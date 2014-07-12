@@ -59,7 +59,7 @@ import com.caibowen.gplume.misc.Str;
  */
 public class Injector implements IBeanAssemblerAware {
 
-	private static final Logger LOG = LoggerFactory.getLogger(Inject.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Injector.class);
 	
 	private IBeanAssembler beanAssembler;
 	@Override

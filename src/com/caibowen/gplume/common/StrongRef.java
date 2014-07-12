@@ -34,7 +34,11 @@ public class StrongRef<T> extends WeakReference<T> {
 	public T get() {
         return this.ref;
     }
-
+    
+	public void set(T v) {
+        this.ref = v;
+    }
+    
     @Override
 	public void clear() {
         this.ref = null;
