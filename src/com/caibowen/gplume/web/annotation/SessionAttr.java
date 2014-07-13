@@ -43,7 +43,7 @@ public @interface SessionAttr {
 	boolean nullable() default true;
 	
 	/**
-	 * alternative/default value of this attribute, used if is null
+	 * alternative/default value of this attribute, used if value is empty
 	 */
-	String alternative() default "";
+	String defaultVal() default "";
 }

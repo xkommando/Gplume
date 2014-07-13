@@ -22,6 +22,7 @@ import com.caibowen.gplume.web.builder.IAction;
 
 
 /**
+ * void simple(RequestContext ctx);
  * 
  * fixed path non-binding action
  * @author BowenCai

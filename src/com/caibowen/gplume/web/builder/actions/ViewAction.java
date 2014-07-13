@@ -26,6 +26,10 @@ import com.caibowen.gplume.web.view.IView;
 
 /**
  * 
+ * IView p(RequestContext ctn);
+ * IView p();
+ * 
+ * 
  * web handle returns View
  * 
  * ViewAction, including ViewRestAction
@@ -51,9 +55,9 @@ public class ViewAction implements IAction {
 	
 	protected final boolean hasRequest;
 	
-	public ViewAction(String u, Method m, Object ctrl, boolean req) {
+	public ViewAction(String u, Method m, Object ctrl, boolean hasReq) {
 		effectiveURI = u;
-		hasRequest = req;
+		hasRequest = hasReq;
 		method = m;
 		controller = ctrl;
 	}
@@ -62,7 +66,11 @@ public class ViewAction implements IAction {
 	public void perform(RequestContext context) throws Throwable {
 		context.putAttr(ACTION_NAME, this);
 		Object v = null;
-		v = method.invoke(controller, context);
+		if (hasRequest)
+			v = method.invoke(controller, context);
+		else
+			v = method.invoke(controller);
+		
 		if (v != null) {
 			((IView)v).resolve(context);
 		}

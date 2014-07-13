@@ -20,9 +20,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -60,7 +63,7 @@ public class RequestContext implements Serializable {
 	 * @param in
 	 * @param out
 	 */
-	public RequestContext(HttpServletRequest in, 
+	RequestContext(HttpServletRequest in, 
 							HttpServletResponse out, 
 							AbstractControlCenter c) {
 		
@@ -124,12 +127,13 @@ public class RequestContext implements Serializable {
 			response.sendError(503);
 		} catch (Exception e) {
 			throw new RuntimeException("In request for [" 
-					+ this.path + "] Error sending 503 service unavailable error", e);
+					+ this.path + "] Error sending 503 error", e);
 		}
 	}
 
 	/**
-	 * sendRedirect
+	 * AKA, sendRedirect
+	 * 
 	 * @param url
 	 */
 	public void jumpTo(final String url) {
@@ -163,14 +167,7 @@ public class RequestContext implements Serializable {
 		}
 		return false;
 	}
-//        name.equalsIgnoreCase("Comment") // rfc2019
-//        name.equalsIgnoreCase("Discard") // 2019++
-//        name.equalsIgnoreCase("Domain") ||
-//        name.equalsIgnoreCase("Expires") // (old cookies)
-//        name.equalsIgnoreCase("Max-Age") // rfc2019
-//        || name.equalsIgnoreCase("Path") ||
-//        name.equalsIgnoreCase("Secure") ||
-//        name.equalsIgnoreCase("Version")
+
 	
 	public void addCookie(final String value) {
 		addCookie(value, -1);
@@ -181,16 +178,7 @@ public class RequestContext implements Serializable {
 	
 	public void addCookie(final String name, final String value, final int ageInSecond) {
 		
-		if (Str.Patterns.COOKIE_NAME.matcher(name).matches()
-			&& !name.equalsIgnoreCase("Comment") // rfc2019
-			&& !name.equalsIgnoreCase("Discard") // 2019++
-			&& !name.equalsIgnoreCase("Domain")
-			&& !name.equalsIgnoreCase("Expires") // (old cookies)
-			&& !name.equalsIgnoreCase("Max-Age") // rfc2019
-			&& !name.equalsIgnoreCase("Path")
-			&& !name.equalsIgnoreCase("Secure") 
-			&& !name.equalsIgnoreCase("Version")
-			&& !name.startsWith("$")) {
+		if (validCookieName(name)) {
 			Cookie cookie = new Cookie(name, value);
 			cookie.setMaxAge(ageInSecond);
 			response.addCookie(cookie);
@@ -203,8 +191,7 @@ public class RequestContext implements Serializable {
 	}
 	
 	public void addCookie(Cookie ck) {
-		
-		if (Str.Patterns.COOKIE_NAME.matcher(ck.getName()).matches()) {
+		if (validCookieName(ck.getName())) {
 			response.addCookie(ck);
 		} else {
 			throw new IllegalArgumentException(
@@ -212,9 +199,22 @@ public class RequestContext implements Serializable {
 					+"]\nname pattern [" + Str.Patterns.COOKIE_NAME.pattern() + "]");
 		}
 	}
+	
+	private static boolean validCookieName(@Nonnull String name) {
+		return Str.Patterns.COOKIE_NAME.matcher(name).matches()
+		&& !name.equalsIgnoreCase("Comment") // rfc2019
+		&& !name.equalsIgnoreCase("Discard") // 2019++
+		&& !name.equalsIgnoreCase("Domain")
+		&& !name.equalsIgnoreCase("Expires") // (old cookies)
+		&& !name.equalsIgnoreCase("Max-Age") // rfc2019
+		&& !name.equalsIgnoreCase("Path")
+		&& !name.equalsIgnoreCase("Secure") 
+		&& !name.equalsIgnoreCase("Version")
+		&& !name.startsWith("$");
+	}
 
 	@Nullable
-	public Cookie getCookie(final String name) {
+	public Cookie cookie(final String name) {
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
@@ -226,12 +226,44 @@ public class RequestContext implements Serializable {
 		return null;
 	}
 
+	@Nullable
+	public String cookieVal(String name) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals(name)) {
+					return cookie.getValue();
+				}
+			}
+		}
+		return null;
+	}
+	
 	public HttpSession session(boolean boo) {
 		return request.getSession(boo);
 	}
+	
+	public<T> T sessionAttr(String name) {
+		HttpSession session = request.getSession(true);
+		return (T)session.getAttribute(name);
+	}
+	
+
+	public ServletContext context() {
+		return controlCenter.getServletContext();
+	}
+	
+	public<T> T contextAttr(String name) {
+		return (T)controlCenter.getServletContext().getAttribute(name);
+	}
+	
 // -------------------------------------------------------------------
 //				web cache utilities
 //-------------------------------------------------------------------
+	public void setETag(final String tag) {
+		response.setHeader("ETag", tag);
+	}
+	
 	@Nullable
 	public String eTag() {
 		
@@ -239,12 +271,12 @@ public class RequestContext implements Serializable {
 		
 		return Str.Utils.notBlank(tag) ? tag : null;
 	}
+
 	/**
-	 * 
-	 * @param etag not null!
+	 * @param etag 
 	 * @return false if do not have e-tag in request or does not match
 	 */
-	public boolean matchETag(final String etag) {
+	public boolean matchETag(@Nonnull final String etag) {
 		
 		String tag = request.getHeader("If-None-Match");
 		if (Str.Utils.notBlank(tag)) {
@@ -252,6 +284,15 @@ public class RequestContext implements Serializable {
 		} else {
 			return false;
 		}
+	}
+	
+	public void setTimeModified(long timeModified) {
+		this.timeModified = timeModified;
+		response.setHeader("Last-Modified", Long.toString(timeModified));
+	}
+	
+	public long timeModified() {
+		return timeModified;
 	}
 	
 	public long lastModified() {
@@ -264,10 +305,24 @@ public class RequestContext implements Serializable {
 		}
 	}
 	
+	/**
+	 * set max age and expire time
+	 * @param second
+	 */
+	public void setCacheControl(int second) {
+		String info =  "max-age=" + second;
+		response.setHeader("Cache-Control", info);
+		response.setHeader("Expires", Long.toString(timeModified + second * 1000L));
+	}
+	
 	//012345678
 	//max-age=0
 	//max-age=10
-	public int cacheControl() {
+	/**
+	 * get max age header
+	 * @return -1 if not specified
+	 */
+	public int maxAge() {
 		
 		String cacheCtrl = request.getHeader("Cache-Control");
 		if (Str.Utils.notBlank(cacheCtrl)) {
@@ -280,26 +335,7 @@ public class RequestContext implements Serializable {
 				return Integer.parseInt(cacheCtrl.substring(8));
 			}
 		}
-		return 0;
-	}
-	
-	public void setETag(final String tag) {
-		response.setHeader("ETag", tag);
-	}
-
-	public long timeModified() {
-		return timeModified;
-	}
-	
-	public void setTimeModified(long timeModified) {
-		this.timeModified = timeModified;
-		response.setHeader("Last-Modified", Long.toString(timeModified));
-	}
-	
-	public void setCacheControl(int second) {
-		String info =  "max-age=" + second;
-		response.setHeader("Cache-Control",info);
-		response.setHeader("Expires", Long.toString(timeModified + second * 1000L));
+		return -1;
 	}
 	
 	public boolean canBeGZipped() {
@@ -525,13 +561,83 @@ public class RequestContext implements Serializable {
 		return ret == null ? ret : def;
 	}
 
-// -----------------------------------------------------------------------------
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder(1024);
+		b.append("{\r\n\tRequestContext : {\r\n \t\t controlCenter : \"" + controlCenter 
+				+ "\",\r\n \t\t request : \"" + request 
+				+ "\",\r\n \t\t response : \"" + response 
+				+ "\",\r\n \t\t httpmMthod : \"" + httpmMthod 
+				+ "\",\r\n \t\t timeModified : \"" + timeModified 
+				+ "\",\r\n \t\t path : \"" + path 
+				+ "\",\r\n \t\t query string : \"" + request.getQueryString() 
+				+ "\",\r\n \t\t remote ddress : \"" + request.getRemoteAddr() 
+				+ "\"\r\n\t}\r\n");
+		
+		int len = 0;
+		boolean added = false;
+		b.append("\tRequest Parameters : {\r\n");
+		Enumeration<String> params = request.getParameterNames();
+		while (params.hasMoreElements()) {
+			String paramName = params.nextElement();
+			String var = request.getParameter(paramName);
+			b.append("\t\t").append(paramName).append(" : \"").append(var).append("\", \r\n");
+			added = true;
+		}
+		if (added) {
+			len = b.length();
+			b.delete(len - 4, len - 3);
+		}
+		added = false;
+		
+		b.append("\t}\r\n\tRequest Attributes : {\r\n");
+		params = request.getAttributeNames();
+		while (params.hasMoreElements()) {
+			String paramName = params.nextElement();
+			Object var = request.getAttribute(paramName);
+			b.append("\t\t").append(paramName).append(" : \"").append(var).append("\", \r\n");
+			added = true;
+		}
+		if (added) {
+			len = b.length();
+			b.delete(len - 4, len - 3);
+		}
+		added = false;
+		
+		HttpSession session = request.getSession(false);
+		b.append("\t}\r\n\tSession Attributes : {\r\n");
+		if (session != null) {
+			b
+			.append(" \t\t sessionid : ").append(session.getId())
+			.append(",\r\n \t\t creationTime : ").append(session.getCreationTime())
+			.append(",\r\n \t\t lastAccessedTime : ").append(session.getLastAccessedTime())
+			.append(",\r\n \t\t maxInactiveInterval : ").append(session.getMaxInactiveInterval());
+			
+			params = session.getAttributeNames();
+			while (params.hasMoreElements()) {
+				String paramName = params.nextElement();
+				Object var = request.getAttribute(paramName);
+				b.append(", \r\n \t\t ")
+				.append(paramName).append(" : \"").append(var).append('\"');
+			}
+		}
+		
+		b.append("\r\n\t}\r\n\tServlet Context Attributes : {\r\n");
+		params = context().getAttributeNames();
+		while (params.hasMoreElements()) {
+			String paramName = params.nextElement();
+			Object var = request.getAttribute(paramName);
+			b.append("\t\t").append(paramName).append(" : \"").append(var).append("\", \r\n");
+			added = true;
+		}
+		if (added) {
+			len = b.length();
+			b.delete(len - 4, len - 3);
+		}
+		added = false;
+		b.append("\r\n\t}\r\n}");
+		return b.toString();
+	}
 
 }
-//private static final String METHOD_GET		= "GET";
-//private static final String METHOD_POST		= "POST";
-//private static final String METHOD_PUT		= "PUT";
-//private static final String METHOD_DELETE	= "DELETE";
-//private static final String METHOD_HEAD		= "HEAD";
-//private static final String METHOD_OPTIONS	= "OPTIONS";
-//private static final String METHOD_TRACE	= "TRACE";
+

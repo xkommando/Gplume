@@ -14,6 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 /**
+ * Why use many small action objects instead of a big one with many logic?
+ * speed.
+ * 
  * @author BowenCai
  *
  */

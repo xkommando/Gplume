@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import javax.annotation.Nullable;
 
 import com.caibowen.gplume.common.CacheBuilder;
-import com.caibowen.gplume.misc.Hash;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.JspAction;
@@ -106,8 +105,7 @@ public class ActionBuilder extends RestActionBuilder implements IActionBuilder {
 				
 				final MethodHandle handle$ = 
 						object != null ? handle.bindTo(object) : handle;
-				
-				return actMap.get(Hash.hash(uri, handle, hasRequestContext), 
+				return actMap.get(hash(uri, handle, hasRequestContext), 
 									new CacheBuilder<IAction>() {
 										@Override
 										public IAction build() {
@@ -119,7 +117,7 @@ public class ActionBuilder extends RestActionBuilder implements IActionBuilder {
 			} else if (retKlass.equals(void.class)) {
 				MethodHandle handle = findMethodeHandle(method, SIMPLE_TYPE);
 				final MethodHandle handle$ = object != null ? handle.bindTo(object) : handle;
-				return actMap.get(Hash.hash(uri, handle, handle), 
+				return actMap.get(hash(uri, handle, handle), 
 						new CacheBuilder<IAction>() {
 							@Override
 							public IAction build() {
@@ -129,7 +127,7 @@ public class ActionBuilder extends RestActionBuilder implements IActionBuilder {
 				
 			} else if (IView.class.isAssignableFrom(retKlass)){
 				final Method $$ = method; final Object $$$ = object; 
-				return actMap.get(Hash.hash(uri, method, object, hasRequestContext), 
+				return actMap.get(hash(uri, method, object, hasRequestContext), 
 						new CacheBuilder<IAction>() {
 							@Override
 							public IAction build() {
@@ -142,6 +140,15 @@ public class ActionBuilder extends RestActionBuilder implements IActionBuilder {
 						"null uri || null controller object || null method handle");
 			}
 		}
+	}
+	
+	static int hash(@Nullable Object...args) {
+		int h = 1;
+		for (int i = 0; i < args.length; i++) {
+			Object object = args[i];
+			h = 31 * h + (object == null ? 0 : object.hashCode());
+		}
+		return h;
 	}
 
 }

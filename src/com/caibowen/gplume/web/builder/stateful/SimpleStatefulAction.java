@@ -13,26 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.test.junit;
+package com.caibowen.gplume.web.builder.stateful;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.invoke.MethodHandle;
+
+import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
 
 
 /**
- * specify manifest file path
- * file will be read using classLoader.getResourceAsStream
- * @see JunitPal
+ * void ss(MyState s, RequestContext ctx)
  * 
  * @author BowenCai
  *
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface ManifestPath {
-	String value();
+public class SimpleStatefulAction extends SimpleAction {
+
+	private static final long serialVersionUID = -8968416219169871432L;
+	protected final StateGen gen;
+	
+	public SimpleStatefulAction(String u, MethodHandle handle, StateGen g) {
+		super(u, handle);
+		this.gen = g;
+	}
+	
+
+	@Override
+	public void perform(RequestContext req) throws Throwable {
+		req.putAttr(ACTION_NAME, this);
+		Object state = gen.gen(req);
+		methodHandle.invoke(state, req);
+	}
+
 }

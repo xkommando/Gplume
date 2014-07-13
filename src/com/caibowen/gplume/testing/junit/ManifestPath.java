@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.annotation;
+package com.caibowen.gplume.testing.junit;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,31 +22,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
-
 /**
+ * specify manifest file path
+ * file will be read using classLoader.getResourceAsStream
+ * @see JunitPal
  * 
  * @author BowenCai
  *
  */
-@Target({ElementType.PARAMETER, ElementType.FIELD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ContextAttri {
-	
-	/**
-	 * The name of the session attribute to bind to.
-	 * default name is the parameter/field name
-	 */
-	String value() default "";
-	
-
-	/**
-	 * Whether the parameter is required.
-	 */
-	boolean nullable() default true;
-	
-	/**
-	 * default value of this attribute, used if is null
-	 */
-	String defaultVal() default "";
+public @interface ManifestPath {
+	String value();
 }

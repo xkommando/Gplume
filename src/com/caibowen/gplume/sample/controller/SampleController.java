@@ -81,6 +81,9 @@ public class SampleController {
 			"/index.html",
 			"/index.jsp"})
 	public String index(RequestContext context) {
+		System.out.println("SampleController.index()");
+		context.putAttr("aaa", 64464);
+		System.out.println(context.toString());
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		return "/index.jsp";
 	}

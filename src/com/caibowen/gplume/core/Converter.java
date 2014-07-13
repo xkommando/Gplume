@@ -17,6 +17,7 @@ package com.caibowen.gplume.core;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -145,15 +146,12 @@ public class Converter {
 		@Nullable
 		public static<T> Object translateStr(String var, Class<T> type) {
 
-			if (var == null || type == null) {
+			if (var == null || type == null || type == String.class) {
 				return var;
 			}
 			var = var.trim();
 			
-			if (type == String.class) {
-				return var;
-				
-			} else if (type == byte[].class || type == Byte[].class) {
+			if (type == byte[].class || type == Byte[].class) {
 				return var.getBytes();
 			 
 			} else if (type == Boolean.class || type == boolean.class) {
@@ -460,7 +458,7 @@ public class Converter {
 		FORMAT_DAY = new SimpleDateFormat("yyyy-MM-dd");
 		
 		
-		TYPE_TABLE = new HashMap<String, Class<?>>();
+		TYPE_TABLE = new HashMap<String, Class<?>>(128);
 		
 		TYPE_TABLE.put("byte", byte.class);
 		TYPE_TABLE.put("Byte", Byte.class);
@@ -504,23 +502,33 @@ public class Converter {
 
 		TYPE_TABLE.put("BigDecimal", BigDecimal.class);
 		TYPE_TABLE.put("BigInteger", BigInteger.class);
-		
+		TYPE_TABLE.put("BigDecimal[]", BigDecimal[].class);
+		TYPE_TABLE.put("BigInteger[]", BigInteger[].class);
+
 		TYPE_TABLE.put("string", String.class);
 		TYPE_TABLE.put("String", String.class);
+		TYPE_TABLE.put("string[]", String[].class);
+		TYPE_TABLE.put("String[]", String[].class);
 
 		TYPE_TABLE.put("enum", Enum.class);
 		TYPE_TABLE.put("Enum", Enum.class);
+		TYPE_TABLE.put("enum[]", Enum[].class);
+		TYPE_TABLE.put("Enum[]", Enum[].class);
 		
 		TYPE_TABLE.put("date", java.util.Date.class);
 		TYPE_TABLE.put("Date", java.util.Date.class);
+		TYPE_TABLE.put("date[]", java.util.Date[].class);
+		TYPE_TABLE.put("Date[]", java.util.Date[].class);
 
 		TYPE_TABLE.put("Class", Class.class);
 		TYPE_TABLE.put("Class[]", Class[].class);
+		TYPE_TABLE.put("Type", Type.class);
 		TYPE_TABLE.put("Void", Void.class);
 		TYPE_TABLE.put("void", void.class);
 		TYPE_TABLE.put("Object", Object.class);
 		TYPE_TABLE.put("Object[]", Object[].class);
 
+		TYPE_TABLE.put("Throwable", Throwable.class);
 		TYPE_TABLE.put("Exception", Exception.class);
 		TYPE_TABLE.put("Error", Error.class);
 	}

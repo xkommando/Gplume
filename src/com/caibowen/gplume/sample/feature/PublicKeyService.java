@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.caibowen.gplume.sample.feature;
 
-import java.security.Key;
 import java.security.PublicKey;
 
 
