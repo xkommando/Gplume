@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
 import com.caibowen.gplume.logging.Logger;
 import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.PathValParser;
+import com.caibowen.gplume.web.builder.actions.PathValResolver;
 
 
 /**
@@ -36,21 +36,20 @@ public class PathValDefaltSetter extends ReqDefaultValSetter {
 	private static final long serialVersionUID = -4078115932844698160L;
 	private static final Logger LOG = LoggerFactory.getLogger(ReqDefaultValSetter.class);
 	
-
-	final PathValParser parser;
+	final PathValResolver resolver;
 	
-	PathValDefaltSetter(MethodHandle getter, String name, Field field,
+	public PathValDefaltSetter(MethodHandle getter, Field field,
 			boolean nullable, Object defaultValue
-			 , PathValParser p) {
-		super(getter, name, field, nullable, defaultValue);
-		parser = p;
+			 , PathValResolver p) {
+		super(getter, null, field, nullable, defaultValue);
+		resolver = p;
 	}
 	
 	@Override
 	public void setWith(RequestContext req, Object state) {
 		Object var = null;
 		try {
-			var = parser.parseAndCast(req.path, null);
+			var = resolver.resolveAndCast(req.path, null);
 		} catch (Throwable e) {
 			LOG.warn(
 			"request [" + req.path + "]\r\n"
@@ -71,7 +70,7 @@ public class PathValDefaltSetter extends ReqDefaultValSetter {
 		"request [" + req.path + "]\r\n"
 		+ "failed setting field [" + field.getName()
 		+ "]\r\n in class [" + state.getClass().getName() + "]" 
-		+ " with val named [" + name 
+		+ " with arg named [" + resolver.getArgName() 
 			+ "] \r\n and value [" + (var == null ? "null" : var.toString()) + "]"
 		, e);
 		}

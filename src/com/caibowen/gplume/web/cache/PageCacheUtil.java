@@ -39,6 +39,9 @@ import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
+
 
 /**
  * A collection of response processing utilities, which are shared between 2 or more filters
@@ -49,6 +52,8 @@ import javax.servlet.http.HttpServletResponse;
  * @version $Id: ResponseUtil.java 744 2008-08-16 20:10:49Z gregluck $
  */
 public final class PageCacheUtil {
+	private static final Logger LOG = LoggerFactory.getLogger(Package.class);
+	
     /**
      * Checks if the request uri is an include. These cannot be gzipped.
      */
@@ -82,7 +87,7 @@ public final class PageCacheUtil {
      * This is in java or elsewhere.
      * <p/>
      * On a unix system to reproduce do <code>gzip -n empty_file</code>. -n tells gzip to not
-     * include the file name. The resulting file size is 20 bytes.
+     * include the file id. The resulting file size is 20 bytes.
      * <p/>
      * Therefore 20 bytes can be used indicate that the gzip byte[] will be empty when ungzipped.
      */
@@ -103,7 +108,7 @@ public final class PageCacheUtil {
 
         //Check for 0 length body
         if (compressedBytes.length == EMPTY_GZIPPED_CONTENT_SIZE) {
-System.out.println("===>>> DEBUG " + request.getRequestURL() + " resulted in an empty response.");
+LOG.debug("===>>> DEBUG " + request.getRequestURL() + " resulted in an empty response.");
             return true;
         } else {
             return false;
@@ -129,7 +134,7 @@ System.out.println("===>>> DEBUG " + request.getRequestURL() + " resulted in an 
         //Check for NO_CONTENT
         if (responseStatus == HttpServletResponse.SC_NO_CONTENT) {
 
-System.out.println("====>>> DEBUG  " + request.getRequestURL() + " resulted in a " + HttpServletResponse.SC_NO_CONTENT
+        	LOG.debug("====>>> DEBUG  " + request.getRequestURL() + " resulted in a " + HttpServletResponse.SC_NO_CONTENT
         + " response. Removing message body in accordance with RFC2616.");
             return true;
         }
@@ -137,7 +142,7 @@ System.out.println("====>>> DEBUG  " + request.getRequestURL() + " resulted in a
         //Check for NOT_MODIFIED
         if (responseStatus == HttpServletResponse.SC_NOT_MODIFIED) {
 
-System.out.println("====>>> DEBUG  " +request.getRequestURL() + " resulted in a " + HttpServletResponse.SC_NOT_MODIFIED
+        	LOG.debug("====>>> DEBUG  " +request.getRequestURL() + " resulted in a " + HttpServletResponse.SC_NOT_MODIFIED
         + " response. Removing message body in accordance with RFC2616.");
             return true;
         }

@@ -38,7 +38,7 @@ import com.caibowen.gplume.misc.Str;
  * 
  * The Injector set properties using public setters only.
  * 
- * The inject look up properties based on the field class, or name,
+ * The inject look up properties based on the field class, or id,
  * 
  * Note that inherited fields that are marked @Inject and 
  * contains a correspondent public setter
@@ -48,9 +48,9 @@ import com.caibowen.gplume.misc.Str;
  * throws IllegalAccessException 
  * else try
  * 1. @Named("id") 				-> get by ${id}
- * 2. @Named() no value set  	-> get by field name
+ * 2. @Named() no value set  	-> get by field id
  * 3. @Inject 					-> get by field class
- * 4. @Inject 					-> get by field name
+ * 4. @Inject 					-> get by field id
  * 
  * 	still not found -> failed !
  * 
@@ -72,9 +72,9 @@ public class Injector implements IBeanAssemblerAware {
 	 * for non-public filed without public setter throws IllegalAccessException
 	 * else try 
 	 * 1. @Named("id") 					-> get by ${id} 
-	 * 2. @Named() no value set 		-> get by field name 
+	 * 2. @Named() no value set 		-> get by field id 
 	 * 3. @Inject 						-> get by field class 
-	 * 4. @Inject 						-> get by field name
+	 * 4. @Inject 						-> get by field id
 	 * 
 	 * still not found -> failed !
 	 * 
@@ -119,7 +119,7 @@ public class Injector implements IBeanAssemblerAware {
 		} else if (null != (var = beanAssembler.getBean(field.getName()))) {
 			if (field.getType().isAssignableFrom(var.getClass())){
 				LOG.warn("cannot find bean for field [{0}] in class [{1}]"
-						+ "\r\n But find bean in beanAssemble with the same ID as the field name[{2}]"
+						+ "\r\n But find bean in beanAssemble with the same ID as the field id[{2}]"
 						+ "\r\n Setting field with this bean[{4}]"
 						, field.getName()
 						, object.getClass().getName()
@@ -138,7 +138,7 @@ public class Injector implements IBeanAssemblerAware {
 		} else {
 			throw new NoSuchElementException("faild to set field[" 
 					+ field.getName() + "] in class[" + object.getClass().getName() +"]"
-					+ "\r\n cannot find bean with the assignale type or specified name for this field");
+					+ "\r\n cannot find bean with the assignale type or specified id for this field");
 		}	
 	}
 	
@@ -174,7 +174,7 @@ public class Injector implements IBeanAssemblerAware {
 //		public void setBb(int bb) {
 //			this.bb = bb;
 //		}
-//		public void name() {
+//		public void id() {
 //			System.out.println(bb);
 //		}
 //	}
@@ -185,7 +185,7 @@ public class Injector implements IBeanAssemblerAware {
 //			this.cc = cc;
 //		}
 //		@Override
-//		public void name() {
+//		public void id() {
 //			System.out.println( bb + "  " + cc);
 //		}
 //	}
@@ -201,7 +201,7 @@ public class Injector implements IBeanAssemblerAware {
 //			this.bb = bb;
 //		}
 //		@Override
-//		public void name() {
+//		public void id() {
 //			System.out.println( bb + "  " + cc + "   " + dd);
 //		}
 //	}

@@ -27,15 +27,15 @@ import com.caibowen.gplume.web.builder.stateful.IStateSetter;
  * default setter 
  * set value from RequestContext : 
  * @ContextAttr
- * @CookieAttr
+ * @CookieVal
  * @ReqAttr
- * @ReqParam
+ * @ReqParam // no default val
  * @SessionAttr
  *  
  * @author BowenCai
  *
  */
-class ReqSetter implements IStateSetter {
+public class ReqSetter implements IStateSetter {
 
 	private static final long serialVersionUID = 8117499794418545935L;
 	@Nonnull 
@@ -50,7 +50,7 @@ class ReqSetter implements IStateSetter {
 	
 	protected final boolean nullable;
 	
-	ReqSetter(MethodHandle getter, String name, Field field,
+	public ReqSetter(MethodHandle getter, String name, Field field,
 			boolean nullable) {
 		this.getter = getter;
 		this.name = name;
@@ -73,7 +73,12 @@ class ReqSetter implements IStateSetter {
 			+ "]\r\n for field [" + field.getName() 
 			+ "]\r\n in class [" + state.getClass().getName() + "]" , e);
 		}
-		
+		if (val == null && !nullable) {
+			throw new RuntimeException(
+			"null request attribute for non-null property [" 
+					+ name + "]\r\n for field [" + field.getName()
+					+ "] in class [" + state.getClass().getName() + "] ");
+		}
 		try {
 			field.set(state, val);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
@@ -87,6 +92,13 @@ class ReqSetter implements IStateSetter {
 			+ "] \r\n and value [" + (val == null ? "null" : val.toString()) + "]"
 		, e);
 		}
+		
+	}
+
+	@Override
+	public String toString() {
+		return "ReqSetter [getter=" + getter + ", name=" + name + ", field="
+				+ field + ", nullable=" + nullable + "]";
 	}
 
 }

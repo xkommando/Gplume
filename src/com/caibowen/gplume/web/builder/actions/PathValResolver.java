@@ -26,14 +26,14 @@ import com.caibowen.gplume.core.Converter;
  * @author BowenCai
  *
  */
-public class PathValParser {
+public class PathValResolver {
 
 	final int startIdx; // start idx of arg
 	final String argName;
 	final Class<?> argType;
 	final String suffix;
 	
-	public PathValParser(int startIdx, String argName, Class<?> argType,
+	public PathValResolver(int startIdx, String argName, Class<?> argType,
 			String suffix) {
 		this.startIdx = startIdx;
 		this.argName = argName;
@@ -42,7 +42,7 @@ public class PathValParser {
 	}
 	
 	@Nullable
-	public Object parseAndCast(String path, String name) {
+	public Object resolveAndCast(String path, String name) {
 		return Converter.slient.translateStr(
 				parseArg(path), argType);
 	}
@@ -52,6 +52,7 @@ public class PathValParser {
 		
 		String argVar;
 		if (suffix.endsWith("*")) {
+			//e.g., abc/arg={}*
 			return argVar = uri.substring(startIdx);
 		} else {
 			int idx = uri.lastIndexOf(suffix);

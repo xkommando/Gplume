@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
 public @interface ReqAttr {
 	
 	/**
-	 * The name of the request attribute to bind to.
+	 * The id of the request attribute to bind to.
 	 */
 	String value() default "";
 

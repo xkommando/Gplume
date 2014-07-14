@@ -42,7 +42,7 @@
 //import javax.persistence.Table;
 //
 //@Entity
-//@Table(name="wk_chapter")
+//@Table(id="wk_chapter")
 //public class Chapter implements Serializable {
 //
 //	private static final long serialVersionUID = -1959747962303882199L;
@@ -55,7 +55,7 @@
 //	public Timestamp 		time_created;
 //	
 //	@Column
-//	public String 			name;
+//	public String 			id;
 //	
 //	@Column
 //	public String 			description;
@@ -74,10 +74,10 @@
 //		this.time_created = time_created;
 //	}
 //	public String getName() {
-//		return name;
+//		return id;
 //	}
-//	public void setName(String name) {
-//		this.name = name;
+//	public void setName(String id) {
+//		this.name = id;
 //	}
 //	public String getDescription() {
 //		return description;
@@ -93,7 +93,7 @@
 //		result = prime * result
 //				+ ((description == null) ? 0 : description.hashCode());
 //		result = prime * result + id;
-//		result = prime * result + ((name == null) ? 0 : name.hashCode());
+//		result = prime * result + ((id == null) ? 0 : id.hashCode());
 //		result = prime * result
 //				+ ((time_created == null) ? 0 : time_created.hashCode());
 //		return result;
@@ -114,10 +114,10 @@
 //			return false;
 //		if (id != other.id)
 //			return false;
-//		if (name == null) {
+//		if (id == null) {
 //			if (other.name != null)
 //				return false;
-//		} else if (!name.equals(other.name))
+//		} else if (!id.equals(other.name))
 //			return false;
 //		if (time_created == null) {
 //			if (other.time_created != null)
@@ -129,6 +129,6 @@
 //	@Override
 //	public String toString() {
 //		return "Chapter [id=" + id + ", time_created=" + time_created
-//				+ ", name=" + name + ", description=" + description + "]";
+//				+ ", id=" + id + ", description=" + description + "]";
 //	}
 //}

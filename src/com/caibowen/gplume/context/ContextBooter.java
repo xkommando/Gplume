@@ -46,7 +46,7 @@ public class ContextBooter {
 					= LoggerFactory.getLogger(ContextBooter.class);
 
 	/**
-	 * bean name for internationalization
+	 * bean id for internationalization
 	 */
 	private static final String I18N_SERVICE_BEAN_ID = "i18nService";
 	

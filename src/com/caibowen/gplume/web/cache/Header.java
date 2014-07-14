@@ -51,7 +51,7 @@ public class Header<T extends Serializable> implements Serializable {
     /**
      * Create a new Header
      * 
-     * @param name Name of the header, may not be null
+     * @param id Name of the header, may not be null
      * @param value Value of the header, may not be null
      */
     public Header(String name, T value) {
@@ -79,7 +79,7 @@ public class Header<T extends Serializable> implements Serializable {
      */
     @Override
     public String toString() {
-        return "Header[name=" + this.name + ", value=" + this.value + "]";
+        return "Header[id=" + this.name + ", value=" + this.value + "]";
     }
 
 	@Override

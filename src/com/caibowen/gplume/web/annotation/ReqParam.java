@@ -32,8 +32,8 @@ import java.lang.annotation.Target;
 public @interface ReqParam {
 
 	/**
-	 * The name of the request parameter to bind to.
-	 * default name is the parameter/field name
+	 * The id of the request parameter to bind to.
+	 * default id is the parameter/field id
 	 */
 	String value() default "";
 

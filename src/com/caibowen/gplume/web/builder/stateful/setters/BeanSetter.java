@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 
 import javax.annotation.Nonnull;
 
+import com.caibowen.gplume.context.bean.IBeanAssembler;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.stateful.IStateSetter;
 
@@ -26,33 +27,47 @@ import com.caibowen.gplume.web.builder.stateful.IStateSetter;
 
 /**
  * set object from the IoC rather than object from servlet.
- * 
- * Note that instead of retrieving bean from bean factory each time needed
- * this setter will keep a ref to the bean at instantiation
- * thus the bean injected maybe outdated.
+ * this setter will try to get bean 
+ * from IBeanAssembler with the given ID each time bean is needed.
+ * @Inject
+ * @Named
+// * Note that instead of retrieving bean from bean factory each time needed
+// * this setter will keep a ref to the bean at instantiation
+// * thus the bean injected maybe outdated.
  * 
  * @author BowenCai
  *
  */
-class BeanSetter implements IStateSetter {
+public class BeanSetter implements IStateSetter {
 
 	private static final long serialVersionUID = -7793827519595236754L;
 	
 	@Nonnull 
 	protected final Field field;
+
 	@Nonnull 
-	protected final Object bean;
+	protected IBeanAssembler assembler;
+	@Nonnull
+	protected final String id;
 	
 	protected final boolean nullable;
 	
-	BeanSetter(Field field, Object bean, boolean nullable) {
+	public BeanSetter(Field field, IBeanAssembler assembler, String name, boolean nullable) {
 		this.field = field;
-		this.bean = bean;
+		this.id = name;
 		this.nullable = nullable;
+		this.assembler = assembler;
 	}
 	
 	@Override
 	public void setWith(RequestContext req, Object state) {
+		Object bean = assembler.getBean(id);
+		if (bean == null && !nullable) {
+			throw new RuntimeException("request [" + req.path + "]\r\n"
+					+ "failed setting field [" + field.getName()
+					+ "]\r\n in class [" + state.getClass().getName() + "]"
+					+ "\r\n Cause: Cannot get bean with ID [" + id + "]");
+		}
 		try {
 			field.set(state, bean);
 		} catch (IllegalArgumentException | IllegalAccessException e) {

@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
+
 /**
  * 
  * @author BowenCai
@@ -30,18 +31,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface CookieAttr {
+public @interface PathVal {
 	
-	/**
-	 * The name of the cookie attribute to bind to.
-	 */
-	String value() default "";
-
-	/**
-	 * Whether the parameter is nullable.
-	 */
 	boolean nullable() default true;
-	
+
 	/**
 	 * default value of this attribute, used if is null
 	 */

@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 public @interface Controller {
 
 	/**
-	 * indicate a suggestion for a logical component name,
+	 * indicate a suggestion for a logical component id,
 	 */
 	String value() default "";
 

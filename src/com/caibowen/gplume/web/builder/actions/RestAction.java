@@ -33,28 +33,28 @@ public class RestAction extends SimpleAction {
 	
 	private static final long serialVersionUID = 7479824844662522176L;
 
-	PathValParser parser;
+	final PathValResolver resolver;
 	final boolean inMethodCall;
 	
 	public RestAction(String uri, MethodHandle handle, 
 						int start, String name, Class<?> type, String s, boolean call) {
 		
 		super(uri, handle);
-		parser = new PathValParser(start, name, type, s);
+		resolver = new PathValResolver(start, name, type, s);
 		inMethodCall = call;
 	}
 	
 	@Override
 	public void perform(RequestContext requestContext) throws Throwable {
 		
-		Object var = parser.parseAndCast(requestContext.path, null);
+		Object var = resolver.resolveAndCast(requestContext.path, null);
 		
 		requestContext.putAttr(ACTION_NAME, this);
 
 		if (inMethodCall) {
 			methodHandle.invoke(var, requestContext);
 		} else {
-			requestContext.putAttr(parser.getArgName(), var);
+			requestContext.putAttr(resolver.getArgName(), var);
 			methodHandle.invoke(requestContext);
 		}
 	}

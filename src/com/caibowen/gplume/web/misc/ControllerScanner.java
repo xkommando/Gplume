@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.misc;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.annotation.Intercept;
 import com.caibowen.gplume.web.builder.IAction;
-import com.sun.jndi.url.corbaname.corbanameURLContextFactory;
 
 
 /**
@@ -43,9 +41,9 @@ import com.sun.jndi.url.corbaname.corbanameURLContextFactory;
  * 
  *     
     <bean class="com.caibowen.gplume.web.misc.ControllerScanner">
-        <property name="pkg" value="com.caibowen.web.conroller"/>
-        <property name="doInject" value="true"/>
-        <property name="controlCenterCallBack" ref="controlCenter"/>
+        <property id="pkg" value="com.caibowen.web.conroller"/>
+        <property id="doInject" value="true"/>
+        <property id="controlCenterCallBack" ref="controlCenter"/>
     </bean>
  * 
  * 
@@ -100,7 +98,6 @@ public class ControllerScanner implements InitializingBean {
 				
 				if (mayBeController(class1)) {
 					LOG.debug("\t>>> find controller[" + class1.getName() + "]");
-					Constructor<?> ctor = class1.getConstructor();
 					ctrls.add(class1.newInstance());
 				}
 			}

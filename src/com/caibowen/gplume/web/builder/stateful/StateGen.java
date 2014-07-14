@@ -36,7 +36,6 @@ public class StateGen {
 	/**
 	 * should be set accessible if necessary
 	 */
-	Class<?> orignalKlass;
 	Constructor<?> ctor;
 	
 	public Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {

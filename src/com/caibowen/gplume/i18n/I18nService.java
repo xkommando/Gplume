@@ -57,7 +57,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 			= new EnumMap<Dialect, NativePackage>(Dialect.class);
 	
 	/**
-	 * key: ISO 639-1 name
+	 * key: ISO 639-1 id
 	 * value: file path
 	 * @param pkgFiles the pkgFiles to set
 	 */
@@ -193,7 +193,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 //	}
 	
 	/**
-	 * resolve ISO 639-1 name
+	 * resolve ISO 639-1 id
 	 * zh_CN
 	 * en
 	 * @param localeInfo

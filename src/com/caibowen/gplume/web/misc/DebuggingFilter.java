@@ -96,7 +96,7 @@ System.out.println("---   browzer   ---");
 			if (name.equals("ETag") || name.equals("Cache-Control") || name.equals("If-None-Match")
 					|| name.equals("If-Modified-Since") || name.equals("Last-Modified")) {
 				String var = request.getHeader(name);
-				System.out.println("name[" + name + "]  var[" + var + "]");
+				System.out.println("id[" + name + "]  var[" + var + "]");
 			}
 		}
 System.out.println("---   browzer   ---");

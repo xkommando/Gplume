@@ -72,7 +72,7 @@ import com.caibowen.gplume.cache.ICacheProvider;
  * <p/>
  * The following init-params are supported:
  * <ol>
- * <li>cacheName - the name in ehcache.xml used by the filter.
+ * <li>cacheName - the id in ehcache.xml used by the filter.
  * <li>blockingTimeoutMillis - the time, in milliseconds, to wait for the filter
  * chain to return with a response on a cache miss. This is useful to fail fast
  * in the event of an infrastructure failure.
@@ -86,7 +86,7 @@ public abstract class CachingFilter implements Filter {
     
     /**
      * The cache holding the web pages. Ensure that all threads for a given
-     * cache name are using the same instance of this.
+     * cache id are using the same instance of this.
      */
     protected ICacheProvider cacheProvider;
 
@@ -242,7 +242,7 @@ System.out.println("building new cache[" + pageData.getDateCreated().getTime() +
         final Collection<Header<? extends Serializable>> headers = pageInfo
                 .getHeaders();
 
-        // Track which headers have been set so all headers of the same name
+        // Track which headers have been set so all headers of the same id
         // after the first are added
         final TreeSet<String> setHeaders = new TreeSet<>(
                 String.CASE_INSENSITIVE_ORDER);

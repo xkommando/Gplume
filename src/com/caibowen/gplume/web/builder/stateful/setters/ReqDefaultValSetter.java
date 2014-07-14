@@ -18,7 +18,7 @@ package com.caibowen.gplume.web.builder.stateful.setters;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.caibowen.gplume.logging.Logger;
 import com.caibowen.gplume.logging.LoggerFactory;
@@ -29,9 +29,8 @@ import com.caibowen.gplume.web.RequestContext;
 /**
  * set value from RequestContext : 
  * @ContextAttr
- * @CookieAttr
+ * @CookieVal
  * @ReqAttr
- * @ReqParam
  * @SessionAttr
  * 
  * setter with default value
@@ -41,15 +40,15 @@ import com.caibowen.gplume.web.RequestContext;
  * @author BowenCai
  *
  */
-class ReqDefaultValSetter extends ReqSetter {
+public class ReqDefaultValSetter extends ReqSetter {
 
 	private static final long serialVersionUID = 7151958851575269082L;
 	private static final Logger LOG = LoggerFactory.getLogger(ReqDefaultValSetter.class);
 	
-	@Nonnull
+	@Nullable
 	protected final Object defaultVal;
 	
-	ReqDefaultValSetter(MethodHandle getter, String name, Field field,
+	public ReqDefaultValSetter(MethodHandle getter, String name, Field field,
 			boolean nullable, Object defaultValue) {
 		super(getter, name, field, nullable);
 		defaultVal = defaultValue;
@@ -84,5 +83,12 @@ class ReqDefaultValSetter extends ReqSetter {
 			+ "] \r\n and value [" + (var == null ? "null" : var.toString()) + "]"
 		, e);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "ReqDefaultValSetter [defaultVal=" + defaultVal + ", getter="
+				+ getter + ", name=" + name + ", field=" + field
+				+ ", nullable=" + nullable + "]";
 	}
 }

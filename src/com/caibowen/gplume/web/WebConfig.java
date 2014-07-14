@@ -35,15 +35,15 @@ import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 
 /*
 	<bean id="controlCenter" class="com.caibowen.gplume.web.SimpleControlCenter">
-		<property name="preProcessor" ref="headPrePrcessor"/>
+		<property id="preProcessor" ref="headPrePrcessor"/>
         
-		<property name="actionFactory">
+		<property id="actionFactory">
 		    <bean class="com.caibowen.gplume.web.action.ActionFactory" />
 		</property>
 		
-		<property name="injector" ref="injector"/>
+		<property id="injector" ref="injector"/>
 		
-		<property name="errorHandler">
+		<property id="errorHandler">
 		    <bean class="com.caibowen.web.misc.ErrorHandler" />
 		</property>
 		    <list> 
@@ -56,9 +56,9 @@ import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 	NEW
 	
 	<bean class="com.caibowen.gplume.web.EasyConfig">
-		<property name="preProcessor" ref="somePreprocessor"/>
-		<property name="errorHandler" ref="someErrorHandler"/>
-		<property name="pkgs">
+		<property id="preProcessor" ref="somePreprocessor"/>
+		<property id="errorHandler" ref="someErrorHandler"/>
+		<property id="pkgs">
 			<list>
 				<value>package1<value>
 				<value>package2<value>

@@ -45,13 +45,13 @@ public class ViewRestAction extends RestAction {
 
 	@Override
 	public void perform(RequestContext context) throws Throwable {
-		Object var = parser.parseAndCast(context.path, null);
+		Object var = resolver.resolveAndCast(context.path, null);
 		context.putAttr(ACTION_NAME, this);
 		Object v = null;
 		if (inMethodCall) {
 			v = method.invoke(controller, var, context);
 		} else {
-			context.putAttr(parser.getArgName(), var);
+			context.putAttr(resolver.getArgName(), var);
 			v = method.invoke(controller, var);
 		}
 		if (v != null) {

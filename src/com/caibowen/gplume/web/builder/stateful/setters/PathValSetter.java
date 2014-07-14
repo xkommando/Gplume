@@ -21,14 +21,14 @@ import java.lang.reflect.Field;
 import javax.annotation.Nonnull;
 
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.PathValParser;
+import com.caibowen.gplume.web.builder.actions.PathValResolver;
 
 
 
 /**
  * set value from uri
  * no default value
- * @PathValue
+ * @PathVal
  * 
  * @author BowenCai
  *
@@ -36,13 +36,13 @@ import com.caibowen.gplume.web.builder.actions.PathValParser;
 public class PathValSetter extends ReqSetter  {
 
 	private static final long serialVersionUID = 5064087603625572454L;
+	// resolver resolve
+	final PathValResolver resolver;
 	
-	final PathValParser parser;
-	
-	PathValSetter(MethodHandle getter, String name, Field field,
-			boolean nullable, PathValParser p) {
-		super(getter, name, field, nullable);
-		this.parser = p;
+	public PathValSetter(MethodHandle getter, Field field,
+			boolean nullable, PathValResolver p) {
+		super(getter, null, field, nullable);
+		this.resolver = p;
 	}
 	
 	@Override
@@ -51,7 +51,7 @@ public class PathValSetter extends ReqSetter  {
 
 		Object val = null;
 		try {
-			val = parser.parseAndCast(req.path, null);
+			val = resolver.resolveAndCast(req.path, null);
 		} catch (Throwable e) {
 			if (!nullable)
 				throw new RuntimeException(
@@ -70,7 +70,7 @@ public class PathValSetter extends ReqSetter  {
 		"request [" + req.path + "]\r\n"
 		+ "failed setting field [" + field.getName()
 		+ "]\r\n in class [" + state.getClass().getName() + "]" 
-		+ " with val named [" + name 
+		+ " with val named [" + resolver.getArgName() 
 			+ "] \r\n and value [" + (val == null ? "null" : val.toString()) + "]"
 		, e);
 		}

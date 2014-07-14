@@ -149,7 +149,7 @@ public class SampleController {
 	
 //	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"},
 //			httpMethods={HttpMethod.GET, HttpMethod.POST})
-//	public FreemarkerView name(Date date, RequestContext context) {
+//	public FreemarkerView id(Date date, RequestContext context) {
 //		return new FreemarkerView("/index.", date);
 //	}
 	

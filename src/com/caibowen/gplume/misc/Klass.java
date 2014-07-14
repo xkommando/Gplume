@@ -47,8 +47,8 @@ public final class Klass {
 	
 	
 	/**
-	 * compare java.lang.reflect.field by its name, if two field, 
-	 * although at different levels of inheritance, have the same name and type,
+	 * compare java.lang.reflect.field by its id, if two field, 
+	 * although at different levels of inheritance, have the same id and type,
 	 * pick the one in the low inheritance level.
 	 * 
 	 * And during comparison, parent field will generally be covered (shadowed) by 
@@ -59,12 +59,12 @@ public final class Klass {
 		public int compare(Field o1, Field o2) {
 			int cmp = o1.getName().compareTo(o2.getName());
 			return cmp != 0 ? cmp 
-					:  o1.getType().equals(o2.getType()) ? 0 : 1;// same name, compare type
+					:  o1.getType().equals(o2.getType()) ? 0 : 1;// same id, compare type
 		}
 	};
 	/**
 	 * get all filed (public private) in the class inheritance tree
-	 * parent field with the same name and type will be covered (shadowed) by 
+	 * parent field with the same id and type will be covered (shadowed) by 
 	 * child field, only one copy is returned.
 	 * 
 	 * @param clazz
@@ -143,12 +143,12 @@ public final class Klass {
     }
 
     /**
-     * Maps a primitive class name to its corresponding abbreviation used in array class names.
+     * Maps a primitive class id to its corresponding abbreviation used in array class names.
      */
     private static final Map<String, String> abbreviationMap;
 
     /**
-     * Maps an abbreviation used in array class names to corresponding primitive class name.
+     * Maps an abbreviation used in array class names to corresponding primitive class id.
      */
     private static final Map<String, String> reverseAbbreviationMap;
 
@@ -174,14 +174,14 @@ public final class Klass {
         reverseAbbreviationMap = Collections.unmodifiableMap(r);
     }
 
-    // Short class name
+    // Short class id
     // ----------------------------------------------------------------------
     /**
-     * <p>Gets the class name minus the package name for an {@code Object}.</p>
+     * <p>Gets the class id minus the package id for an {@code Object}.</p>
      *
-     * @param object  the class to get the short name for, may be null
+     * @param object  the class to get the short id for, may be null
      * @param valueIfNull  the value to return if null
-     * @return the class name of the object without the package name, or the null value
+     * @return the class id of the object without the package id, or the null value
      */
     public static String getShortClassName(final Object object, final String valueIfNull) {
         if (object == null) {
@@ -191,14 +191,14 @@ public final class Klass {
     }
 
     /**
-     * <p>Gets the class name minus the package name from a {@code Class}.</p>
+     * <p>Gets the class id minus the package id from a {@code Class}.</p>
      *
      * <p>Consider using the Java 5 API {@link Class#getSimpleName()} instead.
      * The one known difference is that this code will return {@code "Map.Entry"} while
      * the {@code java.lang.Class} variant will simply return {@code "Entry"}. </p>
      *
-     * @param cls  the class to get the short name for.
-     * @return the class name without the package name or an empty string
+     * @param cls  the class to get the short id for.
+     * @return the class id without the package id or an empty string
      */
     public static String getShortClassName(final Class<?> cls) {
         if (cls == null) {
@@ -208,16 +208,16 @@ public final class Klass {
     }
 
     /**
-     * <p>Gets the class name minus the package name from a String.</p>
+     * <p>Gets the class id minus the package id from a String.</p>
      *
-     * <p>The string passed in is assumed to be a class name - it is not checked.</p>
+     * <p>The string passed in is assumed to be a class id - it is not checked.</p>
 
      * <p>Note that this method differs from Class.getSimpleName() in that this will
      * return {@code "Map.Entry"} whilst the {@code java.lang.Class} variant will simply
      * return {@code "Entry"}. </p>
      *
-     * @param className  the className to get the short name for
-     * @return the class name of the class without the package name or an empty string
+     * @param className  the className to get the short id for
+     * @return the class id of the class without the package id or an empty string
      */
     public static String getShortClassName(String className) {
         if ( !Str.Utils.notBlank(className)) {
@@ -255,8 +255,8 @@ public final class Klass {
     /**
      * <p>Null-safe version of <code>aClass.getSimpleName()</code></p>
      *
-     * @param cls the class for which to get the simple name.
-     * @return the simple class name.
+     * @param cls the class for which to get the simple id.
+     * @return the simple class id.
      * @since 3.0
      * @see Class#getSimpleName()
      */
@@ -270,9 +270,9 @@ public final class Klass {
     /**
      * <p>Null-safe version of <code>aClass.getSimpleName()</code></p>
      *
-     * @param object the object for which to get the simple class name.
+     * @param object the object for which to get the simple class id.
      * @param valueIfNull the value to return if <code>object</code> is <code>null</code>
-     * @return the simple class name.
+     * @return the simple class id.
      * @since 3.0
      * @see Class#getSimpleName()
      */
@@ -283,14 +283,14 @@ public final class Klass {
         return getSimpleName(object.getClass());
     }
 
-    // Package name
+    // Package id
     // ----------------------------------------------------------------------
     /**
-     * <p>Gets the package name of an {@code Object}.</p>
+     * <p>Gets the package id of an {@code Object}.</p>
      *
-     * @param object  the class to get the package name for, may be null
+     * @param object  the class to get the package id for, may be null
      * @param valueIfNull  the value to return if null
-     * @return the package name of the object, or the null value
+     * @return the package id of the object, or the null value
      */
     public static String getPackageName(final Object object, final String valueIfNull) {
         if (object == null) {
@@ -300,10 +300,10 @@ public final class Klass {
     }
 
     /**
-     * <p>Gets the package name of a {@code Class}.</p>
+     * <p>Gets the package id of a {@code Class}.</p>
      *
-     * @param cls  the class to get the package name for, may be {@code null}.
-     * @return the package name or an empty string
+     * @param cls  the class to get the package id for, may be {@code null}.
+     * @return the package id or an empty string
      */
     public static String getPackageName(final Class<?> cls) {
         if (cls == null) {
@@ -313,13 +313,13 @@ public final class Klass {
     }
 
     /**
-     * <p>Gets the package name from a {@code String}.</p>
+     * <p>Gets the package id from a {@code String}.</p>
      *
-     * <p>The string passed in is assumed to be a class name - it is not checked.</p>
+     * <p>The string passed in is assumed to be a class id - it is not checked.</p>
      * <p>If the class is unpackaged, return an empty string.</p>
      *
-     * @param className  the className to get the package name for, may be {@code null}
-     * @return the package name or an empty string
+     * @param className  the className to get the package id for, may be {@code null}
+     * @return the package id or an empty string
      */
     public static String getPackageName(String className) {
         if (!Str.Utils.notBlank(className)) {
@@ -413,8 +413,8 @@ public final class Klass {
     /**
      * <p>Given a {@code List} of class names, this method converts them into classes.</p>
      *
-     * <p>A new {@code List} is returned. If the class name cannot be found, {@code null}
-     * is stored in the {@code List}. If the class name in the {@code List} is
+     * <p>A new {@code List} is returned. If the class id cannot be found, {@code null}
+     * is stored in the {@code List}. If the class id in the {@code List} is
      * {@code null}, {@code null} is stored in the output {@code List}.</p>
      *
      * @param classNames  the classNames to change
@@ -1009,7 +1009,7 @@ public final class Klass {
      * "{@code [Ljava.util.Map.Entry;}", and "{@code [Ljava.util.Map$Entry;}".
      *
      * @param classLoader  the class loader to use to load the class
-     * @param className  the class name
+     * @param className  the class id
      * @param initialize  whether the class must be initialized
      * @return the class represented by {@code className} using the {@code classLoader}
      * @throws ClassNotFoundException if the class is not found
@@ -1026,7 +1026,7 @@ public final class Klass {
             }
             return clazz;
         } catch (final ClassNotFoundException ex) {
-            // allow path separators (.) as inner class name separators
+            // allow path separators (.) as inner class id separators
             final int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
 
             if (lastDotIndex != -1) {
@@ -1051,7 +1051,7 @@ public final class Klass {
      * and "{@code [Ljava.util.Map$Entry;}".
      *
      * @param classLoader  the class loader to use to load the class
-     * @param className  the class name
+     * @param className  the class id
      * @return the class represented by {@code className} using the {@code classLoader}
      * @throws ClassNotFoundException if the class is not found
      */
@@ -1066,7 +1066,7 @@ public final class Klass {
      * "{@code java.util.Map$Entry[]}", "{@code [Ljava.util.Map.Entry;}",
      * and "{@code [Ljava.util.Map$Entry;}".
      *
-     * @param className  the class name
+     * @param className  the class id
      * @return the class represented by {@code className} using the current thread's context class loader
      * @throws ClassNotFoundException if the class is not found
      */
@@ -1080,7 +1080,7 @@ public final class Klass {
      * syntaxes "{@code java.util.Map.Entry[]}", "{@code java.util.Map$Entry[]}",
      * "{@code [Ljava.util.Map.Entry;}", and "{@code [Ljava.util.Map$Entry;}".
      *
-     * @param className  the class name
+     * @param className  the class id
      * @param initialize  whether the class must be initialized
      * @return the class represented by {@code className} using the current thread's context class loader
      * @throws ClassNotFoundException if the class is not found
@@ -1095,10 +1095,10 @@ public final class Klass {
 
     // ----------------------------------------------------------------------
     /**
-     * Converts a class name to a JLS style class name.
+     * Converts a class id to a JLS style class id.
      *
-     * @param className  the class name
-     * @return the converted name
+     * @param className  the class id
+     * @return the converted id
      */
     private static String toCanonicalName(String className) {
         className = className.trim();

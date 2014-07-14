@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,13 +56,24 @@ public class RequestContext implements Serializable {
 	
 	private long timeModified;
 
+//for test only
+	public RequestContext() {
+
+		this.request = null;
+		this.response = null;
+		this.controlCenter = null;
+		this.httpmMthod = null;
+		this.path = null;//_u.substring(request.getContextPath().length());
+	}
+	
 	/**
 	 *  created by ControlCenter controlCenter only
 	 * 
 	 * @param in
 	 * @param out
 	 */
-	RequestContext(HttpServletRequest in, 
+	//for test only
+	public RequestContext(HttpServletRequest in, 
 							HttpServletResponse out, 
 							AbstractControlCenter c) {
 		
@@ -185,7 +195,7 @@ public class RequestContext implements Serializable {
 			
 		} else {
 			throw new IllegalArgumentException(
-					"illegal cookie name or name is token[" + name 
+					"illegal cookie id or id is token[" + name 
 					+"]\nname pattern [" + Str.Patterns.COOKIE_NAME.pattern() + "]");
 		}
 	}
@@ -195,7 +205,7 @@ public class RequestContext implements Serializable {
 			response.addCookie(ck);
 		} else {
 			throw new IllegalArgumentException(
-					"illegal cookie name[" + ck.getName() 
+					"illegal cookie id[" + ck.getName() 
 					+"]\nname pattern [" + Str.Patterns.COOKIE_NAME.pattern() + "]");
 		}
 	}

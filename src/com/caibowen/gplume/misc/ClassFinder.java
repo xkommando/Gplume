@@ -65,7 +65,7 @@ public final class ClassFinder {
 	 * Recursive method used to find all classes in a given directory and subdirs.
 	 *
 	 * @param directory   The base directory
-	 * @param packageName The package name for classes found inside the base directory
+	 * @param packageName The package id for classes found inside the base directory
 	 * @return The classes
 	 * @throws ClassNotFoundException
 	 */

@@ -35,16 +35,16 @@ import com.caibowen.gplume.web.view.IView;
  * (as the first parameter, and the second also the last parameter, is RequestContext)
  *
  * you can also write the method as other plain handle, 
- * this way, the argument will be put into the RequstContext as a attribute, with the name specified in your URI
+ * this way, the argument will be put into the RequstContext as a attribute, with the id specified in your URI
  * example:
- * with annotation @Hanlde({"/abc/def/{arg-name::Integer}.html"})
+ * with annotation @Hanlde({"/abc/def/{arg-id::Integer}.html"})
  * you can write method as 
  * cotrollerMethod(Type arg, RequestContext c) {
  * 	// use the arg here, arg may be null
  * }
  * or
  * cotrollerMethod(RequestContext c) {
- * 		Type var = c.getAttr("arg-name");
+ * 		Type var = c.getAttr("arg-id");
  * }
  */
 /**

@@ -34,8 +34,8 @@ import java.lang.annotation.Target;
 public @interface ContextAttr {
 	
 	/**
-	 * The name of the session attribute to bind to.
-	 * default name is the parameter/field name
+	 * The id of the session attribute to bind to.
+	 * default id is the parameter/field id
 	 */
 	String value() default "";
 	

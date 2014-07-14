@@ -111,7 +111,7 @@ public class Input extends WeakHashMap<String, Object> implements HttpServletReq
 
 	/**
 	 * The default behavior of this method is to return getDateHeader(String
-	 * name) on the wrapped original object.
+	 * id) on the wrapped original object.
 	 */
 	@Override
 	public long getDateHeader(String name) {
@@ -119,7 +119,7 @@ public class Input extends WeakHashMap<String, Object> implements HttpServletReq
 	}
 
 	/**
-	 * The default behavior of this method is to return getHeader(String name)
+	 * The default behavior of this method is to return getHeader(String id)
 	 * on the wrapped original object.
 	 */
 	@Override
@@ -128,7 +128,7 @@ public class Input extends WeakHashMap<String, Object> implements HttpServletReq
 	}
 
 	/**
-	 * The default behavior of this method is to return getHeaders(String name)
+	 * The default behavior of this method is to return getHeaders(String id)
 	 * on the wrapped original object.
 	 */
 	@Override
@@ -148,7 +148,7 @@ public class Input extends WeakHashMap<String, Object> implements HttpServletReq
 
 	/**
 	 * The default behavior of this method is to return getIntHeader(String
-	 * name) on the wrapped original object.
+	 * id) on the wrapped original object.
 	 */
 
 	@Override
@@ -368,7 +368,7 @@ public class Input extends WeakHashMap<String, Object> implements HttpServletReq
 
 	/**
 	 * The default behavior of this method is to return getParameter(String
-	 * name) on the wrapped original object.
+	 * id) on the wrapped original object.
 	 */
 
 	@Override
@@ -397,7 +397,7 @@ public class Input extends WeakHashMap<String, Object> implements HttpServletReq
 
 	/**
 	 * The default behavior of this method is to return
-	 * getParameterValues(String name) on the wrapped original object.
+	 * getParameterValues(String id) on the wrapped original object.
 	 */
 	@Override
 	public String[] getParameterValues(String name) {

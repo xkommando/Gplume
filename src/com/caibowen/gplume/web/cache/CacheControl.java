@@ -16,5 +16,6 @@
 package com.caibowen.gplume.web.cache;
 
 public enum CacheControl {
-	Private
+	Private, 
+	Public
 }

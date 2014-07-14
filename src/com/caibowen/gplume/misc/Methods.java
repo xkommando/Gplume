@@ -113,7 +113,7 @@ public class Methods {
      * </p>
      *
      * @param object invoke method on this object
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param args use these arguments - treat null as empty array
      * @return The value returned by the invoked method
      *
@@ -140,7 +140,7 @@ public class Methods {
      * would match a {@code boolean} primitive.</p>
      *
      * @param object invoke method on this object
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param args use these arguments - treat null as empty array
      * @param parameterTypes match these parameters - treat null as empty array
      * @return The value returned by the invoked method
@@ -178,7 +178,7 @@ public class Methods {
      * {@link #getAccessibleMethod}(Class,String,Class[])}.</p>
      *
      * @param object invoke method on this object
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param args use these arguments - treat {@code null} as empty array
      * @return The value returned by the invoked method
      *
@@ -205,7 +205,7 @@ public class Methods {
      * {@link #getAccessibleMethod(Class,String,Class[])}.</p>
      *
      * @param object invoke method on this object
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param args use these arguments - treat null as empty array
      * @param parameterTypes match these parameters - treat {@code null} as empty array
      * @return The value returned by the invoked method
@@ -242,7 +242,7 @@ public class Methods {
      * {@link #getAccessibleMethod(Class, String, Class[])}.</p>
      *
      * @param cls invoke static method on this class
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param args use these arguments - treat {@code null} as empty array
      * @param parameterTypes match these parameters - treat {@code null} as empty array
      * @return The value returned by the invoked method
@@ -283,7 +283,7 @@ public class Methods {
      * </p>
      *
      * @param cls invoke static method on this class
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param args use these arguments - treat {@code null} as empty array
      * @return The value returned by the invoked method
      *
@@ -313,7 +313,7 @@ public class Methods {
      *
      *
      * @param cls invoke static method on this class
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param args use these arguments - treat {@code null} as empty array
      * @param parameterTypes match these parameters - treat {@code null} as empty array
      * @return The value returned by the invoked method
@@ -349,7 +349,7 @@ public class Methods {
      * {@link #getAccessibleMethod(Class, String, Class[])}.</p>
      *
      * @param cls invoke static method on this class
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param args use these arguments - treat {@code null} as empty array
      * @return The value returned by the invoked method
      *
@@ -370,13 +370,13 @@ public class Methods {
 
     /**
      * <p>Returns an accessible method (that is, one that can be invoked via
-     * reflection) with given name and parameters. If no such method
+     * reflection) with given id and parameters. If no such method
      * can be found, return {@code null}.
      * This is just a convenience wrapper for
      * {@link #getAccessibleMethod(Method)}.</p>
      *
      * @param cls get method from this class
-     * @param methodName get method with this name
+     * @param methodName get method with this id
      * @param parameterTypes with these parameters types
      * @return The accessible method
      */
@@ -429,7 +429,7 @@ public class Methods {
      * can be found, return {@code null}.</p>
      *
      * @param cls Class to be checked
-     * @param methodName Method name of the method we wish to call
+     * @param methodName Method id of the method we wish to call
      * @param parameterTypes The parameter type signatures
      * @return the accessible method or {@code null} if not found
      */
@@ -460,7 +460,7 @@ public class Methods {
      * call this rather than the higher level methods.</p>
      *
      * @param cls Parent class for the interfaces to be checked
-     * @param methodName Method name of the method we wish to call
+     * @param methodName Method id of the method we wish to call
      * @param parameterTypes The parameter type signatures
      * @return the accessible method or {@code null} if not found
      */
@@ -498,10 +498,10 @@ public class Methods {
     }
 
     /**
-     * <p>Finds an accessible method that matches the given name and has compatible parameters.
+     * <p>Finds an accessible method that matches the given id and has compatible parameters.
      * Compatible parameters mean that every method parameter is assignable from 
      * the given parameters.
-     * In other words, it finds a method with the given name 
+     * In other words, it finds a method with the given id 
      * that will take the parameters given.</p>
      *
      * <p>This method is used by 
@@ -515,7 +515,7 @@ public class Methods {
      * </p>
      *
      * @param cls find method in this class
-     * @param methodName find method with this name
+     * @param methodName find method with this id
      * @param parameterTypes find method with most compatible parameters 
      * @return The accessible method
      */
@@ -531,7 +531,7 @@ public class Methods {
         Method bestMatch = null;
         final Method[] methods = cls.getMethods();
         for (final Method method : methods) {
-            // compare name and parameters
+            // compare id and parameters
             if (method.getName().equals(methodName) && Klass.isAssignable(parameterTypes, method.getParameterTypes())) {
                 // get accessible version of method
                 final Method accessibleMethod = getAccessibleMethod(method);

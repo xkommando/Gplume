@@ -54,14 +54,14 @@ import com.caibowen.gplume.logging.LoggerFactory;
  * 
  * example
  * 	<bean id="course" class="model.Course">
-		<property name="courseName" value="Programming"/>
-		<property name="referenceBook" ref="jcip"/>
-		<property name="mainBooks">
+		<property id="courseName" value="Programming"/>
+		<property id="referenceBook" ref="jcip"/>
+		<property id="mainBooks">
 		  <list>
 			<bean  id="c++11" class="model.Book"><!-- will not be registered in factory >
-				<property name="name" value="the c++ programming Language"/>
-				<property name="author" value="B.S."/>
-				<property name="publisher">
+				<property id="id" value="the c++ programming Language"/>
+				<property id="author" value="B.S."/>
+				<property id="publisher">
 					<ref>
 						publisher
 					</ref>

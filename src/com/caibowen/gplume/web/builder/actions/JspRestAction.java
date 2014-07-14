@@ -17,7 +17,6 @@ package com.caibowen.gplume.web.builder.actions;
 
 import java.lang.invoke.MethodHandle;
 
-import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.web.RequestContext;
 
 
@@ -50,7 +49,7 @@ public class JspRestAction extends RestAction {
 
 	@Override
 	public void perform(RequestContext context) throws Throwable {
-		Object var = parser.parseAndCast(context.path, null);
+		Object var = resolver.resolveAndCast(context.path, null);
 		context.putAttr(ACTION_NAME, this);
 		Object jsp = null;
 		if (inMethodCall) {
@@ -59,7 +58,7 @@ public class JspRestAction extends RestAction {
 			else
 				jsp = methodHandle.invoke(var);
 		} else {
-			context.putAttr(parser.getArgName(), var);
+			context.putAttr(resolver.getArgName(), var);
 
 			if (hasRequest)
 				jsp = methodHandle.invoke(context);

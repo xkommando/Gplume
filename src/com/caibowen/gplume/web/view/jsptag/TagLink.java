@@ -36,12 +36,12 @@ public class TagLink extends WriterTag {
 	public String write(JspWriter writer) throws IOException {
 		
 		if (displayName != null && nativeName != null) {
-			return "dunplicated display name: displayName["
-					+ displayName + "] native name[" + nativeName + "]";
+			return "dunplicated display id: displayName["
+					+ displayName + "] native id[" + nativeName + "]";
 		}
 		// nullable
-//		else if (displayName == null && name == null) {
-//			return "null display name and  native name";
+//		else if (displayName == null && id == null) {
+//			return "null display id and  native id";
 //		}
 		
 		boolean isNative = nativeName != null;
@@ -50,7 +50,7 @@ public class TagLink extends WriterTag {
 		// more validation in test mode
 		if (TEST_MODE) {
 			if (!Str.Utils.notBlank(testName)) {
-				THIS_LOG.warn("url[" + url + "] name is empty");
+				THIS_LOG.warn("url[" + url + "] id is empty");
 			}
 			if (!Str.Utils.notBlank(target)) {
 				THIS_LOG.warn("target field is empty");
@@ -90,7 +90,7 @@ public class TagLink extends WriterTag {
 	
 //	public static void main(String...a) {
 //		TagLink link = new TagLink();
-//		link.setDisplayName("name");
+//		link.setDisplayName("id");
 ////		link.setTarget("_blank");
 //		link.setUrl("http://www.caibowen.com/");
 //		link.doTag();

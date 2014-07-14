@@ -27,9 +27,9 @@ import javax.annotation.Nullable;
 import com.caibowen.gplume.misc.Klass;
 
 /**
- * set static or non-static property based on name,
+ * set static or non-static property based on id,
  * if there is a public setter, invoke it
- * if no setter is found, find the public or private field with the same name, and set it
+ * if no setter is found, find the public or private field with the same id, and set it
  * 
  * @author BowenCai
  *
@@ -38,8 +38,8 @@ public class BeanEditor {
 
 	/**
 	 * set property, 
-	 * first look for public setter for this name
-	 * second, look for public field of this name
+	 * first look for public setter for this id
+	 * second, look for public field of this id
 	 * the property can be virtual, that is, no underlying field exists.
 	 * like : 
 	 * public void setProp(Type var) {
@@ -213,12 +213,12 @@ public class BeanEditor {
 			throw new IllegalStateException(
 			"in class [" + obj.getClass().getName()
 			+ "]  cannot find public setter for [" + fieldName 
-			+ "] and cannot find public field of this name", e);
+			+ "] and cannot find public field of this id", e);
 		}
 	}
 
 	/**
-	 * find setter by name and
+	 * find setter by id and
 	 * set property with the public setter
 	 * 
 	 * @param obj

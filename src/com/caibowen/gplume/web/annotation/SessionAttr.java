@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface SessionAttr {
 	/**
-	 * The name of the session attribute to bind to.
+	 * The id of the session attribute to bind to.
 	 */
 	String value() default "";
 

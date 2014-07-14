@@ -57,7 +57,7 @@ public final class TypeTraits {
 		}
 		// no such field
 		throw new NoSuchFieldException(
-				"cannnot find field of name[" + fieldName 
+				"cannnot find field of id[" + fieldName 
 				+ "] in class [" + klass.getName() + "]");
 	}
 	
@@ -180,7 +180,7 @@ public final class TypeTraits {
     }
 	
     /**
-     * set field of this name with this var
+     * set field of this id with this var
      * @param object
      * @param fieldName
      * @param var

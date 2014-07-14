@@ -155,9 +155,9 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 	/**
 	 * For each property, there are 3 notation:
 	 * 
-	 * 1. <property name="Xyz"><value="Xyz"/></porperty>
+	 * 1. <property id="Xyz"><value="Xyz"/></porperty>
 	 * 
-	 * 2. <property name="Xyz" value="Xyz"/>
+	 * 2. <property id="Xyz" value="Xyz"/>
 	 * 
 	 * 3. no property is needed.
 	 */
@@ -200,7 +200,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 			String propName = prop.getAttribute(XMLTags.PROPERTY_NAME);
 			if (!Str.Utils.notBlank(propName)) {
 				throw new NullPointerException(
-						"Property name is empty.Element: ["
+						"Property id is empty.Element: ["
 								+ prop.getNodeName() + "]");
 			}
 			propName = propName.trim();
@@ -215,19 +215,19 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 				String varRef = prop.getAttribute(XMLTags.PROPERTY_REF);
 				
 				if (Str.Utils.notBlank(varStr)) {
-					// e.g., <property name="number" value="5"/>
+					// e.g., <property id="number" value="5"/>
 					// str value will casted to param type if needed
 					BeanEditor.setProperty(beanObj, propName, varStr.trim());
 					continue;
 					
 				} else if (Str.Utils.notBlank(varRef)) {
-					// e.g., <property name="bean" ref="someOtherBean"/>
+					// e.g., <property id="bean" ref="someOtherBean"/>
 					Object ref = getBean(varRef.trim());
 					BeanEditor.setProperty(beanObj, propName, ref);
 					continue;
 					
 				} else if (Str.Utils.notBlank(varObj)) {
-					// e.g. <property name="injector" object="com.caibowen.gplume.core.Injector"/>
+					// e.g. <property id="injector" object="com.caibowen.gplume.core.Injector"/>
 					Class<?> klass = this.classLoader.loadClass(varObj.trim());
 					Object obj = klass.newInstance();
 					preprocess(obj);
