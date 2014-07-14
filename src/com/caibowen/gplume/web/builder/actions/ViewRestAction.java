@@ -17,7 +17,6 @@ package com.caibowen.gplume.web.builder.actions;
 
 import java.lang.reflect.Method;
 
-import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.view.IView;
 
@@ -46,13 +45,13 @@ public class ViewRestAction extends RestAction {
 
 	@Override
 	public void perform(RequestContext context) throws Throwable {
-		Object var = Converter.slient.translateStr(parseArg(context.path), argType);
+		Object var = parser.parseAndCast(context.path, null);
 		context.putAttr(ACTION_NAME, this);
 		Object v = null;
 		if (inMethodCall) {
 			v = method.invoke(controller, var, context);
 		} else {
-			context.putAttr(argName, var);
+			context.putAttr(parser.getArgName(), var);
 			v = method.invoke(controller, var);
 		}
 		if (v != null) {

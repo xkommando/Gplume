@@ -25,7 +25,7 @@ import com.caibowen.gplume.web.RequestContext;
  * @author BowenCai
  *
  */
-interface IStateSetter extends Serializable {
+public interface IStateSetter extends Serializable {
 
 	void setWith(RequestContext req, Object state);
 	

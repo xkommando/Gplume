@@ -17,7 +17,6 @@ package com.caibowen.gplume.web.builder.actions;
 
 import java.lang.invoke.MethodHandle;
 
-import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.web.RequestContext;
 
 /**
@@ -34,79 +33,31 @@ public class RestAction extends SimpleAction {
 	
 	private static final long serialVersionUID = 7479824844662522176L;
 
-	final int startIdx; // start idx of arg
-	final String argName;
-	final Class<?> argType;
-	final String suffix;
+	PathValParser parser;
 	final boolean inMethodCall;
 	
 	public RestAction(String uri, MethodHandle handle, 
 						int start, String name, Class<?> type, String s, boolean call) {
 		
 		super(uri, handle);
-		startIdx = start;
-		argName = name;
-		argType = type;
-		suffix = s;
+		parser = new PathValParser(start, name, type, s);
 		inMethodCall = call;
 	}
 	
 	@Override
 	public void perform(RequestContext requestContext) throws Throwable {
-		Object var = Converter.slient.translateStr(parseArg(requestContext.path), argType);
+		
+		Object var = parser.parseAndCast(requestContext.path, null);
+		
 		requestContext.putAttr(ACTION_NAME, this);
 
 		if (inMethodCall) {
 			methodHandle.invoke(var, requestContext);
 		} else {
-			requestContext.putAttr(argName, var);
+			requestContext.putAttr(parser.getArgName(), var);
 			methodHandle.invoke(requestContext);
 		}
 	}
 	
-	/**
-	 * 
-	 * 
-	 * @param uri
-	 * @return
-	 * @see ActionBuilder
-	 */
-	protected String parseArg(String uri) {
-		
-		String argVar;
-		if (suffix.endsWith("*")) {
-			return argVar = uri.substring(startIdx);
-		} else {
-			int idx = uri.lastIndexOf(suffix);
-			if (idx != -1) {
-				/**
-				 * e.g. abc/arg=123.html
-				 * 				   ^ suffix
-				 */
-				argVar = uri.substring(startIdx, idx);
-			} else {
-				/**
-				 * e.g. abc/arg=123
-				 */
-				argVar = uri.substring(startIdx);
-			}
-		}
-		return argVar;
-	}
-	
-	public String getArgName() {
-		return argName;
-	}
-	
-	public Class<?> getArgType() {
-		return argType;
-	}
 
-	public int getStartIdx() {
-		return startIdx;
-	}
-
-	public String getSuffix() {
-		return suffix;
-	}
 }

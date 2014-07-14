@@ -13,43 +13,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.builder.stateful;
+package com.caibowen.gplume.web.builder.stateful.setters;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 
 import javax.annotation.Nonnull;
 
 import com.caibowen.gplume.web.RequestContext;
-
-
+import com.caibowen.gplume.web.builder.stateful.IStateSetter;
 
 /**
- * set object from the IoC rather than object from servlet.
- * 
+ * default setter 
+ * set value from RequestContext : 
+ * @ContextAttr
+ * @CookieAttr
+ * @ReqAttr
+ * @ReqParam
+ * @SessionAttr
+ *  
  * @author BowenCai
  *
  */
-class BeanSetter implements IStateSetter {
+class ReqSetter implements IStateSetter {
 
-	private static final long serialVersionUID = -7793827519595236754L;
+	private static final long serialVersionUID = 8117499794418545935L;
+	@Nonnull 
+	protected final MethodHandle getter;
 	
+	@Nonnull
+	protected final String name;
+	
+	// Accessible field
 	@Nonnull 
 	protected final Field field;
-	@Nonnull 
-	protected final Object bean;
 	
 	protected final boolean nullable;
 	
-	BeanSetter(Field field, Object bean, boolean nullable) {
+	ReqSetter(MethodHandle getter, String name, Field field,
+			boolean nullable) {
+		this.getter = getter;
+		this.name = name;
 		this.field = field;
-		this.bean = bean;
 		this.nullable = nullable;
 	}
-	
+
 	@Override
-	public void setWith(RequestContext req, Object state) {
+	public void setWith(@Nonnull RequestContext req, 
+					@Nonnull Object state) {
+
+		Object val = null;
 		try {
-			field.set(state, bean);
+			val = getter.invoke(req, name);
+		} catch (Throwable e) {
+			if (!nullable)
+				throw new RuntimeException(
+			"request [" + req.path + "]\r\n"
+			+ "failed invoking getter [" + getter + "] to get val named [" + name 
+			+ "]\r\n for field [" + field.getName() 
+			+ "]\r\n in class [" + state.getClass().getName() + "]" , e);
+		}
+		
+		try {
+			field.set(state, val);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			
 			if (!nullable)
@@ -57,7 +83,8 @@ class BeanSetter implements IStateSetter {
 		"request [" + req.path + "]\r\n"
 		+ "failed setting field [" + field.getName()
 		+ "]\r\n in class [" + state.getClass().getName() + "]" 
-		+ " with bean named [" + (bean == null ? "null" : bean.toString()) + "]"
+		+ " with val named [" + name 
+			+ "] \r\n and value [" + (val == null ? "null" : val.toString()) + "]"
 		, e);
 		}
 	}

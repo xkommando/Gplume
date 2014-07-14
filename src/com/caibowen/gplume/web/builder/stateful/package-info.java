@@ -14,6 +14,19 @@
  * limitations under the License.
  ******************************************************************************/
 /**
+ * 
+ * setter factory + statefulactionFactory -> stateful action
+ * 
+ * scan state class:
+ * 		1. get setters
+ * 		2. get state generators store setters to gen.
+ * 		3. get actions
+ * 
+ * Actions:
+ * 
+ * SimpleStatefulAction
+ * 
+ * 
  * @author BowenCai
  *
  */

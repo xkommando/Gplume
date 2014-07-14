@@ -37,7 +37,7 @@ class NestedStateGen extends StateGen {
 	@Nonnull Object referred;
 	
 	@Override
-	Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		Object state = ctor.newInstance(referred);
 		for (IStateSetter setter : setters) {

@@ -13,61 +13,66 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.builder.stateful;
+package com.caibowen.gplume.web.builder.stateful.setters;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 
 import javax.annotation.Nonnull;
 
+import com.caibowen.gplume.logging.Logger;
+import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.RequestContext;
 
+
+
 /**
- * default setter 
+ * set value from RequestContext : 
+ * @ContextAttr
+ * @CookieAttr
+ * @ReqAttr
+ * @ReqParam
+ * @SessionAttr
+ * 
+ * setter with default value
+ * if cannot get value from request, use the default value.
+ * the default value should has been casted from String to the target class.
  * 
  * @author BowenCai
  *
  */
-class StateSetter implements IStateSetter {
+class ReqDefaultValSetter extends ReqSetter {
 
-	private static final long serialVersionUID = 8117499794418545935L;
-	@Nonnull 
-	protected final MethodHandle getter;
+	private static final long serialVersionUID = 7151958851575269082L;
+	private static final Logger LOG = LoggerFactory.getLogger(ReqDefaultValSetter.class);
+	
 	@Nonnull
-	protected final String name;
+	protected final Object defaultVal;
 	
-	// Accessible field
-	@Nonnull 
-	protected final Field field;
-	
-	protected final boolean nullable;
-	
-	StateSetter(MethodHandle getter, String name, Field field,
-			boolean nullable) {
-		this.getter = getter;
-		this.name = name;
-		this.field = field;
-		this.nullable = nullable;
+	ReqDefaultValSetter(MethodHandle getter, String name, Field field,
+			boolean nullable, Object defaultValue) {
+		super(getter, name, field, nullable);
+		defaultVal = defaultValue;
 	}
-
+	
 	@Override
-	public void setWith(@Nonnull RequestContext req, 
-					@Nonnull Object state) {
-
-		Object val = null;
+	public void setWith(RequestContext req, Object state) {
+		Object var = null;
 		try {
-			val = getter.invoke(req, name);
+			var = getter.invoke(req, name);
 		} catch (Throwable e) {
-			if (!nullable)
-				throw new RuntimeException(
+			LOG.warn(
 			"request [" + req.path + "]\r\n"
 			+ "failed invoking getter [" + getter + "] to get val named [" + name 
 			+ "]\r\n for field [" + field.getName() 
-			+ "]\r\n in class [" + state.getClass().getName() + "]" , e);
+			+ "]\r\n in class [" + state.getClass().getName()
+			+ "]\r\n using default [" + defaultVal + "]",
+			e);
 		}
-		
+		if (var == null) 
+			var = defaultVal;
 		try {
-			field.set(state, val);
+			field.set(state, var);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			
 			if (!nullable)
@@ -76,9 +81,8 @@ class StateSetter implements IStateSetter {
 		+ "failed setting field [" + field.getName()
 		+ "]\r\n in class [" + state.getClass().getName() + "]" 
 		+ " with val named [" + name 
-			+ "] \r\n and value [" + (val == null ? "null" : val.toString()) + "]"
+			+ "] \r\n and value [" + (var == null ? "null" : var.toString()) + "]"
 		, e);
 		}
 	}
-
 }

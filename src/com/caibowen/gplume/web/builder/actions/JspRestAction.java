@@ -50,7 +50,7 @@ public class JspRestAction extends RestAction {
 
 	@Override
 	public void perform(RequestContext context) throws Throwable {
-		Object var = Converter.slient.translateStr(parseArg(context.path), argType);
+		Object var = parser.parseAndCast(context.path, null);
 		context.putAttr(ACTION_NAME, this);
 		Object jsp = null;
 		if (inMethodCall) {
@@ -59,7 +59,7 @@ public class JspRestAction extends RestAction {
 			else
 				jsp = methodHandle.invoke(var);
 		} else {
-			context.putAttr(argName, var);
+			context.putAttr(parser.getArgName(), var);
 
 			if (hasRequest)
 				jsp = methodHandle.invoke(context);

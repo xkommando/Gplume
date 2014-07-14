@@ -29,7 +29,7 @@ import com.caibowen.gplume.web.RequestContext;
  * @author BowenCai
  *
  */
-class StateGen {
+public class StateGen {
 
 	List<? extends IStateSetter> setters;
 
@@ -39,7 +39,7 @@ class StateGen {
 	Class<?> orignalKlass;
 	Constructor<?> ctor;
 	
-	Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		
 		Object state = ctor.newInstance();
 		for (IStateSetter setter : setters) {

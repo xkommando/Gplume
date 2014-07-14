@@ -13,48 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.builder.stateful;
+package com.caibowen.gplume.web.builder.stateful.actions;
 
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.ViewAction;
-import com.caibowen.gplume.web.view.IView;
+import com.caibowen.gplume.web.builder.actions.SimpleAction;
+import com.caibowen.gplume.web.builder.stateful.StateGen;
 
 
 /**
- * 
- * IView p(State s, RequestContext ctn);
- * IView p(State s);
+ * void ss(MyState s, RequestContext ctx)
  * 
  * @author BowenCai
  *
  */
-public class ViewStatefulAction extends ViewAction {
+public class SimpleStatefulAction extends SimpleAction {
 
-	private static final long serialVersionUID = -1318446478047269626L;
-
+	private static final long serialVersionUID = -8968416219169871432L;
 	protected final StateGen gen;
 	
-	public ViewStatefulAction(String u, Method m, Object ctrl, boolean hasReq, StateGen g) {
-		super(u, m, ctrl, hasReq);
+	public SimpleStatefulAction(String u, MethodHandle handle, StateGen g) {
+		super(u, handle);
 		this.gen = g;
 	}
 	
+
 	@Override
-	public void perform(RequestContext context) throws Throwable {
-		context.putAttr(ACTION_NAME, this);
-		Object state = gen.gen(context);
-		Object v = null;
-		if (hasRequest)
-			v = method.invoke(controller, state, context);
-		else
-			v = method.invoke(controller, state);
-		
-		if (v != null) {
-			((IView)v).resolve(context);
-		}
+	public void perform(RequestContext req) throws Throwable {
+		req.putAttr(ACTION_NAME, this);
+		Object state = gen.gen(req);
+		methodHandle.invoke(state, req);
 	}
 
-	
 }

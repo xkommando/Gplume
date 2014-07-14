@@ -14,9 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 /**
- * Why use many small action objects instead of a big one with many logic?
- * speed.
- * 
+ * Why use many small action objects instead of a big one with some logic?
+ * speed!
+ * Note that IAction is Serializable to enable hot migration of applications 
  * @author BowenCai
  *
  */
