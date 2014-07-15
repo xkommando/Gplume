@@ -16,6 +16,7 @@
 package com.caibowen.gplume.sample.controller;
 
 import java.security.PublicKey;
+import java.util.Date;
 
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.sample.feature.PublicKeyService;
@@ -23,7 +24,9 @@ import com.caibowen.gplume.sample.feature.Validator;
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.annotation.Controller;
+import com.caibowen.gplume.web.annotation.CookieVal;
 import com.caibowen.gplume.web.annotation.Handle;
+import com.caibowen.gplume.web.annotation.ReqAttr;
 import com.caibowen.gplume.web.annotation.ReqParam;
 import com.caibowen.gplume.web.annotation.SessionAttr;
 import com.caibowen.gplume.web.view.IView;
@@ -44,10 +47,18 @@ public class SampleController2 {
 	PublicKeyService keyService;
 	UserService userService;
 	class MyState {
+		@ReqAttr(value="alias", defaultVal="1992-6-14")
+		Date birthday;
+
+		@CookieVal
+		Double testData;
+		
 		@ReqParam("psw_cipher")
 		String passwordCipher;
+		
 		@ReqParam(value="email_address", nullable = false)
 		String email;
+		
 		@SessionAttr(value="this_pubkey",nullable = false)
 		PublicKey key;
 		

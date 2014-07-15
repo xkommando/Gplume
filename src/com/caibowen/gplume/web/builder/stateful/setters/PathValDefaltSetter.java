@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
 import com.caibowen.gplume.logging.Logger;
 import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.PathValResolver;
+import com.caibowen.gplume.web.builder.PathValResolver;
 
 
 /**

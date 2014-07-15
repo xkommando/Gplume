@@ -37,7 +37,7 @@ import com.sun.istack.internal.Nullable;
  * @author BowenCai
  *
  */
-class RestActionBuilder extends ActionBuilderBase {
+class RestActionBuilder extends AbstractActionBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestActionBuilder.class.getName());
 
@@ -118,7 +118,7 @@ class RestActionBuilder extends ActionBuilderBase {
 					+ "] method [" 
 					+ method.getName()  +"]");
 		}
-		
+		PathValResolver pr = new PathValResolver(lq, argName, argType, suffix);
 		//------------------------------- argName  MethodType
 		
 		
@@ -133,12 +133,13 @@ class RestActionBuilder extends ActionBuilderBase {
 		Class<?> retKalss = method.getReturnType();
 		
 		if (retKalss.equals(String.class)) {
-			return new JspRestAction(effectiveURI, handle, lq, argName, argType, suffix, inMethodCall, hasRequset);
+			return new JspRestAction(effectiveURI, handle, inMethodCall, hasRequset, pr);
 		} else if (retKalss.equals(void.class)) {
-			return new RestAction(effectiveURI, handle, lq, argName, argType, suffix, inMethodCall);
-		
+			return new RestAction(effectiveURI, handle, inMethodCall, pr);
+
+//					boolean inM, boolean req) {
 		} else if (IView.class.isAssignableFrom(retKalss)) {
-			return new ViewRestAction(effectiveURI, method, object, lq, argName, argType, suffix, inMethodCall, hasRequset);
+			return new ViewRestAction(effectiveURI, method, object, inMethodCall, hasRequset, pr);
 		} else {
 			throw new IllegalArgumentException(
 			"unidentified method[" + method + "] in object[" + object + "]");

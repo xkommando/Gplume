@@ -21,7 +21,9 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.caibowen.gplume.cache.mem.WeakCache;
 import com.caibowen.gplume.web.RequestContext;
@@ -32,46 +34,44 @@ import com.caibowen.gplume.web.builder.actions.SimpleAction;
  * @author BowenCai
  *
  */
-class ActionBuilderBase {
+public abstract class AbstractActionBuilder {
 
 	// from java.lang.invoke
-	protected final Lookup LOOKUP = MethodHandles.publicLookup();
+	protected static final Lookup LOOKUP = MethodHandles.publicLookup();
 
 	/**
 	 * 
 	 * void func(RequestContext );
 	 */
-	protected final MethodType SIMPLE_TYPE = MethodType.methodType(
+	protected static final MethodType SIMPLE_TYPE = MethodType.methodType(
 			void.class, RequestContext.class);
 	
 	/**
 	 * String func(RequestContext );
 	 */
-	protected final MethodType RET_JSP_TYPE = MethodType.methodType(
+	protected static final MethodType RET_JSP_TYPE = MethodType.methodType(
 			String.class, RequestContext.class);
 	
 	/**
 	 * String func();
 	 */
-	protected final MethodType RET_JSP_NOPARAM_TYPE = MethodType.methodType(
+	protected static final MethodType RET_JSP_NOPARAM_TYPE = MethodType.methodType(
 			String.class);
 	
 	/**
 	 * void func(RequestContext, SimpleAction);
 	 */
-	protected final MethodType INTERCEPT_TYPE = MethodType.methodType(
+	protected static final MethodType INTERCEPT_TYPE = MethodType.methodType(
 			void.class, RequestContext.class, SimpleAction.class);
 
 	/**
 	 * keep track of all actions, avoid rebuilding actions
 	 */
-	protected final WeakCache<Integer, IAction> actMap = new WeakCache<>();
+	protected static final WeakCache<Integer, IAction> actMap = new WeakCache<>();
 	
-	/**
-	 * 
-	 */
-	protected final WeakCache<Class<?>, Object> ctrlMap = new WeakCache<>(256);
-	protected final WeakCache<Class<?>, Object> incMap = new WeakCache<>(128);
+	
+	public abstract IAction buildAction(final String uri,  @Nullable Object object, Method method);
+	
 	
 	/**
 	 * @Handle(uri={"/abc/{erf::date}"})
@@ -86,7 +86,7 @@ class ActionBuilderBase {
 	 * @param typ
 	 * @return
 	 */
-	protected @Nonnull MethodHandle 
+	protected static @Nonnull MethodHandle 
 	findMethodeHandle(Method method, MethodType typ) {
 
 		String mName = method.getName();
@@ -120,5 +120,12 @@ class ActionBuilderBase {
 		}
 		return actionhandle;
 	}
+
 	
+	//----------------- trush
+	/**
+	 * 
+	 */
+	protected final WeakCache<Class<?>, Object> ctrlMap = new WeakCache<>(256);
+	protected final WeakCache<Class<?>, Object> incMap = new WeakCache<>(128);
 }

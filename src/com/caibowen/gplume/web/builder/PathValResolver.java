@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.builder.actions;
+package com.caibowen.gplume.web.builder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,7 +26,7 @@ import com.caibowen.gplume.core.Converter;
  * @author BowenCai
  *
  */
-public class PathValResolver {
+public class PathValResolver implements IpathValResolver {
 
 	final int startIdx; // start idx of arg
 	final String argName;
@@ -41,14 +41,22 @@ public class PathValResolver {
 		this.suffix = suffix;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.caibowen.gplume.web.builder.IpathValResolver#resolveAndCast(java.lang.String, java.lang.String)
+	 */
+	@Override
 	@Nullable
 	public Object resolveAndCast(String path, String name) {
 		return Converter.slient.translateStr(
-				parseArg(path), argType);
+				parseArg(path, name), argType);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.caibowen.gplume.web.builder.IpathValResolver#parseArg(java.lang.String, java.lang.String)
+	 */
+	@Override
 	@Nonnull
-	public String parseArg(@Nonnull String uri) {
+	public String parseArg(@Nonnull String uri, String name) {
 		
 		String argVar;
 		if (suffix.endsWith("*")) {

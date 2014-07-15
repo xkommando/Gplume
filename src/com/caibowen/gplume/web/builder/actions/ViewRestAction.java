@@ -18,6 +18,7 @@ package com.caibowen.gplume.web.builder.actions;
 import java.lang.reflect.Method;
 
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.PathValResolver;
 import com.caibowen.gplume.web.view.IView;
 
 /**
@@ -35,9 +36,9 @@ public class ViewRestAction extends RestAction {
 
 	protected final boolean hasRequest;
 	
-	public ViewRestAction(String uri,  Method m, Object ctrl, int start,
-			String name, Class<?> type, String s, boolean inM, boolean req) {
-		super(uri, null, start, name, type, s, inM);
+	public ViewRestAction(String uri,  Method m, Object ctrl,
+			boolean inM, boolean req, PathValResolver pr) {
+		super(uri, null, inM, pr);
 		hasRequest = req;
 		method = m;
 		controller = ctrl;

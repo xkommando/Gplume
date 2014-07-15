@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
 import javax.annotation.Nonnull;
 
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.PathValResolver;
+import com.caibowen.gplume.web.builder.PathValResolver;
 
 
 

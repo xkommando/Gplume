@@ -3,8 +3,6 @@ package com.caibowen.gplume.web.builder.stateful.setters;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 
-import javax.annotation.Nullable;
-
 import com.caibowen.gplume.logging.Logger;
 import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.web.RequestContext;
@@ -13,13 +11,11 @@ import com.caibowen.gplume.web.RequestContext;
 
 /**
  * <pre>
- * for with default val
- * @ReqParam
- * the getter is different:
- * 
+ * for @ReqParam with default val
+ * the getter is :
+ * public int getIntParam(String name, int defaultVar)
+ * instead of 
  * public Integer getIntParam(String name)
- * vs 
- * public int getIntParam(String name, int defaultVar) {
  * </pre>
  * @author BowenCai
  *

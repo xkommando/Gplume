@@ -45,15 +45,51 @@ import com.caibowen.gplume.web.builder.stateful.setters.ReqSetter;
 
 
 /**
+ * <pre>
+ * create setters for field annotated with:
  * @ContextAttr
  * @CookieVal
  * @ReqAttr
- * @ReqParam // no default val
  * @SessionAttr
+ * @ReqParam // no default val
  * @PathVal
  * 
  * @Inject
  * 
+ * Strategies:
+ * 
+ * nullable ? 
+ * annotated with @Nonnull && nullable
+ * 
+ * name ? @Named value 
+ * 			or @ReqAttr value 
+ * 				or field name
+ * 
+ * 
+ * @Inject : BeanSetter
+ * 
+ * @ContextAttr
+ * @CookieVal
+ * @ReqAttr
+ * @SessionAttr
+ * 1. get method handle by annotaion class hashcode
+ * 2. has default value -> ReqDefaultValSetter
+ * otherwise -> ReqSetter
+ * 
+ * @ReqParam
+ *  1. field type(int bool ...) primitive ? to wrapper class
+ *  2. get method handle
+ *  
+ *  no default:
+ *   h = wrapper class hashcode  -> reqc.getDoubleParam("");
+ *   ReqSetter
+ *   
+ *  if has default value 
+ *  h = * wrapper class hashcode * 1231 -> reqc.getDoubleParam("", 0.0);
+ *  ReqParamDefaultValSetter
+ *  
+ * 
+ * </pre>
  * @author BowenCai
  *
  */
@@ -66,6 +102,9 @@ public class SetterFactory {
 	 */
 	public static IStateSetter createSetter(Field field) {
 		
+		/**
+		 * setAccessible
+		 */
 		if (!field.isAccessible())
 			try {
 				field.setAccessible(true);
@@ -76,7 +115,9 @@ public class SetterFactory {
 						+ field.getDeclaringClass().getName() + "]");
 			}
 		
-		
+		/**
+		 * Inject
+		 */
 		if (field.isAnnotationPresent(Inject.class)
 				|| field.isAnnotationPresent(Named.class)) {
 
@@ -85,6 +126,9 @@ public class SetterFactory {
 					, named(field, field.getName())
 					, nullable(field));
 			
+			/**
+			 * ContextAttr
+			 */
 		} else if (field.isAnnotationPresent(ContextAttr.class)) {
 			
 			ContextAttr ann = field.getAnnotation(ContextAttr.class);
@@ -92,6 +136,9 @@ public class SetterFactory {
 			
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
+			/**
+			 * CookieVal
+			 */
 		} else if (field.isAnnotationPresent(CookieVal.class)) {
 
 			CookieVal ann = field.getAnnotation(CookieVal.class);
@@ -99,6 +146,9 @@ public class SetterFactory {
 			
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
+			/**
+			 * ReqAttr
+			 */
 		} else if (field.isAnnotationPresent(ReqAttr.class)) {
 
 			ReqAttr ann = field.getAnnotation(ReqAttr.class);
@@ -106,6 +156,9 @@ public class SetterFactory {
 			
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
+			/**
+			 * SessionAttr
+			 */
 		} else if (field.isAnnotationPresent(SessionAttr.class)) {
 
 			SessionAttr ann = field.getAnnotation(SessionAttr.class);
@@ -123,6 +176,9 @@ public class SetterFactory {
 //			
 //		}
 		
+		/**
+		 * ReqParam
+		 */
 		else if (field.isAnnotationPresent(ReqParam.class)) {
 			ReqParam ann = field.getAnnotation(ReqParam.class);
 			Class<?> cls = field.getType();
@@ -153,8 +209,7 @@ public class SetterFactory {
 										String annName, 
 										String defaultVal, 
 										boolean annNullable) {
-		System.out.println("SetterFactory.reqSetter()");
-		System.out.println(defaultVal);
+		
 		boolean nul = nullable(field) && annNullable;
 		String name = named(field, annName);
 		
@@ -207,7 +262,7 @@ public class SetterFactory {
 	 * 
 	 */
 	private static final Map<Integer, MethodHandle> 
-	annoHandleMap = new HashMap<Integer, MethodHandle>(32);
+	annoHandleMap = new HashMap<Integer, MethodHandle>(64);
 	
 	static {
 		try {
@@ -239,7 +294,7 @@ public class SetterFactory {
 		// 6 * 4 = 24
 //        bool hashCode: return value ? 1231 : 1237;
 		// non-null ? Multiply 1231
-		RequestContext reqc = null;
+//		RequestContext reqc = null;
 //		reqc.getBoolParam("");
 		annoHandleMap.put(Boolean.class.hashCode(), look.unreflect(
 				klass.getMethod("getBoolParam", String.class)

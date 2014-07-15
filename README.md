@@ -94,6 +94,11 @@ public class SampleController {
 	@Inject UserService userService;
 	
 	class MyState {
+		@ReqAttr(value="alias", defaultVal="1992-6-14")
+		Date testdata1;
+		@CookieVal
+		Double testdata2;
+
 		@ReqParam("psw_cipher")
 		String passwordCipher;
 		@ReqParam(value="email_address", nullable = false)

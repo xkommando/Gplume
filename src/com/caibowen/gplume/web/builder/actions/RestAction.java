@@ -18,6 +18,7 @@ package com.caibowen.gplume.web.builder.actions;
 import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.PathValResolver;
 
 /**
  * 
@@ -36,11 +37,10 @@ public class RestAction extends SimpleAction {
 	final PathValResolver resolver;
 	final boolean inMethodCall;
 	
-	public RestAction(String uri, MethodHandle handle, 
-						int start, String name, Class<?> type, String s, boolean call) {
+	public RestAction(String uri, MethodHandle handle, boolean call, PathValResolver pr) {
 		
 		super(uri, handle);
-		resolver = new PathValResolver(start, name, type, s);
+		resolver = pr;
 		inMethodCall = call;
 	}
 	

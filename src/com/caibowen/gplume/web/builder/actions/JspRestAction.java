@@ -18,6 +18,7 @@ package com.caibowen.gplume.web.builder.actions;
 import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.PathValResolver;
 
 
 /**
@@ -41,9 +42,8 @@ public class JspRestAction extends RestAction {
 
 	protected final boolean hasRequest;
 	
-	public JspRestAction(String uri, MethodHandle handle, int start,
-			String name, Class<?> type, String s, boolean call, boolean req) {
-		super(uri, handle, start, name, type, s, call);
+	public JspRestAction(String uri, MethodHandle handle, boolean call, boolean req, PathValResolver pr) {
+		super(uri, handle, call, pr);
 		hasRequest = req;
 	}
 
