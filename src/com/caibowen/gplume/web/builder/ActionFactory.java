@@ -51,13 +51,6 @@ public class ActionFactory implements IActionFactory, Serializable {
 
 	private ActionMapper<Interception> interceptMapper = new ActionMapper<>();
 	
-	@Inject
-	private IActionBuilder actionBuilder;
-	@Override
-	public void setActionBuilder(IActionBuilder actionBuilder) {
-		this.actionBuilder = actionBuilder;
-	}
-
 	@Override
 	public IAction findAction(HttpMethod httpmMthod, String uri) {
 		
@@ -88,7 +81,6 @@ public class ActionFactory implements IActionFactory, Serializable {
 		return (Interception) interceptMapper.getAction(uri);
 	}
 	
-
 	@Override
 	public void registerIntercept(@Nullable String prefix, 
 									@Nonnull Object controller, 
@@ -107,7 +99,10 @@ public class ActionFactory implements IActionFactory, Serializable {
 					uri = prefix + uri;
 				
 				checkURI(uri);
-				Interception i = actionBuilder.buildInterception(uri, ctrl, method);
+				Interception i = BuilderFactory
+								.getBuilder(uri, method, ctrl)
+								.buildInterception(uri, ctrl, method);
+				
 				interceptMapper.add(i);
 			}
 		} else {
@@ -122,12 +117,6 @@ public class ActionFactory implements IActionFactory, Serializable {
 	public void registerHandles(@Nullable String prefix, 
 								@Nullable Object ctrl,
 								@Nonnull Method method) {
-		/**
-		 * set to null to indicate the static method and avoid methodhandle binding
-		 */
-		if (Modifier.isStatic(method.getModifiers())) {
-			ctrl = null;
-		}
 		
 		Handle info = method.getAnnotation(Handle.class);
 		String[] uris = info.value();
@@ -143,7 +132,9 @@ public class ActionFactory implements IActionFactory, Serializable {
 			if (addPrefix)
 				uri = prefix + uri;
 			
-			IAction action = actionBuilder.buildAction(uri, ctrl, method);
+			IAction action = BuilderFactory
+							.getBuilder(uri, method, ctrl)
+							.buildAction(uri, ctrl, method);
 			
 			checkURI(action.getEffectiveURI());
 			HttpMethod[] methods = info.httpMethods();

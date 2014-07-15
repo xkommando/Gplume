@@ -95,8 +95,8 @@ public abstract class AbstractControlCenter
 				addController(ctrlObj, true);
 			} catch (Exception e) {
 				throw new RuntimeException(
-						"error adding controller class["
-								+ ctrlObj.getClass().getName() + "]\n"
+						"error adding controller["
+								+ ctrlObj.getClass().getName() + "]\r\n"
 								+ e.getMessage(), e);
 			}
 		}

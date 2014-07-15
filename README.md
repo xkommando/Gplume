@@ -92,12 +92,12 @@ public class SampleController {
 	@Inject Validator validator;
 	@Inject PublicKeyService keyService;
 	@Inject UserService userService;
-	
+	//state class can be defined any where, public or private, static or non-static
 	class MyState {
 		@ReqAttr(value="alias", defaultVal="1992-6-14")
 		Date testdata1;
-		@CookieVal
-		Double testdata2;
+		@CookieVal(defaultVal=" 2.457  ", nullable=false)
+		double testdata2;
 
 		@ReqParam("psw_cipher")
 		String passwordCipher;
@@ -189,7 +189,7 @@ public class ChapterDAO extends HibernateDaoSupport {
 ```Java
 @RunWith(JunitPal.class)
 @ManifestPath("file:src/manifest.xml") // read as file
-public class TestNULL {
+public class TestDemo {
 	@Named("controlCenter")
 	public AbstractControlCenter controlCenter;
 	@Test

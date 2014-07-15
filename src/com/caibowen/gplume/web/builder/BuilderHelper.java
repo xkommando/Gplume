@@ -17,16 +17,16 @@ package com.caibowen.gplume.web.builder;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import com.caibowen.gplume.cache.mem.WeakCache;
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
 
 /**
@@ -34,44 +34,52 @@ import com.caibowen.gplume.web.builder.actions.SimpleAction;
  * @author BowenCai
  *
  */
-public abstract class AbstractActionBuilder {
+public class BuilderHelper {
 
 	// from java.lang.invoke
-	protected static final Lookup LOOKUP = MethodHandles.publicLookup();
+	public static final Lookup LOOKUP = MethodHandles.publicLookup();
 
 	/**
 	 * 
 	 * void func(RequestContext );
 	 */
-	protected static final MethodType SIMPLE_TYPE = MethodType.methodType(
+	public static final MethodType SIMPLE_TYPE = MethodType.methodType(
 			void.class, RequestContext.class);
 	
 	/**
 	 * String func(RequestContext );
 	 */
-	protected static final MethodType RET_JSP_TYPE = MethodType.methodType(
+	public static final MethodType RET_JSP_TYPE = MethodType.methodType(
 			String.class, RequestContext.class);
 	
 	/**
 	 * String func();
 	 */
-	protected static final MethodType RET_JSP_NOPARAM_TYPE = MethodType.methodType(
+	public static final MethodType RET_JSP_NOPARAM_TYPE = MethodType.methodType(
 			String.class);
 	
 	/**
 	 * void func(RequestContext, SimpleAction);
 	 */
-	protected static final MethodType INTERCEPT_TYPE = MethodType.methodType(
+	public static final MethodType INTERCEPT_TYPE = MethodType.methodType(
 			void.class, RequestContext.class, SimpleAction.class);
 
 	/**
 	 * keep track of all actions, avoid rebuilding actions
 	 */
-	protected static final WeakCache<Integer, IAction> actMap = new WeakCache<>();
+	public static final WeakCache<Integer, IAction> actMap = new WeakCache<>(256);
+	public static final WeakCache<Class<?>, Object> ctrlMap = new WeakCache<>(256);
+	public static final WeakCache<Class<?>, Object> incMap = new WeakCache<>(128);
 	
-	
-	public abstract IAction buildAction(final String uri,  @Nullable Object object, Method method);
-	
+	public static Interception 
+	buildInterception(String u, 
+						Object object, 
+						Method method) {
+		
+		MethodHandle handle = findMethodeHandle(method, INTERCEPT_TYPE);
+		handle = object == null ? handle : handle.bindTo(object);
+		return new Interception(u , handle);
+	}
 	
 	/**
 	 * @Handle(uri={"/abc/{erf::date}"})
@@ -122,10 +130,4 @@ public abstract class AbstractActionBuilder {
 	}
 
 	
-	//----------------- trush
-	/**
-	 * 
-	 */
-	protected final WeakCache<Class<?>, Object> ctrlMap = new WeakCache<>(256);
-	protected final WeakCache<Class<?>, Object> incMap = new WeakCache<>(128);
 }

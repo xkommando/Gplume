@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.builder.stateful;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
@@ -34,7 +36,14 @@ import com.caibowen.gplume.web.RequestContext;
  */
 class NestedStateGen extends StateGen {
 
-	@Nonnull Object referred;
+	@Nonnull final Object referred;
+	
+	public NestedStateGen(List<? extends IStateSetter> setters,
+			Constructor<?> ctor, Object ref) {
+		super(setters, ctor);
+		this.referred = ref;
+	}
+
 	
 	@Override
 	public Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {

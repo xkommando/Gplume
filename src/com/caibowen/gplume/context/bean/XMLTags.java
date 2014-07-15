@@ -41,7 +41,7 @@ public class XMLTags {
 	 */
 	public static final String BEAN_LIFE_SPAN = "lifespan";
 	
-	public static final String PROPERTY_NAME = "id";
+	public static final String PROPERTY_NAME = "name";
 
 	public static final String PROPERTY_OBJ = "instance";
 	public static final String PROPERTY_LIST = "list";

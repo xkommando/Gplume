@@ -38,7 +38,6 @@ public class SimpleStatefulAction extends SimpleAction {
 		this.gen = g;
 	}
 	
-
 	@Override
 	public void perform(RequestContext req) throws Throwable {
 		req.putAttr(ACTION_NAME, this);

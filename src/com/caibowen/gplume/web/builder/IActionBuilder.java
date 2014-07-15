@@ -40,5 +40,4 @@ public interface IActionBuilder {
 	Interception buildInterception(String u, Object object, Method method);
 
 	IAction buildAction(final String uri, @Nullable Object object, Method method);
-
 }

@@ -18,12 +18,14 @@ package com.caibowen.gplume.web.builder;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.logging.Logger;
 import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.JspRestAction;
 import com.caibowen.gplume.web.builder.actions.RestAction;
 import com.caibowen.gplume.web.builder.actions.ViewRestAction;
@@ -37,7 +39,7 @@ import com.sun.istack.internal.Nullable;
  * @author BowenCai
  *
  */
-class RestActionBuilder extends AbstractActionBuilder {
+class RestActionBuilder implements IActionBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestActionBuilder.class.getName());
 
@@ -73,8 +75,8 @@ class RestActionBuilder extends AbstractActionBuilder {
 	 * @param method
 	 * @return
 	 */
-	protected final RestAction 
-	buildRest(String uri, Object object, Method method) {
+	@Override
+	public IAction buildAction(String uri, Object object, Method method) {
 
 		final int lq = uri.indexOf('{');
 		final int rq = uri.lastIndexOf('}');
@@ -167,16 +169,14 @@ class RestActionBuilder extends AbstractActionBuilder {
 	 * @param obj
 	 * @return null if not found
 	 */
-	private @Nullable MethodHandle getRestHandle(Method method, 
-											Class<?> argClass, 
-											Object obj,
-											boolean hasRequest) {
+	private @Nullable static MethodHandle 
+	getRestHandle(Method method, Class<?> argClass, 
+					Object obj, boolean hasRequest) {
 		
 		Class<?> retClass = method.getReturnType();
 		if (!retClass.equals(String.class) && !retClass.equals(void.class)) {
 			return null;
 		}
-		
 		
 		/**
 		 * first try find method that the path variable is one of the method's parameter
@@ -210,14 +210,16 @@ class RestActionBuilder extends AbstractActionBuilder {
 			}
 			
 			if (retClass.equals(String.class)) {
-				mType = RET_JSP_TYPE;
+				mType = BuilderHelper.RET_JSP_TYPE;
 			} else {
-				mType = SIMPLE_TYPE;
+				mType = BuilderHelper.SIMPLE_TYPE;
 			}
 		}
 //		mType = isMatch ? mType : retClass.equals(String.class) ?  RET_JSP_TYPE : SIMPLE_TYPE;
-		MethodHandle handle = findMethodeHandle(method, mType);
-		return obj != null ? handle.bindTo(obj) : handle;
+		MethodHandle handle = BuilderHelper.findMethodeHandle(method, mType);
+		
+		return Modifier.isStatic(method.getModifiers()) 
+				? handle : handle.bindTo(obj);
 	}
 	
 	
@@ -257,6 +259,12 @@ class RestActionBuilder extends AbstractActionBuilder {
 					+ method.getDeclaringClass().getClass().getName() + "]"
 					+ "\n check your method type and @Handle uri");
 		}
+	}
+
+
+	@Override
+	public Interception buildInterception(String u, Object object, Method method) {
+		return BuilderHelper.buildInterception(u, object, method);
 	}
 	
 }

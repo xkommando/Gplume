@@ -25,13 +25,19 @@ import com.caibowen.gplume.web.builder.actions.Interception;
 
 /**
  * manage all actions
+ * 
+ * factory :
+ * 		builder1 :
+ * 		builder2 :
+ * 		builder3 :
+ * 			....
+ * 
+ * 
  * @author BowenCai
  *
  */
 public interface IActionFactory {
 
-	void setActionBuilder(IActionBuilder actionBuilder);
-	
 	/**
 	 * @param controller
 	 * @param method
@@ -46,7 +52,7 @@ public interface IActionFactory {
 	
 	 IAction 			findAction(HttpMethod httpmMthod, String uri);
 
-	 Interception 	findInterception(String uri);
+	 Interception 		findInterception(String uri);
 
 	 boolean 			removeHandle(String uri);
 

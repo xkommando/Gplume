@@ -200,8 +200,9 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 			String propName = prop.getAttribute(XMLTags.PROPERTY_NAME);
 			if (!Str.Utils.notBlank(propName)) {
 				throw new NullPointerException(
-						"Property id is empty.Element: ["
+						"Property id is empty. \r\n NodeName: ["
 								+ prop.getNodeName() + "]");
+				
 			}
 			propName = propName.trim();
 			

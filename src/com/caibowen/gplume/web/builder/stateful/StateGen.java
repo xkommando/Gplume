@@ -38,6 +38,11 @@ public class StateGen {
 	 */
 	Constructor<?> ctor;
 	
+	public StateGen(List<? extends IStateSetter> setters, Constructor<?> ctor) {
+		this.setters = setters;
+		this.ctor = ctor;
+	}
+	
 	public Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		
 		Object state = ctor.newInstance();

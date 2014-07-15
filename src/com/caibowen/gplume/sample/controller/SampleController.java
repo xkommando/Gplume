@@ -82,9 +82,11 @@ public class SampleController {
 			"/index.jsp"})
 	public String index(RequestContext context) {
 		System.out.println("SampleController.index()");
-		context.putAttr("aaa", 64464);
 		System.out.println(context.toString());
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
+		context.putAttr("test_int", 123);
+		context.session(true).setAttribute("msg", "ctx msg");
+		context.session(true).setAttribute("aaa", 15999);
 		return "/index.jsp";
 	}
 	

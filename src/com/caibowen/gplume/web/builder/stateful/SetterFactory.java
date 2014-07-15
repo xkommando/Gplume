@@ -98,8 +98,9 @@ public class SetterFactory {
 	/**
 	 * field will be set accessible if necessary
 	 * @param field
-	 * @return
+	 * @return null if no correspondent annotation found
 	 */
+	@Nullable
 	public static IStateSetter createSetter(Field field) {
 		
 		/**
