@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.logging;
+package com.caibowen.gplume.misc.logging;
 
 import javax.annotation.Nullable;
 

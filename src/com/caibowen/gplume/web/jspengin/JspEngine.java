@@ -23,8 +23,8 @@ import javax.inject.Inject;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.AbstractControlCenter;
 
 

@@ -26,8 +26,8 @@ import javax.inject.Named;
 
 import com.caibowen.gplume.context.bean.IBeanAssembler;
 import com.caibowen.gplume.context.bean.IBeanAssemblerAware;
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str;
 

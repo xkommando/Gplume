@@ -13,40 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.logging;
-
-
 /**
+ * To integrate with Spring and Hibernate
+ * Jars need:
  * 
+ * full hibernate
+ * 
+ * apache common-logging
+ * 
+ * spring beans	
+ * spring context
+ * spring core
+ * 
+ * spring jdbc
+ * spring dao
+ * spring orm
+ * 
+ * spring tx 
+ * 
+ * build sucessed on:
+ * hibernate 3.3
+ * common-logging 1.1.3
+ * spring-beans-3.2.6
+ * spring context-3.2.6
+ * spring core-3.2.6
+ * 
+ * spring jdbc-3.2.6
+ * spring dao-2.0.8
+ * spring orm-3.2.6
+ * 
+ * spring tx -4.0.3
+ * 
+ */
+/**
  * @author BowenCai
  *
  */
-public abstract class LoggerFactory {
-
-	private static LoggerFactory factory;
-    
-	synchronized public static void setLoggerFactory(LoggerFactory f) {
-    	factory = f;
-    }
-	
-    public static LoggerFactory getLoggerFactory() {
-		if (factory == null)
-			factory = new JdkLoggerFactory();
-		
-		return factory;
-	}
-    
-    public static Logger getLogger(Class<?> cls) {
-    	return getLoggerFactory().getLoggerImpl(cls);
-    }
-
-    public static Logger getLogger(String name) {
-    	return getLoggerFactory().getLoggerImpl(name);
-    }
-    
-
-
-    protected abstract Logger getLoggerImpl(Class<?> cls);
-
-    protected abstract Logger getLoggerImpl(String name);
-}
+package com.caibowen.gplume.misc.orm.hibernate;

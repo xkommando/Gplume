@@ -22,6 +22,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.annotation.Intercept;
@@ -36,6 +38,7 @@ import com.caibowen.gplume.web.builder.actions.Interception;
 public class ActionFactory implements IActionFactory, Serializable {
 	
 	private static final long serialVersionUID = -4677797873703541912L;
+	private static final Logger LOG = LoggerFactory.getLogger(ActionFactory.class);
 	
 	private ActionMapper<IAction>[] mappers;
 	public ActionFactory() {
@@ -119,6 +122,11 @@ public class ActionFactory implements IActionFactory, Serializable {
 //			System.out.print(uri);
 			for (HttpMethod hm : methods) {
 //				System.out.println(hm);
+				if (LOG.isDebugEnabled())
+					LOG.debug("adding action from method[{0}]"
+							+ " URI [{1}] Method [{2}]"
+							, method.toString(), action.getEffectiveURI(), hm);
+				
 				mappers[hm.ordinal()].add(action);
 			} // methods
 		}

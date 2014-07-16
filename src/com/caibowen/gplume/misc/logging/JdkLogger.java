@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.logging;
+package com.caibowen.gplume.misc.logging;
 
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -33,6 +33,7 @@ public class JdkLogger implements Logger {
 
     public JdkLogger(String name) {
         this.log = java.util.logging.Logger.getLogger(name);
+        log.setLevel(Level.FINEST);
     }
 
     @Override

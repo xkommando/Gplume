@@ -20,8 +20,8 @@ import java.lang.reflect.Field;
 
 import javax.annotation.Nullable;
 
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.RequestContext;
 
 

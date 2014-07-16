@@ -18,8 +18,8 @@ package com.caibowen.gplume.web.builder.stateful.setters;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.PathValResolver;
 

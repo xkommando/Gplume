@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.misc.Str.Utils;
 
 /**
  * 
@@ -323,7 +324,7 @@ public class Converter {
 		}
 		string = string.trim();
 		if (Str.Patterns.INTERGER.matcher(string).matches()) {
-			return Long.parseLong(string);
+			return Long.decode(string);
 		} else {
 			throw new NumberFormatException("cannot parse [" + string + "] to integer");
 		}
@@ -385,6 +386,278 @@ public class Converter {
 		}
 	}
 
+    public static BigInteger toBigInteger(final String str) {
+        if (str == null) {
+            return null;
+        }
+        int pos = 0; // offset within string
+        int radix = 10;
+        boolean negate = false; // need to negate later?
+        if (str.startsWith("-")) {
+            negate = true;
+            pos = 1;
+        }
+        if (str.startsWith("0x", pos) || str.startsWith("0x", pos)) { // hex
+            radix = 16;
+            pos += 2;
+        } else if (str.startsWith("#", pos)) { // alternative hex (allowed by Long/Integer)
+            radix = 16;
+            pos ++;
+        } else if (str.startsWith("0", pos) && str.length() > pos + 1) { // octal; so long as there are additional digits
+            radix = 8;
+            pos ++;
+        } // default is to treat as decimal
+
+        final BigInteger value = new BigInteger(str.substring(pos), radix);
+        return negate ? value.negate() : value;
+    }
+    
+
+    /**
+     * <p>Turns a string value into a java.lang.Number.</p>
+     *
+     * <p>If the string starts with {@code 0x} or {@code -0x} (lower or upper case) or {@code #} or {@code -#}, it
+     * will be interpreted as a hexadecimal Integer - or Long, if the number of digits after the
+     * prefix is more than 8 - or BigInteger if there are more than 16 digits.
+     * </p>
+     * <p>Then, the value is examined for a type qualifier on the end, i.e. one of
+     * <code>'f','F','d','D','l','L'</code>.  If it is found, it starts 
+     * trying to Converter.to successively larger types from the type specified
+     * until one is found that can represent the value.</p>
+     *
+     * <p>If a type specifier is not found, it will check for a decimal point
+     * and then try successively larger types from <code>Integer</code> to
+     * <code>BigInteger</code> and from <code>Float</code> to
+    * <code>BigDecimal</code>.</p>
+    * 
+     * <p>
+     * Integral values with a leading {@code 0} will be interpreted as octal; the returned number will
+     * be Integer, Long or BigDecimal as appropriate.
+     * </p>
+     *
+     * <p>Returns <code>null</code> if the string is <code>null</code>.</p>
+     *
+     * <p>This method does not trim the input string, i.e., strings with leading
+     * or trailing spaces will generate NumberFormatExceptions.</p>
+     *
+     * @param str  String containing a number, may be null
+     * @return Number created from the string (or null if the input is null)
+     * @throws NumberFormatException if the value cannot be converted
+     */
+    public static Number createNumber(final String str) throws NumberFormatException {
+        if (str == null) {
+            return null;
+        }
+        if (!Utils.notBlank(str)) {
+            throw new NumberFormatException("A blank string is not a valid number");
+        }
+        // Need to deal with all possible hex prefixes here
+        final String[] hex_prefixes = {"0x", "0X", "-0x", "-0X", "#", "-#"};
+        int pfxLen = 0;
+        for(final String pfx : hex_prefixes) {
+            if (str.startsWith(pfx)) {
+                pfxLen += pfx.length();
+                break;
+            }
+        }
+        if (pfxLen > 0) { // we have a hex number
+            char firstSigDigit = 0; // strip leading zeroes
+            for(int i = pfxLen; i < str.length(); i++) {
+                firstSigDigit = str.charAt(i);
+                if (firstSigDigit == '0') { // count leading zeroes
+                    pfxLen++;
+                } else {
+                    break;
+                }
+            }
+            final int hexDigits = str.length() - pfxLen;
+            if (hexDigits > 16 || (hexDigits == 16 && firstSigDigit > '7')) { // too many for Long
+                return Converter.toBigInteger(str);
+            }
+            if (hexDigits > 8 || (hexDigits == 8 && firstSigDigit > '7')) { // too many for an int
+                return Converter.toLong(str);
+            }
+            return Converter.toInteger(str);
+        }
+        final char lastChar = str.charAt(str.length() - 1);
+        String mant;
+        String dec;
+        String exp;
+        final int decPos = str.indexOf('.');
+        final int expPos = str.indexOf('e') + str.indexOf('E') + 1; // assumes both not present
+        // if both e and E are present, this is caught by the checks on expPos (which prevent IOOBE)
+        // and the parsing which will detect if e or E appear in a number due to using the wrong offset
+
+        int numDecimals = 0; // Check required precision (LANG-693)
+        if (decPos > -1) { // there is a decimal point
+
+            if (expPos > -1) { // there is an exponent
+                if (expPos < decPos || expPos > str.length()) { // prevents double exponent causing IOOBE
+                    throw new NumberFormatException(str + " is not a valid number.");
+                }
+                dec = str.substring(decPos + 1, expPos);
+            } else {
+                dec = str.substring(decPos + 1);
+            }
+            mant = str.substring(0, decPos);
+            numDecimals = dec.length(); // gets number of digits past the decimal to ensure no loss of precision for floating point numbers.
+        } else {
+            if (expPos > -1) {
+                if (expPos > str.length()) { // prevents double exponent causing IOOBE
+                    throw new NumberFormatException(str + " is not a valid number.");
+                }
+                mant = str.substring(0, expPos);
+            } else {
+                mant = str;
+            }
+            dec = null;
+        }
+        if (!Character.isDigit(lastChar) && lastChar != '.') {
+            if (expPos > -1 && expPos < str.length() - 1) {
+                exp = str.substring(expPos + 1, str.length() - 1);
+            } else {
+                exp = null;
+            }
+            //Requesting a specific type..
+            final String numeric = str.substring(0, str.length() - 1);
+            final boolean allZeros = isAllZeros(mant) && isAllZeros(exp);
+            switch (lastChar) {
+                case 'l' :
+                case 'L' :
+                    if (dec == null
+                        && exp == null
+                        && (numeric.charAt(0) == '-' 
+                        && Str.Utils.isDigits(numeric.substring(1)) 
+                        	||  Str.Utils.isDigits(numeric))) {
+                        try {
+                            return Converter.toLong(numeric);
+                        } catch (final NumberFormatException nfe) { // NOPMD
+                            // Too big for a long
+                        }
+                        return Converter.toBigInteger(numeric);
+
+                    }
+                    throw new NumberFormatException(str + " is not a valid number.");
+                case 'f' :
+                case 'F' :
+                    try {
+                        final Float f = toFloat(numeric);
+                        if (!(f.isInfinite() || (f.floatValue() == 0.0F && !allZeros))) {
+                            //If it's too big for a float or the float value = 0 and the string
+                            //has non-zeros in it, then float does not have the precision we want
+                            return f;
+                        }
+
+                    } catch (final NumberFormatException nfe) { // NOPMD
+                        // ignore the bad number
+                    }
+                    //$FALL-THROUGH$
+                case 'd' :
+                case 'D' :
+                    try {
+                        final Double d = Converter.toDouble(numeric);
+                        if (!(d.isInfinite() || (d.floatValue() == 0.0D && !allZeros))) {
+                            return d;
+                        }
+                    } catch (final NumberFormatException nfe) { // NOPMD
+                        // ignore the bad number
+                    }
+                    try {
+                        return Converter.toBigDecimal(numeric);
+                    } catch (final NumberFormatException e) { // NOPMD
+                        // ignore the bad number
+                    }
+                    //$FALL-THROUGH$
+                default :
+                    throw new NumberFormatException(str + " is not a valid number.");
+
+            }
+        }
+        //User doesn't have a preference on the return type, so let's start
+        //small and go from there...
+        if (expPos > -1 && expPos < str.length() - 1) {
+            exp = str.substring(expPos + 1, str.length());
+        } else {
+            exp = null;
+        }
+        if (dec == null && exp == null) { // no decimal point and no exponent
+            //Must be an Integer, Long, Biginteger
+            try {
+                return Converter.toInteger(str);
+            } catch (final NumberFormatException nfe) { // NOPMD
+                // ignore the bad number
+            }
+            try {
+                return Converter.toLong(str);
+            } catch (final NumberFormatException nfe) { // NOPMD
+                // ignore the bad number
+            }
+            return Converter.toBigInteger(str);
+        }
+
+        //Must be a Float, Double, BigDecimal
+        final boolean allZeros = isAllZeros(mant) && isAllZeros(exp);
+        try {
+            if(numDecimals <= 7){// If number has 7 or fewer digits past the decimal point then make it a float
+                final Float f = Converter.toFloat(str);
+                if (!(f.isInfinite() || (f.floatValue() == 0.0F && !allZeros))) {
+                    return f;
+                }
+            }
+        } catch (final NumberFormatException nfe) { // NOPMD
+            // ignore the bad number
+        }
+        try {
+            if(numDecimals <= 16){// If number has between 8 and 16 digits past the decimal point then make it a double
+                final Double d = Converter.toDouble(str);
+                if (!(d.isInfinite() || (d.doubleValue() == 0.0D && !allZeros))) {
+                    return d;
+                }
+            }
+        } catch (final NumberFormatException nfe) { // NOPMD
+            // ignore the bad number
+        }
+        return Converter.toBigDecimal(str);
+    }
+    
+    
+    /**
+     * <p>Convert a <code>String</code> to a <code>BigDecimal</code>.</p>
+     * 
+     * <p>Returns <code>null</code> if the string is <code>null</code>.</p>
+     *
+     * @param str  a <code>String</code> to convert, may be null
+     * @return converted <code>BigDecimal</code> (or null if the input is null)
+     * @throws NumberFormatException if the value cannot be converted
+     */
+    public static BigDecimal toBigDecimal(final String str) {
+        if (str == null) {
+            return null;
+        }
+        // handle JDK1.3.1 bug where "" throws IndexOutOfBoundsException
+        if (!Str.Utils.notBlank(str)) {
+            throw new NumberFormatException("A blank string is not a valid number");
+        }
+        if (str.trim().startsWith("--")) {
+            // this is protection for poorness in java.lang.BigDecimal.
+            // it accepts this as a legal value, but it does not appear 
+            // to be in specification of class. OS X Java parses it to 
+            // a wrong value.
+            throw new NumberFormatException(str + " is not a valid number.");
+        }
+        return new BigDecimal(str);
+    }
+    private static boolean isAllZeros(final String str) {
+        if (str == null) {
+            return true;
+        }
+        for (int i = str.length() - 1; i >= 0; i--) {
+            if (str.charAt(i) != '0') {
+                return false;
+            }
+        }
+        return str.length() > 0;
+    }
 	/**
 	 * cast String to to date(year, month, day), not hour, minutes, or second !
 	 * 

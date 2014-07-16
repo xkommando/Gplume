@@ -1,3 +1,4 @@
+package com.caibowen.gplume.misc.orm.hibernate;
 /*******************************************************************************
  * Copyright 2014 Bowen Cai
  * 

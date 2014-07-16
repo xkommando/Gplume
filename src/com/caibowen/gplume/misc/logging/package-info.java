@@ -13,23 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.logging;
-
 /**
  * 
+ */
+/**
  * @author BowenCai
  *
  */
-public class JdkLoggerFactory extends LoggerFactory {
-
-	@Override
-	protected Logger getLoggerImpl(Class<?> cls) {
-		return new JdkLogger(cls.getName());
-	}
-
-	@Override
-	protected Logger getLoggerImpl(String name) {
-		return new JdkLogger(name);
-	}
-
-}
+package com.caibowen.gplume.misc.logging;

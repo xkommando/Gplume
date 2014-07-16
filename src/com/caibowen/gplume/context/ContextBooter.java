@@ -17,8 +17,8 @@ package com.caibowen.gplume.context;
 
 import java.io.InputStream;
 
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.i18n.WebI18nService;
 

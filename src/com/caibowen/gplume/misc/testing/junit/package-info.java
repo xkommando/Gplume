@@ -15,9 +15,10 @@
  ******************************************************************************/
 /**
  * 
+ * utilities for testing with Junit4
  */
 /**
  * @author BowenCai
  *
  */
-package com.caibowen.gplume.logging;
+package com.caibowen.gplume.misc.testing.junit;

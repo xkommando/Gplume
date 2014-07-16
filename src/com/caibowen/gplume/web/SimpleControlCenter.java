@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.annotation.Controller;
 import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.builder.IAction;

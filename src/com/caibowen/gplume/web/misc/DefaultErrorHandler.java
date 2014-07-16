@@ -17,8 +17,8 @@ package com.caibowen.gplume.web.misc;
 
 import java.io.PrintWriter;
 
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.IErrorHandler;
 import com.caibowen.gplume.web.RequestContext;
 

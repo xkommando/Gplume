@@ -21,8 +21,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import com.caibowen.gplume.core.Converter;
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.JspRestAction;

@@ -19,8 +19,8 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspWriter;
 
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Str;
 
 public class TagLink extends WriterTag {

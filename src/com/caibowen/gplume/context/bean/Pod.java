@@ -21,8 +21,8 @@ import javax.annotation.Nullable;
 
 import org.w3c.dom.Element;
 
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 
 /**
  * manage bean life circle

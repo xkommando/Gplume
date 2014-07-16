@@ -13,12 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+package com.caibowen.gplume.misc.logging;
+
+
 /**
  * 
- * utilities for testing with Junit4
- */
-/**
  * @author BowenCai
  *
  */
-package com.caibowen.gplume.testing.junit;
+public abstract class LoggerFactory {
+
+	private static LoggerFactory factory;
+    
+	synchronized public static void setLoggerFactory(LoggerFactory f) {
+    	factory = f;
+    }
+	
+    public static LoggerFactory getLoggerFactory() {
+		if (factory == null)
+			factory = new JdkLoggerFactory();
+		
+		return factory;
+	}
+    
+    public static Logger getLogger(Class<?> cls) {
+    	return getLoggerFactory().getLoggerImpl(cls);
+    }
+
+    public static Logger getLogger(String name) {
+    	return getLoggerFactory().getLoggerImpl(name);
+    }
+    
+
+
+    protected abstract Logger getLoggerImpl(Class<?> cls);
+
+    protected abstract Logger getLoggerImpl(String name);
+}

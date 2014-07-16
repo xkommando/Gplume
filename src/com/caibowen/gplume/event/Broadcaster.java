@@ -27,8 +27,8 @@ import com.caibowen.gplume.common.StrongRef;
 import com.caibowen.gplume.common.WeakRef;
 import com.caibowen.gplume.context.bean.IAssemlberVisitor;
 import com.caibowen.gplume.core.TypeTraits;
-import com.caibowen.gplume.logging.Logger;
-import com.caibowen.gplume.logging.LoggerFactory;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 
 /**
  * Register listener and broadcast event.
