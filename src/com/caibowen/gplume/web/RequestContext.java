@@ -72,7 +72,7 @@ public class RequestContext implements Serializable {
 	 * @param in
 	 * @param out
 	 */
-	//for test only
+	//public for test only
 	public RequestContext(HttpServletRequest in, 
 							HttpServletResponse out, 
 							AbstractControlCenter c) {
@@ -166,7 +166,7 @@ public class RequestContext implements Serializable {
 	}
 
 // -----------------------------------------------
-	public boolean containsCookie(final String name) {
+	public boolean hasCookie(final String name) {
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
 			for (Cookie c : cookies) {
@@ -178,17 +178,31 @@ public class RequestContext implements Serializable {
 		return false;
 	}
 
-	
+	/**
+	 * cookie name is the name of this thread
+	 * @param value cookie value
+	 */
 	public void addCookie(final String value) {
 		addCookie(value, -1);
 	}
+	
+	/**
+	 * cookie name is the name of this thread
+	 * @param value cookie value
+	 */
 	public void addCookie(final String value, final int ageInSecond) {
 		addCookie(Thread.currentThread().getName(), value, ageInSecond);
 	}
 	
+	/**
+	 * 
+	 * @param name
+	 * @param value
+	 * @param ageInSecond  age in second
+	 */
 	public void addCookie(final String name, final String value, final int ageInSecond) {
 		
-		if (validCookieName(name)) {
+		if (cookieNameValid(name)) {
 			Cookie cookie = new Cookie(name, value);
 			cookie.setMaxAge(ageInSecond);
 			response.addCookie(cookie);
@@ -201,16 +215,16 @@ public class RequestContext implements Serializable {
 	}
 	
 	public void addCookie(Cookie ck) {
-		if (validCookieName(ck.getName())) {
+		if (cookieNameValid(ck.getName())) {
 			response.addCookie(ck);
 		} else {
 			throw new IllegalArgumentException(
-					"illegal cookie id[" + ck.getName() 
+					"illegal cookie name[" + ck.getName() 
 					+"]\nname pattern [" + Str.Patterns.COOKIE_NAME.pattern() + "]");
 		}
 	}
 	
-	private static boolean validCookieName(@Nonnull String name) {
+	private static boolean cookieNameValid(@Nonnull String name) {
 		return Str.Patterns.COOKIE_NAME.matcher(name).matches()
 		&& !name.equalsIgnoreCase("Comment") // rfc2019
 		&& !name.equalsIgnoreCase("Discard") // 2019++
@@ -253,6 +267,7 @@ public class RequestContext implements Serializable {
 		return request.getSession(boo);
 	}
 	
+	@Nullable
 	public<T> T sessionAttr(String name) {
 		HttpSession session = request.getSession(true);
 		return (T)session.getAttribute(name);
@@ -263,6 +278,7 @@ public class RequestContext implements Serializable {
 		return controlCenter.getServletContext();
 	}
 	
+	@Nullable
 	public<T> T contextAttr(String name) {
 		return (T)controlCenter.getServletContext().getAttribute(name);
 	}
@@ -276,9 +292,7 @@ public class RequestContext implements Serializable {
 	
 	@Nullable
 	public String eTag() {
-		
 		String tag = request.getHeader("If-None-Match");
-		
 		return Str.Utils.notBlank(tag) ? tag : null;
 	}
 
@@ -305,6 +319,10 @@ public class RequestContext implements Serializable {
 		return timeModified;
 	}
 	
+	/**
+	 * 
+	 * @return -1 if not specified
+	 */
 	public long lastModified() {
 
 		String _lastModified = request.getHeader("If-Modified-Since");
@@ -373,7 +391,7 @@ public class RequestContext implements Serializable {
 		return (T) request.getAttribute(key);
 	}
 	
-	public void remove(String name) {
+	public void removeAttr(String name) {
 		request.removeAttribute(name);
 	}
 

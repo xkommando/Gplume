@@ -44,7 +44,6 @@ public class StateGen {
 	}
 	
 	public Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		
 		Object state = ctor.newInstance();
 		for (IStateSetter setter : setters) {
 			setter.setWith(req, state);

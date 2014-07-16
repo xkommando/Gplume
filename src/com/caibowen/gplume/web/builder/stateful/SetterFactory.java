@@ -102,7 +102,6 @@ public class SetterFactory {
 	 */
 	@Nullable
 	public static IStateSetter createSetter(Field field) {
-		
 		/**
 		 * setAccessible
 		 */
@@ -133,7 +132,7 @@ public class SetterFactory {
 		} else if (field.isAnnotationPresent(ContextAttr.class)) {
 			
 			ContextAttr ann = field.getAnnotation(ContextAttr.class);
-			MethodHandle handle = annoHandleMap.get(ContextAttr.class.hashCode());
+			MethodHandle handle = anno2HandleMap.get(ContextAttr.class.hashCode());
 			
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
@@ -143,7 +142,7 @@ public class SetterFactory {
 		} else if (field.isAnnotationPresent(CookieVal.class)) {
 
 			CookieVal ann = field.getAnnotation(CookieVal.class);
-			MethodHandle handle = annoHandleMap.get(CookieVal.class.hashCode());
+			MethodHandle handle = anno2HandleMap.get(CookieVal.class.hashCode());
 			
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
@@ -153,7 +152,7 @@ public class SetterFactory {
 		} else if (field.isAnnotationPresent(ReqAttr.class)) {
 
 			ReqAttr ann = field.getAnnotation(ReqAttr.class);
-			MethodHandle handle = annoHandleMap.get(ReqAttr.class.hashCode());
+			MethodHandle handle = anno2HandleMap.get(ReqAttr.class.hashCode());
 			
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
@@ -163,7 +162,7 @@ public class SetterFactory {
 		} else if (field.isAnnotationPresent(SessionAttr.class)) {
 
 			SessionAttr ann = field.getAnnotation(SessionAttr.class);
-			MethodHandle handle = annoHandleMap.get(SessionAttr.class.hashCode());
+			MethodHandle handle = anno2HandleMap.get(SessionAttr.class.hashCode());
 			
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
@@ -171,7 +170,7 @@ public class SetterFactory {
 		
 //		else if (field.isAnnotationPresent(PathVal.class)) {
 //			PathVal ann = field.getAnnotation(PathVal.class);
-//			MethodHandle handle = annoHandleMap.get(PathVal.class);
+//			MethodHandle handle = anno2HandleMap.get(PathVal.class);
 //			return Str.Utils.notBlank(ann.defaultVal()) ? 
 //					new PathValDefaltSetter(handle, field, nullable(field) && ann.nullable(), , p)
 //			
@@ -188,19 +187,24 @@ public class SetterFactory {
 			int hash = cls.hashCode();
 			boolean hasDefault = false;
 			if (Str.Utils.notBlank(ann.defaultVal())) {
-				hash *= 1231;
 				hasDefault = true;
+				hash *= 1231;
 			}
 			
-			MethodHandle handle = annoHandleMap.get(hash);
-			return hasDefault ? new ReqParamDefaultValSetter(handle
+			MethodHandle handle = anno2HandleMap.get(hash);
+			return hasDefault ?
+					new ReqParamDefaultValSetter(handle
 					, named(field, ann.value())
 					, field
 					, nullable(field) && ann.nullable()
 					, Converter.slient.translateStr(ann.defaultVal(), field.getType()))
 			
-			: new ReqSetter(handle, named(field, ann.value()), field, nullable(field) && ann.nullable());
+			: new ReqSetter(handle
+					, named(field, ann.value())
+					, field
+					, nullable(field) && ann.nullable());
 		}
+		
 		return null;
 	}
 
@@ -263,7 +267,7 @@ public class SetterFactory {
 	 * 
 	 */
 	private static final Map<Integer, MethodHandle> 
-	annoHandleMap = new HashMap<Integer, MethodHandle>(64);
+	anno2HandleMap = new HashMap<Integer, MethodHandle>(64);
 	
 	static {
 		try {
@@ -273,22 +277,22 @@ public class SetterFactory {
 //		Converter.slient.translateStr("", Integer.class);
 		Lookup look = MethodHandles.publicLookup();
 //		public<T> T contextAttr(String id) {
-		annoHandleMap.put(ContextAttr.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(ContextAttr.class.hashCode(), look.unreflect(
 				klass.getMethod("contextAttr", String.class)
 				));
 
 //		public<T> T sessionAttr(String id) {
-		annoHandleMap.put(SessionAttr.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(SessionAttr.class.hashCode(), look.unreflect(
 				klass.getMethod("sessionAttr", String.class)
 				));
 
 //		public String cookieVal(String id) {
-		annoHandleMap.put(CookieVal.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(CookieVal.class.hashCode(), look.unreflect(
 				klass.getMethod("cookieVal", String.class)
 				));
 
 //		public<T> T attr(String key) {
-		annoHandleMap.put(ReqAttr.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(ReqAttr.class.hashCode(), look.unreflect(
 				klass.getMethod("attr", String.class)
 				));
 
@@ -297,107 +301,107 @@ public class SetterFactory {
 		// non-null ? Multiply 1231
 //		RequestContext reqc = null;
 //		reqc.getBoolParam("");
-		annoHandleMap.put(Boolean.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Boolean.class.hashCode(), look.unreflect(
 				klass.getMethod("getBoolParam", String.class)
 				));
 //		reqc.getBoolParam("", true);
-		annoHandleMap.put(Boolean.class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Boolean.class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getBoolParam", String.class, boolean.class)
 				));
 //		reqc.getBoolsParam("");
-		annoHandleMap.put(Boolean[].class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Boolean[].class.hashCode(), look.unreflect(
 				klass.getMethod("getBoolsParam", String.class)
 				));
 //		reqc.getBoolsParam("", Collections.EMPTY_LIST);
-		annoHandleMap.put(Boolean[].class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Boolean[].class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getBoolsParam", String.class, List.class)
 				));
 		
 //		reqc.getDoubleParam("");
-		annoHandleMap.put(Double.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Double.class.hashCode(), look.unreflect(
 				klass.getMethod("getDoubleParam", String.class)
 				));
 //		reqc.getDoubleParam("", 0.0);
-		annoHandleMap.put(Double.class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Double.class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getDoubleParam", String.class, double.class)
 				));
 //		reqc.getDoublesParam("");
-		annoHandleMap.put(Double[].class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Double[].class.hashCode(), look.unreflect(
 				klass.getMethod("getDoublesParam", String.class)
 				));
 //		reqc.getDoublesParam("", Collections.EMPTY_LIST);
-		annoHandleMap.put(Double[].class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Double[].class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getDoublesParam", String.class, List.class)
 				));
 		
 //		reqc.getFloatParam("");
-		annoHandleMap.put(Float.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Float.class.hashCode(), look.unreflect(
 				klass.getMethod("getFloatParam", String.class)
 				));
 //		reqc.getFloatParam("", 0.0F);
-		annoHandleMap.put(Float.class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Float.class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getFloatParam", String.class, float.class)
 				));
 //		reqc.getFloatsParam("");
-		annoHandleMap.put(Float[].class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Float[].class.hashCode(), look.unreflect(
 				klass.getMethod("getFloatsParam", String.class)
 				));
 //		reqc.getFloatsParam("", Collections.EMPTY_LIST);
-		annoHandleMap.put(Float[].class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Float[].class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getFloatsParam", String.class, List.class)
 				));
 		
 //		reqc.getIntParam("");
-		annoHandleMap.put(Integer.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Integer.class.hashCode(), look.unreflect(
 				klass.getMethod("getIntParam", String.class)
 				));
 //		reqc.getIntParam("", 0);
-		annoHandleMap.put(Integer.class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Integer.class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getIntParam", String.class, int.class)
 				));
 //		reqc.getIntsParam("");
-		annoHandleMap.put(Integer[].class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Integer[].class.hashCode(), look.unreflect(
 				klass.getMethod("getIntsParam", String.class)
 				));
 //		reqc.getIntsParam("", Collections.EMPTY_LIST);
-		annoHandleMap.put(Integer[].class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Integer[].class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getIntsParam", String.class, List.class)
 				));
 		//------- long
 //		reqc.getLongParam("");
-		annoHandleMap.put(Long.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Long.class.hashCode(), look.unreflect(
 				klass.getMethod("getLongParam", String.class)
 				));
 //		reqc.getLongParam("", 0L);
-		annoHandleMap.put(Long.class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Long.class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getLongParam", String.class, long.class)
 				));
 //		reqc.getLongsParam("");
-		annoHandleMap.put(Long[].class.hashCode(), look.unreflect(
+		anno2HandleMap.put(Long[].class.hashCode(), look.unreflect(
 				klass.getMethod("getLongsParam", String.class)
 				));
 //		reqc.getLongsParam("", Collections.EMPTY_LIST);
-		annoHandleMap.put(Long[].class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(Long[].class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getLongsParam", String.class, List.class)
 				));
 		
 //		reqc.getStrParam("");
-		annoHandleMap.put(String.class.hashCode(), look.unreflect(
+		anno2HandleMap.put(String.class.hashCode(), look.unreflect(
 				klass.getMethod("getStrParam", String.class)
 				));
 //		reqc.getStrParam("", "default");
-		annoHandleMap.put(String.class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(String.class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getStrParam", String.class, String.class)
 				));
 		
 		//
 //		reqc.getStrArrayParam("");
-		annoHandleMap.put(String[].class.hashCode(), look.unreflect(
+		anno2HandleMap.put(String[].class.hashCode(), look.unreflect(
 				klass.getMethod("getStrArrayParam", String.class)
 				));
 		
 //		reqc.getStrArrayParam("", null);
-		annoHandleMap.put(String[].class.hashCode() * 1231, look.unreflect(
+		anno2HandleMap.put(String[].class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getStrArrayParam", String.class, String[].class)
 				));
 		

@@ -23,8 +23,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.caibowen.gplume.cache.mem.WeakCache;
+import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
@@ -68,19 +70,35 @@ public class BuilderHelper {
 	 * keep track of all actions, avoid rebuilding actions
 	 */
 	public static final WeakCache<Integer, IAction> actMap = new WeakCache<>(256);
+	public static final WeakCache<Integer, Interception> incMap = new WeakCache<>(128);
+	
 	public static final WeakCache<Class<?>, Object> ctrlMap = new WeakCache<>(256);
-	public static final WeakCache<Class<?>, Object> incMap = new WeakCache<>(128);
 	
 	public static Interception 
-	buildInterception(String u, 
+	buildInterception(final String u, 
 						Object object, 
 						Method method) {
 		
 		MethodHandle handle = findMethodeHandle(method, INTERCEPT_TYPE);
-		handle = object == null ? handle : handle.bindTo(object);
-		return new Interception(u , handle);
+		final MethodHandle $ = Modifier.isStatic(method.getModifiers())
+				? handle : handle.bindTo(object);
+		
+		return incMap.get(hash(u, handle), new CacheBuilder<Interception>() {
+			@Override
+			public Interception build() {
+				return new Interception(u , $);
+			}
+		});
 	}
-	
+
+	public static int hash(@Nullable Object...args) {
+		int h = 1;
+		for (int i = 0; i < args.length; i++) {
+			Object object = args[i];
+			h = 31 * h + (object == null ? 0 : object.hashCode());
+		}
+		return h;
+	}
 	/**
 	 * @Handle(uri={"/abc/{erf::date}"})
 	 * void handle(RequestContext req); OK, value put to request attribute

@@ -24,7 +24,7 @@ import com.caibowen.gplume.web.builder.stateful.StateGen;
 
 /**
  * void ss(MyState s, RequestContext ctx)
- * 
+ * return void, must has RequestContext
  * @author BowenCai
  *
  */

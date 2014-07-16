@@ -22,18 +22,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.web.builder.BuilderHelper;
 import com.caibowen.gplume.web.builder.IAction;
-import com.caibowen.gplume.web.builder.IActionBuilder;
-import com.caibowen.gplume.web.builder.actions.Interception;
+import com.caibowen.gplume.web.builder.stateful.actions.JspStatefulAction;
 import com.caibowen.gplume.web.builder.stateful.actions.SimpleStatefulAction;
+import com.caibowen.gplume.web.view.IView;
 
 
 
@@ -44,26 +44,30 @@ import com.caibowen.gplume.web.builder.stateful.actions.SimpleStatefulAction;
  * @author BowenCai
  *
  */
-public class StatefulActionBuilder implements IActionBuilder {
-
-	@Override
-	public Interception buildInterception(String u, Object object, Method method) {
-		return BuilderHelper.buildInterception(u, object, method);
-	}
+public class StatefulActionBuilder {
 	
-	@Override
-	public IAction buildAction(final String uri, 
+	public static IAction buildAction(final String uri, 
 									@Nullable Object object, 
 									Method method) {
 //		if (method.getReturnType().equals(void.class)) {
 //			return buildAction(uri, object, method);
 //		}
 		try {
-			return buildSimple(uri, object, method);
+			if (method.getReturnType().equals(String.class))
+				return buildJSP(uri, object, method);
+			
+			else if (IView.class.isAssignableFrom(method.getReturnType()))
+				return buildViewed(uri, object, method);
+			
+			else if (method.getReturnType().equals(void.class))
+				return buildSimple(uri, object, method);
+			
 		} catch (IllegalAccessException | NoSuchMethodException
 				| SecurityException e) {
 			throw new RuntimeException(e);
 		}
+		
+		throw new IllegalArgumentException("cannot build action out of "  + method);
 	}
 	
 	private static IAction buildSimple(final String uri, 
@@ -73,10 +77,33 @@ public class StatefulActionBuilder implements IActionBuilder {
 		Class<?> stateCls = method.getParameterTypes()[0];
 		MethodHandle handle = BuilderHelper.LOOKUP.unreflect(method);
 		
-		handle = Modifier.isStatic(method.getModifiers())
+		final MethodHandle handle$ = Modifier.isStatic(method.getModifiers())
 				? handle : handle.bindTo(object);
+
+		final StateGen gen = stateGen(stateCls);
+		return BuilderHelper.actMap.get(
+				BuilderHelper.hash(uri, handle, gen), 
+				new CacheBuilder<IAction>() {
+					@Override
+					public IAction build() {
+						return new SimpleStatefulAction(uri, handle$, gen);
+					}
+		});
+	}
+
+	private static IAction buildJSP(final String uri, 
+										@Nullable Object object, 
+										Method method) throws IllegalAccessException, NoSuchMethodException, SecurityException {
+//		new JspStatefulAction(u, handle, g, hasRequestContext)
+		return null;
+	}
+	private static IAction 
+	buildViewed(final String uri, @Nullable Object object, 
+			Method method) throws IllegalAccessException, NoSuchMethodException, SecurityException {
+//ViewStatefulAction(String u, Method m, Object ctrl, boolean hasReq, StateGen g) {
+	
 		
-		return new SimpleStatefulAction(uri, handle, stateGen(stateCls));
+		return null;
 	}
 	
 	private static StateGen stateGen(Class<?> stateCls) throws NoSuchMethodException, SecurityException {
@@ -84,22 +111,24 @@ public class StatefulActionBuilder implements IActionBuilder {
 		List<IStateSetter> setters = setters(stateCls);
 		
 		Class<?> refClass = referredClass(stateCls);
+		// has trivial constructor
 		if (refClass == null) {
 			Constructor<?> c = stateCls.getConstructor();
 			if (!c.isAccessible())
 				c.setAccessible(true);
 			return new StateGen(setters, c);
 			
-		} else {// reffered 
-			System.out.println("StatefulActionBuilder.stateGen()");
-			System.out.println(stateCls);
-			System.out.println(refClass);
+		} else {
+			// non-static inner class
+			// ctor has referred object
 			Constructor<?> c = stateCls.getDeclaredConstructor(refClass);
 			if (!c.isAccessible())
 				c.setAccessible(true);
 			
 			Object ref = BuilderHelper.ctrlMap.get(refClass);
+			
 			if (ref == null) {
+			// controller not registered, search bean container
 				Set<Object> beans = AppContext.beanAssembler.getBeans(refClass);
 				if (beans.size() != 1)
 					throw new RuntimeException(
@@ -117,6 +146,7 @@ public class StatefulActionBuilder implements IActionBuilder {
 	}
 	
 	private static List<IStateSetter> setters(Class<?> stateCls) {
+		
 		Field[] fs = stateCls.getDeclaredFields();
 		List<IStateSetter> setters = new ArrayList<>(fs.length);
 		for (Field f : stateCls.getDeclaredFields()) {
@@ -126,6 +156,7 @@ public class StatefulActionBuilder implements IActionBuilder {
 		}
 		return setters;
 	}
+	
 	/**
 	 * 
 	 * @param stateCls

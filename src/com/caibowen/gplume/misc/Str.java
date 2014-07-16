@@ -63,7 +63,7 @@ public class Str {
 		 */
 		public static final Pattern EMAIL = Pattern.compile(
 				"\\b^['_a-z0-9-\\+]+(\\.['_a-z0-9-\\+]+)*"
-				+"@[a-z0-9-]+(\\.[a-z0-9-]+)*\\.([a-z]{2}|aero|arpa|asia|biz|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|id|nato|net|org|pro|tel|travel|xxx)$\\b"
++"@[a-z0-9-]+(\\.[a-z0-9-]+)*\\.([a-z]{2}|aero|arpa|asia|biz|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|id|nato|net|org|pro|tel|travel|xxx)$\\b"
 		);
 
 		public static void main(String...a) {

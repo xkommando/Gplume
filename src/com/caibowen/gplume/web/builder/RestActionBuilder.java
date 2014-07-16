@@ -25,7 +25,6 @@ import com.caibowen.gplume.logging.Logger;
 import com.caibowen.gplume.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.JspRestAction;
 import com.caibowen.gplume.web.builder.actions.RestAction;
 import com.caibowen.gplume.web.builder.actions.ViewRestAction;
@@ -39,7 +38,7 @@ import com.sun.istack.internal.Nullable;
  * @author BowenCai
  *
  */
-class RestActionBuilder implements IActionBuilder {
+class RestActionBuilder {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RestActionBuilder.class.getName());
 
@@ -75,8 +74,7 @@ class RestActionBuilder implements IActionBuilder {
 	 * @param method
 	 * @return
 	 */
-	@Override
-	public IAction buildAction(String uri, Object object, Method method) {
+	public static IAction buildAction(String uri, Object object, Method method) {
 
 		final int lq = uri.indexOf('{');
 		final int rq = uri.lastIndexOf('}');
@@ -261,10 +259,4 @@ class RestActionBuilder implements IActionBuilder {
 		}
 	}
 
-
-	@Override
-	public Interception buildInterception(String u, Object object, Method method) {
-		return BuilderHelper.buildInterception(u, object, method);
-	}
-	
 }

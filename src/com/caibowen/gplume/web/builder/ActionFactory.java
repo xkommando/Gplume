@@ -17,11 +17,9 @@ package com.caibowen.gplume.web.builder;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
 
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.HttpMethod;
@@ -38,60 +36,42 @@ import com.caibowen.gplume.web.builder.actions.Interception;
 public class ActionFactory implements IActionFactory, Serializable {
 	
 	private static final long serialVersionUID = -4677797873703541912L;
-	// -----------------------------------------------------------------------------
-	// GET, POST, HEAD, PUT, PATCH, DELETE, OPTIONS, TRACE
-	// -----------------------------------------------------------------------------
-	private ActionMapper<IAction> getMapper = new ActionMapper<>();
-	private ActionMapper<IAction> postMapper = new ActionMapper<>();
-	private ActionMapper<IAction> headMapper = new ActionMapper<>();
-	private ActionMapper<IAction> putMapper = new ActionMapper<>();
-	private ActionMapper<IAction> patchMapper = new ActionMapper<>();
-	private ActionMapper<IAction> deleteMapper = new ActionMapper<>();
-	private ActionMapper<IAction> optionMapper = new ActionMapper<>();
+	
+	private ActionMapper<IAction>[] mappers;
+	public ActionFactory() {
+		
+		final int enumCount = HttpMethod.class.getEnumConstants().length;
 
-	private ActionMapper<Interception> interceptMapper = new ActionMapper<>();
+		// last one is for interception
+		mappers = new ActionMapper[enumCount + 1];
+
+		for (int i = 0; i < enumCount; i++) {
+			mappers[i] = new ActionMapper<>();
+		}
+		mappers[enumCount] = new ActionMapper<>();
+	}
 	
 	@Override
 	public IAction findAction(HttpMethod httpmMthod, String uri) {
-		
-		switch (httpmMthod) {
-		
-		case GET:
-			return getMapper.getAction(uri);
-		case POST:
-			return postMapper.getAction(uri);
-		case PUT:
-			return putMapper.getAction(uri);
-		case HEAD:
-			return headMapper.getAction(uri);
-		case OPTIONS:
-			return optionMapper.getAction(uri);
-		case DELETE:
-			return deleteMapper.getAction(uri);
-		case PATCH:
-			return patchMapper.getAction(uri);
-		default:
-			throw new UnsupportedOperationException(
-					"http method[" + httpmMthod + "] for [" + uri + "] is not suported");
-		}
+		return mappers[httpmMthod.ordinal()].getAction(uri);
 	}
 	
 	@Override
 	public Interception findInterception(String uri) {
-		return (Interception) interceptMapper.getAction(uri);
+		return (Interception) mappers[mappers.length - 1].getAction(uri);
 	}
 	
 	@Override
 	public void registerIntercept(@Nullable String prefix, 
-									@Nonnull Object controller, 
+									@Nonnull Object ctrl, 
 									@Nonnull Method method) {
 
-		Object ctrl;
-		if (Modifier.isStatic(method.getModifiers())) {
-			ctrl = null;
-		} else {
-			ctrl = controller;
-		}
+//		Object ctrl;
+//		if (Modifier.isStatic(method.getModifiers())) {
+//			ctrl = null;
+//		} else {
+//			ctrl = controller;
+//		}
 		String[] uris = method.getAnnotation(Intercept.class).value();
 		if (uris != null && uris.length > 0) {
 			for (String uri : uris) {
@@ -99,16 +79,15 @@ public class ActionFactory implements IActionFactory, Serializable {
 					uri = prefix + uri;
 				
 				checkURI(uri);
-				Interception i = BuilderFactory
-								.getBuilder(uri, method, ctrl)
+				Interception i = BuilderProxy
 								.buildInterception(uri, ctrl, method);
 				
-				interceptMapper.add(i);
+				mappers[mappers.length - 1].add(i);
 			}
 		} else {
 			throw new NullPointerException(
 					"No URI specified for Intercept method[" + method.getName()
-							+ "] in class [" + controller.getClass().getName()
+							+ "] in class [" + ctrl.getClass().getName()
 							+ "]");
 		}
 	}
@@ -132,46 +111,15 @@ public class ActionFactory implements IActionFactory, Serializable {
 			if (addPrefix)
 				uri = prefix + uri;
 			
-			IAction action = BuilderFactory
-							.getBuilder(uri, method, ctrl)
-							.buildAction(uri, ctrl, method);
+			IAction action = BuilderProxy
+							.buildAction(uri, method, ctrl);
 			
 			checkURI(action.getEffectiveURI());
 			HttpMethod[] methods = info.httpMethods();
-			
 //			System.out.print(uri);
 			for (HttpMethod hm : methods) {
 //				System.out.println(hm);
-				// do dispatch
-				switch (hm) {
-
-				case GET:
-					getMapper.add(action);
-					break;
-				case POST:
-					postMapper.add(action);
-					break;
-				case PUT:
-					putMapper.add(action);
-					break;
-				case HEAD:
-					headMapper.add(action);
-					break;
-				case OPTIONS:
-					optionMapper.add(action);
-					break;
-				case DELETE:
-					deleteMapper.add(action);
-					break;
-				case PATCH:
-					patchMapper.add(action);
-					break;
-				default:
-					/**
-					 * how to debug using trace ???
-					 */
-					break;
-				} // switch
+				mappers[hm.ordinal()].add(action);
 			} // methods
 		}
 		
@@ -191,36 +139,21 @@ public class ActionFactory implements IActionFactory, Serializable {
 	
 	@Override
 	public boolean removeHandle(String uri) {
-		return getMapper.remove(uri) || postMapper.remove(uri)
-				|| deleteMapper.remove(uri) || putMapper.remove(uri)
-				|| headMapper.remove(uri) || optionMapper.remove(uri)
-				|| patchMapper.remove(uri);
+		boolean weDidIt = false;
+		for (ActionMapper<IAction> am : mappers) {
+			weDidIt = weDidIt ||  am.remove(uri);
+		}
+		return weDidIt;
 	}
 
 	@Override
 	public boolean removeInterception(final String uri) {
-		return interceptMapper.remove(uri);
+		return mappers[mappers.length - 1].remove(uri);
 	}
 
 	@Override
 	public void destroy() {
-		
-		getMapper.clear();
-		getMapper = null;
-		postMapper.clear();
-		postMapper = null;
-		headMapper.clear();
-		headMapper = null;
-		putMapper.clear();
-		putMapper = null;
-		patchMapper.clear();
-		patchMapper = null;
-		deleteMapper.clear();
-		deleteMapper = null;
-		optionMapper.clear();
-		optionMapper = null;
-		interceptMapper.clear();
-		interceptMapper = null;
+		mappers = null;
 	}
 
 }

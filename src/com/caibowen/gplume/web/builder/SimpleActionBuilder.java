@@ -20,11 +20,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.JspAction;
 import com.caibowen.gplume.web.builder.actions.RestAction;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
@@ -53,14 +51,9 @@ import com.caibowen.gplume.web.view.IView;
  * @author BowenCai
  *
  */
-class SimpleActionBuilder implements IActionBuilder {
+class SimpleActionBuilder {
 	
 //	private static final Logger LOG = Logger.getLogger(SimpleActionBuilder.class.getName());
-
-	@Override
-	public Interception buildInterception(String u, Object object, Method method) {
-		return BuilderHelper.buildInterception(u, object, method);
-	}
 	
 	/**
 	 * @param uri
@@ -69,8 +62,7 @@ class SimpleActionBuilder implements IActionBuilder {
 	 * @return Action or RestAction
 	 * @see RestAction
 	 */
-	@Override
-	public IAction buildAction(final String uri, @Nonnull Object object,
+	public static IAction buildAction(final String uri, @Nonnull Object object,
 			Method method) {
 		/**
 		 * set to null to indicate the static method and avoid methodhandle binding
@@ -91,7 +83,8 @@ class SimpleActionBuilder implements IActionBuilder {
 					Modifier.isStatic(method.getModifiers())
 					? handle : handle.bindTo(object);
 			
-			return BuilderHelper.actMap.get(hash(uri, handle, hasRequestContext),
+			return BuilderHelper.actMap.get(
+					BuilderHelper.hash(uri, handle, hasRequestContext),
 					new CacheBuilder<IAction>() {
 						@Override
 						public IAction build() {
@@ -105,7 +98,8 @@ class SimpleActionBuilder implements IActionBuilder {
 			final MethodHandle handle$ = Modifier.isStatic(method.getModifiers())
 					? handle : handle.bindTo(object);
 					
-			return BuilderHelper.actMap.get(hash(uri, handle, handle),
+			return BuilderHelper.actMap.get(
+					BuilderHelper.hash(uri, handle, handle),
 					new CacheBuilder<IAction>() {
 						@Override
 						public IAction build() {
@@ -116,7 +110,8 @@ class SimpleActionBuilder implements IActionBuilder {
 		} else if (IView.class.isAssignableFrom(retKlass)) {
 			final Method $$ = method;
 			final Object $$$ = object;
-			return BuilderHelper.actMap.get(hash(uri, method, object, hasRequestContext),
+			return BuilderHelper.actMap.get(
+					BuilderHelper.hash(uri, method, object, hasRequestContext),
 					new CacheBuilder<IAction>() {
 						@Override
 						public IAction build() {
@@ -131,16 +126,6 @@ class SimpleActionBuilder implements IActionBuilder {
 		}
 
 	}
-	
-	static int hash(@Nullable Object...args) {
-		int h = 1;
-		for (int i = 0; i < args.length; i++) {
-			Object object = args[i];
-			h = 31 * h + (object == null ? 0 : object.hashCode());
-		}
-		return h;
-	}
-
 }
 
 

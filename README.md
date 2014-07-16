@@ -98,6 +98,9 @@ public class SampleController {
 		Date testdata1;
 		@CookieVal(defaultVal=" 2.457  ", nullable=false)
 		double testdata2;
+		@Inject
+		@Nullable
+		SomeClass beanInIoC;
 
 		@ReqParam("psw_cipher")
 		String passwordCipher;
