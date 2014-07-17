@@ -91,16 +91,13 @@ handle request with an object storing current state
 public class SampleController {
 	@Inject Validator validator;
 	@Inject PublicKeyService keyService;
-	@Inject UserService userService;
 	//state class can be defined any where, public or private, static or non-static
 	class MyState {
 		@ReqAttr(value="alias", defaultVal="1992-6-14")
 		Date testdata1;
 		@CookieVal(defaultVal=" 2.457  ", nullable=false)
 		double testdata2;
-		@Inject
-		@Nullable
-		SomeClass beanInIoC;
+		@Inject UserService userService;
 
 		@ReqParam("psw_cipher")
 		String passwordCipher;

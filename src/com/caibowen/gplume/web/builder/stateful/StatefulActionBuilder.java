@@ -29,10 +29,12 @@ import javax.annotation.Nullable;
 
 import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.context.AppContext;
+import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.BuilderHelper;
 import com.caibowen.gplume.web.builder.IAction;
 import com.caibowen.gplume.web.builder.stateful.actions.JspStatefulAction;
 import com.caibowen.gplume.web.builder.stateful.actions.SimpleStatefulAction;
+import com.caibowen.gplume.web.builder.stateful.actions.ViewStatefulAction;
 import com.caibowen.gplume.web.view.IView;
 
 
@@ -49,18 +51,28 @@ public class StatefulActionBuilder {
 	public static IAction buildAction(final String uri, 
 									@Nullable Object object, 
 									Method method) {
-//		if (method.getReturnType().equals(void.class)) {
-//			return buildAction(uri, object, method);
-//		}
+		Class<?> stateCls = method.getParameterTypes()[0];
+		MethodHandle handle;
+		try {
+			handle = BuilderHelper.LOOKUP.unreflect(method);
+		} catch (IllegalAccessException e1) {
+			throw new RuntimeException(e1);
+		}
+		
+		final MethodHandle handle$ = Modifier.isStatic(method.getModifiers())
+				? handle : handle.bindTo(object);
+
+		final StateGen gen = stateGen(stateCls);
+		
 		try {
 			if (method.getReturnType().equals(String.class))
-				return buildJSP(uri, object, method);
+				return buildJSP(uri, gen, handle$);
 			
 			else if (IView.class.isAssignableFrom(method.getReturnType()))
 				return buildViewed(uri, object, method);
 			
 			else if (method.getReturnType().equals(void.class))
-				return buildSimple(uri, object, method);
+				return buildSimple(uri, gen, handle$);
 			
 		} catch (IllegalAccessException | NoSuchMethodException
 				| SecurityException e) {
@@ -70,19 +82,25 @@ public class StatefulActionBuilder {
 		throw new IllegalArgumentException("cannot build action out of "  + method);
 	}
 	
+	
+	/**
+	 * 
+	 * void act(State s, RequestContext c)
+	 * 
+	 * @param uri
+	 * @param object
+	 * @param method
+	 * @return
+	 * @throws IllegalAccessException
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 */
 	private static IAction buildSimple(final String uri, 
-										@Nullable Object object, 
-										Method method) throws IllegalAccessException, NoSuchMethodException, SecurityException {
+										final StateGen gen,
+										final MethodHandle handle$) throws IllegalAccessException, NoSuchMethodException, SecurityException {
 		
-		Class<?> stateCls = method.getParameterTypes()[0];
-		MethodHandle handle = BuilderHelper.LOOKUP.unreflect(method);
-		
-		final MethodHandle handle$ = Modifier.isStatic(method.getModifiers())
-				? handle : handle.bindTo(object);
-
-		final StateGen gen = stateGen(stateCls);
 		return BuilderHelper.actMap.get(
-				BuilderHelper.hash(uri, handle, gen), 
+				BuilderHelper.hash(uri, handle$, gen), 
 				new CacheBuilder<IAction>() {
 					@Override
 					public IAction build() {
@@ -92,28 +110,57 @@ public class StatefulActionBuilder {
 	}
 
 	private static IAction buildJSP(final String uri, 
-										@Nullable Object object, 
-										Method method) throws IllegalAccessException, NoSuchMethodException, SecurityException {
+									final StateGen gen,
+									final MethodHandle handle$) throws IllegalAccessException, NoSuchMethodException, SecurityException {
 //		new JspStatefulAction(u, handle, g, hasRequestContext)
-		return null;
+		
+		Class<?> ps[] = handle$.type().parameterArray();
+		final boolean hasReq = ps[ps.length - 1].equals(RequestContext.class);
+		
+		return BuilderHelper.actMap.get(BuilderHelper.hash(uri, handle$, gen, hasReq),
+				new CacheBuilder<IAction>() {
+					@Override
+					public IAction build() {
+						return new JspStatefulAction(uri, handle$, gen, hasReq);
+					}
+				});
 	}
+	
 	private static IAction 
-	buildViewed(final String uri, @Nullable Object object, 
-			Method method) throws IllegalAccessException, NoSuchMethodException, SecurityException {
+	buildViewed(final String uri, @Nullable final Object object, 
+			final Method method) throws IllegalAccessException, NoSuchMethodException, SecurityException {
 //ViewStatefulAction(String u, Method m, Object ctrl, boolean hasReq, StateGen g) {
-	
-		
-		return null;
+
+		Class<?> ps[] = method.getParameterTypes();
+		final boolean hasReq = ps[ps.length - 1].equals(RequestContext.class);
+		final StateGen gen = stateGen(ps[0]);
+		return BuilderHelper.actMap.get(
+		BuilderHelper.hash(uri, method, object, gen, hasReq),
+				new CacheBuilder<IAction>() {
+					@Override
+					public IAction build() {
+						return 
+						new ViewStatefulAction(uri, method, object, hasReq, gen);
+					}
+				});
 	}
 	
-	private static StateGen stateGen(Class<?> stateCls) throws NoSuchMethodException, SecurityException {
+	private static StateGen stateGen(Class<?> stateCls) {
 		
+		StateGen s = BuilderHelper.stateMap.get(stateCls);
+		if (s != null)
+			return s;
 		List<IStateSetter> setters = setters(stateCls);
 		
 		Class<?> refClass = referredClass(stateCls);
 		// has trivial constructor
 		if (refClass == null) {
-			Constructor<?> c = stateCls.getConstructor();
+			Constructor<?> c;
+			try {
+				c = stateCls.getDeclaredConstructor();
+			} catch (NoSuchMethodException | SecurityException e) {
+				throw new RuntimeException(e);
+			}
 			if (!c.isAccessible())
 				c.setAccessible(true);
 			return new StateGen(setters, c);
@@ -121,7 +168,12 @@ public class StatefulActionBuilder {
 		} else {
 			// non-static inner class
 			// ctor has referred object
-			Constructor<?> c = stateCls.getDeclaredConstructor(refClass);
+			Constructor<?> c;
+			try {
+				c = stateCls.getDeclaredConstructor(refClass);
+			} catch (NoSuchMethodException | SecurityException e) {
+				throw new RuntimeException(e);
+			}
 			if (!c.isAccessible())
 				c.setAccessible(true);
 			
@@ -140,8 +192,9 @@ public class StatefulActionBuilder {
 				);
 				ref = beans.iterator().next();
 			}
-			
-			return new NestedStateGen(setters, c, ref);
+			s = new NestedStateGen(setters, c, ref);
+			BuilderHelper.stateMap.put(stateCls, s);
+			return s;
 		}
 	}
 	

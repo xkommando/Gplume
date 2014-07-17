@@ -6,7 +6,7 @@
  * speed!
  * 
  * Note that IAction is Serializable to enable hot migration of applications 
- * 
+ * Note that stateful actions does not support rest API
  * @author BowenCai
  *
  */

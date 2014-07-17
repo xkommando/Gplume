@@ -26,6 +26,7 @@ import javax.inject.Named;
 
 
 
+
 import com.caibowen.gplume.annotation.Semaphored;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.event.AppEvent;
@@ -87,6 +88,11 @@ public class SampleController {
 		context.putAttr("test_int", 123);
 		context.session(true).setAttribute("msg", "ctx msg");
 		context.session(true).setAttribute("aaa", 15999);
+		Integer[] ints = new Integer[3];
+		ints[0] = new Integer(1);
+		ints[1] = new Integer(2);
+		ints[2] = new Integer(3);
+		context.session(true).setAttribute("ints", ints);
 		return "/index.jsp";
 	}
 	

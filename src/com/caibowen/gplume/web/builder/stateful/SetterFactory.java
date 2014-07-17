@@ -95,16 +95,9 @@ import com.caibowen.gplume.web.builder.stateful.setters.ReqSetter;
  */
 public class SetterFactory {
 	
-	/**
-	 * field will be set accessible if necessary
-	 * @param field
-	 * @return null if no correspondent annotation found
-	 */
-	@Nullable
-	public static IStateSetter createSetter(Field field) {
-		/**
-		 * setAccessible
-		 */
+	
+	private static void setAccessible(Field field) {
+		
 		if (!field.isAccessible())
 			try {
 				field.setAccessible(true);
@@ -114,13 +107,21 @@ public class SetterFactory {
 						+ field.getName() + "] in class ["
 						+ field.getDeclaringClass().getName() + "]");
 			}
+	}
+	/**
+	 * field will be set accessible if necessary
+	 * @param field
+	 * @return null if no correspondent annotation found
+	 */
+	@Nullable
+	public static IStateSetter createSetter(Field field) {
 		
 		/**
 		 * Inject
 		 */
 		if (field.isAnnotationPresent(Inject.class)
 				|| field.isAnnotationPresent(Named.class)) {
-
+			setAccessible(field);
 			return new BeanSetter(field
 					, AppContext.beanAssembler
 					, named(field, field.getName())
@@ -130,7 +131,8 @@ public class SetterFactory {
 			 * ContextAttr
 			 */
 		} else if (field.isAnnotationPresent(ContextAttr.class)) {
-			
+
+			setAccessible(field);
 			ContextAttr ann = field.getAnnotation(ContextAttr.class);
 			MethodHandle handle = anno2HandleMap.get(ContextAttr.class.hashCode());
 			
@@ -141,6 +143,7 @@ public class SetterFactory {
 			 */
 		} else if (field.isAnnotationPresent(CookieVal.class)) {
 
+			setAccessible(field);
 			CookieVal ann = field.getAnnotation(CookieVal.class);
 			MethodHandle handle = anno2HandleMap.get(CookieVal.class.hashCode());
 			
@@ -151,6 +154,7 @@ public class SetterFactory {
 			 */
 		} else if (field.isAnnotationPresent(ReqAttr.class)) {
 
+			setAccessible(field);
 			ReqAttr ann = field.getAnnotation(ReqAttr.class);
 			MethodHandle handle = anno2HandleMap.get(ReqAttr.class.hashCode());
 			
@@ -161,6 +165,7 @@ public class SetterFactory {
 			 */
 		} else if (field.isAnnotationPresent(SessionAttr.class)) {
 
+			setAccessible(field);
 			SessionAttr ann = field.getAnnotation(SessionAttr.class);
 			MethodHandle handle = anno2HandleMap.get(SessionAttr.class.hashCode());
 			
@@ -180,6 +185,9 @@ public class SetterFactory {
 		 * ReqParam
 		 */
 		else if (field.isAnnotationPresent(ReqParam.class)) {
+
+			setAccessible(field);
+			
 			ReqParam ann = field.getAnnotation(ReqParam.class);
 			Class<?> cls = field.getType();
 			if (cls.isPrimitive())

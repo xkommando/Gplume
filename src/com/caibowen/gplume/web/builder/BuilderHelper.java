@@ -30,6 +30,7 @@ import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
+import com.caibowen.gplume.web.builder.stateful.StateGen;
 
 /**
  * 
@@ -71,7 +72,8 @@ public class BuilderHelper {
 	 */
 	public static final WeakCache<Integer, IAction> actMap = new WeakCache<>(256);
 	public static final WeakCache<Integer, Interception> incMap = new WeakCache<>(128);
-	
+
+	public static final WeakCache<Class<?>, StateGen> stateMap = new WeakCache<>(256);
 	public static final WeakCache<Class<?>, Object> ctrlMap = new WeakCache<>(256);
 	
 	public static Interception 
