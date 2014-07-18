@@ -66,8 +66,29 @@ use message tag in JSP
 ```HTML
 <gp:msg k="gplumeIsRunning" />
 ```
-#####Part Three: Handle HTTP Request
-handle request with a method
+#####Part Three: Gplume Web MVC
+Request pre-process and after-process
+```java
+public class SampleProcessor implements IRequestProcessor {
+	@Override // all request goes here
+	public void process(RequestContext context) {
+		before(context);
+		getNext().process(context);
+		after(context);
+	}
+```
+Build process chain in the XML
+```XML
+<bean id="headPrePrcessor" class="com.caibowen.gplume.web.i18n.NativePkgInjector">
+	<property name="i18nService" ref="i18nService"/>
+	<property name="next">
+		<bean class="com.caibowen.web.plugin.ui.BackgroundImgPreprocessor">
+			<property name="next" instance="com.caibowen.web.plugin.statistic.LogRequestPreProcessor"/>
+		</bean>
+	</property>
+</bean>
+```
+Handle request with method
 ```Java
 	@Handle(value={"/", "/index",
 			"/index.html", "/index.jsp"}})
@@ -76,7 +97,7 @@ handle request with a method
 		return "/index.jsp";
 	}
 	//number concurrent requests is limited by this semapher
-	@Semaphored(permit=100, fair=false)
+	@Semaphored(permit=100, fair=false, timeout=1000)// when time is out, send 503 
 	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"}
 			, httpMethods={HttpMethod.GET, HttpMethod.POST})
 	public FreeMarkerView happyBirthday(Date date) {
@@ -84,7 +105,7 @@ handle request with a method
 		return new FreeMarkerView(date);
 	}
 ```
-handle request with an object storing current state
+Handle request with an object storing current state
 ```Java
 //Note: this sample login function is for demo only and is insecure
 @Controller("/async/")// the base path
@@ -119,6 +140,7 @@ public class SampleController {
 		}
 	}
 	
+	@Semaphored(permit=300, timeout=1000)
 	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
 	public IView login(MyState reqScope, RequestContext req) {
 		if (reqScope == null) //non-null requirements are not met.
@@ -131,6 +153,18 @@ public class SampleController {
 		}
 	}
 }
+```
+Intercept requests
+```java
+	@Intercept(value = { "/user*" }) // intercept request by URL
+	public void demo(RequestContext context, IAction action) throws Throwable {
+		if (hasLogedIn(context)) {
+			action.perform(context);
+			afterProcess(context);
+		} else {
+			context.jumpTo("/login");
+		}
+	}
 ```
 #####Part Four. handle Event. 
 register listeners and publish events as:

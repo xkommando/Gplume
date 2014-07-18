@@ -65,9 +65,9 @@ public class Str {
 +"@[a-z0-9-]+(\\.[a-z0-9-]+)*\\.([a-z]{2}|aero|arpa|asia|biz|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|id|nato|net|org|pro|tel|travel|xxx)$\\b"
 		);
 
-		public static void main(String...a) {
-			System.out.println(EMAIL.matcher("hzzyxxx@163.com").matches());
-		}
+//		public static void main(String...a) {
+//			System.out.println(EMAIL.matcher("hzzyxxx@163.com").matches());
+//		}
 		public static final Pattern INTERGER = Pattern.compile("(-?[0-9]*)");
 		
 		public static final Pattern FLOAT_NUMBER = Pattern.compile(
@@ -766,9 +766,17 @@ public class Str {
 	    }
 	}
 	public static class Utils {
-	
+
 		/**
-		 * String will be trimmed
+		 * null or filled with space
+		 * @param s
+		 * @return
+		 */
+		public static boolean isBlank(final CharSequence s) {
+			return !notBlank(s);
+		}
+		/**
+		 * CharSequence not null contains non-space char
 		 * @param s
 		 * @return s != null && s.trim().length() > 0;
 		 */

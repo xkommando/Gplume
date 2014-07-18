@@ -16,7 +16,7 @@ import com.caibowen.gplume.web.view.IView;
 @Controller
 public class TestContrl3 {
 
-	class X {
+	static class X {
 		@SessionAttr("aaa")
 		int test_inttt;
 		@SessionAttr
@@ -71,7 +71,6 @@ public class TestContrl3 {
 		System.out.println(x.ints);
 		return IView.get.textView("4 hahaha" + x.msg);
 	}
-	
 	
 	@Handle({"/state/5"})
 	public IView name5(X x) {

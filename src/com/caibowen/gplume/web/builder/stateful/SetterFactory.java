@@ -172,7 +172,7 @@ public class SetterFactory {
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
 		}
-		
+		// rest API not supported
 //		else if (field.isAnnotationPresent(PathVal.class)) {
 //			PathVal ann = field.getAnnotation(PathVal.class);
 //			MethodHandle handle = anno2HandleMap.get(PathVal.class);
@@ -180,7 +180,6 @@ public class SetterFactory {
 //					new PathValDefaltSetter(handle, field, nullable(field) && ann.nullable(), , p)
 //			
 //		}
-		
 		/**
 		 * ReqParam
 		 */
@@ -212,10 +211,18 @@ public class SetterFactory {
 					, field
 					, nullable(field) && ann.nullable());
 		}
-		
 		return null;
 	}
 
+	/**
+	 * create setters for field annotated with:
+	 * 
+	 * @ContextAttr
+	 * @CookieVal
+	 * @ReqAttr
+	 * @SessionAttr
+	 * 
+	 */
 	private static IStateSetter reqSetter(
 										MethodHandle handle,
 										Field field, 
@@ -234,8 +241,9 @@ public class SetterFactory {
 						, field.getType()))
 		: new ReqSetter(handle, name, field, nul);
 	}
+	
 	/**
-	 * 
+	 * check Nonnull and Nullable
 	 * @param field
 	 * @return true if no @Nonnull or @Nullable
 	 */
@@ -248,7 +256,7 @@ public class SetterFactory {
 	}
 	
 	/**
-	 * @Named
+	 * @Named.value()
 	 *   -> annotation.value()
 	 *   	->field name
 	 *   
@@ -401,7 +409,6 @@ public class SetterFactory {
 		anno2HandleMap.put(String.class.hashCode() * 1231, look.unreflect(
 				klass.getMethod("getStrParam", String.class, String.class)
 				));
-		
 		//
 //		reqc.getStrArrayParam("");
 		anno2HandleMap.put(String[].class.hashCode(), look.unreflect(

@@ -27,6 +27,9 @@ import javax.inject.Named;
 
 
 
+
+
+
 import com.caibowen.gplume.annotation.Semaphored;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.event.AppEvent;
@@ -38,8 +41,11 @@ import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.sample.feature.BirthdayCalculator;
 import com.caibowen.gplume.sample.feature.TimeChangedEvent;
 import com.caibowen.gplume.web.HttpMethod;
+import com.caibowen.gplume.web.IRequestProcessor;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.annotation.Handle;
+import com.caibowen.gplume.web.annotation.Intercept;
+import com.caibowen.gplume.web.builder.IAction;
 
 /**
  * 
@@ -47,6 +53,24 @@ import com.caibowen.gplume.web.annotation.Handle;
  *
  */
 public class SampleController {
+
+	@Intercept(value = { "/*" })
+	public void demo(RequestContext context, IAction action) throws Throwable {
+		if (hasLogedIn(context)) {
+			action.perform(context);
+			after(context);
+		} else {
+			context.jumpTo("/login");
+		}
+	}
+
+	public boolean hasLogedIn(RequestContext context) {
+		return false;
+	}
+	
+	public void after(RequestContext context) {
+		
+	}
 	
 	@Semaphored(permit=100, fair=false)
 	@Handle({"/test"})
@@ -176,5 +200,6 @@ public class SampleController {
 	public void setBirthdayCalculator(BirthdayCalculator birthdayCalculator) {
 		this.birthdayCalculator = birthdayCalculator;
 	}
+
 }
 
