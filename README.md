@@ -64,20 +64,22 @@ specify them in the manifest.xml
 ```
 use message tag in JSP
 ```HTML
-<gp:msg k="gplumeIsRunning" />
+<label>
+	<gp:msg k="gplumeIsRunning" />
+</label>
 ```
 #####Part Three: Gplume Web MVC
-Request pre-process and after-process
+pre-process and after-process requests
 ```java
 public class SampleProcessor implements IRequestProcessor {
-	@Override // all request goes here
+	@Override // all requests go through this
 	public void process(RequestContext context) {
 		before(context);
 		getNext().process(context);
 		after(context);
 	}
 ```
-Build process chain in the XML
+Chaining processors in XML
 ```XML
 <bean id="headPrePrcessor" class="com.caibowen.gplume.web.i18n.NativePkgInjector">
 	<property name="i18nService" ref="i18nService"/>
@@ -96,8 +98,8 @@ Handle request with method
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		return "/index.jsp";
 	}
-	//number concurrent requests is limited by this semapher
-	@Semaphored(permit=100, fair=false, timeout=1000)// when time is out, send 503 
+	//number of concurrent requests is limited by this semapher
+	@Semaphored(permit=100, fair=false, timeout=1000)// when time is out, send http code 503 
 	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"}
 			, httpMethods={HttpMethod.GET, HttpMethod.POST})
 	public FreeMarkerView happyBirthday(Date date) {
@@ -107,7 +109,7 @@ Handle request with method
 ```
 Handle request with an object storing current state
 ```Java
-//Note: this sample login function is for demo only and is insecure
+//Warn: insecure login controller, for demo only
 @Controller("/async/")// the base path
 public class SampleController {
 	@Inject Validator validator;
@@ -118,7 +120,9 @@ public class SampleController {
 		Date testdata1;
 		@CookieVal(defaultVal=" 2.457  ", nullable=false)
 		double testdata2;
-		@Inject UserService userService;
+		@Inject // injected after instanciation 
+		@Named("myUserService")
+		UserService userService;
 
 		@ReqParam("psw_cipher")
 		String passwordCipher;
@@ -131,16 +135,16 @@ public class SampleController {
 		boolean ok() {
 			String psw = keyService.decrypt(key, passwordCipher);
 			if (!Str.Utils.notBlank(psw)
-					||!validator.matchEmail(email, psw))
+					||!validator.matches(email, psw))
 				return false;
 			else {
-				user = userService.getUser(email);
+				user = userService.getByEmail(email);
 				return true;
 			}
 		}
 	}
 	
-	@Semaphored(permit=300, timeout=1000)
+	@Semaphored(permit=300, timeout=2200)
 	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
 	public IView login(MyState reqScope, RequestContext req) {
 		if (reqScope == null) //non-null requirements are not met.
@@ -160,7 +164,7 @@ Intercept requests
 	public void demo(RequestContext context, IAction action) throws Throwable {
 		if (hasLogedIn(context)) {
 			action.perform(context);
-			afterProcess(context);
+			after(context);
 		} else {
 			context.jumpTo("/login");
 		}
