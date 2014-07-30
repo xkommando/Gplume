@@ -66,6 +66,7 @@ public class BeanEditor {
 
 	/**
 	 * assign list or array
+	 * the string element of the list will be casted
 	 * 
 	 * @param bnClass
 	 * @param bean can be null if is static property

@@ -30,6 +30,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import com.caibowen.gplume.context.InputStreamCallback;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
 
@@ -85,7 +86,8 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 								implements Serializable {
 	
 	private static final long serialVersionUID = 1895612360389006713L;
-	private static final Logger LOG = LoggerFactory.getLogger(IBeanAssembler.LOGGER_NAME);
+
+	private static final Logger LOG = LoggerFactory.getLogger(LOGGER_NAME);
 	/**
 	 * This is a compile flag.
 	 * When this flag is enabled,fields that do not have a correspondent setter 
@@ -127,7 +129,15 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	public void	assemble(@Nonnull final File file) throws Exception{
 		assemble(new InputSource(file.toURI().toASCIIString()));
 	}
-	
+
+	public void assemble(@Nonnull final String path) throws Exception {
+		withPath(path, new InputStreamCallback() {
+			@Override
+			public void doInStream(InputStream stream) throws Exception {
+				assemble(stream);
+			}
+		});
+	}
 	/**
 	 * @return null if not found or exception is thrown in creating non-singleton bean
 	 */

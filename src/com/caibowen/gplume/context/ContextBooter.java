@@ -15,11 +15,9 @@
  ******************************************************************************/
 package com.caibowen.gplume.context;
 
-import java.io.InputStream;
-
+import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
-import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.web.i18n.WebI18nService;
 
 /**
@@ -49,9 +47,6 @@ public class ContextBooter {
 	 * bean id for internationalization
 	 */
 	private static final String I18N_SERVICE_BEAN_ID = "i18nService";
-	
-
-	private InputStreamSupport streamSupport = new InputStreamSupport();
 
 	// optional
 	private ClassLoader classLoader = ContextBooter.class.getClassLoader();
@@ -64,33 +59,20 @@ public class ContextBooter {
 	// require streamProvider
 	
 	public void boot() {
-		
 		// set classloader for beanAssembler
+		InputStreamProviderProxy provider = new InputStreamProviderProxy();
+		provider.classPathProvider = new ClassLoaderInputStreamProvider(getClassLoader());
+		provider.defaultProvider = streamProvider;
+
 		AppContext.beanAssembler.setClassLoader(this.classLoader);
-		String path;
 		if (Str.Utils.notBlank(manifestPath)) {
 			// build beans
-			if (manifestPath.startsWith("classpath:")) {
-				streamSupport.setStreamProvider(
-						new ClassLoaderInputStreamProvider(getClassLoader()));
-				path = manifestPath.substring(10, manifestPath.length());
-				
-			} else if (manifestPath.startsWith("file:")) {
-				streamSupport.setStreamProvider(new FileInputStreamProvider());
-				path = manifestPath.substring(5, manifestPath.length());
-
-			} else {
-				// set by caller, can be servlet context inputstream provider
-				streamSupport.setStreamProvider(streamProvider);
-				path = manifestPath;
+			AppContext.beanAssembler.setStreamProvider(provider);
+			try {
+				AppContext.beanAssembler.assemble(manifestPath);
+			} catch (Exception e) {
+				throw new RuntimeException("Error building beans", e);
 			}
-			
-			streamSupport.withPath(path, new InputStreamCallback() {
-				@Override
-				public void doInStream(InputStream stream) throws Exception {
-					AppContext.beanAssembler.assemble(stream);
-				}
-			});
 			
 		} else {
 			LOG.warn("no manifest file specified "
@@ -113,7 +95,7 @@ public class ContextBooter {
 			}
 			LOG.info(I18N_SERVICE_BEAN_ID + " ready to roll!");
 		} else {
-			LOG.warn("cannot find " + I18N_SERVICE_BEAN_ID);
+			LOG.info("No " + I18N_SERVICE_BEAN_ID + " found");
 		}
 	}
 	

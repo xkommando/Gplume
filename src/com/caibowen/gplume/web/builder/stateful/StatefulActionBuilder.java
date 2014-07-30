@@ -30,7 +30,7 @@ import javax.annotation.Nullable;
 import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.BuilderHelper;
+import com.caibowen.gplume.web.builder.BuilderAux;
 import com.caibowen.gplume.web.builder.IAction;
 import com.caibowen.gplume.web.builder.stateful.actions.JspStatefulAction;
 import com.caibowen.gplume.web.builder.stateful.actions.SimpleStatefulAction;
@@ -54,7 +54,7 @@ public class StatefulActionBuilder {
 		Class<?> stateCls = method.getParameterTypes()[0];
 		MethodHandle handle;
 		try {
-			handle = BuilderHelper.LOOKUP.unreflect(method);
+			handle = BuilderAux.LOOKUP.unreflect(method);
 		} catch (IllegalAccessException e1) {
 			throw new RuntimeException(e1);
 		}
@@ -99,8 +99,8 @@ public class StatefulActionBuilder {
 										final StateGen gen,
 										final MethodHandle handle$) throws IllegalAccessException, NoSuchMethodException, SecurityException {
 		
-		return BuilderHelper.actMap.get(
-				BuilderHelper.hash(uri, handle$, gen), 
+		return BuilderAux.actMap.get(
+				BuilderAux.hash(uri, handle$, gen), 
 				new CacheBuilder<IAction>() {
 					@Override
 					public IAction build() {
@@ -117,7 +117,7 @@ public class StatefulActionBuilder {
 		Class<?> ps[] = handle$.type().parameterArray();
 		final boolean hasReq = ps[ps.length - 1].equals(RequestContext.class);
 		
-		return BuilderHelper.actMap.get(BuilderHelper.hash(uri, handle$, gen, hasReq),
+		return BuilderAux.actMap.get(BuilderAux.hash(uri, handle$, gen, hasReq),
 				new CacheBuilder<IAction>() {
 					@Override
 					public IAction build() {
@@ -134,8 +134,8 @@ public class StatefulActionBuilder {
 		Class<?> ps[] = method.getParameterTypes();
 		final boolean hasReq = ps[ps.length - 1].equals(RequestContext.class);
 		final StateGen gen = stateGen(ps[0]);
-		return BuilderHelper.actMap.get(
-		BuilderHelper.hash(uri, method, object, gen, hasReq),
+		return BuilderAux.actMap.get(
+		BuilderAux.hash(uri, method, object, gen, hasReq),
 				new CacheBuilder<IAction>() {
 					@Override
 					public IAction build() {
@@ -147,7 +147,7 @@ public class StatefulActionBuilder {
 	
 	private static StateGen stateGen(Class<?> stateCls) {
 		
-		StateGen s = BuilderHelper.stateMap.get(stateCls);
+		StateGen s = BuilderAux.stateMap.get(stateCls);
 		if (s != null)
 			return s;
 		List<IStateSetter> setters = setters(stateCls);
@@ -177,7 +177,7 @@ public class StatefulActionBuilder {
 			if (!c.isAccessible())
 				c.setAccessible(true);
 			
-			Object ref = BuilderHelper.ctrlMap.get(refClass);
+			Object ref = BuilderAux.ctrlMap.get(refClass);
 			
 			if (ref == null) {
 			// controller not registered, search bean container
@@ -193,7 +193,7 @@ public class StatefulActionBuilder {
 				ref = beans.iterator().next();
 			}
 			s = new NestedStateGen(setters, c, ref);
-			BuilderHelper.stateMap.put(stateCls, s);
+			BuilderAux.stateMap.put(stateCls, s);
 			return s;
 		}
 	}

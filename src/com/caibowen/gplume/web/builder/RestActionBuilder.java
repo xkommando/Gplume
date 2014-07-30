@@ -208,13 +208,13 @@ class RestActionBuilder {
 			}
 			
 			if (retClass.equals(String.class)) {
-				mType = BuilderHelper.RET_JSP_TYPE;
+				mType = BuilderAux.RET_JSP_TYPE;
 			} else {
-				mType = BuilderHelper.SIMPLE_TYPE;
+				mType = BuilderAux.SIMPLE_TYPE;
 			}
 		}
 //		mType = isMatch ? mType : retClass.equals(String.class) ?  RET_JSP_TYPE : SIMPLE_TYPE;
-		MethodHandle handle = BuilderHelper.findMethodeHandle(method, mType);
+		MethodHandle handle = BuilderAux.findMethodeHandle(method, mType);
 		
 		return Modifier.isStatic(method.getModifiers()) 
 				? handle : handle.bindTo(obj);

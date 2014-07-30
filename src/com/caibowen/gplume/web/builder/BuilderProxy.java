@@ -23,7 +23,7 @@ public class BuilderProxy {
 	public static IAction
 	buildAction(String uri, Method method, @Nonnull Object object) {
 		
-		BuilderHelper.ctrlMap.put(object.getClass(), object);
+		BuilderAux.ctrlMap.put(object.getClass(), object);
 		
 		if (uri.indexOf('{') != -1)
 			return RestActionBuilder.buildAction(uri, object, method);
@@ -42,7 +42,7 @@ public class BuilderProxy {
 	
 	public static Interception 
 	buildInterception(final String u, Object object, Method method) {
-		return BuilderHelper.buildInterception(u, object, method);
+		return BuilderAux.buildInterception(u, object, method);
 	}
 	
 	

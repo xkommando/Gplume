@@ -584,22 +584,23 @@ public class RequestContext implements Serializable {
 		return request.getParameterValues(name);
 	}
 	public String[] getStrArrayParam(String name, String[] def) {
-
 		String[] ret = request.getParameterValues(name);
 		return ret == null ? ret : def;
 	}
-
+	
+	
+	/**
+	 * to JSON string
+	 */
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(1024);
-		b.append("{\r\n\tRequestContext : {\r\n \t\t controlCenter : \"" + controlCenter 
-				+ "\",\r\n \t\t request : \"" + request 
-				+ "\",\r\n \t\t response : \"" + response 
-				+ "\",\r\n \t\t httpmMthod : \"" + httpmMthod 
-				+ "\",\r\n \t\t timeModified : \"" + timeModified 
-				+ "\",\r\n \t\t path : \"" + path 
-				+ "\",\r\n \t\t query string : \"" + request.getQueryString() 
-				+ "\",\r\n \t\t remote ddress : \"" + request.getRemoteAddr() 
+		b.append("{\r\n\tRequestContext : {"
+				+ "\r\n \t\t \"httpmMthod\" : \"" + httpmMthod 
+				+ "\",\r\n \t\t \"path\" : \"" + path 
+				+ "\",\r\n \t\t \"query string\" : \"" + request.getQueryString() 
+				+ "\",\r\n \t\t \"remote ddress\" : \"" + request.getRemoteAddr() 
+				+ "\",\r\n \t\t \"timeModified\" : \"" + timeModified 
 				+ "\"\r\n\t}\r\n");
 		
 		int len = 0;
@@ -609,7 +610,7 @@ public class RequestContext implements Serializable {
 		while (params.hasMoreElements()) {
 			String paramName = params.nextElement();
 			String var = request.getParameter(paramName);
-			b.append("\t\t").append(paramName).append(" : \"").append(var).append("\", \r\n");
+			b.append("\t\t\"").append(paramName).append("\" : \"").append(var).append("\", \r\n");
 			added = true;
 		}
 		if (added) {
@@ -618,12 +619,41 @@ public class RequestContext implements Serializable {
 		}
 		added = false;
 		
-		b.append("\t}\r\n\tRequest Attributes : {\r\n");
+		b.append("\t}\r\n\tCookies: [\r\n");
+		Cookie[] cks = request.getCookies();
+		if (cks != null)
+		for (Cookie ck : request.getCookies()) {
+			b.append("\t\t{\r\n\t\t\t\"name\" : ").append("\"").append(ck.getName()).append("\", \r\n");
+			b.append("\t\t\t\"value\" : ").append("\"").append(ck.getValue()).append("\", \r\n");
+			String var = ck.getComment();
+			if (Str.Utils.notBlank(var)) {
+				b.append("\t\t\t\"comment\" : ").append("\"").append(var).append("\", \r\n");
+			}
+			var = ck.getDomain();
+			if (Str.Utils.notBlank(var)) {
+				b.append("\t\t\t\"domain\" : ").append("\"").append(var).append("\", \r\n");
+			}
+			var = ck.getPath();
+			if (Str.Utils.notBlank(var)) {
+				b.append("\t\t\t\"path\" : ").append("\"").append(var).append("\", \r\n");
+			}
+			b.append("\t\t\t\"secure\" : ").append("\"").append(ck.getSecure()).append("\", \r\n");
+			b.append("\t\t\t\"max age\" : ").append("\"").append(ck.getMaxAge()).append("\", \r\n");
+			b.append("\t\t\t\"version\" : ").append("\"").append(ck.getVersion()).append("\"\r\n\t\t}, \r\n");
+			added = true;
+		}
+		if (added) {
+			len = b.length();
+			b.delete(len - 4, len - 3);
+		}
+		added = false;
+		
+		b.append("\t]\r\n\tRequest Attributes : {\r\n");
 		params = request.getAttributeNames();
 		while (params.hasMoreElements()) {
 			String paramName = params.nextElement();
 			Object var = request.getAttribute(paramName);
-			b.append("\t\t").append(paramName).append(" : \"").append(var).append("\", \r\n");
+			b.append("\t\t\"").append(paramName).append("\" : \"").append(var).append("\", \r\n");
 			added = true;
 		}
 		if (added) {
@@ -636,17 +666,17 @@ public class RequestContext implements Serializable {
 		b.append("\t}\r\n\tSession Attributes : {\r\n");
 		if (session != null) {
 			b
-			.append(" \t\t sessionid : ").append(session.getId())
-			.append(",\r\n \t\t creationTime : ").append(session.getCreationTime())
-			.append(",\r\n \t\t lastAccessedTime : ").append(session.getLastAccessedTime())
-			.append(",\r\n \t\t maxInactiveInterval : ").append(session.getMaxInactiveInterval());
+			.append(" \t\t \"session id\" : \"").append(session.getId())
+			.append("\",\r\n \t\t \"creation time\" : \"").append(session.getCreationTime())
+			.append("\",\r\n \t\t \"lastAccessed time\" : \"").append(session.getLastAccessedTime())
+			.append("\",\r\n \t\t \"maxInactive interval\" : \"").append(session.getMaxInactiveInterval()).append("\"");
 			
 			params = session.getAttributeNames();
 			while (params.hasMoreElements()) {
 				String paramName = params.nextElement();
 				Object var = request.getAttribute(paramName);
-				b.append(", \r\n \t\t ")
-				.append(paramName).append(" : \"").append(var).append('\"');
+				b.append(", \r\n \t\t \"")
+				.append(paramName).append("\" : \"").append(var).append('\"');
 			}
 		}
 		
@@ -655,7 +685,7 @@ public class RequestContext implements Serializable {
 		while (params.hasMoreElements()) {
 			String paramName = params.nextElement();
 			Object var = request.getAttribute(paramName);
-			b.append("\t\t").append(paramName).append(" : \"").append(var).append("\", \r\n");
+			b.append("\t\t\"").append(paramName).append("\" : \"").append(var).append("\", \r\n");
 			added = true;
 		}
 		if (added) {

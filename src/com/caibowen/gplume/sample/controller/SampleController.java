@@ -30,6 +30,8 @@ import javax.inject.Named;
 
 
 
+import javax.servlet.http.Cookie;
+
 import com.caibowen.gplume.annotation.Semaphored;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.event.AppEvent;
@@ -54,15 +56,15 @@ import com.caibowen.gplume.web.builder.IAction;
  */
 public class SampleController {
 
-	@Intercept(value = { "/*" })
-	public void demo(RequestContext context, IAction action) throws Throwable {
-		if (hasLogedIn(context)) {
-			action.perform(context);
-			after(context);
-		} else {
-			context.jumpTo("/login");
-		}
-	}
+//	@Intercept(value = { "/*" })
+//	public void demo(RequestContext context, IAction action) throws Throwable {
+//		if (hasLogedIn(context)) {
+//			action.perform(context);
+//			after(context);
+//		} else {
+//			context.jumpTo("/login");
+//		}
+//	}
 
 	public boolean hasLogedIn(RequestContext context) {
 		return false;
@@ -107,16 +109,31 @@ public class SampleController {
 			"/index.jsp"})
 	public String index(RequestContext context) {
 		System.out.println("SampleController.index()");
-		System.out.println(context.toString());
+		System.out.println(AppContext.beanAssembler.getBean("birthdayCalculator"));
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		context.putAttr("test_int", 123);
+		
 		context.session(true).setAttribute("msg", "ctx msg");
 		context.session(true).setAttribute("aaa", 15999);
+		
 		Integer[] ints = new Integer[3];
 		ints[0] = new Integer(1);
 		ints[1] = new Integer(2);
 		ints[2] = new Integer(3);
+		
+		Cookie ck = new Cookie("ck_name1", "ck_value1");
+		ck.setComment("ck comment 1");
+		ck.setDomain("ck_domain1");
+		ck.setMaxAge(500);
+		ck.setPath("/ck_path");
+		ck.setSecure(true);
+		ck.setVersion(2);
+		context.addCookie(ck);
+		
 		context.session(true).setAttribute("ints", ints);
+		
+		System.out.println(context.toString());
+		
 		return "/index.jsp";
 	}
 	

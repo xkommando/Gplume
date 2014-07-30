@@ -31,17 +31,27 @@ Quick Start:
 	</filter-mapping>
 ```
 #####Part One: The IoC Container.
-Spring-like schema :
+Spring-like configuration:
 ```XML
-	<bean class="com.caibowen.gplume.web.WebConfig" >
-		<property name="preProcessor" ref="headPrePrcessor"/>
-		<property name="errorHandler" instance="com.caibowen.web.misc.ErrorHandler" />
-		<property name="pkgs">
-			<list>
-				<value>com.caibowen.web.controller</value>
-			</list>
-		</property>
-	</bean>
+<import>some_other_config.xml</import>
+<import>so_many_configs.xml</import>
+
+<properties import="kv_pairs.properties">
+	<gplumeVersion>1.0.0.nightly</gplumeVersion>
+	<webErrorHandler>com.caibowen.web.misc.ErrorHandler</webErrorHandler>
+</properties>
+
+<properties import="kv_pairs_of_xml_format.xml" />
+
+<bean class="com.caibowen.gplume.web.WebConfig" >
+	<property name="preProcessor" ref="headPrePrcessor"/>
+	<property name="errorHandler" instance="${webErrorHandler}" />
+	<property name="pkgs">
+		<list>
+			<value>com.caibowen.web.controller</value>
+		</list>
+	</property>
+</bean>
 ```
 #####Part Two: Internationalization. 
 add language packages 
@@ -55,8 +65,8 @@ specify them in the manifest.xml
 	    <property name="defaultLang" value="SimplifiedChinese"/>
 	    <property name="pkgFiles">
 	        <props>
-	            <prop key="en">/i18n/en.properties</prop><!-- in your web root -->
-	            <prop key="zh_CN">/i18n/zh_CN.properties</prop>
+	            <prop key="en">${lang_cn}</prop>
+	            <prop key="${iso639_en}">/i18n/zh_CN.properties</prop>
 	        </props>
 	    </property>
 	    <property name="defaultTimeZone" value="ETC/GMT-8"/>

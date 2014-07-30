@@ -33,7 +33,7 @@ import com.caibowen.gplume.misc.logging.LoggerFactory;
 public class Pod {
 	
 	private static final Logger LOG 
-		= LoggerFactory.getLogger(IBeanAssembler.LOGGER_NAME);
+		= LoggerFactory.getLogger(Pod.class);
 	
 	private final int lifeSpan;
 	private AtomicInteger age;

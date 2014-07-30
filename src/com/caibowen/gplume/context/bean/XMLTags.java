@@ -24,12 +24,15 @@ package com.caibowen.gplume.context.bean;
  */
 public class XMLTags {
 
-	public static final String ROOT = "beans";
+	public static final String ROOT_BEANS = "beans";
 	
 	public static final String BEAN = "bean";
+
+	public static final String IMPROT = "import";
 	
 	public static final String BEAN_ID = "id";
 	public static final String BEAN_CLASS = "class";
+	public static final String PROPERTIES = "properties";
 	public static final String BEAN_PROPERTY = "property";
 
 	/**
@@ -43,7 +46,7 @@ public class XMLTags {
 	
 	public static final String PROPERTY_NAME = "name";
 
-	public static final String PROPERTY_OBJ = "instance";
+	public static final String PROPERTY_INSTANCE = "instance";
 	public static final String PROPERTY_LIST = "list";
 	public static final String PROPERTY_MAP  = "props";
 	public static final String PROPERTY_MAP_PROP  = "prop";

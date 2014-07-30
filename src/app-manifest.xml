@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans>
 
+<!-- NEW -->
+<import>classpath:conf1.xml</import>
+
+<properties import="/i18n/en.properties">
+	<key1>value1</key1>
+	<key2> value2 </key2>
+	<i18n_cn>/i18n/zh_CN.properties</i18n_cn>
+	<iso639_zh>zh_CN</iso639_zh>
+	<my_injector>com.caibowen.gplume.core.Injector</my_injector>
+</properties>
+
+<!-- NEW  -->
 <!-- web app infrastracture -->
 
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
@@ -9,7 +21,7 @@
 	    <property name="pkgFiles">
 	        <props>
 	            <prop key="en">/i18n/en.properties</prop>
-	            <prop key="zh_CN">/i18n/zh_CN.properties</prop>
+	            <prop key="${iso639_zh}">${i18n_cn}</prop>
 	        </props>
 	    </property>
 	</bean>
@@ -21,7 +33,7 @@
 			</bean>
 		</property>
 		<property name="actionFactory" instance="com.caibowen.gplume.web.builder.ActionFactory" />
-		<property name="injector" instance="com.caibowen.gplume.core.Injector" />
+		<property name="injector" instance="${my_injector}" />
 	</bean>
 	
     <bean class="com.caibowen.gplume.web.misc.ControllerScanner">
@@ -33,8 +45,6 @@
         <property name="controlCenterCallBack" ref="controlCenter"/>
     </bean>
 
-	<bean id="birthdayCalculator" class="com.caibowen.gplume.sample.feature.BirthdayCalculator"/>
-	
 </beans>
 
 

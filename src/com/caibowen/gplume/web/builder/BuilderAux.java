@@ -37,7 +37,7 @@ import com.caibowen.gplume.web.builder.stateful.StateGen;
  * @author BowenCai
  *
  */
-public class BuilderHelper {
+public class BuilderAux {
 
 	// from java.lang.invoke
 	public static final Lookup LOOKUP = MethodHandles.publicLookup();
@@ -132,19 +132,14 @@ public class BuilderHelper {
 			}
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException(
-					"\nError making Interception : cannot find method ["
+					"\nError making Action : cannot find method ["
 							+ method
 							+ "]\n of type [" + typ + "]"
-							+"\nin class ["
-							+ ctrlClazz.getName()
-							+ "]");
+							+"\n", e);
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(
-					"Error making Interception : cannot access method ["
-							+ method
-							+ "] in class ["
-							+ ctrlClazz.getName()
-							+ "]");
+					"Error making Action : cannot access method ["
+							+ method, e);
 		}
 		return actionhandle;
 	}

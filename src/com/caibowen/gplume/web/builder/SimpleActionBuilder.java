@@ -73,18 +73,18 @@ class SimpleActionBuilder {
 				&& _[_.length - 1].equals(RequestContext.class);
 
 		if (retKlass.equals(String.class)) {
-
-			MethodHandle handle = BuilderHelper.findMethodeHandle(method,
+			
+			MethodHandle handle = BuilderAux.findMethodeHandle(method,
 					hasRequestContext ? 
-							BuilderHelper.RET_JSP_TYPE 
-							: BuilderHelper.RET_JSP_NOPARAM_TYPE);
-
+							BuilderAux.RET_JSP_TYPE 
+							: BuilderAux.RET_JSP_NOPARAM_TYPE);
+			
 			final MethodHandle handle$ = 
 					Modifier.isStatic(method.getModifiers())
 					? handle : handle.bindTo(object);
 			
-			return BuilderHelper.actMap.get(
-					BuilderHelper.hash(uri, handle, hasRequestContext),
+			return BuilderAux.actMap.get(
+					BuilderAux.hash(uri, handle, hasRequestContext),
 					new CacheBuilder<IAction>() {
 						@Override
 						public IAction build() {
@@ -94,12 +94,12 @@ class SimpleActionBuilder {
 					});
 
 		} else if (retKlass.equals(void.class)) {
-			MethodHandle handle = BuilderHelper.findMethodeHandle(method, BuilderHelper.SIMPLE_TYPE);
+			MethodHandle handle = BuilderAux.findMethodeHandle(method, BuilderAux.SIMPLE_TYPE);
 			final MethodHandle handle$ = Modifier.isStatic(method.getModifiers())
 					? handle : handle.bindTo(object);
 					
-			return BuilderHelper.actMap.get(
-					BuilderHelper.hash(uri, handle, handle),
+			return BuilderAux.actMap.get(
+					BuilderAux.hash(uri, handle, handle),
 					new CacheBuilder<IAction>() {
 						@Override
 						public IAction build() {
@@ -110,8 +110,8 @@ class SimpleActionBuilder {
 		} else if (IView.class.isAssignableFrom(retKlass)) {
 			final Method $$ = method;
 			final Object $$$ = object;
-			return BuilderHelper.actMap.get(
-					BuilderHelper.hash(uri, method, object, hasRequestContext),
+			return BuilderAux.actMap.get(
+					BuilderAux.hash(uri, method, object, hasRequestContext),
 					new CacheBuilder<IAction>() {
 						@Override
 						public IAction build() {

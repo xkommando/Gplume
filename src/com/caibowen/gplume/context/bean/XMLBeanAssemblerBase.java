@@ -15,25 +15,31 @@
  ******************************************************************************/
 package com.caibowen.gplume.context.bean;
 
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.caibowen.gplume.context.InputStreamCallback;
+import com.caibowen.gplume.context.InputStreamSupport;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
+import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
-import com.caibowen.gplume.misc.Str;
 
 
 /**
@@ -43,11 +49,15 @@ import com.caibowen.gplume.misc.Str;
  * @author BowenCai
  *
  */
-public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
+public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements IBeanAssembler {
 
-	private static final Logger LOG = LoggerFactory.getLogger(IBeanAssembler.LOGGER_NAME);
+	protected static final String LOGGER_NAME = "BeanAssembler";
+	
+	private static final Logger LOG = LoggerFactory.getLogger(LOGGER_NAME);
 
 	protected Map<String, Pod> podMap = new ConcurrentHashMap<>(64);
+	protected Map<String, String> globlaProperties = new HashMap<String, String>(32);
+	
 	protected ClassLoader classLoader;
 
 	@Override
@@ -60,6 +70,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 	public ClassLoader getClassLoader() {
 		return this.classLoader;
 	}
+	
 	/**
 	 * xml bean factory being singleton implies that this function is not
 	 * reenterable, thus it is thread safe
@@ -70,64 +81,185 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 	protected void doAssemble(Document doc) throws Exception {
 
 		NodeList nodeList = doc.getChildNodes();
-		Node beanNode = null;
+		Node node = null;
 		
 		// escape comments
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node tn = nodeList.item(i);
 			if (tn != null && tn.getNodeType() == Node.ELEMENT_NODE) {
-				beanNode = tn.getFirstChild();
+				node = tn.getFirstChild();
 				break;
 			}
 		}
-		if (beanNode == null) {
+		if (node == null) {
 			throw new IllegalArgumentException("no bean definition found");
 		}
 		
-		while (beanNode.getNextSibling() != null) {
-
-			beanNode = beanNode.getNextSibling();
-			Element beanElem;
-			if (beanNode.getNodeType() == Node.ELEMENT_NODE) {
-				beanElem = (Element) beanNode;
+		while (node.getNextSibling() != null) {
+			node = node.getNextSibling();
+			Element elem;
+			if (node.getNodeType() == Node.ELEMENT_NODE) {
+				elem = (Element) node;
 			} else {
 				continue;
 			}
-			int lifeSpan;
-			String strLife = beanElem.getAttribute(XMLTags.BEAN_LIFE_SPAN);
-			if (Str.Utils.notBlank(strLife)) {
-				lifeSpan = Converter.toInteger(strLife);
-			} else {
-				lifeSpan = Integer.MAX_VALUE;
-			}
-			
-			String bnId = beanElem.getAttribute(XMLTags.BEAN_ID);
-			Pod pod = null;
 
-			String bnScope = beanElem.getAttribute(XMLTags.BEAN_SINGLETON);
-			boolean isSingleton = true;
-			if (Str.Utils.notBlank(bnScope)) {
-				isSingleton = Converter.toBool(bnScope);
-			}
-			Object bean = null;
-			if (isSingleton) {
-				bean = buildBean(beanElem);
-				pod = new Pod(bnId, null, bean, lifeSpan);
-			} else {
-				pod = new Pod(bnId, beanElem, null, lifeSpan);
-			}
+			switch (elem.getNodeName()) {
+			case XMLTags.IMPROT:
+				handleImport(elem);
+				break;
+				
+			case XMLTags.PROPERTIES:
+				handleProperties(elem);
+				break;
+				
+			case XMLTags.BEAN:
+				int lifeSpan;
+				String strLife = elem.getAttribute(XMLTags.BEAN_LIFE_SPAN);
+				if (Str.Utils.notBlank(strLife)) {
+					lifeSpan = Converter.toInteger(strLife);
+				} else {
+					lifeSpan = Integer.MAX_VALUE;
+				}
+				
+				String bnId = elem.getAttribute(XMLTags.BEAN_ID);
+				Pod pod = null;
 
-			if (Str.Utils.notBlank(bnId)) {
-				podMap.put(bnId, pod);
+				String bnScope = elem.getAttribute(XMLTags.BEAN_SINGLETON);
+				
+				boolean isSingleton = true;
+				if (Str.Utils.notBlank(bnScope)) {
+					isSingleton = Converter.toBool(bnScope);
+				}
+				Object bean = null;
+				if (isSingleton) {
+					bean = buildBean(elem);
+					pod = new Pod(bnId, null, bean, lifeSpan);
+				} else {
+					pod = new Pod(bnId, elem, null, lifeSpan);
+				}
+
+				if (Str.Utils.notBlank(bnId)) {
+					podMap.put(bnId, pod);
+				}
+				LOG.info("Add Bean: id[{0}] of class[{1}] singleton ? {2}  lifeSpan {3}",
+						bnId, (bean != null ? bean.getClass().getName() : "unknown")
+						, isSingleton
+						, lifeSpan
+						);
+			default:
+				break;
 			}
-			
-			LOG.info("Add Bean: id[{0}] of class[{1}] singleton ? {2}  lifeSpan {3}",
-					bnId, (bean != null ? bean.getClass().getName() : "unknown")
-					, isSingleton
-					, lifeSpan
-					);
-			
 		}
+		
+	}
+//	public static void main(String...a) {
+//		System.out.println(_replaceIfPresent("${name sad}"));
+//	}
+	
+	/**
+	 * replace literal value if possible
+	 * 
+	 * <prop> ${ _key name of this value_ } <porp>
+	 * 
+	 * @param name
+	 * @return trimmed str
+	 */
+	@Nonnull
+	protected String replaceIfPresent(@Nonnull String name) {
+		name = name.trim();
+		if (name.startsWith("${") && name.endsWith("}")) {
+			name = name.substring(2, name.length() - 1);
+			name = name.trim();
+			name = globlaProperties.get(name);
+			if (Str.Utils.notBlank(name))
+				return name;
+			else
+				throw new IllegalArgumentException(
+				"no value found for [" + name + "]");
+		}
+		else
+			return name;
+	}
+	
+	/**
+	 * <pre>
+	 * add to globlaProperties from:
+	 * 1. <keyname> value </keyname>
+	 * 
+	 * 2. <properties import="classpath:hahaha.porperties">
+	 * 		<keyname> this pair will be added too </keyName>
+	 * 	  </properties>	
+	 * </pre>
+	 * 
+	 * imported file with extension ".xml" -> properties.loadFromXML
+	 * otherwise -> properties.load
+	 * 
+	 * Note that same key in properties file with be covered by key in config xml
+	 * e.g, form example above, the value for "keyname" will be "this pair will be added too "
+	 * 
+	 * @param elem
+	 */
+	protected void handleProperties(Element elem) {
+		
+		final String loc = elem.getAttribute(XMLTags.IMPROT).trim();
+		final Properties p = new Properties();
+		withPath(loc, new InputStreamCallback() {
+			@Override
+			public void doInStream(InputStream stream) throws Exception {
+				if (loc.endsWith(".xml"))	
+					p.loadFromXML(stream);
+				else
+					p.load(stream);
+			}
+		});
+		
+		for (Map.Entry<?, ?> e: p.entrySet()) {
+			Object k = e.getKey();
+			Object v = e.getValue();
+			if (k instanceof String && v instanceof String)
+				globlaProperties.put((String)k, (String)v);
+		}
+		
+		NodeList nls = elem.getChildNodes();
+		for (int i = 0; i < nls.getLength(); i++) {
+			Element ne = null;
+			Node nn = nls.item(i);
+			if (nn.getNodeType() == Node.ELEMENT_NODE) {
+				ne = (Element) nn;
+				String k = ne.getTagName().trim();
+				String v = ne.getTextContent().trim();
+				if (globlaProperties.containsKey(k))
+					throw new IllegalArgumentException(
+						"dumplicated key [" + k 
+						+ "]\r\n first defined in properties file[" 
+								+ loc + "] as [" + globlaProperties.get(k) 
+						+ "]\r\n second defined in config xml as [" + v + "]");
+
+				globlaProperties.put(k, v);
+			}
+		}
+	}
+	
+	/**
+	 * build beans from other config file 
+	 * @param elem
+	 * @throws Exception 
+	 */
+	protected void handleImport(Element elem) throws Exception {
+		String loc = elem.getTextContent().trim();
+		final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		
+		withPath(loc, new InputStreamCallback() {
+			@Override
+			public void doInStream(InputStream stream) throws Exception {
+				Document doc = builder.parse(stream);
+				doc.getDocumentElement().normalize();
+				doAssemble(doc);
+			}
+		});
+		
+		LOG.info("from {0}, created {1} beans", loc, podMap.size());
 	}
 	
 	/**
@@ -198,22 +330,25 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 			}
 
 			String propName = prop.getAttribute(XMLTags.PROPERTY_NAME);
+			propName = replaceIfPresent(propName);
 			if (!Str.Utils.notBlank(propName)) {
 				throw new NullPointerException(
 						"Property id is empty. \r\n NodeName: ["
 								+ prop.getNodeName() + "]");
 				
 			}
-			propName = propName.trim();
 			
 //System.out.println("class [" + bnClass.getSimpleName() + "] prop[" + propName + "]");
 
 			NodeList varList = prop.getChildNodes();
 			if (varList == null || varList.getLength() == 0) {
 				// property inside, one string value or one ref
-				String varObj = prop.getAttribute(XMLTags.PROPERTY_OBJ);
-				String varStr = prop.getAttribute(XMLTags.PROPERTY_VALUE);
-				String varRef = prop.getAttribute(XMLTags.PROPERTY_REF);
+				String varObj = replaceIfPresent(
+						prop.getAttribute(XMLTags.PROPERTY_INSTANCE));
+				String varStr = replaceIfPresent(
+						prop.getAttribute(XMLTags.PROPERTY_VALUE));
+				String varRef = replaceIfPresent(
+						prop.getAttribute(XMLTags.PROPERTY_REF));
 				
 				if (Str.Utils.notBlank(varStr)) {
 					// e.g., <property id="number" value="5"/>
@@ -229,7 +364,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 					
 				} else if (Str.Utils.notBlank(varObj)) {
 					// e.g. <property id="injector" object="com.caibowen.gplume.core.Injector"/>
-					Class<?> klass = this.classLoader.loadClass(varObj.trim());
+					Class<?> klass = this.classLoader.loadClass(varObj);
 					Object obj = klass.newInstance();
 					preprocess(obj);
 					BeanEditor.setProperty(beanObj, propName, obj);
@@ -281,21 +416,25 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 							throw new IllegalArgumentException(
 							"cannot have [" + elemBn.getNodeName() + "] under tag <props>, must be <prop> only");
 						}
-						String mapK = elemBn.getAttribute(XMLTags.PROPERTY_MAP_KEY);
+						String mapK = replaceIfPresent(
+								elemBn.getAttribute(XMLTags.PROPERTY_MAP_KEY));
+						
 						if (!Str.Utils.notBlank(mapK)) {
 							throw new NullPointerException("empty map key for property[" + propName + "]");
 						}
-						mapK = mapK.trim();
-						String mapV = elemBn.getTextContent();
+						String mapV = replaceIfPresent(
+								elemBn.getTextContent());
+						
 						if (!Str.Utils.notBlank(mapV)) {
-							mapV = elemBn.getAttribute(XMLTags.PROPERTY_VALUE);
+							mapV = replaceIfPresent(
+									elemBn.getAttribute(XMLTags.PROPERTY_VALUE));
+							
 							if (!Str.Utils.notBlank(mapV)) {
 								throw new NullPointerException(
 										"empty map value of key [" 
 											+ mapK + "] for property[" + propName + "]");
 							}
 						}
-						mapV = mapV.trim();
 						properties.setProperty(mapK, mapV);
 						// skip node of #text
 						iter = iter.getNextSibling().getNextSibling();
@@ -316,10 +455,17 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 							beanList.add(buildBean(elemBn));
 
 						} else if (XMLTags.PROPERTY_REF.equals(elemBn.getNodeName())) {
-							beanList.add(getBean(elemBn.getTextContent().trim()));
+							beanList.add(getBean(
+									replaceIfPresent(
+											elemBn.getTextContent())
+												)
+										);
 
 						} else if (XMLTags.PROPERTY_VALUE.equals(elemBn.getNodeName())) {
-							beanList.add(elemBn.getTextContent().trim());
+							beanList.add(replaceIfPresent(
+											elemBn.getTextContent()
+											)
+										);
 						} else {
 							throw new IllegalArgumentException("Unknown property["
 									+ iter.getNodeName() + "]");
@@ -358,6 +504,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler {
 
 	protected @Nonnull Class<?> getClass(Element element) {
 		String clazzName = element.getAttribute(XMLTags.BEAN_CLASS).trim();
+		clazzName = replaceIfPresent(clazzName);
 		try {
 			return this.classLoader.loadClass(clazzName);
 		} catch (Exception e) {
