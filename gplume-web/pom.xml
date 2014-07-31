@@ -11,8 +11,10 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- web infrastructure -->
     <artifactId>gplume-web</artifactId>
     <version>1.5</version>
+    <packaging>jar</packaging>
 
     <dependencies>
 

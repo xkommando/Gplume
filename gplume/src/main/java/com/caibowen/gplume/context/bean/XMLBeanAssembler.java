@@ -104,7 +104,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	private static IBeanAssembler handle = null;
 	private XMLBeanAssembler() {}
 	
-	synchronized public static IBeanAssembler getInstance() {
+	synchronized public static IBeanAssembler instance() {
 		if(handle == null) {
 			handle = new XMLBeanAssembler();
 		}
@@ -138,6 +138,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 			}
 		});
 	}
+
 	/**
 	 * @return null if not found or exception is thrown in creating non-singleton bean
 	 */
@@ -163,19 +164,21 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 				return (T) buildBean(pod.getDescription());
 			} catch (Exception e) {
 				throw new RuntimeException(
-						"faild building non-singleton bean of id[" + id + "]", e);
+						"failed building non-singleton bean of id[" + id + "]", e);
 			}
 		}
 	}
 
 
 	@Nonnull
-	public String globlaProperty(@Nonnull String key) {
+    @Override
+	public String globalProperty(@Nonnull String key) {
 		return globlaProperties.get(key);
 	}
 	
 	@Nonnull
-	public Set<String> globlaPorpertyNames() {
+    @Override
+	public Set<String> globalPropertyNames() {
 		return globlaProperties.keySet();
 	}
 	
@@ -184,14 +187,18 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	public Pod 	getPod(@Nonnull String id) {
 		return podMap.get(id);
 	}
-	
+
+    /**
+     * will not increase the bean age
+     * @param clazz
+     * @return
+     */
 	@Override
 	public Set<Object> getBeans(@Nonnull Class<?> clazz) {
 		Set<Object> set = new HashSet<>(16);
 		for (Pod pod : super.podMap.values()) {
 			Object bean = pod.getInternal();
 			if (clazz.isInstance(bean)) {
-				pod.addAge(1);
 				set.add(bean);
 			}
 		}

@@ -40,7 +40,4 @@
 
     </dependencies>
 
-    <build>
-        <finalName>gplume-sample</finalName>
-    </build>
 </project>

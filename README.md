@@ -66,10 +66,10 @@ specify them in the manifest.xml
 	    <property name="pkgFiles">
 	        <props>
 	            <prop key="en">${lang_cn}</prop>
-	            <prop key="${iso639_en}">/i18n/zh_CN.properties</prop>
+	            <prop key="${iso639_en}">/${i18base}/${i18_cn}</prop>
 	        </props>
 	    </property>
-	    <property name="defaultTimeZone" value="ETC/GMT-8"/>
+	    <property name="${time_zone_name}" value="ETC/GMT-8"/>
 	</bean>
 ```
 use message tag in JSP

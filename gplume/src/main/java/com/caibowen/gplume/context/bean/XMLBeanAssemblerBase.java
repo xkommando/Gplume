@@ -75,7 +75,6 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 	 * xml bean factory being singleton implies that this function is not
 	 * reenterable, thus it is thread safe
 	 * 
-	 * @param beanList
 	 * @throws Exception
 	 */
 	protected void doAssemble(Document doc) throws Exception {
@@ -83,7 +82,7 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 		NodeList nodeList = doc.getChildNodes();
 		Node node = null;
 		
-		// escape comments
+		// escape comments etc, advance to the first node
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node tn = nodeList.item(i);
 			if (tn != null && tn.getNodeType() == Node.ELEMENT_NODE) {
@@ -91,11 +90,13 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 				break;
 			}
 		}
-		if (node == null) {
+
+		if (node == null) { //  no bean definition
 			throw new IllegalArgumentException("no bean definition found");
 		}
 		
 		while (node.getNextSibling() != null) {
+
 			node = node.getNextSibling();
 			Element elem;
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -114,74 +115,98 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 				break;
 				
 			case XMLTags.BEAN:
-				int lifeSpan;
-				String strLife = elem.getAttribute(XMLTags.BEAN_LIFE_SPAN);
-				if (Str.Utils.notBlank(strLife)) {
-					lifeSpan = Converter.toInteger(strLife);
-				} else {
-					lifeSpan = Integer.MAX_VALUE;
-				}
-				
-				String bnId = elem.getAttribute(XMLTags.BEAN_ID);
-				Pod pod = null;
+                handleBean(elem);
+                break;
 
-				String bnScope = elem.getAttribute(XMLTags.BEAN_SINGLETON);
-				
-				boolean isSingleton = true;
-				if (Str.Utils.notBlank(bnScope)) {
-					isSingleton = Converter.toBool(bnScope);
-				}
-				Object bean = null;
-				if (isSingleton) {
-					bean = buildBean(elem);
-					pod = new Pod(bnId, null, bean, lifeSpan);
-				} else {
-					pod = new Pod(bnId, elem, null, lifeSpan);
-				}
-
-				if (Str.Utils.notBlank(bnId)) {
-					podMap.put(bnId, pod);
-				}
-				LOG.info("Add Bean: id[{0}] of class[{1}] singleton ? {2}  lifeSpan {3}",
-						bnId, (bean != null ? bean.getClass().getName() : "unknown")
-						, isSingleton
-						, lifeSpan
-						);
 			default:
 				break;
 			}
 		}
 		
 	}
+
+
+    protected void handleBean(Element elem) throws Exception {
+
+        int lifeSpan;
+        String strLife = elem.getAttribute(XMLTags.BEAN_LIFE_SPAN);
+        if (Str.Utils.notBlank(strLife)) {
+            lifeSpan = Converter.toInteger(strLife);
+        } else {
+            lifeSpan = Integer.MAX_VALUE;
+        }
+
+        String bnId = elem.getAttribute(XMLTags.BEAN_ID);
+        Pod pod = null;
+
+        String bnScope = elem.getAttribute(XMLTags.BEAN_SINGLETON);
+
+        boolean isSingleton = true;
+        if (Str.Utils.notBlank(bnScope)) {
+            isSingleton = Converter.toBool(bnScope);
+        }
+        Object bean = null;
+        if (isSingleton) {
+            bean = buildBean(elem);
+            pod = new Pod(bnId, null, bean, lifeSpan);
+        } else {
+            pod = new Pod(bnId, elem, null, lifeSpan);
+        }
+
+        if (Str.Utils.notBlank(bnId)) {
+            podMap.put(bnId, pod);
+        }
+
+        LOG.info("Add Bean: id[{0}] of class[{1}] singleton ? {2}  lifeSpan {3}",
+                bnId, (bean != null ? bean.getClass().getName() : "unknown")
+                , isSingleton
+                , lifeSpan
+        );
+    }
 //	public static void main(String...a) {
-//		System.out.println(_replaceIfPresent("${name sad}"));
+//		replaceIfPresent("hahaha ${name sad} ooo ${second-hahaha} back-back");
 //	}
-	
-	/**
-	 * replace literal value if possible
-	 * 
-	 * <prop> ${ _key name of this value_ } <porp>
-	 * 
-	 * @param name
-	 * @return trimmed str
-	 */
-	@Nonnull
-	protected String replaceIfPresent(@Nonnull String name) {
-		name = name.trim();
-		if (name.startsWith("${") && name.endsWith("}")) {
-			name = name.substring(2, name.length() - 1);
-			name = name.trim();
-			name = globlaProperties.get(name);
-			if (Str.Utils.notBlank(name))
-				return name;
-			else
-				throw new IllegalArgumentException(
-				"no value found for [" + name + "]");
-		}
-		else
-			return name;
-	}
-	
+
+    /**
+     * support multi property in one string
+     * hahaha ${name sad} ooo ${second-hahaha} back-back
+     *
+     * do not support nested properties
+     *
+     * hahaha ${name sad${second-hahaha}} ooo  back-back -> goes wrong
+     *
+     *
+     * @param name
+     * @return
+     */
+    @Nonnull
+    protected String replaceIfPresent(@Nonnull String name) {
+        name = name.trim();
+        int lq = 0;
+        int rq = 0;
+        int lastL = 0;
+        StringBuilder b = new StringBuilder(name.length() * 3);
+
+        lq = name.indexOf("${", rq);
+        while (lq != -1) {
+            rq = name.indexOf('}', lq);
+            if (rq == -1)
+                throw new IllegalArgumentException(
+                        "configuration: unclosed property [" + name + "]");
+
+            b.append(name.substring(lastL, lq));
+
+            String k = name.substring(lq + 2, rq);
+            b.append(globlaProperties.get(k.trim()));
+            lq = name.indexOf("${", rq);
+            lastL = rq + 1;
+        }
+        b.append(name.substring(lastL, name.length()));
+
+        return b.toString();
+    }
+
+
 	/**
 	 * <pre>
 	 * add to globlaProperties from:
@@ -226,17 +251,19 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 			Element ne = null;
 			Node nn = nls.item(i);
 			if (nn.getNodeType() == Node.ELEMENT_NODE) {
-				ne = (Element) nn;
-				String k = ne.getTagName().trim();
-				String v = ne.getTextContent().trim();
-				if (globlaProperties.containsKey(k))
+                ne = (Element) nn;
+                String k = ne.getTagName().trim();
+                String v = ne.getTextContent().trim();
+                if (!globlaProperties.containsKey(k)) {
+                    globlaProperties.put(k, v);
+                    LOG.info("add property:  \"{0}\" : \"{1}\"", k, v);
+                } else
 					throw new IllegalArgumentException(
 						"dumplicated key [" + k 
 						+ "]\r\n first defined in properties file[" 
 								+ loc + "] as [" + globlaProperties.get(k) 
 						+ "]\r\n second defined in config xml as [" + v + "]");
 
-				globlaProperties.put(k, v);
 			}
 		}
 	}
@@ -259,13 +286,13 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 			}
 		});
 		
-		LOG.info("from {0}, created {1} beans", loc, podMap.size());
+		LOG.info("import configuration from {0}, {1} beans created", loc, podMap.size());
 	}
 	
 	/**
 	 * after process (often with life circle managemetn )is done in Pod
 	 * @see Pod
-	 * @param object
+	 * @param beanObj
 	 */
 	protected void preprocess(Object beanObj) {
 		if (beanObj instanceof IBeanAssemblerAware) {
@@ -345,6 +372,7 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 				// property inside, one string value or one ref
 				String varObj = replaceIfPresent(
 						prop.getAttribute(XMLTags.PROPERTY_INSTANCE));
+
 				String varStr = replaceIfPresent(
 						prop.getAttribute(XMLTags.PROPERTY_VALUE));
 				String varRef = replaceIfPresent(

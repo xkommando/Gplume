@@ -75,6 +75,8 @@ public interface IBeanAssembler {
 	
 	
 	/**
+     * will not increase the bean age
+     *
 	 * @param clazz
 	 * @return a set of beans of that is instance of this class (including derived)
 	 */
@@ -87,9 +89,10 @@ public interface IBeanAssembler {
 	 * @return key value configuration from xml or porperties file
 	 */
 	@Nonnull
-	String 		globlaProperty(@Nonnull String key);
+	String globalProperty(@Nonnull String key);
+
 	@Nonnull
-	Set<String> globlaPorpertyNames();
+	Set<String> globalPropertyNames();
 	
 	
 	/**
@@ -110,12 +113,11 @@ public interface IBeanAssembler {
 	boolean 		addBean(@Nonnull String id, @Nonnull Object bean);
 	
 	/**
-	 * 
 	 * @param id
 	 * @return bean reference if found, null if not found
 	 * @throws Exception 
 	 */
-	void 		removeBean(@Nonnull String id);
+	void 		    removeBean(@Nonnull String id);
 	
 	/**
 	 * update singleton

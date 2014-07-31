@@ -12,7 +12,7 @@
     <modules>
         <module>gplume</module>
         <module>gplume-sample</module>
-        <module>gplume-ex</module>
+        <module>gplume-webex</module>
     </modules>
 
     <dependencies>

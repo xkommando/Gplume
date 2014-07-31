@@ -23,6 +23,7 @@ import java.util.Locale;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
  * 
@@ -35,10 +36,15 @@ import javax.servlet.http.HttpServletResponse;
  * @author BowenCai
  *
  */
-public class Output implements HttpServletResponse{
+public class Output extends HttpServletResponseWrapper {
 
-	StringWriter writer = new StringWriter(1024);
-	
+	StringWriter writer;
+
+    public Output() {
+        super(null);
+        writer = new StringWriter(1024);
+    }
+
 	@Override
 	public ServletOutputStream getOutputStream() throws IOException {
 		return new ServletOutputStream() {
@@ -73,7 +79,10 @@ public class Output implements HttpServletResponse{
 	@Override
 	public void setBufferSize(int arg0) {}
 
-	@Override
+    /**
+     * servlet 2.4+
+     * @param arg0
+     */
 	public void setCharacterEncoding(String arg0) {}
 
 	@Override
@@ -85,7 +94,10 @@ public class Output implements HttpServletResponse{
 	@Override
 	public String getCharacterEncoding() {return null; }
 
-	@Override
+    /**
+     * servlet 2.4+
+     * @return
+     */
 	public String getContentType() {return null;}
 	
 	@Override
@@ -94,59 +106,19 @@ public class Output implements HttpServletResponse{
 	@Override
 	public int getBufferSize() { return 0x7fffffff; }
 	
-	@Override
-	public void setLocale(Locale arg0) {}
-	@Override
-	public Locale getLocale() { return null;}
-	
-	@Override
-	public void addCookie(Cookie arg0) {}
-
-	@Override
-	public void addDateHeader(String arg0, long arg1) {}
-
-	@Override
-	public void addHeader(String arg0, String arg1) {}
-
-	@Override
-	public void addIntHeader(String arg0, int arg1) {}
-
-	@Override
-	public boolean containsHeader(String arg0) {return false;}
-
-	@Override
-	public String encodeRedirectURL(String arg0) {return null;}
-
-	@Override
-	public String encodeRedirectUrl(String arg0) {return null;}
-
-	@Override
-	public String encodeURL(String arg0) {return null;}
-
-	@Override
-	public String encodeUrl(String arg0) {return null;}
-
-	@Override
-	public void sendError(int arg0) throws IOException {}
-
-	@Override
-	public void sendError(int arg0, String arg1) throws IOException {}
-
-	@Override
-	public void sendRedirect(String arg0) throws IOException {}
-
-	@Override
-	public void setDateHeader(String arg0, long arg1) {}
-
-	@Override
-	public void setHeader(String arg0, String arg1) {}
-
-	@Override
-	public void setIntHeader(String arg0, int arg1) {}
-
-	@Override
-	public void setStatus(int arg0) {}
-	@Override
-	public void setStatus(int arg0, String arg1) {}
+//	@Override
+//	public void addCookie(Cookie arg0) {}
+//
+//	@Override
+//	public void addDateHeader(String arg0, long arg1) {}
+//
+//	@Override
+//	public void addHeader(String arg0, String arg1) {}
+//
+//	@Override
+//	public void addIntHeader(String arg0, int arg1) {}
+//
+//	@Override
+//	public boolean containsHeader(String arg0) {return false;}
 
 }
