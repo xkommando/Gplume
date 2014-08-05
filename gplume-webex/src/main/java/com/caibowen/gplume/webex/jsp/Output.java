@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.jspengin;
+package com.caibowen.gplume.webex.jsp;
 
 import java.io.IOException;
 import java.io.PrintWriter;

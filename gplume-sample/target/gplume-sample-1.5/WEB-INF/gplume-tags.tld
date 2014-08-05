@@ -4,7 +4,6 @@
 	version="2.0">
 
 	<tlib-version>1.0</tlib-version>
-	<jsp-version>1.2</jsp-version>
 
 	<short-name>gplume-tags</short-name>
 
@@ -12,7 +11,7 @@
 
 	<tag>
 		<name>msg</name>
-		<tag-class>com.caibowen.gplume.web.view.jsptag.TagMessage</tag-class>
+		<tag-class>com.caibowen.gplume.webex.jsp.tag.TagMessage</tag-class>
 		<body-content>empty</body-content>
 		<attribute>
 			<name>k</name>
@@ -23,7 +22,7 @@
 	
 	<tag>
 		<name>link</name>
-		<tag-class>com.caibowen.gplume.web.view.jsptag.TagLink</tag-class>
+		<tag-class>com.caibowen.gplume.webex.jsp.tag.TagLink</tag-class>
 		<body-content>empty</body-content>
 		<attribute>
 			<name>nativeName</name>

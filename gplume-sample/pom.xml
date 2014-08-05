@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>com.caibowen</groupId>
-            <artifactId>gplume-web</artifactId>
+            <artifactId>gplume-webex</artifactId>
             <version>1.5</version>
         </dependency>
 

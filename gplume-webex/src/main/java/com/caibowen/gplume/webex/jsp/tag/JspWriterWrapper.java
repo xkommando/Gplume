@@ -13,21 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.view.jsptag;
+package com.caibowen.gplume.webex.jsp.tag;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import javax.servlet.jsp.JspWriter;
 
 
-class JspWriterMock extends JspWriter {
+public class JspWriterWrapper extends JspWriter {
 
-	protected JspWriterMock() {
-		super(4096, true);
+    private final PrintStream ps;
+
+	protected JspWriterWrapper(PrintStream printStream) {
+		super(4096, false);
+        this.ps = printStream;
 	}
 
 	@Override
 	public void clear() throws IOException {
+
 	}
 
 	@Override
@@ -36,11 +41,12 @@ class JspWriterMock extends JspWriter {
 
 	@Override
 	public void close() throws IOException {
+        ps.close();
 	}
 
 	@Override
 	public void flush() throws IOException {
-		System.out.flush();
+		ps.flush();
 	}
 
 	@Override
@@ -50,102 +56,102 @@ class JspWriterMock extends JspWriter {
 
 	@Override
 	public void newLine() throws IOException {
-		System.out.println();
+		ps.println();
 	}
 
 	@Override
 	public void print(boolean arg0) throws IOException {
-		System.out.print(arg0);
+		ps.print(arg0);
 	}
 
 	@Override
 	public void print(char arg0) throws IOException {
-		System.out.print(arg0);
+		ps.print(arg0);
 	}
 
 	@Override
 	public void print(int arg0) throws IOException {
-		System.out.print(arg0);
+		ps.print(arg0);
 	}
 
 	@Override
 	public void print(long arg0) throws IOException {
-		System.out.print(arg0);		
+		ps.print(arg0);		
 	}
 
 	@Override
 	public void print(float arg0) throws IOException {
-		System.out.print(arg0);		
+		ps.print(arg0);		
 	}
 
 	@Override
 	public void print(double arg0) throws IOException {
-		System.out.print(arg0);		
+		ps.print(arg0);		
 	}
 
 	@Override
 	public void print(char[] arg0) throws IOException {
-		System.out.print(arg0);		
+		ps.print(arg0);
 	}
 
 	@Override
 	public void print(String arg0) throws IOException {
-		System.out.print(arg0);		
+		ps.print(arg0);
 	}
 
 	@Override
 	public void print(Object arg0) throws IOException {
-		System.out.print(arg0);		
+		ps.print(arg0);		
 	}
 
 	@Override
 	public void println() throws IOException {
-		System.out.println();	
+		ps.println();	
 	}
 
 	@Override
 	public void println(boolean arg0) throws IOException {
-		System.out.println(arg0);
+		ps.println(arg0);
 	}
 
 	@Override
 	public void println(char arg0) throws IOException {
-		System.out.println(arg0);		
+		ps.println(arg0);		
 	}
 
 	@Override
 	public void println(int arg0) throws IOException {
-		System.out.println(arg0);		
+		ps.println(arg0);		
 	}
 
 	@Override
 	public void println(long arg0) throws IOException {
-		System.out.println(arg0);		
+		ps.println(arg0);		
 	}
 
 	@Override
 	public void println(float arg0) throws IOException {
-		System.out.println(arg0);		
+		ps.println(arg0);		
 	}
 
 	@Override
 	public void println(double arg0) throws IOException {
-		System.out.println(arg0);		
+		ps.println(arg0);		
 	}
 
 	@Override
 	public void println(char[] arg0) throws IOException {
-		System.out.println(arg0);		
+		ps.println(arg0);		
 	}
 
 	@Override
 	public void println(String arg0) throws IOException {
-		System.out.println(arg0);		
+		ps.println(arg0);		
 	}
 
 	@Override
 	public void println(Object arg0) throws IOException {
-		System.out.println(arg0);		
+		ps.println(arg0);		
 	}
 
 	@Override

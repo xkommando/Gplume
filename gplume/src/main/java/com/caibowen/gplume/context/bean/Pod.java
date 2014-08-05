@@ -65,11 +65,13 @@ public class Pod {
 		this.instance = instance;
 		this.lifeSpan = lifeSp;
 		this.age = new AtomicInteger(0);
+
 		process(beanId, instance);
 	}
 	
 	/**
 	 * process bean after creation and properties set.
+     *
 	 * @param id
 	 * @param bean
 	 */
@@ -98,17 +100,16 @@ public class Pod {
 	 * @throws Exception
 	 */
 	void destroy() throws Exception {
-		
-		LOG.info(
-		"bean id[{0}] class[" + (instance != null ? instance.getClass().getSimpleName() : "unknown")
-		+ "] destroyed", beanId);
-		
 		if (instance != null && instance instanceof DisposableBean) {
 			((DisposableBean)instance).destroy();
 		}
 		instance = null;
 		description = null;
 		this.beanId = null;
+
+        LOG.info(
+                "bean id[{0}] class[" + (instance != null ? instance.getClass().getSimpleName() : "unknown")
+                + "] destroyed", beanId);
 	}
 	
 	void setInstance(Object instance) {

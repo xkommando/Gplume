@@ -43,7 +43,6 @@ public class JspAction extends SimpleAction {
 	public void perform(RequestContext context) throws Throwable {
 		context.putAttr(ACTION_NAME, this);
 		
-			
 		Object o = null;
 		if (hasRequest)
 			o = methodHandle.invoke(context);
@@ -53,7 +52,7 @@ public class JspAction extends SimpleAction {
 		if(o != null)
 			context.render((String)o);
 		/**
-		 * o must be String, this has been check in the construction of this action
+		 * o must be String, this has been checked in the construction of this action
 		 */
 	}
 

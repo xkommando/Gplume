@@ -248,10 +248,9 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 		
 		NodeList nls = elem.getChildNodes();
 		for (int i = 0; i < nls.getLength(); i++) {
-			Element ne = null;
 			Node nn = nls.item(i);
 			if (nn.getNodeType() == Node.ELEMENT_NODE) {
-                ne = (Element) nn;
+                Element ne = (Element) nn;
                 String k = ne.getTagName().trim();
                 String v = ne.getTextContent().trim();
                 if (!globlaProperties.containsKey(k)) {
@@ -259,7 +258,7 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
                     LOG.info("add property:  \"{0}\" : \"{1}\"", k, v);
                 } else
 					throw new IllegalArgumentException(
-						"dumplicated key [" + k 
+						"duplicated key [" + k
 						+ "]\r\n first defined in properties file[" 
 								+ loc + "] as [" + globlaProperties.get(k) 
 						+ "]\r\n second defined in config xml as [" + v + "]");
@@ -275,7 +274,8 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 	 */
 	protected void handleImport(Element elem) throws Exception {
 		String loc = elem.getTextContent().trim();
-		final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		final DocumentBuilder builder =
+                DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		
 		withPath(loc, new InputStreamCallback() {
 			@Override
@@ -286,7 +286,7 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 			}
 		});
 		
-		LOG.info("import configuration from {0}, {1} beans created", loc, podMap.size());
+		LOG.info("importing configuration from {0}, {1} beans created", loc, podMap.size());
 	}
 	
 	/**

@@ -41,6 +41,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 	private static final Logger LOG = LoggerFactory.getLogger(ActionFactory.class);
 	
 	private ActionMapper<IAction>[] mappers;
+
 	public ActionFactory() {
 		
 		final int enumCount = HttpMethod.class.getEnumConstants().length;
@@ -69,12 +70,6 @@ public class ActionFactory implements IActionFactory, Serializable {
 									@Nonnull Object ctrl, 
 									@Nonnull Method method) {
 
-//		Object ctrl;
-//		if (Modifier.isStatic(method.getModifiers())) {
-//			ctrl = null;
-//		} else {
-//			ctrl = controller;
-//		}
 		String[] uris = method.getAnnotation(Intercept.class).value();
 		if (uris != null && uris.length > 0) {
 			for (String uri : uris) {
