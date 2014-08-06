@@ -26,7 +26,15 @@ import com.caibowen.gplume.misc.Str;
 
 
 /**
- * 
+ * set defaultProvider
+ * or classPathProvider
+ *
+ * for path str:
+ * "classpath:aaa"  -> will use classPathProvider
+ * "file:aaa"       -> FileInputStreamProvider
+ * "url:aaa"        -> URLInputStreamProvider
+ * "aaa"            -> defaultProvider
+ *
  * @author bowen.cbw
  *
  */
@@ -35,7 +43,6 @@ public class InputStreamProviderProxy implements InputStreamProvider {
 	public static final InputStreamProvider FILE_PROVIDER = new FileInputStreamProvider();
 	public static final InputStreamProvider URL_PROVIDER = new URLInputStreamProvider();
 
-	public InputStreamProvider servletContextProvider;
 	public InputStreamProvider classPathProvider;
 	public InputStreamProvider defaultProvider;
 	
@@ -61,7 +68,7 @@ public class InputStreamProviderProxy implements InputStreamProvider {
 			}
 		}
 
-        LOG.info("using " + providerToUse.getClass().getSimpleName());
+        LOG.debug("using [" + providerToUse.getClass().getSimpleName() + "] to get [" + path + "]");
 		return providerToUse.getStream(path);
 	}
 

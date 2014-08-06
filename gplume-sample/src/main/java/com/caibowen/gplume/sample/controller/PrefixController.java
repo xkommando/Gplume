@@ -29,7 +29,7 @@ public class PrefixController{
 	@Handle({"case1"})// real path: /prefix/case1
 	public static String case1() {
 //		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
-		return "/index.jsp";
+		return "index";
 	}
 	
 	@Handle({"index",
@@ -37,7 +37,7 @@ public class PrefixController{
 			"index.jsp"})
 	public static void staticMethod(RequestContext context) {
 //		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
-		context.render("/index.jsp");
+		context.render("index");
 	}
 	
 	@Handle(value = { "case2/{date formate like 1992-6-14::Date}" },
@@ -45,6 +45,6 @@ public class PrefixController{
 	public static String case2(Date f) {
 		System.out.println("PrefixController.happyBirthday()");
 		System.out.println(f);
-		return "/index.jsp";
+		return "index";
 	}
 }

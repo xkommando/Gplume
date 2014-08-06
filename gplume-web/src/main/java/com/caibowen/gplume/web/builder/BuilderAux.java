@@ -31,6 +31,8 @@ import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
 import com.caibowen.gplume.web.builder.stateful.StateGen;
+import com.caibowen.gplume.web.misc.JspViewResolvers;
+import com.caibowen.gplume.web.view.IStrViewResolver;
 
 /**
  * 
@@ -75,7 +77,10 @@ public class BuilderAux {
 
 	public static final WeakCache<Class<?>, StateGen> stateMap = new WeakCache<>(256);
 	public static final WeakCache<Class<?>, Object> ctrlMap = new WeakCache<>(256);
-	
+
+    public static IStrViewResolver STR_VIEW_RESOLVER = new JspViewResolvers.CompletePathViewResolver();
+
+
 	public static Interception 
 	buildInterception(final String u, 
 						Object object, 

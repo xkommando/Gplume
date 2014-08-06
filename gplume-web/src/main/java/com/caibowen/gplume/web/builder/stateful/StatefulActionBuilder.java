@@ -32,11 +32,11 @@ import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.BuilderAux;
 import com.caibowen.gplume.web.builder.IAction;
-import com.caibowen.gplume.web.builder.stateful.actions.JspStatefulAction;
+import com.caibowen.gplume.web.builder.stateful.actions.StrStatefulAction;
 import com.caibowen.gplume.web.builder.stateful.actions.SimpleStatefulAction;
 import com.caibowen.gplume.web.builder.stateful.actions.ViewStatefulAction;
 import com.caibowen.gplume.web.view.IView;
-
+import com.oracle.webservices.internal.api.databinding.Databinding;
 
 
 /**
@@ -88,8 +88,8 @@ public class StatefulActionBuilder {
 	 * void act(State s, RequestContext c)
 	 * 
 	 * @param uri
-	 * @param object
-	 * @param method
+	 * @param gen
+	 * @param handle$
 	 * @return
 	 * @throws IllegalAccessException
 	 * @throws NoSuchMethodException
@@ -112,8 +112,7 @@ public class StatefulActionBuilder {
 	private static IAction buildJSP(final String uri, 
 									final StateGen gen,
 									final MethodHandle handle$) throws IllegalAccessException, NoSuchMethodException, SecurityException {
-//		new JspStatefulAction(u, handle, g, hasRequestContext)
-		
+
 		Class<?> ps[] = handle$.type().parameterArray();
 		final boolean hasReq = ps[ps.length - 1].equals(RequestContext.class);
 		
@@ -121,7 +120,9 @@ public class StatefulActionBuilder {
 				new CacheBuilder<IAction>() {
 					@Override
 					public IAction build() {
-						return new JspStatefulAction(uri, handle$, gen, hasReq);
+						return new StrStatefulAction(
+                                uri, handle$, gen,
+                                hasReq, BuilderAux.STR_VIEW_RESOLVER);
 					}
 				});
 	}

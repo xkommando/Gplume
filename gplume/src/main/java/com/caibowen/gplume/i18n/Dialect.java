@@ -61,7 +61,7 @@ public enum Dialect {
 		this.nativeName = nativeNameInASCI;
 	}
 	
-	public static final String NAME = Dialect.class.getName();
+	public static final String NAME = Dialect.class.getSimpleName();
 	
 	public final int code;
 	public final String iso639_1;

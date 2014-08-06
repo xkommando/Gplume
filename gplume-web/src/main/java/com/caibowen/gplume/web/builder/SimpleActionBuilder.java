@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 
 import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.JspAction;
+import com.caibowen.gplume.web.builder.actions.StrAction;
 import com.caibowen.gplume.web.builder.actions.RestAction;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
 import com.caibowen.gplume.web.builder.actions.ViewAction;
@@ -58,7 +58,7 @@ class SimpleActionBuilder {
 	/**
 	 * @param uri
 	 * @param object
-	 * @param handle
+	 * @param method
 	 * @return Action or RestAction
 	 * @see RestAction
 	 */
@@ -88,10 +88,11 @@ class SimpleActionBuilder {
 					new CacheBuilder<IAction>() {
 						@Override
 						public IAction build() {
-							return new JspAction(uri, handle$,
-									hasRequestContext);
+							return new StrAction(uri, handle$,
+									hasRequestContext, BuilderAux.STR_VIEW_RESOLVER);
 						}
 					});
+
 
 		} else if (retKlass.equals(void.class)) {
 			MethodHandle handle = BuilderAux.findMethodeHandle(method, BuilderAux.SIMPLE_TYPE);

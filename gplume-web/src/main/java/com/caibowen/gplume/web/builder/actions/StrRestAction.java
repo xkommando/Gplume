@@ -19,6 +19,7 @@ import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.PathValResolver;
+import com.caibowen.gplume.web.view.IStrViewResolver;
 
 
 /**
@@ -35,16 +36,24 @@ import com.caibowen.gplume.web.builder.PathValResolver;
  * @author BowenCai
  *
  */
-public class JspRestAction extends RestAction {
+public class StrRestAction extends RestAction {
 
 	private static final long serialVersionUID = -7671427896241639360L;
 
 
 	protected final boolean hasRequest;
+    protected final IStrViewResolver viewResolver;
 	
-	public JspRestAction(String uri, MethodHandle handle, boolean call, boolean req, PathValResolver pr) {
+	public StrRestAction(String uri
+                        , MethodHandle handle
+                        , boolean call
+                        , boolean req
+                        , PathValResolver pr
+                        , IStrViewResolver resolver) {
+
 		super(uri, handle, call, pr);
-		hasRequest = req;
+		this.hasRequest = req;
+        this.viewResolver = resolver;
 	}
 
 	@Override

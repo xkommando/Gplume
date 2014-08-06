@@ -26,25 +26,40 @@
 	        </props>
 	    </property>
 	</bean>
-	
-	<bean id="controlCenter" class="com.caibowen.gplume.web.SimpleControlCenter">
-		<property name="preProcessor">
-			<bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">
-				  <property name="i18nService" ref="i18nService"/>
-			</bean>
-		</property>
-		<property name="actionFactory" instance="com.caibowen.gplume.web.builder.ActionFactory" />
-		<property name="injector" instance="${my_injector}" />
-	</bean>
-	
-    <bean class="com.caibowen.gplume.web.misc.ControllerScanner">
-        <property name="packages">
+
+    <bean class="com.caibowen.gplume.web.WebConfig">
+        <property name="preProcessor">
+            <bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">
+                <property name="i18nService" ref="i18nService"/>
+            </bean>
+        </property>
+        <property name="pkgs">
             <list>
                 <value>com.caibowen.gplume.sample</value>
             </list>
         </property>
-        <property name="controlCenterCallBack" ref="controlCenter"/>
+        <property name="viewPrefix" value="/"/>
+        <property name="viewSuffix" value=".jsp" />
     </bean>
+
+	<!--<bean id="controlCenter" class="com.caibowen.gplume.web.SimpleControlCenter">-->
+		<!--<property name="preProcessor">-->
+			<!--<bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">-->
+				  <!--<property name="i18nService" ref="i18nService"/>-->
+			<!--</bean>-->
+		<!--</property>-->
+		<!--<property name="actionFactory" instance="com.caibowen.gplume.web.builder.ActionFactory" />-->
+		<!--<property name="injector" instance="${my_injector}" />-->
+	<!--</bean>-->
+	<!---->
+    <!--<bean class="com.caibowen.gplume.web.misc.ControllerScanner">-->
+        <!--<property name="packages">-->
+            <!--<list>-->
+                <!--<value>com.caibowen.gplume.sample</value>-->
+            <!--</list>-->
+        <!--</property>-->
+        <!--<property name="controlCenterCallBack" ref="controlCenter"/>-->
+    <!--</bean>-->
 
 </beans>
 

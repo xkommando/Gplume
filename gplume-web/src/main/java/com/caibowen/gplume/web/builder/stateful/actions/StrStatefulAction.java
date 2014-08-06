@@ -13,47 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.builder.actions;
+package com.caibowen.gplume.web.builder.stateful.actions;
 
 import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.web.builder.stateful.StateGen;
+import com.caibowen.gplume.web.view.IStrViewResolver;
 
 
 /**
- * web handle returning String
- * 
- * return "index.jsp";
- * 
+ * String jss(State s, RequestContext ctx);
+ * String jss(State s);
+ *  
  * @author BowenCai
  *
  */
-public class JspAction extends SimpleAction {
+public class StrStatefulAction extends SimpleStatefulAction  {
 
-	private static final long serialVersionUID = -5228310514106204080L;
-	
+	private static final long serialVersionUID = 5126077573601786405L;
+
 	protected final boolean hasRequest;
-	
-	public JspAction(String u, MethodHandle handle, boolean hasRequestContext) {
-		super(u, handle);
+    protected final IStrViewResolver viewResolver;
+
+	public StrStatefulAction(String u
+                            , MethodHandle handle
+                            , StateGen g
+                            , boolean hasRequestContext
+                            , IStrViewResolver resolver) {
+
+		super(u, handle, g);
 		this.hasRequest = hasRequestContext;
+        this.viewResolver = resolver;
 	}
 	
 	@Override
 	public void perform(RequestContext context) throws Throwable {
 		context.putAttr(ACTION_NAME, this);
+		Object state = gen.gen(context);
 		
 		Object o = null;
 		if (hasRequest)
-			o = methodHandle.invoke(context);
+			o = methodHandle.invoke(state, context);
 		else
-			o = methodHandle.invoke();
+			o = methodHandle.invoke(state);
 		
 		if(o != null)
-			context.render((String)o);
-		/**
-		 * o must be String, this has been checked in the construction of this action
-		 */
+            viewResolver.resolve(context, (String)o);
 	}
+
+
 
 }

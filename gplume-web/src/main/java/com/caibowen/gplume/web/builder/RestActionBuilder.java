@@ -25,7 +25,7 @@ import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.builder.actions.JspRestAction;
+import com.caibowen.gplume.web.builder.actions.StrRestAction;
 import com.caibowen.gplume.web.builder.actions.RestAction;
 import com.caibowen.gplume.web.builder.actions.ViewRestAction;
 import com.caibowen.gplume.web.view.IView;
@@ -133,7 +133,10 @@ class RestActionBuilder {
 		Class<?> retKalss = method.getReturnType();
 		
 		if (retKalss.equals(String.class)) {
-			return new JspRestAction(effectiveURI, handle, inMethodCall, hasRequset, pr);
+			return new StrRestAction(effectiveURI
+                    , handle, inMethodCall, hasRequset
+                    , pr, BuilderAux.STR_VIEW_RESOLVER);
+
 		} else if (retKalss.equals(void.class)) {
 			return new RestAction(effectiveURI, handle, inMethodCall, pr);
 

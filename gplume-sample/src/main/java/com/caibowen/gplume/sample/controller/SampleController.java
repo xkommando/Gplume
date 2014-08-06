@@ -87,7 +87,7 @@ public class SampleController {
 			}
 			System.out.println();
 		}
-		context.render("/index.jsp");
+		context.render("index");
 	}
 	
 	
@@ -106,7 +106,7 @@ public class SampleController {
 	@Handle({"/",
 			"/index",
 			"/index.html",
-			"/index.jsp"})
+			"index"})
 	public String index(RequestContext context) {
 		System.out.println("SampleController.index()");
 		System.out.println(AppContext.beanAssembler.getBean("birthdayCalculator"));
@@ -134,7 +134,7 @@ public class SampleController {
 		
 		System.out.println(context.toString());
 		
-		return "/index.jsp";
+		return "index";
 	}
 	
 	

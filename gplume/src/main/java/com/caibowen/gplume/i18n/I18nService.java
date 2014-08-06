@@ -17,22 +17,13 @@ package com.caibowen.gplume.i18n;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import com.caibowen.gplume.context.ClassLoaderInputStreamProvider;
-import com.caibowen.gplume.context.FileInputStreamProvider;
-import com.caibowen.gplume.context.InputStreamCallback;
-import com.caibowen.gplume.context.InputStreamProvider;
-import com.caibowen.gplume.context.InputStreamSupport;
+import com.caibowen.gplume.context.*;
 import com.caibowen.gplume.context.bean.DisposableBean;
 import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.misc.logging.Logger;
@@ -68,7 +59,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 	
 	/**
 	 * 
-	 * @param properties
+	 * @param provider
 	 */
 	public void loadFiles(final InputStreamProvider provider) throws Exception {
 		if (pkgFiles == null || pkgFiles.size() == 0) {
@@ -76,6 +67,9 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 		}
 		
 		InputStreamSupport support = new InputStreamSupport(provider);
+        InputStreamProviderProxy sp = new InputStreamProviderProxy();
+        sp.defaultProvider = provider;
+        support.setStreamProvider(sp);
 
 		for (Map.Entry<Object, Object> e : pkgFiles.entrySet()) {
 			if (e.getKey() instanceof String && e.getValue() instanceof String) {
@@ -83,19 +77,7 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 				String path = (String) e.getValue();
 				final Dialect dialect = resolve(k);
 				final Properties pkg = new Properties();
-				if (path.startsWith("classpath:")) {
-					support.setStreamProvider(
-							new ClassLoaderInputStreamProvider(
-								I18nService.class.getClassLoader()));
-					path = path.substring(0, path.length());
-					
-				} else if (path.startsWith("file:")) {
-					support.setStreamProvider(new FileInputStreamProvider());
-					path = path.substring(5, path.length());
-					
-				} else {
-					support.setStreamProvider(provider);
-				}
+
 				support.withPath(path, new InputStreamCallback() {
 					@Override
 					public void doInStream(InputStream stream) throws Exception {
@@ -116,23 +98,30 @@ public class I18nService implements Serializable, InitializingBean, DisposableBe
 								@Nonnull Properties properties) {
 		
 		if (dialect == null) {
-			if (null != properties.get(Dialect.NAME)) {
-				dialect = (Dialect)properties.get(Dialect.NAME);
-			} else {
-				throw new NullPointerException("no dialect specified");
-			}
+            dialect = searchForDialect(properties);
 		}
 		if (dialect == defaultLang) {
-			LOG.info("pkg for default dialect[" + defaultLang.nativeName + "] added");
+			LOG.debug("pkg for default dialect[" + defaultLang.nativeName + "] added");
 			pkgTable.put(dialect, new NativePackage(dialect, properties, null));
 		} else {
 			pkgTable.put(dialect, new NativePackage(dialect, 
 									properties, 
 									pkgTable.get(defaultLang)));
-			LOG.info("pkg for [" + dialect.nativeName + "] added");
+			LOG.debug("pkg for [" + dialect.nativeName + "] added");
 		}
 	}
-	
+
+    @Nonnull
+    protected static Dialect searchForDialect(@Nonnull Properties properties) {
+        Object de = properties.get(Dialect.NAME);
+        if (null != de) {
+            if (de instanceof String)
+                return resolve((String) de);
+            else if (de instanceof Dialect)
+                return (Dialect) de;
+        }
+        throw new NullPointerException("no dialect specified");
+    }
 	/**
 	 * 
 	 * @param localeInfo

@@ -28,6 +28,7 @@ import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.annotation.Intercept;
 import com.caibowen.gplume.web.builder.actions.Interception;
+import com.caibowen.gplume.web.view.IStrViewResolver;
 
 /**
  * container for action, interception
@@ -41,7 +42,6 @@ public class ActionFactory implements IActionFactory, Serializable {
 	private static final Logger LOG = LoggerFactory.getLogger(ActionFactory.class);
 	
 	private ActionMapper<IAction>[] mappers;
-
 	public ActionFactory() {
 		
 		final int enumCount = HttpMethod.class.getEnumConstants().length;
@@ -54,7 +54,12 @@ public class ActionFactory implements IActionFactory, Serializable {
 		}
 		mappers[enumCount] = new ActionMapper<>();
 	}
-	
+
+
+    public void setDefaultViewResolver(IStrViewResolver resolver) {
+        BuilderAux.STR_VIEW_RESOLVER = resolver;
+    }
+
 	@Override
 	public IAction findAction(HttpMethod httpmMthod, String uri) {
 		return mappers[httpmMthod.ordinal()].getAction(uri);

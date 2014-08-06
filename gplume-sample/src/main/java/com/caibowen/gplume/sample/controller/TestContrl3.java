@@ -40,7 +40,7 @@ public class TestContrl3 {
 		System.out.println(x.test_inttt);
 		System.out.println(x.msg);
 		System.out.println(x.test_int);
-		req.render("/index.jsp");
+		req.render("index");
 	}
 	
 	@Handle({"/state/2"})
@@ -50,7 +50,7 @@ public class TestContrl3 {
 		System.out.println(x.test_inttt);
 		System.out.println(x.msg);
 		System.out.println(x.test_int);
-		return "/index.jsp";
+		return "index";
 	}
 	
 	@Handle({"/state/3"})
@@ -59,7 +59,7 @@ public class TestContrl3 {
 		System.out.println(x.test_inttt);
 		System.out.println(x.msg);
 		System.out.println(x.test_int);
-		return "/index.jsp";
+		return "index";
 	}
 	
 	@Handle({"/state/4"})

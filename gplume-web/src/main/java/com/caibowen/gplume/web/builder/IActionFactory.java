@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2014 Bowen Cai
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,41 +22,39 @@ import javax.annotation.Nullable;
 
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.builder.actions.Interception;
+import com.caibowen.gplume.web.view.IStrViewResolver;
 
 /**
  * manage all actions
- * 
+ * <p/>
  * factory :
- * 		builder1 :
- * 		builder2 :
- * 		builder3 :
- * 			....
- * 
- * 
- * @author BowenCai
+ * builder1 :
+ * builder2 :
+ * builder3 :
+ * ....
  *
+ * @author BowenCai
  */
 public interface IActionFactory {
 
-	/**
-	 * @param controller
-	 * @param method
-	 */
-	 void 			registerHandles(@Nullable String prefix, 
-											@Nullable Object ctrl,
-											@Nonnull Method method);
-	
-	 void 			registerIntercept(@Nullable String prefix, 
-											@Nullable Object ctrl,
-											@Nonnull Method method);
-	
-	 IAction 			findAction(HttpMethod httpmMthod, String uri);
 
-	 Interception 		findInterception(String uri);
+    void setDefaultViewResolver(IStrViewResolver resolver);
 
-	 boolean 			removeHandle(String uri);
+    void registerHandles(@Nullable String prefix,
+                         @Nullable Object ctrl,
+                         @Nonnull Method method);
 
-	 boolean 			removeInterception(final String uri);
+    void registerIntercept(@Nullable String prefix,
+                           @Nullable Object ctrl,
+                           @Nonnull Method method);
 
-	 void 			destroy();
+    IAction findAction(HttpMethod httpmMthod, String uri);
+
+    Interception findInterception(String uri);
+
+    boolean removeHandle(String uri);
+
+    boolean removeInterception(final String uri);
+
+    void destroy();
 }

@@ -235,6 +235,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		
 		oldPod.setInstance(bean);
 		super.podMap.put(id, oldPod);
+        LOG.debug("{0} of type {1} updated", id, bean.getClass().getName());
 	}
 
 	@Override
@@ -255,6 +256,11 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		}
 		Pod pod = new Pod(id, null, bean, lifeSpan);
 		super.podMap.put(id, pod);
+        LOG.debug("Bean {0} of type {1} with life span {2} added"
+                , id
+                , bean.getClass().getName()
+                , lifeSpan);
+
 		return true;
 	}
 	

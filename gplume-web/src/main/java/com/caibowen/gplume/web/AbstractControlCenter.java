@@ -18,6 +18,7 @@ package com.caibowen.gplume.web;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -153,7 +154,7 @@ public abstract class AbstractControlCenter
 	public IRequestProcessor getPreProcessor() {
 		return preProcessor;
 	}
-	public void setPreProcessor(IRequestProcessor preProcessor) {
+	public void setPreProcessor(@Nullable IRequestProcessor preProcessor) {
 		this.preProcessor = preProcessor;
 	}
 
