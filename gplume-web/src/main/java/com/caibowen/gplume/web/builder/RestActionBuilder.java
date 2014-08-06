@@ -28,7 +28,7 @@ import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.StrRestAction;
 import com.caibowen.gplume.web.builder.actions.RestAction;
 import com.caibowen.gplume.web.builder.actions.ViewRestAction;
-import com.caibowen.gplume.web.view.IView;
+import com.caibowen.gplume.web.IView;
 import com.sun.istack.internal.Nullable;
 
 /**

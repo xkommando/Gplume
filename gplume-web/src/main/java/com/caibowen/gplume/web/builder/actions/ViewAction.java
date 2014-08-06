@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.IAction;
-import com.caibowen.gplume.web.view.IView;
+import com.caibowen.gplume.web.IView;
 
 
 /**

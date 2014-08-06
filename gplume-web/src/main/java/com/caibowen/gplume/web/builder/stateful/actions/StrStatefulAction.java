@@ -19,7 +19,7 @@ import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.stateful.StateGen;
-import com.caibowen.gplume.web.view.IStrViewResolver;
+import com.caibowen.gplume.web.IStrViewResolver;
 
 
 /**

@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.ViewAction;
 import com.caibowen.gplume.web.builder.stateful.StateGen;
-import com.caibowen.gplume.web.view.IView;
+import com.caibowen.gplume.web.IView;
 
 
 /**

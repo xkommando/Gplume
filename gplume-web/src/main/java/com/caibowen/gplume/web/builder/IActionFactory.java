@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
 
 import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.builder.actions.Interception;
-import com.caibowen.gplume.web.view.IStrViewResolver;
+import com.caibowen.gplume.web.IStrViewResolver;
 
 /**
  * manage all actions

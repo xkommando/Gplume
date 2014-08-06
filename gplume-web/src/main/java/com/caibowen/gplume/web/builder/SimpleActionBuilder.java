@@ -27,7 +27,7 @@ import com.caibowen.gplume.web.builder.actions.StrAction;
 import com.caibowen.gplume.web.builder.actions.RestAction;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
 import com.caibowen.gplume.web.builder.actions.ViewAction;
-import com.caibowen.gplume.web.view.IView;
+import com.caibowen.gplume.web.IView;
 
 /*
  *  * 

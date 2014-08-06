@@ -15,7 +15,7 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.web.view;
+package com.caibowen.gplume.web;
 
 import com.caibowen.gplume.web.RequestContext;
 

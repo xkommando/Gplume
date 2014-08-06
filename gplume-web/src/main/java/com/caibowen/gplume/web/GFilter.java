@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caibowen.gplume.context.AppContext;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 
 
 /**
@@ -41,8 +43,10 @@ import com.caibowen.gplume.context.AppContext;
  */
 public class GFilter implements Filter {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GFilter.class);
+
 	/**
-	 * necessary component
+	 *  required component
 	 */
 	private AbstractControlCenter controlCenter;
 
@@ -57,12 +61,7 @@ public class GFilter implements Filter {
 			controlCenter.init(arg0.getServletContext());
 
 		} catch (Throwable e) {
-			// no exception will be thrown at production,
-			//so remove this line after test!
-
-			// if debug, print it
-			e.printStackTrace();
-			throw new RuntimeException("error init control center", e);
+            LOG.fatal("error init control center", e);
 		}
 	}
 

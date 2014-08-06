@@ -35,8 +35,7 @@ import com.caibowen.gplume.web.builder.IAction;
 import com.caibowen.gplume.web.builder.stateful.actions.StrStatefulAction;
 import com.caibowen.gplume.web.builder.stateful.actions.SimpleStatefulAction;
 import com.caibowen.gplume.web.builder.stateful.actions.ViewStatefulAction;
-import com.caibowen.gplume.web.view.IView;
-import com.oracle.webservices.internal.api.databinding.Databinding;
+import com.caibowen.gplume.web.IView;
 
 
 /**

@@ -31,8 +31,7 @@ import com.caibowen.gplume.web.builder.ActionFactory;
 import com.caibowen.gplume.web.builder.IActionFactory;
 import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
-import com.caibowen.gplume.web.misc.JspViewResolvers;
-import com.caibowen.gplume.web.view.IStrViewResolver;
+import com.caibowen.gplume.web.views.JspViewResolvers;
 
 
 /*
@@ -102,7 +101,7 @@ public class WebConfig implements InitializingBean, Serializable {
 
 
     // optional
-    // by default it is JSP view resolver
+    // by default it is JSP views resolver
     @Inject IStrViewResolver defaultViewResolver;
     public void setDefaultViewResolver(IStrViewResolver defaultViewResolver) {
         this.defaultViewResolver = defaultViewResolver;
@@ -184,11 +183,11 @@ public class WebConfig implements InitializingBean, Serializable {
         int resolverType = 0;
         if (Str.Utils.notBlank(viewPrefix)) {
             resolverType++;
-            LOG.debug("view prefix {0}", viewPrefix);
+            LOG.debug("views prefix {0}", viewPrefix);
         }
         if (Str.Utils.notBlank(viewSuffix)) {
             resolverType += 3;
-            LOG.debug("view suffix {0}", viewSuffix);
+            LOG.debug("views suffix {0}", viewSuffix);
         }
         if (defaultViewResolver != null) {
             return defaultViewResolver;

@@ -28,7 +28,7 @@ import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.annotation.Intercept;
 import com.caibowen.gplume.web.builder.actions.Interception;
-import com.caibowen.gplume.web.view.IStrViewResolver;
+import com.caibowen.gplume.web.IStrViewResolver;
 
 /**
  * container for action, interception

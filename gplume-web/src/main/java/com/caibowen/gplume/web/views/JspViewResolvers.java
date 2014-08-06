@@ -15,15 +15,15 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.web.misc;
+package com.caibowen.gplume.web.views;
 
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.view.IStrViewResolver;
+import com.caibowen.gplume.web.IStrViewResolver;
 
 import java.io.Serializable;
 
 /**
- * JSP view Resolvers
+ * JSP views Resolvers
  *
  * @author BowenCai
  *

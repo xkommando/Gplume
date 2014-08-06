@@ -11,7 +11,15 @@ Features:
 
 ----------------------------
 Quick Start:
-#####Part Zero: Configurate the web.xml:
+#####Part Zero: maven dependency
+```XML
+<dependency>
+	<groupId>com.caibowen</groupId>
+	<artifactId>gplume-webex</artifactId><!--extensions for web develop-->
+	<version>1.5</version>
+</dependency>
+```
+#####Part One: Configurate the web.xml:
 
 ```XML
 	<context-param>
@@ -30,7 +38,7 @@ Quick Start:
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 ```
-#####Part One: The IoC Container.
+#####Part Two: The IoC Container.
 Spring-like configuration:
 ```XML
 <import>some_other_config.xml</import>
@@ -53,7 +61,7 @@ Spring-like configuration:
 	</property>
 </bean>
 ```
-#####Part Two: Internationalization. 
+#####Part Three: Internationalization. 
 add language packages 
 	`en.properties` where there is `gplumeIsRunning=Gplume is Running!` 
 and 
@@ -78,7 +86,7 @@ use message tag in JSP
 	<gp:msg k="gplumeIsRunning" />
 </label>
 ```
-#####Part Three: Gplume Web MVC
+#####Part Four: Gplume Web MVC
 pre-process and after-process requests
 ```java
 public class SampleProcessor implements IRequestProcessor {
@@ -180,7 +188,7 @@ Intercept requests
 		}
 	}
 ```
-#####Part Four. handle Event. 
+#####Part Five. handle Event. 
 register listeners and publish events as:
 ```Java
 AppContext.broadcaster.register(new IEventHook() {
@@ -201,7 +209,7 @@ TimeChangedEvent event = new TimeChangedEvent(this);
 event.setTime(new Date());
 AppContext.broadcaster.broadcast(event);
 ```
-#####Part Five: ORM using Hibernate.
+#####Part Six: ORM using Hibernate.
 Spring and Hibernate can be integrated to Gplume with just a few lines configuration:
 
 ``` XML
@@ -233,7 +241,7 @@ public class ChapterDAO extends HibernateDaoSupport {
 	}
 }
 ```
-#####Part Six. Test with Junit
+#####Part Seven. Test with Junit
 ```Java
 @RunWith(JunitPal.class)
 @ManifestPath("file:src/manifest.xml") // read as file

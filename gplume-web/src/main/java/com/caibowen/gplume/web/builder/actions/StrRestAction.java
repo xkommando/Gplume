@@ -19,11 +19,11 @@ import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.PathValResolver;
-import com.caibowen.gplume.web.view.IStrViewResolver;
+import com.caibowen.gplume.web.IStrViewResolver;
 
 
 /**
- * RestAction with method returning JSP view
+ * RestAction with method returning JSP views
  * @Handle(...)
  * public action(Date date) {
  * 

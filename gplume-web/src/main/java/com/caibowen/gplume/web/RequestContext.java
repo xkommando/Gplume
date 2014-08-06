@@ -33,7 +33,6 @@ import javax.servlet.http.HttpSession;
 
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Str;
-import com.caibowen.gplume.web.view.IView;
 
 
 /**
@@ -100,7 +99,7 @@ public class RequestContext implements Serializable {
 	}
 	
 	/**
-	 * 	JSP view
+	 * 	JSP views
 	 * @param jspView
 	 */
 	public void render(String jspView) {

@@ -18,7 +18,7 @@ package com.caibowen.gplume.web.builder.actions;
 import java.lang.invoke.MethodHandle;
 
 import com.caibowen.gplume.web.RequestContext;
-import com.caibowen.gplume.web.view.IStrViewResolver;
+import com.caibowen.gplume.web.IStrViewResolver;
 
 
 /**

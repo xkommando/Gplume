@@ -31,8 +31,8 @@ import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.builder.actions.Interception;
 import com.caibowen.gplume.web.builder.actions.SimpleAction;
 import com.caibowen.gplume.web.builder.stateful.StateGen;
-import com.caibowen.gplume.web.misc.JspViewResolvers;
-import com.caibowen.gplume.web.view.IStrViewResolver;
+import com.caibowen.gplume.web.views.JspViewResolvers;
+import com.caibowen.gplume.web.IStrViewResolver;
 
 /**
  * 

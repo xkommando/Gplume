@@ -9,7 +9,7 @@ import com.caibowen.gplume.web.annotation.Controller;
 import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.annotation.ReqAttr;
 import com.caibowen.gplume.web.annotation.SessionAttr;
-import com.caibowen.gplume.web.view.IView;
+import com.caibowen.gplume.web.IView;
 
 
 

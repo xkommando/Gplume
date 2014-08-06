@@ -13,27 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.web.view;
+package com.caibowen.gplume.web.views;
 
+import java.io.PrintWriter;
+
+import com.caibowen.gplume.web.IView;
 import com.caibowen.gplume.web.RequestContext;
 
-/**
- * this is not a real View object, it will return 301 
- * 	and lead the agent jump to other page
- * @author BowenCai
- *
- */
-public class JumpView implements IView {
+public class TextView implements IView {
 
-	final String newURL;
+	private final String encoding;
+	private final String type;
+	public TextView() {
+		this.encoding = PageAttributes.Encoding.UTF_8;
+		this.type = PageAttributes.Type.TEXT;
+	}
 	
-	public JumpView(String newURL) {
-		this.newURL = newURL;
+	public TextView(String encoding, String type) {
+		this.encoding = encoding;
+		this.type = type;
+	}
+
+	private String content;
+
+	public TextView setContent(String content) {
+		this.content = content;
+		return this;
 	}
 
 	@Override
 	public void resolve(RequestContext context) {
-		context.jumpTo(newURL);
+		try {
+			context.response.setContentType(type);
+			context.response.setCharacterEncoding(encoding);
+			PrintWriter writer = context.response.getWriter();
+			writer.write(content);
+		} catch (Exception e) {
+			throw new RuntimeException("Error writing JSP", e);
+		}
 	}
 
 }
