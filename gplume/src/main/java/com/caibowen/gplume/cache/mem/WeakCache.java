@@ -46,11 +46,12 @@ public final class WeakCache<K, V> implements Serializable {
 	public WeakCache (int capacity) {
 		map = new WeakHashMap<K, WeakReference<V>>(capacity * 4 / 3);
 	}
-	public boolean contains(K key) {
+
+    public boolean contains(K key) {
 		if (map == null) {
 			return false;
 		}
-		return map.get(key) == null;
+		return map.get(key) != null;
 	}
 	
 	public V get(K key) {

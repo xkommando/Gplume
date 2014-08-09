@@ -15,12 +15,30 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.web.views;
+
+import com.caibowen.gplume.web.RequestContext;
 
 /**
- * @Auther bowen.cbw
- * @since 8/9/2014.
- */
-public interface InitializingBean {
-    void afterPropertiesSet() throws Exception;
+ *
+ * add a prefix and a suffix to the jsp name to make a complete path
+ *
+ * @author BowenCai
+ *
+*/
+public class JspPrefixSuffixResolver extends JspSuffixResolver {
+
+    private static final long serialVersionUID = 4685236015290815491L;
+
+    public final String prefix;
+
+    public JspPrefixSuffixResolver(String prefix, String suffix) {
+        super(suffix);
+        this.prefix = prefix;
+    }
+
+    @Override
+    public void resolve(RequestContext ctx, String ret) {
+        ctx.render(prefix + ret + suffix);
+    }
 }

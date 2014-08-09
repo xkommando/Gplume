@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.NoSuchElementException;
@@ -24,8 +25,8 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.bean.IBeanAssembler;
-import com.caibowen.gplume.context.bean.IBeanAssemblerAware;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.misc.Klass;
@@ -57,15 +58,10 @@ import com.caibowen.gplume.misc.Str;
  * @author BowenCai
  *
  */
-public class Injector implements IBeanAssemblerAware {
+public class Injector implements Serializable {
 
+    private static final long serialVersionUID = -5041870626361257009L;
 	private static final Logger LOG = LoggerFactory.getLogger(Injector.class);
-	
-	private IBeanAssembler beanAssembler;
-	@Override
-	public void setBeanAssembler(IBeanAssembler beanFactroy) {
-		this.beanAssembler = beanFactroy;
-	}
 
 	/**
 	 * 
@@ -104,7 +100,7 @@ public class Injector implements IBeanAssemblerAware {
 	void withInject(Object object, Field field) {
 		
 		Object var = null;
-		Set<Object> vars = beanAssembler.getBeans(field.getType());
+		Set<Object> vars = AppContext.beanAssembler.getBeans(field.getType());
 		if (vars.size() != 1) {
 			try {
 				BeanEditor.setProperty(object, field.getName(), 
@@ -116,7 +112,7 @@ public class Injector implements IBeanAssemblerAware {
 								, field.getDeclaringClass()));
 			}
 			
-		} else if (null != (var = beanAssembler.getBean(field.getName()))) {
+		} else if (null != (var = AppContext.beanAssembler.getBean(field.getName()))) {
 			if (field.getType().isAssignableFrom(var.getClass())){
 				LOG.warn("cannot find bean for field [{0}] in class [{1}]"
 						+ "\r\n But find bean in beanAssemble with the same ID as the field id[{2}]"
@@ -148,7 +144,7 @@ public class Injector implements IBeanAssemblerAware {
 		if (!Str.Utils.notBlank(curID)) {
 			curID = field.getName();
 		}					
-		Object var = beanAssembler.getBean(curID);
+		Object var = AppContext.beanAssembler.getBean(curID);
 		if (var == null) {
 			throw new NullPointerException("cannot find bean with id [" 
 					+ curID + "] for property[" + field.getName() 

@@ -295,13 +295,7 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 	 * @param beanObj
 	 */
 	protected void preprocess(Object beanObj) {
-		if (beanObj instanceof IBeanAssemblerAware) {
-			((IBeanAssemblerAware) beanObj).setBeanAssembler(this);
-			LOG.info(
-					"IBeanAssemblerAware bean[" 
-					+ beanObj.getClass().getSimpleName() 
-					+ "] beanAssembler setted");
-		}
+
 		if (beanObj instanceof BeanClassLoaderAware) {
 			((BeanClassLoaderAware)beanObj).setBeanClassLoader(this.classLoader);
 			LOG.info(

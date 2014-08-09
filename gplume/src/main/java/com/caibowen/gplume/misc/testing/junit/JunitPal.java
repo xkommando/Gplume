@@ -50,7 +50,6 @@ public class JunitPal extends BlockJUnit4ClassRunner {
 			}
 			prepareTest(testObj, path);
 			Injector injector = new Injector();
-			injector.setBeanAssembler(AppContext.beanAssembler);
 			injector.inject(testObj);
 		}
 		return testObj;

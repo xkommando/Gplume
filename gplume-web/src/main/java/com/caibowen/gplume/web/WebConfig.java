@@ -31,56 +31,17 @@ import com.caibowen.gplume.web.builder.ActionFactory;
 import com.caibowen.gplume.web.builder.IActionFactory;
 import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
-import com.caibowen.gplume.web.views.JspViewResolvers;
+import com.caibowen.gplume.web.views.*;
 
 
-/*
-	<bean id="controlCenter" class="com.caibowen.gplume.web.SimpleControlCenter">
-		<property id="preProcessor" ref="headPrePrcessor"/>
-        
-		<property id="actionFactory">
-		    <bean class="com.caibowen.gplume.web.action.ActionFactory" />
-		</property>
-		
-		<property id="injector" ref="injector"/>
-		
-		<property id="errorHandler">
-		    <bean class="com.caibowen.web.misc.ErrorHandler" />
-		</property>
-		    <list> 
-		    	<bean class="com.caibowen.Test2" />
-		    	<bean class="com.caibowen.Test3" />
-		    </list>
-		</property>
-	</bean>
-	
-	NEW
-	
-	<bean class="com.caibowen.gplume.web.EasyConfig">
-		<property id="preProcessor" ref="somePreprocessor"/>
-		<property id="errorHandler" ref="someErrorHandler"/>
-		<property id="pkgs">
-			<list>
-				<value>package1<value>
-				<value>package2<value>
-			<list>
-		<property/>
-	</bean>
-*/
 /**
- * add EasyConfig in your .xml and get the gplume.web.controlCenter is ready to go!
  * 
- * 
+ * using WebConfig to reduce xml configuration
  * 
  * @author BowenCai
  *
  */
 public class WebConfig implements InitializingBean, Serializable {
-	
-	private static final long serialVersionUID = 657513014059796966L;
-
-	private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class.getName());
-
 
     // optional
 	@Inject IRequestProcessor preProcessor;
@@ -112,12 +73,13 @@ public class WebConfig implements InitializingBean, Serializable {
     public void setViewPrefix(String viewPrefix) {
         this.viewPrefix = viewPrefix;
     }
+
+    // optional
+    @Inject String viewSuffix;
     public void setViewSuffix(String viewSuffix) {
         this.viewSuffix = viewSuffix;
     }
 
-    // optional
-    @Inject String viewSuffix;
 
     @Override
 	public void afterPropertiesSet() throws Exception {
@@ -128,7 +90,6 @@ public class WebConfig implements InitializingBean, Serializable {
 			Injector injector = AppContext.beanAssembler.getBean("injector");
 			if (injector == null) {
 				injector = new Injector();
-				injector.setBeanAssembler(AppContext.beanAssembler);
 				AppContext.beanAssembler.addBean("injector", injector);
 			}
             center.setInjector(injector);
@@ -160,8 +121,9 @@ public class WebConfig implements InitializingBean, Serializable {
             scanner.afterPropertiesSet();
 
 			boolean boo = AppContext.beanAssembler.addBean("controlCenter", center);
-			LOG.info(boo ? "ControlCenter set up"
-                    : "cannot add [controlCenter] to beanAssembler");
+
+            if (boo) LOG.info("ControlCenter set up");
+            else LOG.info("cannot add [controlCenter] to beanAssembler");
 
 
 		} catch (Exception e) {
@@ -193,15 +155,20 @@ public class WebConfig implements InitializingBean, Serializable {
             return defaultViewResolver;
 
         } else {
+
             if (resolverType == 1)
-                return new JspViewResolvers.PrefixResolver(viewPrefix);
+                return new JspPrefixResolver(viewPrefix);
             else if (resolverType == 3)
-                return new JspViewResolvers.SuffixResolver(viewSuffix);
+                return new JspSuffixResolver(viewSuffix);
             else if (resolverType == 4)
-                return new JspViewResolvers.PrefixSuffixResolver(viewPrefix, viewSuffix);
+                return new JspPrefixSuffixResolver(viewPrefix, viewSuffix);
             else
-                return new JspViewResolvers.CompletePathViewResolver();
+                return new JspCompletePathViewResolver();
         }
     }
+
+    private static final long serialVersionUID = 657513014059796966L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(WebConfig.class.getName());
 
 }

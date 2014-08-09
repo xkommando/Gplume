@@ -87,7 +87,7 @@ use message tag in JSP
 </label>
 ```
 #####Part Four: Gplume Web MVC
-pre-process and after-process requests
+Pre-process and after-process requests
 ```java
 public class SampleProcessor implements IRequestProcessor {
 	@Override // all requests go through this
@@ -107,6 +107,17 @@ Chaining processors in XML
 		</bean>
 	</property>
 </bean>
+<bean class="com.caibowen.gplume.web.WebConfig">
+	<property name="preProcessor" ref="headPrePrcessor"/>
+	<property name="pkgs">
+		<list>
+			<value>com.caibowen.gplume.sample</value>
+		</list>
+	</property>
+	<!--by default it is Jsp view resolver-->
+	<property name="viewPrefix" value="/"/>
+	<property name="viewSuffix" value=".jsp" />
+</bean>
 ```
 Handle request with method
 ```Java
@@ -114,7 +125,7 @@ Handle request with method
 			"/index.html", "/index.jsp"}})
 	public String index(RequestContext context) {
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
-		return "/index.jsp";
+		return "index"; 
 	}
 	//number of concurrent requests is limited by this semapher
 	@Semaphored(permit=100, fair=false, timeout=1000)// when time is out, send http code 503 

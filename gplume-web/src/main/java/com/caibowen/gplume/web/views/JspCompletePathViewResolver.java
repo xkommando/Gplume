@@ -15,12 +15,20 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.web.views;
+
+import com.caibowen.gplume.web.IStrViewResolver;
+import com.caibowen.gplume.web.RequestContext;
 
 /**
- * @Auther bowen.cbw
- * @since 8/9/2014.
- */
-public interface InitializingBean {
-    void afterPropertiesSet() throws Exception;
+ *
+ * resolve jsp by given name, the name is the complete path to the jsp file
+ *
+ * @author BowenCai
+*/
+public class JspCompletePathViewResolver implements IStrViewResolver {
+    @Override
+    public void resolve(RequestContext ctx, String ret) {
+        ctx.render(ret);
+    }
 }

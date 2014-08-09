@@ -38,6 +38,7 @@
                 <value>com.caibowen.gplume.sample</value>
             </list>
         </property>
+        <!-- using JSP view resolver by default -->
         <property name="viewPrefix" value="/"/>
         <property name="viewSuffix" value=".jsp" />
     </bean>

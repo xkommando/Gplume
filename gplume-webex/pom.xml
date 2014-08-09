@@ -12,6 +12,7 @@
     <!-- web extension -->
     <artifactId>gplume-webex</artifactId>
     <version>1.5</version>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

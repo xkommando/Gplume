@@ -17,9 +17,9 @@
 
 package com.caibowen.gplume.web;
 
-import com.caibowen.gplume.web.RequestContext;
-
 /**
+ *
+ * resolve view given by name
  *
  * @author BowenCai
  */

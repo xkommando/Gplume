@@ -84,7 +84,7 @@ public class Pod {
 			try {
 				((InitializingBean)bean).afterPropertiesSet();
 				LOG.info(
-						"bean [" + bean.getClass().getSimpleName() 
+						"bean [" + bean.getClass().getSimpleName()
 						+ "] initialized");
 			} catch (Exception e) {
 				throw new RuntimeException(e);

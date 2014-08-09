@@ -21,6 +21,7 @@ import com.caibowen.gplume.web.RequestContext;
 /**
  * this is not a real View object, it will return 301 
  * 	and lead the agent jump to other page
+ *
  * @author BowenCai
  *
  */

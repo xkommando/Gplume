@@ -15,12 +15,31 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.web.views;
+
+import com.caibowen.gplume.web.IStrViewResolver;
+import com.caibowen.gplume.web.RequestContext;
+
+import java.io.Serializable;
 
 /**
- * @Auther bowen.cbw
- * @since 8/9/2014.
- */
-public interface InitializingBean {
-    void afterPropertiesSet() throws Exception;
+ *  add a suffix to the jsp name to make a complete path
+ *
+ * @author BowenCai
+ *
+*/
+public class JspSuffixResolver implements IStrViewResolver, Serializable {
+
+    private static final long serialVersionUID = 6433472763677545676L;
+
+    public final String suffix;
+
+    public JspSuffixResolver(String suffix) {
+        this.suffix = suffix;
+    }
+
+    @Override
+    public void resolve(RequestContext ctx, String ret) {
+        ctx.render(ret + suffix);
+    }
 }
