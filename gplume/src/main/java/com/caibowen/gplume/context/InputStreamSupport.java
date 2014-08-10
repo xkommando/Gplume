@@ -45,8 +45,10 @@ public class InputStreamSupport {
 
 	public void withPath(String path, InputStreamCallback callback) {
 		Exception ex = null;
-		InputStream inputStream = streamProvider.getStream(path);
-		if (inputStream == null) {
+        InputStream inputStream = null;
+        try {
+            inputStream = streamProvider.getStream(path);
+        } catch (Exception e) {
 			throw new IllegalArgumentException("resource unavailable[" + path
 					+ "] with provider [" + streamProvider.getClass().getName()
 					+ "]");

@@ -228,24 +228,26 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
 	protected void handleProperties(Element elem) {
 		
 		final String loc = elem.getAttribute(XMLTags.IMPROT).trim();
-		final Properties p = new Properties();
-		withPath(loc, new InputStreamCallback() {
-			@Override
-			public void doInStream(InputStream stream) throws Exception {
-				if (loc.endsWith(".xml"))	
-					p.loadFromXML(stream);
-				else
-					p.load(stream);
-			}
-		});
-		
-		for (Map.Entry<?, ?> e: p.entrySet()) {
-			Object k = e.getKey();
-			Object v = e.getValue();
-			if (k instanceof String && v instanceof String)
-				globlaProperties.put((String)k, (String)v);
-		}
-		
+        if (Str.Utils.notBlank(loc)) {
+            final Properties p = new Properties();
+            withPath(loc, new InputStreamCallback() {
+                @Override
+                public void doInStream(InputStream stream) throws Exception {
+                    if (loc.endsWith(".xml"))
+                        p.loadFromXML(stream);
+                    else
+                        p.load(stream);
+                }
+            });
+
+            for (Map.Entry<?, ?> e : p.entrySet()) {
+                Object k = e.getKey();
+                Object v = e.getValue();
+                if (k instanceof String && v instanceof String)
+                    globlaProperties.put((String) k, (String) v);
+            }
+        }
+
 		NodeList nls = elem.getChildNodes();
 		for (int i = 0; i < nls.getLength(); i++) {
 			Node nn = nls.item(i);
@@ -253,6 +255,7 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
                 Element ne = (Element) nn;
                 String k = ne.getTagName().trim();
                 String v = ne.getTextContent().trim();
+
                 if (!globlaProperties.containsKey(k)) {
                     globlaProperties.put(k, v);
                     LOG.info("add property:  \"{0}\" : \"{1}\"", k, v);

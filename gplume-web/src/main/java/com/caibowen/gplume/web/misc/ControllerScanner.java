@@ -88,23 +88,24 @@ public class ControllerScanner implements InitializingBean {
 					"no pkg specified["+pkg+']');
 		}
 		
-		ArrayList<Object> ctrls = new ArrayList<Object>(16);
+		ArrayList<Object> ctrls = new ArrayList<Object>(64);
 
 		List<Class<?>> allClazz =  ClassFinder.find(pkg, 
 									Thread.currentThread().getContextClassLoader());
-		try {
-			
 			for (Class<?> class1 : allClazz) {
-				
 				if (mayBeController(class1)) {
 					LOG.debug("\t>>> find controller[" + class1.getName() + "]");
-					ctrls.add(class1.newInstance());
+                    Object ctl = null;
+                    try {
+                        ctl = class1.newInstance();
+                    } catch (Exception e) {
+                        LOG.error("error init class ", e);
+                        continue;
+                    }
+                    ctrls.add(ctl);
 				}
 			}
 
-		} catch (Exception e) {
-			throw new RuntimeException("error init class", e);
-		}
 		return ctrls;
 	}
 	
