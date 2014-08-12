@@ -107,7 +107,7 @@ public class SampleController {
 			"/index",
 			"/index.html",
 			"index"})
-	public String index(RequestContext context) {
+	public String index(SampleController self, RequestContext context) {
 		System.out.println("SampleController.index()");
 		System.out.println(AppContext.beanAssembler.getBean("birthdayCalculator"));
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));

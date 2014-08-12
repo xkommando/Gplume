@@ -114,7 +114,7 @@ Chaining processors in XML
 			<value>com.caibowen.gplume.sample</value>
 		</list>
 	</property>
-	<!--by default it is Jsp view resolver-->
+	<!--by default using Jsp view resolver-->
 	<property name="viewPrefix" value="/"/>
 	<property name="viewSuffix" value=".jsp" />
 </bean>
@@ -140,42 +140,40 @@ Handle request with an object storing current state
 ```Java
 //Warn: insecure login controller, for demo only
 @Controller("/async/")// the base path
-public class SampleController {
+public class MyAction {
+
+	@ReqAttr(value="alias", defaultVal="1992-6-14")
+	Date testdata1;
+	@CookieVal(defaultVal=" 2.457  ", nullable=false)
+	double testdata2;
+	@ReqParam("psw_cipher")
+	String passwordCipher;
+	@ReqParam(value="email_address", nullable = false)
+	String email;
+	@SessionAttr(value="this_pubkey",nullable = false)
+	PublicKey key;
+
+	@Inject // injected after instanciation 
+	@Named("myUserService")
+	UserService userService;
 	@Inject Validator validator;
 	@Inject PublicKeyService keyService;
-	//state class can be defined any where, public or private, static or non-static
-	class MyState {
-		@ReqAttr(value="alias", defaultVal="1992-6-14")
-		Date testdata1;
-		@CookieVal(defaultVal=" 2.457  ", nullable=false)
-		double testdata2;
-		@Inject // injected after instanciation 
-		@Named("myUserService")
-		UserService userService;
 
-		@ReqParam("psw_cipher")
-		String passwordCipher;
-		@ReqParam(value="email_address", nullable = false)
-		String email;
-		@SessionAttr(value="this_pubkey",nullable = false)
-		PublicKey key;
-		
-		User user;
-		boolean ok() {
-			String psw = keyService.decrypt(key, passwordCipher);
-			if (!Str.Utils.notBlank(psw)
-					||!validator.matches(email, psw))
-				return false;
-			else {
-				user = userService.getByEmail(email);
-				return true;
-			}
+	User user;
+	boolean ok() {
+		String psw = keyService.decrypt(key, passwordCipher);
+		if (!Str.Utils.notBlank(psw)
+				||!validator.matches(email, psw))
+			return false;
+		else {
+			user = userService.getByEmail(email);
+			return true;
 		}
 	}
 	
 	@Semaphored(permit=300, timeout=2200)
 	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
-	public IView login(MyState reqScope, RequestContext req) {
+	public IView login(MyAction reqScope, RequestContext req) {
 		if (reqScope == null) //non-null requirements are not met.
 			return IView.get.textView("no public key in session");
 		else if (!reqScope.ok())
