@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.caibowen.gplume.context.bean.IBeanAssembler;
 import com.caibowen.gplume.context.bean.XMLBeanAssembler;

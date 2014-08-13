@@ -18,10 +18,7 @@ package com.caibowen.gplume.context.bean;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
@@ -197,7 +194,11 @@ public abstract class XMLBeanAssemblerBase extends InputStreamSupport implements
             b.append(name.substring(lastL, lq));
 
             String k = name.substring(lq + 2, rq);
-            b.append(globlaProperties.get(k.trim()));
+            String val = globlaProperties.get(k.trim());
+            if (val == null)
+                throw new NoSuchElementException("cannot find property of key [" + k + "]");
+
+            b.append(val);
             lq = name.indexOf("${", rq);
             lastL = rq + 1;
         }
