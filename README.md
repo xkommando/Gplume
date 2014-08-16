@@ -45,16 +45,18 @@ Spring-like configuration:
 <config>some_other_config.xml</config>
 <config>so_many_configs.xml</config>
 
+<!--add global properties-->
 <properties import="kv_pairs.properties" scope="global">
 	<gplumeVersion>1.0.0.nightly</gplumeVersion>
 	<webErrorHandler>com.caibowen.web.misc.ErrorHandler</webErrorHandler>
 </properties>
 
-<--! default scope: current file -->
+<!-- default scope: current file -->
 <properties import="kv_pairs_of_xml_format.xml" scope="file" />
+<!--all properties is accessible at run time-->
 
 <bean class="com.caibowen.gplume.web.WebConfig" aftercall="afterPropertySet">
-    <construct>
+    <construct> <!--constructor injection -->
         <list>
             <bean class="some.class"/>
             <ref>someOtherBean</ref>
@@ -78,16 +80,16 @@ and
 
 specify them in the manifest.xml
 ```XML
-	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
-		<construct>
-			<props>
-	            <prop key="en">${lang_cn}</prop>
-	            <prop key="${iso639_en}">/${i18base}/${i18_cn}</prop>
-	        </props>
-		</construct>
-	    <property name="defaultLang" value="SimplifiedChinese"/>
-	    <property name="${time_zone_name}" value="ETC/GMT-8"/>
-	</bean>
+<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
+	<construct>
+		<props>
+			<prop key="en">${lang_cn}</prop>
+			<prop key="${iso639_en}">/${i18base}/${i18_cn}</prop>
+		</props>
+	</construct>
+	<property name="defaultLang" value="SimplifiedChinese"/>
+	<property name="${time_zone_name}" value="ETC/GMT-8"/>
+</bean>
 ```
 use message tag in JSP
 ```HTML
