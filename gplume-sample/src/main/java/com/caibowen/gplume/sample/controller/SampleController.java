@@ -108,8 +108,6 @@ public class SampleController {
 			"/index.html",
 			"index"})
 	public String index(SampleController self, RequestContext context) {
-		System.out.println("SampleController.index()");
-		System.out.println(AppContext.beanAssembler.getBean("birthdayCalculator"));
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		context.putAttr("test_int", 123);
 		
@@ -131,8 +129,6 @@ public class SampleController {
 		context.addCookie(ck);
 		
 		context.session(true).setAttribute("ints", ints);
-		
-		System.out.println(context.toString());
 		
 		return "index";
 	}

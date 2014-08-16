@@ -36,10 +36,8 @@ public interface IBeanAssembler {
 	void setClassLoader(@Nonnull ClassLoader loader);
 	@Nonnull
 	ClassLoader getClassLoader();
-	
-	
-	void setStreamProvider(InputStreamProvider streamProvider);
-	
+
+    void setConfigCenter(ConfigCenter configCenter);
 	
 	/**
 	 * build all beans.
@@ -70,10 +68,7 @@ public interface IBeanAssembler {
 	@Nullable
 	public<T> T 		getBean(@Nonnull String id);
 	
-	@Nullable
-	Pod 				getPod(@Nonnull String id);
-	
-	
+
 	/**
      * will not increase the bean age
      *
@@ -89,10 +84,8 @@ public interface IBeanAssembler {
 	 * @return key value configuration from xml or porperties file
 	 */
 	@Nonnull
-	String globalProperty(@Nonnull String key);
+    ConfigCenter configCenter();
 
-	@Nonnull
-	Set<String> globalPropertyNames();
 	
 	
 	/**

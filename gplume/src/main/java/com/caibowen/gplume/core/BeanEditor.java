@@ -15,10 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -36,6 +33,18 @@ import com.caibowen.gplume.misc.Klass;
  */
 public class BeanEditor {
 
+    public static Object construct(Class klass, Object param) throws Exception {
+        for (Constructor ctor : klass.getDeclaredConstructors()) {
+            Class[] ps = ctor.getParameterTypes();
+            if (ps.length == 1 && Klass.isAssignable(param.getClass(), ps[0])) {
+                if (!ctor.isAccessible())
+                    ctor.setAccessible(true);
+                return ctor.newInstance(param);
+            }
+        }
+        throw new NoSuchMethodException("cannot find constructor for class [" + klass.getName()
+                +"] that can be invoked with [" + param + "]");
+    }
 	/**
 	 * set property, 
 	 * first look for public setter for this id

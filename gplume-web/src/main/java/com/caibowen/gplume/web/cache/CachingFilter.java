@@ -70,7 +70,7 @@ import com.caibowen.gplume.cache.ICacheProvider;
  * indefinitely. This situation is monitored and if it happens, an
  * IllegalStateException will be thrown.
  * <p/>
- * The following init-params are supported:
+ * The following construct-params are supported:
  * <ol>
  * <li>cacheName - the id in ehcache.xml used by the filter.
  * <li>blockingTimeoutMillis - the time, in milliseconds, to wait for the filter

@@ -613,71 +613,70 @@ public final class Klass {
      * <em><a href="http://docs.oracle.com/javase/specs/">The Java Language Specification</a></em>,
      * sections 5.1.1, 5.1.2 and 5.1.4 for details.</p>
      *
-     * @param cls  the Class to check, may be null
+     * @param fromClass  the Class to check, may be null
      * @param toClass  the Class to try to assign into, returns false if null
-     * @param autoboxing  whether to use implicit autoboxing/unboxing between primitives and wrappers
      * @return {@code true} if assignment possible
      */
-    public static boolean isAssignable(Class<?> cls, final Class<?> toClass) {
+    public static boolean isAssignable(Class<?> fromClass, final Class<?> toClass) {
         if (toClass == null) {
             return false;
         }
         // have to check for null, as isAssignableFrom doesn't
-        if (cls == null) {
+        if (fromClass == null) {
             return !toClass.isPrimitive();
         }
 
-		if (cls.isPrimitive() && !toClass.isPrimitive()) {
-			cls = primitiveToWrapper(cls);
-			if (cls == null) {
+		if (fromClass.isPrimitive() && !toClass.isPrimitive()) {
+			fromClass = primitiveToWrapper(fromClass);
+			if (fromClass == null) {
 				return false;
 			}
 		}
-		if (toClass.isPrimitive() && !cls.isPrimitive()) {
-			cls = wrapperToPrimitive(cls);
-			if (cls == null) {
+		if (toClass.isPrimitive() && !fromClass.isPrimitive()) {
+			fromClass = wrapperToPrimitive(fromClass);
+			if (fromClass == null) {
 				return false;
 			}
 		}
         
-        if (cls.equals(toClass)) {
+        if (fromClass.equals(toClass)) {
             return true;
         }
-        if (cls.isPrimitive()) {
+        if (fromClass.isPrimitive()) {
             if (toClass.isPrimitive() == false) {
                 return false;
             }
-            if (Integer.TYPE.equals(cls)) {
+            if (Integer.TYPE.equals(fromClass)) {
                 return Long.TYPE.equals(toClass)
                     || Float.TYPE.equals(toClass)
                     || Double.TYPE.equals(toClass);
             }
-            if (Long.TYPE.equals(cls)) {
+            if (Long.TYPE.equals(fromClass)) {
                 return Float.TYPE.equals(toClass)
                     || Double.TYPE.equals(toClass);
             }
-            if (Boolean.TYPE.equals(cls)) {
+            if (Boolean.TYPE.equals(fromClass)) {
                 return false;
             }
-            if (Double.TYPE.equals(cls)) {
+            if (Double.TYPE.equals(fromClass)) {
                 return false;
             }
-            if (Float.TYPE.equals(cls)) {
+            if (Float.TYPE.equals(fromClass)) {
                 return Double.TYPE.equals(toClass);
             }
-            if (Character.TYPE.equals(cls)) {
+            if (Character.TYPE.equals(fromClass)) {
                 return Integer.TYPE.equals(toClass)
                     || Long.TYPE.equals(toClass)
                     || Float.TYPE.equals(toClass)
                     || Double.TYPE.equals(toClass);
             }
-            if (Short.TYPE.equals(cls)) {
+            if (Short.TYPE.equals(fromClass)) {
                 return Integer.TYPE.equals(toClass)
                     || Long.TYPE.equals(toClass)
                     || Float.TYPE.equals(toClass)
                     || Double.TYPE.equals(toClass);
             }
-            if (Byte.TYPE.equals(cls)) {
+            if (Byte.TYPE.equals(fromClass)) {
                 return Short.TYPE.equals(toClass)
                     || Integer.TYPE.equals(toClass)
                     || Long.TYPE.equals(toClass)
@@ -687,7 +686,7 @@ public final class Klass {
             // should never get here
             return false;
         }
-        return toClass.isAssignableFrom(cls);
+        return toClass.isAssignableFrom(fromClass);
     }
     
     /**

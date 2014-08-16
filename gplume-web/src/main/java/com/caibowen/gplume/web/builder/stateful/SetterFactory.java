@@ -421,7 +421,7 @@ public class SetterFactory {
 				));
 		
 		} catch (Exception e) {
-			throw new RuntimeException("cannot init SetterFactory", e);
+			throw new RuntimeException("cannot construct SetterFactory", e);
 		}
 	}
 }

@@ -22,16 +22,22 @@ package com.caibowen.gplume.context.bean;
  * @author BowenCai
  *
  */
-public class XMLTags {
+public abstract class XMLTags {
 
 	public static final String ROOT_BEANS = "beans";
 	
 	public static final String BEAN = "bean";
 
+    public static final String CONFIG = "config";
+    public static final String SCOPE = "scope";
 	public static final String IMPROT = "import";
 	
 	public static final String BEAN_ID = "id";
 	public static final String BEAN_CLASS = "class";
+    public static final String BEAN_AFTER_CALL = "aftercall";
+    public static final String BEAN_CONSTRUCT = "construct";
+
+
 	public static final String PROPERTIES = "properties";
 	public static final String BEAN_PROPERTY = "property";
 
@@ -48,6 +54,7 @@ public class XMLTags {
 
 	public static final String PROPERTY_INSTANCE = "instance";
 	public static final String PROPERTY_LIST = "list";
+    public static final String PROPERTY_STR = "str";
 	public static final String PROPERTY_MAP  = "props";
 	public static final String PROPERTY_MAP_PROP  = "prop";
 	public static final String PROPERTY_MAP_KEY  = "key";

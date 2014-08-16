@@ -22,36 +22,45 @@ Quick Start:
 #####Part One: Configurate the web.xml:
 
 ```XML
-	<context-param>
-        <param-name>manifest</param-name>
-        <param-value>classpath:app-manifest.xml</param-value><!-- in your class path -->
-    </context-param>
-	<listener>
-		<listener-class>com.caibowen.gplume.web.WebAppBooter</listener-class>
-	</listener>
-		<filter>
-		<filter-name>dispatcher</filter-name>
-		<filter-class>com.caibowen.gplume.web.GFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>dispatcher</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
+<context-param>
+	<param-name>manifest</param-name>
+	<param-value>classpath:app-manifest.xml</param-value><!-- in your class path -->
+</context-param>
+<listener>
+	<listener-class>com.caibowen.gplume.web.WebAppBooter</listener-class>
+</listener>
+
+<filter>
+	<filter-name>dispatcher</filter-name>
+	<filter-class>com.caibowen.gplume.web.GFilter</filter-class>
+</filter>
+<filter-mapping>
+	<filter-name>dispatcher</filter-name>
+	<url-pattern>/*</url-pattern>
+</filter-mapping>
 ```
 #####Part Two: The IoC Container.
 Spring-like configuration:
 ```XML
-<import>some_other_config.xml</import>
-<import>so_many_configs.xml</import>
+<config>some_other_config.xml</config>
+<config>so_many_configs.xml</config>
 
-<properties import="kv_pairs.properties">
+<properties import="kv_pairs.properties" scope="global">
 	<gplumeVersion>1.0.0.nightly</gplumeVersion>
 	<webErrorHandler>com.caibowen.web.misc.ErrorHandler</webErrorHandler>
 </properties>
 
-<properties import="kv_pairs_of_xml_format.xml" />
+<--! default scope: current file -->
+<properties import="kv_pairs_of_xml_format.xml" scope="file" />
 
-<bean class="com.caibowen.gplume.web.WebConfig" >
+<bean class="com.caibowen.gplume.web.WebConfig" aftercall="afterPropertySet">
+    <construct>
+        <list>
+            <bean class="some.class"/>
+            <ref>someOtherBean</ref>
+            <str>literal</str>
+        </list>
+    </construct>
 	<property name="preProcessor" ref="headPrePrcessor"/>
 	<property name="errorHandler" instance="${webErrorHandler}" />
 	<property name="pkgs">
@@ -70,13 +79,13 @@ and
 specify them in the manifest.xml
 ```XML
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
-	    <property name="defaultLang" value="SimplifiedChinese"/>
-	    <property name="pkgFiles">
-	        <props>
+		<construct>
+			<props>
 	            <prop key="en">${lang_cn}</prop>
 	            <prop key="${iso639_en}">/${i18base}/${i18_cn}</prop>
 	        </props>
-	    </property>
+		</construct>
+	    <property name="defaultLang" value="SimplifiedChinese"/>
 	    <property name="${time_zone_name}" value="ETC/GMT-8"/>
 	</bean>
 ```
@@ -100,7 +109,7 @@ public class SampleProcessor implements IRequestProcessor {
 Chaining processors in XML
 ```XML
 <bean id="headPrePrcessor" class="com.caibowen.gplume.web.i18n.NativePkgInjector">
-	<property name="i18nService" ref="i18nService"/>
+	<construct ref="i18nService"/>
 	<property name="next">
 		<bean class="com.caibowen.web.plugin.ui.BackgroundImgPreprocessor">
 			<property name="next" instance="com.caibowen.web.plugin.statistic.LogRequestPreProcessor"/>

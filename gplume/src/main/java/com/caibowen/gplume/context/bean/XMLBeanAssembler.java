@@ -131,12 +131,12 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	}
 
 	public void assemble(@Nonnull final String path) throws Exception {
-		withPath(path, new InputStreamCallback() {
-			@Override
-			public void doInStream(InputStream stream) throws Exception {
-				assemble(stream);
-			}
-		});
+		configCenter.withPath(path, new InputStreamCallback() {
+            @Override
+            public void doInStream(InputStream stream) throws Exception {
+                assemble(stream);
+            }
+        });
 	}
 
 	/**
@@ -169,24 +169,11 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		}
 	}
 
-
-	@Nonnull
+    @Nonnull
     @Override
-	public String globalProperty(@Nonnull String key) {
-		return globlaProperties.get(key);
-	}
-	
-	@Nonnull
-    @Override
-	public Set<String> globalPropertyNames() {
-		return globlaProperties.keySet();
-	}
-	
-	@Nullable
-	@Override
-	public Pod 	getPod(@Nonnull String id) {
-		return podMap.get(id);
-	}
+    public ConfigCenter configCenter() {
+        return configCenter;
+    }
 
     /**
      * will not increase the bean age

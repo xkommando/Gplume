@@ -99,7 +99,7 @@ public class ControllerScanner implements InitializingBean {
                     try {
                         ctl = class1.newInstance();
                     } catch (Exception e) {
-                        LOG.error("error init class ", e);
+                        LOG.error("error construct class ", e);
                         continue;
                     }
                     ctrls.add(ctl);

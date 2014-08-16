@@ -45,8 +45,16 @@ public class InputStreamProviderProxy implements InputStreamProvider {
 
 	public InputStreamProvider classPathProvider;
 	public InputStreamProvider defaultProvider;
-	
-	@Override
+
+    public void setClassPathProvider(InputStreamProvider classPathProvider) {
+        this.classPathProvider = classPathProvider;
+    }
+
+    public void setDefaultProvider(InputStreamProvider defaultProvider) {
+        this.defaultProvider = defaultProvider;
+    }
+
+    @Override
 	public InputStream getStream(String path) {
 		InputStreamProvider providerToUse = null;
 		if (Str.Utils.notBlank(path)) {

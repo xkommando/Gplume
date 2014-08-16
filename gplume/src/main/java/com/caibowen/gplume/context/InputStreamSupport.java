@@ -44,22 +44,26 @@ public class InputStreamSupport {
 
 
 	public void withPath(String path, InputStreamCallback callback) {
-		Exception ex = null;
         InputStream inputStream = null;
         try {
             inputStream = streamProvider.getStream(path);
+            if (inputStream.available() < 1)
+                throw new IllegalStateException("not avaliable");
         } catch (Exception e) {
-			throw new IllegalArgumentException("resource unavailable[" + path
-					+ "] with provider [" + streamProvider.getClass().getName()
-					+ "]");
+            throw new IllegalArgumentException("resource unavailable[" + path
+                    + "] with provider [" + streamProvider.getClass().getName()
+                    + "]", e);
 		}
+
+        Exception ex = null;
 		try {
 			callback.doInStream(inputStream);
 		} catch (Exception e) {
 			ex = e;
 		} finally {
 			try {
-				inputStream.close();
+                if (inputStream != null)
+    				inputStream.close();
 			} catch (IOException e) {
 				ex = e;
 			}

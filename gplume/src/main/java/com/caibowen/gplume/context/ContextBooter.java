@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.context;
 
+import com.caibowen.gplume.context.bean.ConfigCenter;
 import com.caibowen.gplume.i18n.I18nService;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.misc.logging.Logger;
@@ -60,14 +61,14 @@ public class ContextBooter {
 	
 	public void boot() {
 		// set classloader for beanAssembler
-		InputStreamProviderProxy provider = new InputStreamProviderProxy();
-		provider.classPathProvider = new ClassLoaderInputStreamProvider(getClassLoader());
-		provider.defaultProvider = streamProvider;
+        ConfigCenter configCenter = new ConfigCenter();
+        configCenter.setClassPathProvider(new ClassLoaderInputStreamProvider(this.classLoader));
+        configCenter.setDefaultStreamProvider(streamProvider);
 
 		AppContext.beanAssembler.setClassLoader(this.classLoader);
+        AppContext.beanAssembler.setConfigCenter(configCenter);
+
 		if (Str.Utils.notBlank(manifestPath)) {
-			// build beans
-			AppContext.beanAssembler.setStreamProvider(provider);
 			try {
 				AppContext.beanAssembler.assemble(manifestPath);
 			} catch (Exception e) {
