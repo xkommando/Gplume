@@ -37,7 +37,9 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * @auther bowen.cbw
+ *  auxiliary for xml parsing
+ *
+ * @author bowen.cbw
  * @since 8/16/2014.
  */
 abstract class XMLAux implements IBeanAssembler {
@@ -51,9 +53,6 @@ abstract class XMLAux implements IBeanAssembler {
     public void setConfigCenter(ConfigCenter configCenter) {
         this.configCenter = configCenter;
     }
-
-
-    abstract protected void preprocess(Object obj);
 
 
     protected @Nonnull Class<?> getClass(Element element) {
@@ -123,8 +122,6 @@ abstract class XMLAux implements IBeanAssembler {
                 beanElem.getAttribute(XMLTags.BEAN_AFTER_CALL));
 
         Object beanObj = construct(bnClass, findCtorElem(beanElem), afterCall);
-
-        preprocess(beanObj);
 
         LOG.info("bean class[{0}] created", bnClass.getSimpleName());
 
@@ -201,7 +198,7 @@ abstract class XMLAux implements IBeanAssembler {
                      * 				    <key> or <value>
                      */
                     iter = iter.getFirstChild().getNextSibling();
-                    Properties properties = buildProp(iter, propName);
+                    Properties properties = buildMap(iter, propName);
                     BeanEditor.setProperty(beanObj, propName, properties);
 
                 } else { // single value or list
@@ -231,7 +228,7 @@ abstract class XMLAux implements IBeanAssembler {
             } // props
 
         } // for properties
-
+        afterProcess(beanObj, afterCall);
         return beanObj;
     }
 
@@ -259,8 +256,8 @@ abstract class XMLAux implements IBeanAssembler {
         } else if (Str.Utils.notBlank(varObj)) {
             // e.g. <property id="injector" instance="com.caibowen.gplume.core.Injector"/>
             Class<?> klass = this.classLoader.loadClass(varObj);
-            Object obj = klass.newInstance();
-            preprocess(obj);
+            Object obj = construct(klass, null, null);
+            afterProcess(obj, null);
             return obj;
 
         } else {
@@ -270,7 +267,7 @@ abstract class XMLAux implements IBeanAssembler {
 
 
     private @Nonnull
-    Properties buildProp(Node iter, String propName) {
+    Properties buildMap(Node iter, String propName) {
         Properties properties = new Properties();
 
         while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
@@ -348,6 +345,36 @@ abstract class XMLAux implements IBeanAssembler {
         return beanList;
     }
 
+    protected void afterProcess(Object bean, String initName) throws Exception {
+        if (bean instanceof BeanClassLoaderAware) {
+            ((BeanClassLoaderAware)bean).setBeanClassLoader(this.classLoader);
+            LOG.info(
+                    "BeanClassLoaderAware bean["
+                            + bean.getClass().getSimpleName()
+                            + "] ClassLoader setted");
+        }
+
+        if (bean instanceof InitializingBean) {
+            ((InitializingBean) bean).afterPropertiesSet();
+            LOG.info(
+                    "bean [" + bean.getClass().getSimpleName()
+                            + "] initialized");
+        }
+
+
+        if (Str.Utils.isBlank(initName))
+            return;
+
+        Method m = bean.getClass().getDeclaredMethod(initName.trim());
+        if (!m.isAccessible())
+            m.setAccessible(true);
+        if (Modifier.isStatic(m.getModifiers()))
+            m.invoke(null);
+        else
+            m.invoke(bean);
+
+    }
+
     protected Object construct(@Nonnull Class klass,
                                @Nullable Element prop,
                                @Nullable String initName) throws Exception {
@@ -367,7 +394,7 @@ abstract class XMLAux implements IBeanAssembler {
 
             } else if (prop.getNodeName().equals(XMLTags.PROPERTY_MAP)) {
                 prop = (Element) prop.getFirstChild().getNextSibling();
-                Map m = buildProp(prop, "Constructor:" + klass.getName());
+                Map m = buildMap(prop, "Constructor:" + klass.getName());
                 val = BeanEditor.construct(klass, m);
 
             } else {
@@ -388,19 +415,7 @@ abstract class XMLAux implements IBeanAssembler {
                                         + "needs 1 actual " + ls.size());
                 }
             }
-
         }
-
-        if (Str.Utils.isBlank(initName))
-            return val;
-
-        Method m = klass.getDeclaredMethod(initName.trim(), null);
-        if (!m.isAccessible())
-            m.setAccessible(true);
-        if (Modifier.isStatic(m.getModifiers()))
-            m.invoke(null);
-        else
-            m.invoke(val);
 
         return val;
     }

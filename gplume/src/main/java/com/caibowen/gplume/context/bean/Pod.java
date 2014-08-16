@@ -15,14 +15,12 @@
  ******************************************************************************/
 package com.caibowen.gplume.context.bean;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nullable;
-
-import org.w3c.dom.Element;
-
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.w3c.dom.Element;
+
+import javax.annotation.Nullable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * manage bean life circle
@@ -78,17 +76,6 @@ public class Pod {
 	static void process(String id, Object bean) {
 		if (bean != null && bean instanceof BeanIDAware) {
 			((BeanIDAware)bean).setBeanID(id);
-		}
-
-		if (bean != null && bean instanceof InitializingBean) {
-			try {
-				((InitializingBean)bean).afterPropertiesSet();
-				LOG.info(
-						"bean [" + bean.getClass().getSimpleName()
-						+ "] initialized");
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
 		}
 	}
 	

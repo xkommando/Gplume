@@ -15,30 +15,22 @@
  ******************************************************************************/
 package com.caibowen.gplume.context.bean;
 
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import com.caibowen.gplume.context.InputStreamCallback;
+import com.caibowen.gplume.core.Converter;
+import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.caibowen.gplume.context.InputStreamCallback;
-import com.caibowen.gplume.core.BeanEditor;
-import com.caibowen.gplume.core.Converter;
-import com.caibowen.gplume.misc.Str;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import javax.annotation.Nonnull;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -157,11 +149,6 @@ public abstract class XMLBeanAssemblerBase extends XMLAux {
                 , lifeSpan
         );
     }
-//	public static void main(String...a) {
-//		replaceIfPresent("hahaha ${name sad} ooo ${second-hahaha} back-back");
-//	}
-
-
 
 
     /**
