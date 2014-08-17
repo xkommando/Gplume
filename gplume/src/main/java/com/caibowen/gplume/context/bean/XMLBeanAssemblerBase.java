@@ -78,8 +78,8 @@ public abstract class XMLBeanAssemblerBase extends XMLAux {
 			}
 		}
 
-		if (node == null) { //  no bean definition
-			throw new IllegalArgumentException("no bean definition found");
+		if (node == null) { //  nothing
+			throw new IllegalArgumentException("no configuration found");
 		}
 		
 		while (node.getNextSibling() != null) {
@@ -106,6 +106,7 @@ public abstract class XMLBeanAssemblerBase extends XMLAux {
                 break;
 
 			default:
+                LOG.warn("unknown tag[" + elem.getNodeName() + "]");
 				break;
 			}
 		}
@@ -192,23 +193,7 @@ public abstract class XMLBeanAssemblerBase extends XMLAux {
             }
         });
 
-        LOG.info("importing configuration from {0}, {1} beans created", loc, podMap.size());
+        LOG.debug("importing configuration from {0}, {1} beans created", loc, podMap.size());
     }
-
-	/**
-	 * after process (often with life circle managemetn )is done in Pod
-	 * @see Pod
-	 * @param beanObj
-	 */
-	protected void preprocess(Object beanObj) {
-
-		if (beanObj instanceof BeanClassLoaderAware) {
-			((BeanClassLoaderAware)beanObj).setBeanClassLoader(this.classLoader);
-			LOG.info(
-					"BeanClassLoaderAware bean[" 
-					+ beanObj.getClass().getSimpleName() 
-					+ "] ClassLoader setted");
-		}
-	}
 
  }

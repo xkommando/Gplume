@@ -140,9 +140,8 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	}
 
 	/**
-	 * @return null if not found or exception is thrown in creating non-singleton bean
+	 * @return null if not found or throw exception in failing to create non-singleton bean
 	 */
-	@SuppressWarnings("unchecked")
 	@Nullable
 	@Override
 	public <T> T getBean(@Nonnull String id) {

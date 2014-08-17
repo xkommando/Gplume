@@ -118,10 +118,7 @@ abstract class XMLAux implements IBeanAssembler {
                     + "] is interface and cannot be instantiated");
         }
 
-        String afterCall = configCenter.replaceIfPresent(
-                beanElem.getAttribute(XMLTags.BEAN_AFTER_CALL));
-
-        Object beanObj = construct(bnClass, findCtorElem(beanElem), afterCall);
+        Object beanObj = construct(bnClass, findCtorElem(beanElem));
 
         LOG.info("bean class[{0}] created", bnClass.getSimpleName());
 
@@ -228,6 +225,10 @@ abstract class XMLAux implements IBeanAssembler {
             } // props
 
         } // for properties
+
+        String afterCall = configCenter.replaceIfPresent(
+                beanElem.getAttribute(XMLTags.BEAN_AFTER_CALL));
+
         afterProcess(beanObj, afterCall);
         return beanObj;
     }
@@ -256,7 +257,7 @@ abstract class XMLAux implements IBeanAssembler {
         } else if (Str.Utils.notBlank(varObj)) {
             // e.g. <property id="injector" instance="com.caibowen.gplume.core.Injector"/>
             Class<?> klass = this.classLoader.loadClass(varObj);
-            Object obj = construct(klass, null, null);
+            Object obj = construct(klass, null);
             afterProcess(obj, null);
             return obj;
 
@@ -349,9 +350,9 @@ abstract class XMLAux implements IBeanAssembler {
         if (bean instanceof BeanClassLoaderAware) {
             ((BeanClassLoaderAware)bean).setBeanClassLoader(this.classLoader);
             LOG.info(
-                    "BeanClassLoaderAware bean["
+                    "classLoader aware  bean ["
                             + bean.getClass().getSimpleName()
-                            + "] ClassLoader setted");
+                            + "] set classLoader [" + this.classLoader);
         }
 
         if (bean instanceof InitializingBean) {
@@ -372,12 +373,10 @@ abstract class XMLAux implements IBeanAssembler {
             m.invoke(null);
         else
             m.invoke(bean);
-
     }
 
     protected Object construct(@Nonnull Class klass,
-                               @Nullable Element prop,
-                               @Nullable String initName) throws Exception {
+                               @Nullable Element prop) throws Exception {
 
         Object val = null;
         if (prop == null) {
@@ -409,14 +408,13 @@ abstract class XMLAux implements IBeanAssembler {
                         val = BeanEditor.construct(klass, ls.get(0));
                     else
                         throw new IllegalArgumentException(
-                                "Bean number miss match to construct ["
+                                "Bean number miss match , construct ["
                                         + "] in class ["
                                         + klass.getName() + "]"
                                         + "needs 1 actual " + ls.size());
                 }
             }
         }
-
         return val;
     }
 }

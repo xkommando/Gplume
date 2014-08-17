@@ -13,38 +13,6 @@
 	<my_injector>com.caibowen.gplume.core.Injector</my_injector>
 </properties>
 
-    <bean id="fuckkkk" class="com.caibowen.gplume.sample.model.Tester" aftercall="init">
-        <construct>
-            <props>
-                <prop key="en">/i18n/en.properties</prop>
-                <prop key="${iso639_zh}">/${i18n_cn}/${i18n_cn2}</prop>
-            </props>
-        </construct>
-    </bean>
-
-    <bean class="com.caibowen.gplume.sample.model.Tester">
-        <construct>
-            <list>
-                <ref>fuckkkk</ref>
-                <value>com.caibowen.gplume.sample</value>
-            </list>
-        </construct>
-    </bean>
-
-    <bean class="com.caibowen.gplume.sample.model.Tester">
-        <construct>
-            <ref>fuckkkk</ref>
-        </construct>
-    </bean>
-
-
-    <bean class="com.caibowen.gplume.sample.model.Tester" aftercall="init">
-        <construct ref="fuckkkk"/>
-    </bean>
-
-    <bean class="com.caibowen.gplume.sample.model.Tester" aftercall="init">
-        <construct value="fuckkkk"/>
-    </bean>
 
 <!-- NEW  -->
 <!-- web app infrastracture -->
