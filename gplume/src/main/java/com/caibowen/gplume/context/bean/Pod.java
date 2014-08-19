@@ -69,10 +69,10 @@ public class Pod {
 	 * @param bean
 	 */
 	static void process(String id, Object bean) {
-		if (bean != null && bean instanceof BeanIDAware) {
-			((BeanIDAware)bean).setBeanID(id);
-		}
-	}
+        if (bean != null && bean instanceof BeanIDAware) {
+            ((BeanIDAware) bean).setBeanID(id);
+        }
+    }
 
 	/**
 	 * destroy this bean
