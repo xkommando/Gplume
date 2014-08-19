@@ -60,7 +60,7 @@ Spring-like configuration:
         <list>
             <bean class="some.class"/>
             <ref>someOtherBean</ref>
-            <str>literal</str>
+            <value>literal</value>
         </list>
     </construct>
 	<property name="preProcessor" ref="headPrePrcessor"/>
@@ -83,8 +83,8 @@ specify them in the manifest.xml
 <bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
 	<construct>
 		<props>
-			<prop key="en">${lang_cn}</prop>
-			<prop key="${iso639_en}">/${i18base}/${i18_cn}</prop>
+			<en value-type="String">${lang_cn}</en>
+			<zh_CN>/${i18base}/${i18_cn}</zh_CN>
 		</props>
 	</construct>
 	<property name="defaultLang" value="SimplifiedChinese"/>
@@ -239,7 +239,7 @@ Spring and Hibernate can be integrated to Gplume with just a few lines configura
 	<property name="dataSource" ref="dataSource" />
 	<property name="hibernateProperties">
 		<props>
-			<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+			<hibernate.dialect>org.hibernate.dialect.MySQL5Dialect</hibernate.dialect>
 		</props>
 	</property>
 	<property name="annotatedClasses">
