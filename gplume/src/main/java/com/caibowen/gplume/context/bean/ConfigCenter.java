@@ -154,15 +154,16 @@ public class ConfigCenter implements Serializable{
             configs.put(currentConfigName, current);
             current.put(k, v);
             keyToConfigName.put(k, currentConfigName);
-            LOG.debug("config file [" + currentConfigName + "] add [" + k + "]->[" + v + "]");
+            LOG.debug("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
         } else {
             String old = current.get(k);
             if (old == null) {
-               current.put(k, v);
+                current.put(k, v);
                 keyToConfigName.put(k, currentConfigName);
+                LOG.debug("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
             } else {
                 if (old.equals(v))
-                    LOG.warn("duplicationed key ["
+                    LOG.warn("duplicated key ["
                             + k + "] defined in ["
                             + currentConfigName
                             + "], the two same values is [" + v + "]");
@@ -178,11 +179,12 @@ public class ConfigCenter implements Serializable{
 
     private void addGlobal(String k, String v) {
         String old = globlaProperties.get(k);
-        if (old == null)
+        if (old == null) {
             globlaProperties.put(k, v);
-        else {
+            LOG.debug("add global property: [" + k + "] -> [" + v + "]");
+        } else {
             if (old.equals(v))
-                LOG.warn("duplicationed global key ["
+                LOG.warn("duplicated global key ["
                         + k + "] the two same values is [" + v + "]");
             else
                 throw new IllegalArgumentException(

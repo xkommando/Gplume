@@ -72,17 +72,6 @@ public class Pod {
 		if (bean != null && bean instanceof BeanIDAware) {
 			((BeanIDAware)bean).setBeanID(id);
 		}
-
-		if (bean != null && bean instanceof InitializingBean) {
-			try {
-				((InitializingBean)bean).afterPropertiesSet();
-				LOG.info(
-						"bean [" + bean.getClass().getSimpleName()
-						+ "] initialized");
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	/**

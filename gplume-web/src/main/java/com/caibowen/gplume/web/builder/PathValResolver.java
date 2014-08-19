@@ -26,7 +26,7 @@ import com.caibowen.gplume.core.Converter;
  * @author BowenCai
  *
  */
-public class PathValResolver implements IpathValResolver {
+public class PathValResolver implements IPathValResolver {
 
 	final int startIdx; // start idx of arg
 	final String argName;

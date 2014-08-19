@@ -13,6 +13,7 @@
 	<my_injector>com.caibowen.gplume.core.Injector</my_injector>
 </properties>
 
+<<<<<<< HEAD
 
 <!-- NEW  -->
 <!-- web app infrastracture -->
@@ -26,6 +27,8 @@
             </props>
         </property>
     </bean>
+=======
+>>>>>>> 2c5b3b139f4f94c28c4c758ee1c04ce355ea71d9
 
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
 	    <property name="defaultLang" value="SimplifiedChinese"/>
