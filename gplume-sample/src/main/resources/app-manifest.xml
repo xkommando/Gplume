@@ -17,13 +17,23 @@
 <!-- NEW  -->
 <!-- web app infrastracture -->
 
+    <bean class="com.caibowen.gplume.sample.model.Tester">
+        <construct value="456" type="Integer"/>
+        <property name="map">
+            <props>
+                <k1 value-type="Integer">456</k1>
+                <k2 value-type="Double">456.45789</k2>
+            </props>
+        </property>
+    </bean>
+
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
 	    <property name="defaultLang" value="SimplifiedChinese"/>
         <property name="defaultTimeZone" value="ETC/GMT-8"/>
 	    <property name="pkgFiles">
 	        <props>
-	            <prop key="en">/i18n/en.properties</prop>
-	            <prop key="${iso639_zh}">/${i18n_cn}/${i18n_cn2}</prop>
+	            <en>/i18n/en.properties</en>
+	            <zh_CN>/${i18n_cn}/${i18n_cn2}</zh_CN>
 	        </props>
 	    </property>
 	</bean>

@@ -15,24 +15,22 @@
  ******************************************************************************/
 package com.caibowen.gplume.context.bean;
 
+import com.caibowen.gplume.context.InputStreamCallback;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-
-import com.caibowen.gplume.context.InputStreamCallback;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
 
 /**
  * Usage:
@@ -224,29 +222,22 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		super.podMap.put(id, oldPod);
         LOG.debug("{0} of type {1} updated", id, bean.getClass().getName());
 	}
-
-	@Override
-	public boolean addBean(@Nonnull String id, @Nonnull Object bean) {
-		return addBean(id, bean, Integer.MAX_VALUE);
-	}
 	
 	/**
 	 * new bean must not be non-singleton
 	 */
 	@Override
 	public boolean addBean(@Nonnull String id, 
-							@Nonnull Object bean, 
-							@Nonnull int lifeSpan) {
+							@Nonnull Object bean) {
 		
 		if (contains(id)) {
 			return false;
 		}
-		Pod pod = new Pod(id, null, bean, lifeSpan);
+		Pod pod = new Pod(id, null, bean);
 		super.podMap.put(id, pod);
-        LOG.debug("Bean {0} of type {1} with life span {2} added"
+        LOG.debug("Bean {0} of type {1} added"
                 , id
-                , bean.getClass().getName()
-                , lifeSpan);
+                , bean.getClass().getName());
 
 		return true;
 	}

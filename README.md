@@ -200,7 +200,7 @@ Intercept requests
 ```java
 	@Intercept(value = { "/user*" }) // intercept request by URL
 	public void demo(RequestContext context, IAction action) throws Throwable {
-		if (hasLogedIn(context)) {
+		if (hasLoggedIn(context)) {
 			action.perform(context);
 			after(context);
 		} else {

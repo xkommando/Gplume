@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
+import com.caibowen.gplume.misc.Klass;
+import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.misc.Str.Utils;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -22,19 +28,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import com.caibowen.gplume.misc.Klass;
-import com.caibowen.gplume.misc.Str;
-import com.caibowen.gplume.misc.Str.Utils;
 
 /**
  * 
@@ -807,7 +802,7 @@ public class Converter {
 	}
 	
 
-	@Nullable
+	@Nonnull
 	public static Class<?> getClass(String typeName) {
 		return TYPE_TABLE.get(typeName);
 	}

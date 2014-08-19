@@ -16,14 +16,11 @@
 package com.caibowen.gplume.context.bean;
 
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import com.caibowen.gplume.context.InputStreamProvider;
 
 /**
  * Assemble java beans
@@ -86,16 +83,6 @@ public interface IBeanAssembler {
 	@Nonnull
     ConfigCenter configCenter();
 
-	
-	
-	/**
-	 * the newly added bean is singleton
-	 * @param id
-	 * @param bean
-	 * @param lifeSpan bean lifes
-	 * @return true bean added, false cannot add bean(already exists)
-	 */
-	boolean addBean(@Nonnull String id, @Nonnull Object bean, @Nonnull int lifeSpan);
 	
 	/**
 	 * default life Integer.MAX_VALUE

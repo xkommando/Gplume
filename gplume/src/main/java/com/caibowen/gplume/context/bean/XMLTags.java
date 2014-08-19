@@ -25,8 +25,10 @@ package com.caibowen.gplume.context.bean;
 public abstract class XMLTags {
 
 	public static final String ROOT_BEANS = "beans";
-	
+
 	public static final String BEAN = "bean";
+    public static final String TYPE = "type";
+    public static final String VALUE_TYPE = "value-type";
 
     public static final String CONFIG = "config";
     public static final String SCOPE = "scope";
@@ -34,8 +36,8 @@ public abstract class XMLTags {
 	
 	public static final String BEAN_ID = "id";
 	public static final String BEAN_CLASS = "class";
-    public static final String BEAN_AFTER_CALL = "aftercall";
     public static final String BEAN_CONSTRUCT = "construct";
+    public static final String BEAN_AFTER_CALL = "aftercall";
 
 
 	public static final String PROPERTIES = "properties";
@@ -45,19 +47,12 @@ public abstract class XMLTags {
 	 * specify singleton bean, false by default
 	 */
 	public static final String BEAN_SINGLETON = "singleton";
-	/**
-	 * 
-	 */
-	public static final String BEAN_LIFE_SPAN = "lifespan";
 	
 	public static final String PROPERTY_NAME = "name";
 
 	public static final String PROPERTY_INSTANCE = "instance";
 	public static final String PROPERTY_LIST = "list";
-    public static final String PROPERTY_STR = "str";
 	public static final String PROPERTY_MAP  = "props";
-	public static final String PROPERTY_MAP_PROP  = "prop";
-	public static final String PROPERTY_MAP_KEY  = "key";
 	public static final String PROPERTY_VALUE = "value";
 	public static final String PROPERTY_REF = "ref";
 }

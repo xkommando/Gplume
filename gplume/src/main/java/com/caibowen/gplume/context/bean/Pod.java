@@ -15,14 +15,11 @@
  ******************************************************************************/
 package com.caibowen.gplume.context.bean;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nullable;
-
-import org.w3c.dom.Element;
-
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.w3c.dom.Element;
+
+import javax.annotation.Nullable;
 
 /**
  * manage bean life circle
@@ -34,9 +31,7 @@ public class Pod {
 	
 	private static final Logger LOG 
 		= LoggerFactory.getLogger(Pod.class);
-	
-	private final int lifeSpan;
-	private AtomicInteger age;
+
 	private String beanId;
 	
 	/**
@@ -55,7 +50,7 @@ public class Pod {
 	 * @param d
 	 * @param instance
 	 */
-	Pod(@Nullable String id, Element d, Object instance, int lifeSp) {
+	Pod(@Nullable String id, Element d, Object instance) {
 		
 		if (d != null && instance != null || d == null && instance == null) {
 			throw new IllegalStateException("cannot decide whether bean is singleton");
@@ -63,8 +58,6 @@ public class Pod {
 		this.beanId = id;
 		this.description = d;
 		this.instance = instance;
-		this.lifeSpan = lifeSp;
-		this.age = new AtomicInteger(0);
 
 		process(beanId, instance);
 	}
@@ -91,10 +84,7 @@ public class Pod {
 			}
 		}
 	}
-	
-	void addAge(int i) {
-		this.age.addAndGet(i);
-	}
+
 	/**
 	 * destroy this bean
 	 * @throws Exception
@@ -130,18 +120,7 @@ public class Pod {
 //---------------------------------------------------------
 	
 	public Object getInstance() {
-		if(age.get() < lifeSpan) {
-			age.incrementAndGet();
-			return instance;
-		} else {
-			try {
-				this.destroy();
-			} catch (Exception e) {
-				throw new RuntimeException(
-						"Error destroying bean pod id[" + beanId +"]", e);
-			}
-			return null;
-		}
+		return instance;
 	}
 
 	public String getBeanId() {
@@ -151,18 +130,5 @@ public class Pod {
 	public boolean isSingleton() {
 		return instance != null;
 	}
-	
-	/**
-	 * @return the age
-	 */
-	public int getAge() {
-		return age.get();
-	}
 
-	/**
-	 * @return the lifeSpan
-	 */
-	public int getLifeSpan() {
-		return lifeSpan;
-	}
 }

@@ -18,6 +18,7 @@
 package com.caibowen.gplume.sample.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -28,6 +29,9 @@ public class Tester {
 
     Tester(String s) {
         System.out.println("constructing Tester str : " + s);
+    }
+    Tester(Integer s) {
+        System.out.println("constructing Tester int : " + s);
     }
 
     Tester(Object s) {
@@ -44,5 +48,12 @@ public class Tester {
 
     void init() {
         System.out.println(" Tester after property set ");
+    }
+
+
+    public void setMap(Map<Object, Object> m) {
+        for (Map.Entry<Object, Object> e : m.entrySet()) {
+            System.out.println(e.getKey() + "   " + e.getValue().getClass().getSimpleName() + "  " + e.getValue());
+        }
     }
 }

@@ -18,6 +18,7 @@
 package com.caibowen.gplume.context.bean;
 
 import com.caibowen.gplume.core.BeanEditor;
+import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
@@ -249,7 +250,12 @@ abstract class XMLAux implements IBeanAssembler {
         if (Str.Utils.notBlank(varStr)) {
             // e.g., <property id="number" value="5"/>
             // str value will casted to param type if needed
-            return varStr;
+            String type;
+            if (null != (type = prop.getAttribute(XMLTags.TYPE))) {
+                type = configCenter.replaceIfPresent(type.trim());
+                return Converter.slient.translateStr(varStr, Converter.getClass(type));
+            } else
+                return varStr;
 
         } else if (Str.Utils.notBlank(varRef)) {
             // e.g., <property id="bean" ref="someOtherBean"/>
@@ -272,33 +278,27 @@ abstract class XMLAux implements IBeanAssembler {
     private @Nonnull
     Properties buildProp(Node iter, String propName) {
         Properties properties = new Properties();
+        while (iter != null) {
+            Element elemBn;
+            if (iter.getNodeType() == Node.ELEMENT_NODE)
+                elemBn = (Element)iter;
+            else
+                continue;
 
-        while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
-            Element elemBn = (Element) iter;
-            if (!XMLTags.PROPERTY_MAP_PROP.equals(elemBn.getNodeName())) {
+            String mapK = configCenter.replaceIfPresent(elemBn.getTagName().trim());
+            if (properties.containsKey(mapK))
                 throw new IllegalArgumentException(
-                        "cannot have [" + elemBn.getNodeName() + "] under tag <props>, must be <prop> only");
-            }
-            String mapK = configCenter.replaceIfPresent(
-                    elemBn.getAttribute(XMLTags.PROPERTY_MAP_KEY));
+                        "duplicated map key for property[" + propName + "]");
 
-            if (!Str.Utils.notBlank(mapK)) {
-                throw new NullPointerException("empty map key for property[" + propName + "]");
-            }
-            String mapV = configCenter.replaceIfPresent(
+            Object mapV = configCenter.replaceIfPresent(
                     elemBn.getTextContent());
 
-            if (!Str.Utils.notBlank(mapV)) {
-                mapV = configCenter.replaceIfPresent(
-                        elemBn.getAttribute(XMLTags.PROPERTY_VALUE));
-
-                if (!Str.Utils.notBlank(mapV)) {
-                    throw new NullPointerException(
-                            "empty map value of key ["
-                                    + mapK + "] for property[" + propName + "]");
-                }
+            String tgtType;
+            if (null != (tgtType = elemBn.getAttribute(XMLTags.VALUE_TYPE))) {
+                Class k = Converter.getClass(configCenter.replaceIfPresent(tgtType.trim()));
+                mapV = Converter.slient.translateStr((String)mapV, k);
             }
-            properties.setProperty(mapK, mapV);
+            properties.put(mapK, mapV);
             // skip node of #text
             iter = iter.getNextSibling().getNextSibling();
         }
@@ -388,13 +388,12 @@ abstract class XMLAux implements IBeanAssembler {
                                         + "needs 1 actual " + ls.size());
                 }
             }
-
         }
 
         if (Str.Utils.isBlank(initName))
             return val;
 
-        Method m = klass.getDeclaredMethod(initName.trim(), null);
+        Method m = klass.getDeclaredMethod(initName.trim());
         if (!m.isAccessible())
             m.setAccessible(true);
         if (Modifier.isStatic(m.getModifiers()))

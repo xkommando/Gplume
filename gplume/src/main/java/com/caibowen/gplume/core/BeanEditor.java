@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
-import java.lang.reflect.*;
-import java.util.List;
+import com.caibowen.gplume.misc.Klass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.caibowen.gplume.misc.Klass;
+import java.lang.reflect.*;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * set static or non-static property based on id,
@@ -33,18 +33,41 @@ import com.caibowen.gplume.misc.Klass;
  */
 public class BeanEditor {
 
+    /***
+     *
+     * find the best suit constructor according to the parameter type and construct an instance
+     *
+     * @throws Exception
+     */
     public static Object construct(Class klass, Object param) throws Exception {
+        TreeMap<Integer, Constructor> q = new TreeMap<>();
         for (Constructor ctor : klass.getDeclaredConstructors()) {
             Class[] ps = ctor.getParameterTypes();
-            if (ps.length == 1 && Klass.isAssignable(param.getClass(), ps[0])) {
-                if (!ctor.isAccessible())
-                    ctor.setAccessible(true);
-                return ctor.newInstance(param);
+            if (ps.length == 1) {
+                if (ps[0].equals(param.getClass())) {
+                    q.put(1, ctor);
+                    break;
+                } else if (ps[0].isAssignableFrom(param.getClass())) {
+                    q.put(2, ctor);
+                } else if (Klass.isAssignable(param.getClass(), ps[0])) {
+                    q.put(3, ctor);
+                }
             }
         }
-        throw new NoSuchMethodException("cannot find constructor for class [" + klass.getName()
-                +"] that can be invoked with [" + param + "]");
+        if (q.size() > 0) {
+            Constructor c = q.firstEntry().getValue();
+            if (!c.isAccessible())
+                c.setAccessible(true);
+            return c.newInstance(param);
+
+        } else {
+            throw new NoSuchMethodException(
+                    "cannot find constructor for class [" + klass.getName()
+                    + "] that can be invoked with [" + param + "]");
+        }
     }
+
+
 	/**
 	 * set property, 
 	 * first look for public setter for this id
@@ -76,11 +99,7 @@ public class BeanEditor {
 	/**
 	 * assign list or array
 	 * the string element of the list will be casted
-	 * 
-	 * @param bnClass
-	 * @param bean can be null if is static property
-	 * @param propName
-	 * @param varList
+     *
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
