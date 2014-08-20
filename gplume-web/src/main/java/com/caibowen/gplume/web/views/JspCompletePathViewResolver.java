@@ -28,7 +28,7 @@ import com.caibowen.gplume.web.RequestContext;
 */
 public class JspCompletePathViewResolver implements IStrViewResolver {
     @Override
-    public void resolve(RequestContext ctx, String ret) {
+    public void resolve(RequestContext ctx, String ret) throws Exception {
         ctx.render(ret);
     }
 }

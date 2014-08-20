@@ -39,7 +39,7 @@ public class JspPrefixResolver implements IStrViewResolver, Serializable {
     }
 
     @Override
-    public void resolve(RequestContext ctx, String ret) {
+    public void resolve(RequestContext ctx, String ret) throws Exception {
         ctx.render(prefix + ret);
     }
 

@@ -79,7 +79,6 @@ public class SampleController {
 	public String index(SampleController self, RequestContext context) {
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		context.putAttr("test_int", 123);
-		
 		context.session(true).setAttribute("msg", "ctx msg");
 		context.session(true).setAttribute("aaa", 15999);
 		

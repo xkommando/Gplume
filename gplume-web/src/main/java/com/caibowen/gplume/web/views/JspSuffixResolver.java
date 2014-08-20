@@ -39,7 +39,7 @@ public class JspSuffixResolver implements IStrViewResolver, Serializable {
     }
 
     @Override
-    public void resolve(RequestContext ctx, String ret) {
+    public void resolve(RequestContext ctx, String ret) throws Exception {
         ctx.render(ret + suffix);
     }
 }

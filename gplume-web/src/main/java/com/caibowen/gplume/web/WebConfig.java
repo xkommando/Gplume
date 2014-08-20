@@ -15,23 +15,21 @@
  ******************************************************************************/
 package com.caibowen.gplume.web;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.Injector;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
-import com.caibowen.gplume.web.builder.ActionFactory;
-import com.caibowen.gplume.web.builder.IActionFactory;
+import com.caibowen.gplume.web.actions.ActionFactory;
 import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 import com.caibowen.gplume.web.views.*;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.List;
 
 
 /**
@@ -43,15 +41,16 @@ import com.caibowen.gplume.web.views.*;
  */
 public class WebConfig implements InitializingBean, Serializable {
 
+    @Inject List<String>  pkgs;
+    public void setPkgs(List<String> pkgs) {
+        this.pkgs = pkgs;
+    }
+
+
     // optional
 	@Inject IRequestProcessor preProcessor;
 	public void setPreProcessor(IRequestProcessor preProcessor) {
 		this.preProcessor = preProcessor;
-	}
-	
-	@Inject List<String>  pkgs;
-	public void setPkgs(List<String> pkgs) {
-		this.pkgs = pkgs;
 	}
 
     // optional
@@ -78,6 +77,11 @@ public class WebConfig implements InitializingBean, Serializable {
     @Inject String viewSuffix;
     public void setViewSuffix(String viewSuffix) {
         this.viewSuffix = viewSuffix;
+    }
+
+    @Inject IViewResolver viewResolver = new DefaultViewResolver();
+    public void setViewResolver(IViewResolver viewResolver) {
+        this.viewResolver = viewResolver;
     }
 
 
@@ -108,8 +112,10 @@ public class WebConfig implements InitializingBean, Serializable {
             // 4. action factory
 			IActionFactory factory = new ActionFactory();
             IStrViewResolver _r = getDefaultViewResolver();
-            factory.setDefaultViewResolver(_r);
-            LOG.info("setting default view resolver {0}", _r.getClass().getName());
+            factory.setStrViewResolver(_r);
+            LOG.info("setting default string view resolver {0}", _r.getClass().getName());
+            factory.setViewResolver(viewResolver);
+            LOG.info("setting default view resolver {0}", viewResolver.getClass().getName());
 
             center.setActionFactory(factory);
             LOG.info("setting action factory {0}", factory.getClass().getName());

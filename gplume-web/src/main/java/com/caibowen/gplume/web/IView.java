@@ -29,7 +29,7 @@ import com.caibowen.gplume.web.views.TextView;
 public interface IView {
 	
 	
-	void resolve(RequestContext context);
+	void resolve(RequestContext context) throws Exception;
 	
 	static class get{
 		

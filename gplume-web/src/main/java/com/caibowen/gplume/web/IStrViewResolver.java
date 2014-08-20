@@ -25,5 +25,5 @@ package com.caibowen.gplume.web;
  */
 public interface IStrViewResolver {
 
-    void resolve(RequestContext ctx, String ret);
+    void resolve(RequestContext ctx, String ret) throws Exception;
 }
