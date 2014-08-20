@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.caibowen.gplume.sample.feature;
 
+import com.caibowen.gplume.event.IAppListener;
+
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
-import com.caibowen.gplume.event.IAppListener;
 
 
 public class BirthdayCalculator implements IAppListener<TimeChangedEvent> {

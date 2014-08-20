@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.caibowen.gplume.sample.feature;
 
-import java.util.Date;
-
 import com.caibowen.gplume.event.AppEvent;
+
+import java.util.Date;
 
 public class TimeChangedEvent extends AppEvent {
 
