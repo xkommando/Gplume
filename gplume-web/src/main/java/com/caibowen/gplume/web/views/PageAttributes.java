@@ -29,7 +29,7 @@ public interface PageAttributes {
 		static final String XML = "application/xml";
 		static final String RSS = "application/rss+xml";
 		static final String ATOM = "application/atom+xml";
-		static final String JSON = "application/json";
+		static final String JSON = "application/webex.json";
 	}
 
 	static class Encoding {

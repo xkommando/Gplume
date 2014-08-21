@@ -24,10 +24,7 @@ import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.actions.ActionFactory;
 import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
-import com.caibowen.gplume.web.views.JspCompletePathViewResolver;
-import com.caibowen.gplume.web.views.JspPrefixResolver;
-import com.caibowen.gplume.web.views.JspPrefixSuffixResolver;
-import com.caibowen.gplume.web.views.JspSuffixResolver;
+import com.caibowen.gplume.web.views.*;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -111,17 +108,7 @@ public class WebConfig implements InitializingBean, Serializable {
 
             // 4. action factory
             IActionFactory factory = new ActionFactory();
-            IViewResolver _rStr = getStrViewResolver();
-            LOG.info("setting default string view resolver {0}", _rStr.getClass().getName());
-
-            HashSet<IViewResolver> _s;
-            if (viewResolvers != null && !viewResolvers.isEmpty())
-                _s = new HashSet<>(viewResolvers);
-            else
-                _s = new HashSet<>();
-
-            _s.add(_rStr);
-            factory.setViewResolvers(new ArrayList<IViewResolver>(_s));
+            factory.setViewResolvers(getViewResolvers());
 
             center.setActionFactory(factory);
             LOG.info("setting action factory {0}", factory.getClass().getName());
@@ -142,6 +129,22 @@ public class WebConfig implements InitializingBean, Serializable {
 			throw new RuntimeException("cannot build controlCenter", e);
 		}
 	}
+
+    public List<IViewResolver> getViewResolvers() {
+        IViewResolver _rStr = getStrViewResolver();
+        LOG.info("setting default string view resolver {0}", _rStr.getClass().getName());
+
+        HashSet<IViewResolver> _s;
+        if (viewResolvers != null && !viewResolvers.isEmpty())
+            _s = new HashSet<>(viewResolvers);
+        else
+            _s = new HashSet<>();
+
+        _s.add(_rStr);
+        _s.add(new TextViewResolver());
+        _s.add(new JumViewResolver());
+        return new ArrayList<IViewResolver>(_s);
+    }
 
     /**
      * case 1 : viewPrefix=""   -> PrefixResolver

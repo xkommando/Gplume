@@ -20,7 +20,6 @@ import java.io.InputStream;
 
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.caibowen.gplume.misc.Str;
 
@@ -84,7 +83,7 @@ public class InputStreamProviderProxy implements InputStreamProvider {
 
 	@Override
 	public String getContextPath() {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 }

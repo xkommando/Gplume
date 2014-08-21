@@ -70,7 +70,7 @@ class SimpleActionBuilder {
 		final boolean hasRequestContext = _t.length > 0
 				&& _t[_t.length - 1].equals(RequestContext.class);
 
-        final IViewResolver resolver = BuilderAux.viewMatcher.findMatch(retKlass);
+        final IViewResolver resolver;
 
 		if (retKlass.equals(void.class)) {
 			MethodHandle handle = BuilderAux.findMethodeHandle(method, BuilderAux.SIMPLE_TYPE);
@@ -86,7 +86,7 @@ class SimpleActionBuilder {
 						}
 					});
 
-		} else if (resolver != null) {
+		} else if (null != (resolver = BuilderAux.viewMatcher.findMatch(retKlass))) {
 			final Method $$ = method;
 			final Object $$$ = object;
 			return BuilderAux.actMap.get(
