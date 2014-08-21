@@ -15,15 +15,26 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.web;
+package com.caibowen.gplume.web.actions.builder;
+
+import com.caibowen.gplume.web.IViewResolver;
+
+import java.util.List;
 
 /**
- *
- * resolve view given by name
- *
- * @author BowenCai
+ * @author bowen.cbw
+ * @since 8/21/2014.
  */
-public interface IStrViewResolver {
+public class ViewMatcher {
 
-    void resolve(RequestContext ctx, String ret) throws Exception;
+    private List<IViewResolver> resolvers;
+
+    public void setResolvers(List<IViewResolver> rs) {
+        this.resolvers = rs;
+    }
+
+    public IViewResolver findMatch(Class retKlass) {
+        return null;
+    }
+
 }

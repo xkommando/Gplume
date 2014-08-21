@@ -17,7 +17,7 @@
 
 package com.caibowen.gplume.web.views;
 
-import com.caibowen.gplume.web.IStrViewResolver;
+import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
 /**
@@ -26,9 +26,15 @@ import com.caibowen.gplume.web.RequestContext;
  *
  * @author BowenCai
 */
-public class JspCompletePathViewResolver implements IStrViewResolver {
+public class JspCompletePathViewResolver implements IViewResolver {
+
     @Override
-    public void resolve(RequestContext ctx, String ret) throws Exception {
-        ctx.render(ret);
+    public int fitness(Class val) {
+        return val == String.class ? 1 : -1;
+    }
+
+    @Override
+    public void resolve(RequestContext ctx, Object ret) throws Exception {
+        ctx.render((String)ret);
     }
 }

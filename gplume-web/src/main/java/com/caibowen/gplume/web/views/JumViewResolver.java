@@ -17,28 +17,32 @@
 
 package com.caibowen.gplume.web.views;
 
+import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
 /**
- *
- * add a prefix and a suffix to the jsp name to make a complete path
- *
- * @author BowenCai
- *
-*/
-public class JspPrefixSuffixResolver extends JspSuffixResolver {
+ * @author bowen.cbw
+ * @since 8/21/2014.
+ */
+public class JumViewResolver implements IViewResolver {
 
-    private static final long serialVersionUID = 4685236015290815491L;
-
-    public final String prefix;
-
-    public JspPrefixSuffixResolver(String prefix, String suffix) {
-        super(suffix);
-        this.prefix = prefix;
+    @Override
+    public int fitness(Class klass) {
+        return klass == JumpView.class ? 1 : -1;
     }
 
     @Override
-    public void resolve(RequestContext ctx, Object ret) throws Exception {
-        ctx.render(prefix + ret + suffix);
+    public void resolve(RequestContext ctx, Object view) throws Exception {
+        JumpView jv = (JumpView)view;
+        switch (jv.type) {
+            case 1:
+                ctx.passOff(jv.newURL);
+                return;
+            case 2:
+                ctx.jumpTo(jv.newURL);
+                return;
+            default:
+                throw new IllegalStateException();
+        }
     }
 }

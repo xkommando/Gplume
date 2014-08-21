@@ -20,11 +20,10 @@ import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.IAction;
-import com.caibowen.gplume.web.IView;
+import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.actions.PathValResolver;
 import com.caibowen.gplume.web.actions.RestAction;
-import com.caibowen.gplume.web.actions.StrRestAction;
 import com.caibowen.gplume.web.actions.ViewRestAction;
 import com.sun.istack.internal.Nullable;
 
@@ -133,21 +132,17 @@ class RestActionBuilder {
 		boolean inMethodCall = $.length > 0 && ( !$[0].equals(RequestContext.class));
 		
 		Class<?> retKalss = method.getReturnType();
-		
-		if (retKalss.equals(String.class)) {
-			return new StrRestAction(effectiveURI
-                    , handle, inMethodCall, hasRequset
-                    , pr, BuilderAux.STR_VIEW_RESOLVER);
-
-		} else if (retKalss.equals(void.class)) {
+        IViewResolver resolver;
+		if (retKalss.equals(void.class)) {
 			return new RestAction(effectiveURI, handle, inMethodCall, pr);
 
-//					boolean inM, boolean req) {
-		} else if (IView.class.isAssignableFrom(retKalss)) {
-			return new ViewRestAction(effectiveURI, method, object, inMethodCall, hasRequset, pr, BuilderAux.IVIEW_RESOLVER);
+		} else if (null != (resolver = BuilderAux.viewMatcher.findMatch(retKalss))) {
+			return new ViewRestAction(effectiveURI, method, object,
+                    inMethodCall, hasRequset, pr, resolver);
+
 		} else {
 			throw new IllegalArgumentException(
-			"unidentified method[" + method + "] in object[" + object + "]");
+			"cannot find view resolver for  method[" + method + "] in object[" + object + "]");
 		}
 	
 	}

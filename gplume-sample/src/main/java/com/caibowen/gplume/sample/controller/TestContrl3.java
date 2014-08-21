@@ -1,6 +1,5 @@
 package com.caibowen.gplume.sample.controller;
 
-import com.caibowen.gplume.web.IView;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.annotation.Controller;
 import com.caibowen.gplume.web.annotation.Handle;
@@ -61,24 +60,24 @@ public class TestContrl3 {
 		return "index";
 	}
 	
-	@Handle({"/state/4"})
-	public IView name4(X x, RequestContext req) {
-		System.out.println("TestContrl3.name()");
-		System.out.println(x.test_inttt);
-		System.out.println(x.msg);
-		System.out.println(x.test_int);
-		System.out.println(x.ints);
-		return IView.get.textView("4 hahaha" + x.msg);
-	}
-	
-	@Handle({"/state/5"})
-	public IView name5(X x) {
-		System.out.println("TestContrl3.name()");
-		System.out.println(x.test_inttt);
-		System.out.println(x.msg);
-		System.out.println(x.test_int);
-		return IView.get.textView("5 hahaha" + x.msg);
-	}
+//	@Handle({"/state/4"})
+//	public IView name4(X x, RequestContext req) {
+//		System.out.println("TestContrl3.name()");
+//		System.out.println(x.test_inttt);
+//		System.out.println(x.msg);
+//		System.out.println(x.test_int);
+//		System.out.println(x.ints);
+//		return IView.get.textView("4 hahaha" + x.msg);
+//	}
+//
+//	@Handle({"/state/5"})
+//	public IView name5(X x) {
+//		System.out.println("TestContrl3.name()");
+//		System.out.println(x.test_inttt);
+//		System.out.println(x.msg);
+//		System.out.println(x.test_int);
+//		return IView.get.textView("5 hahaha" + x.msg);
+//	}
 	
 
 }

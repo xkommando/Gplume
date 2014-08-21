@@ -18,14 +18,11 @@ package com.caibowen.gplume.web.actions.builder;
 import com.caibowen.gplume.cache.mem.WeakCache;
 import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.web.IAction;
-import com.caibowen.gplume.web.IStrViewResolver;
-import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.actions.Interception;
 import com.caibowen.gplume.web.actions.SimpleAction;
+import com.caibowen.gplume.web.actions.ViewAction;
 import com.caibowen.gplume.web.actions.stateful.StateGen;
-import com.caibowen.gplume.web.views.DefaultViewResolver;
-import com.caibowen.gplume.web.views.JspCompletePathViewResolver;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -81,10 +78,7 @@ public class BuilderAux implements Serializable{
 	public static final WeakCache<Class<?>, StateGen> stateMap = new WeakCache<>(256);
 	public static final WeakCache<Class<?>, Object> ctrlMap = new WeakCache<>(256);
 
-    public static IStrViewResolver STR_VIEW_RESOLVER = new JspCompletePathViewResolver();
-    public static IViewResolver IVIEW_RESOLVER = new DefaultViewResolver();
-
-	public static Interception 
+	public static Interception
 	buildInterception(final String u, 
 						Object object, 
 						Method method) {
@@ -101,6 +95,8 @@ public class BuilderAux implements Serializable{
 		});
 	}
 
+    public static ViewMatcher viewMatcher;
+
 	public static int hash(@Nullable Object...args) {
 		int h = 1;
 		for (int i = 0; i < args.length; i++) {
@@ -116,10 +112,7 @@ public class BuilderAux implements Serializable{
 	 * 
 	 * why not unreflect ? 
 	 * to get detailed info in debugging
-	 * 
-	 * @param controller
-	 * @param method
-	 * @param typ
+	 *
 	 * @return
 	 */
 	protected static @Nonnull MethodHandle 

@@ -23,5 +23,14 @@ package com.caibowen.gplume.web;
  */
 public interface IViewResolver {
 
-    void resolve(RequestContext ctx, IView view) throws Exception;
+    /**
+     *
+     * @param klass
+     * @return 1 -> fit
+     *         0 -> compatible
+     *        -1 -> not fit
+     */
+    int fitness(Class klass);
+
+    void resolve(RequestContext ctx, Object view) throws Exception;
 }

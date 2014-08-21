@@ -15,9 +15,6 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.views;
 
-import com.caibowen.gplume.web.IView;
-import com.caibowen.gplume.web.RequestContext;
-
 /**
  * this is not a real View object, it will return 301 
  * 	and lead the agent jump to other page
@@ -25,17 +22,21 @@ import com.caibowen.gplume.web.RequestContext;
  * @author BowenCai
  *
  */
-public class JumpView implements IView {
+public class JumpView {
 
-	final String newURL;
-	
-	public JumpView(String newURL) {
-		this.newURL = newURL;
-	}
+    final String newURL;
+    final int type;
 
-	@Override
-	public void resolve(RequestContext context) {
-		context.jumpTo(newURL);
-	}
+    public static JumpView passOn(String u) {
+        return new JumpView(u, 1);
+    }
+    public static JumpView jump(String u) {
+        return new JumpView(u, 2);
+    }
+
+    JumpView(String newURL, int t) {
+        this.newURL = newURL;
+        this.type = t;
+    }
 
 }

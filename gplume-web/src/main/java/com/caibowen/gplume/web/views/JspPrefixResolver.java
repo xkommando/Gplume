@@ -17,7 +17,7 @@
 
 package com.caibowen.gplume.web.views;
 
-import com.caibowen.gplume.web.IStrViewResolver;
+import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
 import java.io.Serializable;
@@ -28,7 +28,7 @@ import java.io.Serializable;
  * @author BowenCai
  *
 */
-public class JspPrefixResolver implements IStrViewResolver, Serializable {
+public class JspPrefixResolver implements IViewResolver, Serializable {
 
     private static final long serialVersionUID = -4770883523301450063L;
 
@@ -39,8 +39,13 @@ public class JspPrefixResolver implements IStrViewResolver, Serializable {
     }
 
     @Override
-    public void resolve(RequestContext ctx, String ret) throws Exception {
-        ctx.render(prefix + ret);
+    public int fitness(Class val) {
+        return val == String.class ? 1 : -1;
+    }
+
+    @Override
+    public void resolve(RequestContext ctx, Object ret) throws Exception {
+        ctx.render(prefix + (String)ret);
     }
 
 }

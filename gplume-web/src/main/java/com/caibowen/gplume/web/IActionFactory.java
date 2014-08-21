@@ -20,10 +20,11 @@ import com.caibowen.gplume.web.actions.Interception;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * manage all actions
- * <p/>
+ * 
  * factory :
  * builder1 :
  * builder2 :
@@ -34,9 +35,7 @@ import java.lang.reflect.Method;
  */
 public interface IActionFactory {
 
-
-    void setStrViewResolver(IStrViewResolver resolver);
-    void setViewResolver(IViewResolver resolver);
+    void setViewResolvers(List<IViewResolver> resolvers);
 
     void registerHandles(@Nullable String prefix,
                          @Nullable Object ctrl,

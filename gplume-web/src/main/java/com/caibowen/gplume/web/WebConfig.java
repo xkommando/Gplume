@@ -24,11 +24,16 @@ import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.actions.ActionFactory;
 import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
-import com.caibowen.gplume.web.views.*;
+import com.caibowen.gplume.web.views.JspCompletePathViewResolver;
+import com.caibowen.gplume.web.views.JspPrefixResolver;
+import com.caibowen.gplume.web.views.JspPrefixSuffixResolver;
+import com.caibowen.gplume.web.views.JspSuffixResolver;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -61,10 +66,10 @@ public class WebConfig implements InitializingBean, Serializable {
 
 
     // optional
-    // by default it is JSP views resolver
-    @Inject IStrViewResolver defaultViewResolver;
-    public void setDefaultViewResolver(IStrViewResolver defaultViewResolver) {
-        this.defaultViewResolver = defaultViewResolver;
+    // by default it is JSP views resolver as the String resolver
+    @Inject List<IViewResolver> viewResolvers;
+    public void setViewResolvers(List<IViewResolver> viewResolvers) {
+        this.viewResolvers = viewResolvers;
     }
 
     // optional
@@ -79,23 +84,18 @@ public class WebConfig implements InitializingBean, Serializable {
         this.viewSuffix = viewSuffix;
     }
 
-    @Inject IViewResolver viewResolver = new DefaultViewResolver();
-    public void setViewResolver(IViewResolver viewResolver) {
-        this.viewResolver = viewResolver;
-    }
-
 
     @Override
 	public void afterPropertiesSet() throws Exception {
 		try {
-			SimpleControlCenter center = new SimpleControlCenter();
+            SimpleControlCenter center = new SimpleControlCenter();
 
             // 1. injector
-			Injector injector = AppContext.beanAssembler.getBean("injector");
-			if (injector == null) {
-				injector = new Injector();
-				AppContext.beanAssembler.addBean("injector", injector);
-			}
+            Injector injector = AppContext.beanAssembler.getBean("injector");
+            if (injector == null) {
+                injector = new Injector();
+                AppContext.beanAssembler.addBean("injector", injector);
+            }
             center.setInjector(injector);
             LOG.info("setting injector {0}", injector.getClass().getName());
 
@@ -110,12 +110,18 @@ public class WebConfig implements InitializingBean, Serializable {
             LOG.info("setting default error handler {0}", _h.getClass().getName());
 
             // 4. action factory
-			IActionFactory factory = new ActionFactory();
-            IStrViewResolver _r = getDefaultViewResolver();
-            factory.setStrViewResolver(_r);
-            LOG.info("setting default string view resolver {0}", _r.getClass().getName());
-            factory.setViewResolver(viewResolver);
-            LOG.info("setting default view resolver {0}", viewResolver.getClass().getName());
+            IActionFactory factory = new ActionFactory();
+            IViewResolver _rStr = getStrViewResolver();
+            LOG.info("setting default string view resolver {0}", _rStr.getClass().getName());
+
+            HashSet<IViewResolver> _s;
+            if (viewResolvers != null && !viewResolvers.isEmpty())
+                _s = new HashSet<>(viewResolvers);
+            else
+                _s = new HashSet<>();
+
+            _s.add(_rStr);
+            factory.setViewResolvers(new ArrayList<IViewResolver>(_s));
 
             center.setActionFactory(factory);
             LOG.info("setting action factory {0}", factory.getClass().getName());
@@ -146,7 +152,7 @@ public class WebConfig implements InitializingBean, Serializable {
      * @return
      */
     @Nonnull
-    private IStrViewResolver getDefaultViewResolver() {
+    private IViewResolver getStrViewResolver() {
 
         int resolverType = 0;
         if (Str.Utils.notBlank(viewPrefix)) {
@@ -157,20 +163,16 @@ public class WebConfig implements InitializingBean, Serializable {
             resolverType += 3;
             LOG.debug("views suffix {0}", viewSuffix);
         }
-        if (defaultViewResolver != null) {
-            return defaultViewResolver;
 
-        } else {
+        if (resolverType == 1)
+            return new JspPrefixResolver(viewPrefix);
+        else if (resolverType == 3)
+            return new JspSuffixResolver(viewSuffix);
+        else if (resolverType == 4)
+            return new JspPrefixSuffixResolver(viewPrefix, viewSuffix);
+        else
+            return new JspCompletePathViewResolver();
 
-            if (resolverType == 1)
-                return new JspPrefixResolver(viewPrefix);
-            else if (resolverType == 3)
-                return new JspSuffixResolver(viewSuffix);
-            else if (resolverType == 4)
-                return new JspPrefixSuffixResolver(viewPrefix, viewSuffix);
-            else
-                return new JspCompletePathViewResolver();
-        }
     }
 
     private static final long serialVersionUID = 657513014059796966L;

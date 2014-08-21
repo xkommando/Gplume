@@ -47,6 +47,7 @@ public interface IAction extends Serializable {
 	 * 
 	 * @return method handle
 	 */
+    @Deprecated
 	public MethodHandle getMethodHandle();
 	
 	/**

@@ -115,19 +115,6 @@ public class RequestContext implements Serializable {
 	}
 	
 	/**
-	 * 
-	 * @param view
-	 */
-	public void render(IView view) {
-		try {
-			view.resolve(this);
-		} catch (Exception e) {
-			throw new RuntimeException("In request for [" 
-					+ this.path + "] Error rendering [" + view + "]", e);
-		}
-	}
-	
-	/**
 	 * reject this request
 	 * return 503, e.g., service unavailable
 	 */

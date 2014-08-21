@@ -160,18 +160,8 @@ public class SampleController {
 		context.putAttr("date", date);
 		return "/happy.jsp";
 	}
-	
-//	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"},
-//			httpMethods={HttpMethod.GET, HttpMethod.POST})
-//	public FreemarkerView id(Date date, RequestContext context) {
-//		return new FreemarkerView("/index.", date);
-//	}
-	
-	public static class FreemarkerView {
-		FreemarkerView(String a, Date b){
-			
-		}
-	}
+
+
 	@Named("birthdayCalculator")
 	BirthdayCalculator birthdayCalculator;
 

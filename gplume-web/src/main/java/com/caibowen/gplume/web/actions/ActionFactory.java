@@ -21,6 +21,7 @@ import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.*;
 import com.caibowen.gplume.web.actions.builder.BuilderAux;
 import com.caibowen.gplume.web.actions.builder.BuilderProxy;
+import com.caibowen.gplume.web.actions.builder.ViewMatcher;
 import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.annotation.Intercept;
 
@@ -28,6 +29,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * container for action, interception
@@ -41,6 +43,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 	private static final Logger LOG = LoggerFactory.getLogger(ActionFactory.class);
 	
 	private ActionMapper<IAction>[] mappers;
+    private ViewMatcher matcher;
 	public ActionFactory() {
 		
 		final int enumCount = HttpMethod.class.getEnumConstants().length;
@@ -52,15 +55,14 @@ public class ActionFactory implements IActionFactory, Serializable {
 			mappers[i] = new ActionMapper<>();
 		}
 		mappers[enumCount] = new ActionMapper<>();
+
+        matcher = new ViewMatcher();
 	}
 
 
-    public void setStrViewResolver(IStrViewResolver resolver) {
-        BuilderAux.STR_VIEW_RESOLVER = resolver;
-    }
-
-    public void setViewResolver(IViewResolver resolver) {
-        BuilderAux.IVIEW_RESOLVER = resolver;
+    public void setViewResolvers(List<IViewResolver> resolvers) {
+        matcher.setResolvers(resolvers);
+        BuilderAux.viewMatcher = this.matcher;
     }
 
 	@Override

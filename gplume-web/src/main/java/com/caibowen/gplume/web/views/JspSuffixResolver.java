@@ -17,7 +17,7 @@
 
 package com.caibowen.gplume.web.views;
 
-import com.caibowen.gplume.web.IStrViewResolver;
+import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
 import java.io.Serializable;
@@ -28,7 +28,7 @@ import java.io.Serializable;
  * @author BowenCai
  *
 */
-public class JspSuffixResolver implements IStrViewResolver, Serializable {
+public class JspSuffixResolver implements IViewResolver, Serializable {
 
     private static final long serialVersionUID = 6433472763677545676L;
 
@@ -39,7 +39,12 @@ public class JspSuffixResolver implements IStrViewResolver, Serializable {
     }
 
     @Override
-    public void resolve(RequestContext ctx, String ret) throws Exception {
-        ctx.render(ret + suffix);
+    public int fitness(Class val) {
+        return val == String.class ? 1 : -1;
+    }
+
+    @Override
+    public void resolve(RequestContext ctx, Object ret) throws Exception {
+        ctx.render((String)ret + suffix);
     }
 }

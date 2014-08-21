@@ -17,18 +17,33 @@
 
 package com.caibowen.gplume.web.views;
 
-import com.caibowen.gplume.web.IView;
 import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
+import java.io.PrintWriter;
+
 /**
  * @author bowen.cbw
- * @since 8/20/2014.
+ * @since 8/21/2014.
  */
-public class DefaultViewResolver implements IViewResolver {
+public class TextViewResolver implements IViewResolver {
 
     @Override
-    public void resolve(RequestContext ctx, IView view) throws Exception{
-        view.resolve(ctx);
+    public int fitness(Class klass) {
+        return klass == TextView.class ? 1 : -1;
+    }
+
+    @Override
+    public void resolve(RequestContext ctx, Object view) throws Exception {
+        TextView tv = (TextView)view;
+        try {
+            ctx.response.setContentType(PageAttributes.Type.TEXT);
+            ctx.response.setCharacterEncoding(tv.encoding);
+            PrintWriter writer = ctx.response.getWriter();
+            writer.write(tv.content);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error writing JSP", e);
+        }
     }
 }

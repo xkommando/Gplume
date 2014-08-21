@@ -15,30 +15,17 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.web.views;
-
-import com.caibowen.gplume.web.RequestContext;
+package com.caibowen.gplume.webex;
 
 /**
- *
- * add a prefix and a suffix to the jsp name to make a complete path
- *
- * @author BowenCai
- *
-*/
-public class JspPrefixSuffixResolver extends JspSuffixResolver {
+ * @author bowen.cbw
+ * @since 8/21/2014.
+ */
+public interface Result<T> {
 
-    private static final long serialVersionUID = 4685236015290815491L;
+    int code();
 
-    public final String prefix;
+    T data();
 
-    public JspPrefixSuffixResolver(String prefix, String suffix) {
-        super(suffix);
-        this.prefix = prefix;
-    }
-
-    @Override
-    public void resolve(RequestContext ctx, Object ret) throws Exception {
-        ctx.render(prefix + ret + suffix);
-    }
+    String msg();
 }

@@ -17,10 +17,9 @@ package com.caibowen.gplume.web.actions.builder;
 
 import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.web.IAction;
-import com.caibowen.gplume.web.IView;
+import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.actions.SimpleAction;
-import com.caibowen.gplume.web.actions.StrAction;
 import com.caibowen.gplume.web.actions.ViewAction;
 
 import javax.annotation.Nonnull;
@@ -71,29 +70,9 @@ class SimpleActionBuilder {
 		final boolean hasRequestContext = _t.length > 0
 				&& _t[_t.length - 1].equals(RequestContext.class);
 
-		if (retKlass.equals(String.class)) {
-			
-			MethodHandle handle = BuilderAux.findMethodeHandle(method,
-					hasRequestContext ? 
-							BuilderAux.RET_JSP_TYPE 
-							: BuilderAux.RET_JSP_NOPARAM_TYPE);
-			
-			final MethodHandle handle$ = 
-					Modifier.isStatic(method.getModifiers())
-					? handle : handle.bindTo(object);
-			
-			return BuilderAux.actMap.get(
-					BuilderAux.hash(uri, handle, hasRequestContext),
-					new CacheBuilder<IAction>() {
-						@Override
-						public IAction build() {
-							return new StrAction(uri, handle$,
-									hasRequestContext, BuilderAux.STR_VIEW_RESOLVER);
-						}
-					});
+        final IViewResolver resolver = BuilderAux.viewMatcher.findMatch(retKlass);
 
-
-		} else if (retKlass.equals(void.class)) {
+		if (retKlass.equals(void.class)) {
 			MethodHandle handle = BuilderAux.findMethodeHandle(method, BuilderAux.SIMPLE_TYPE);
 			final MethodHandle handle$ = Modifier.isStatic(method.getModifiers())
 					? handle : handle.bindTo(object);
@@ -107,7 +86,7 @@ class SimpleActionBuilder {
 						}
 					});
 
-		} else if (IView.class.isAssignableFrom(retKlass)) {
+		} else if (resolver != null) {
 			final Method $$ = method;
 			final Object $$$ = object;
 			return BuilderAux.actMap.get(
@@ -116,13 +95,13 @@ class SimpleActionBuilder {
 						@Override
 						public IAction build() {
 							return new ViewAction(uri, $$, $$$,
-									hasRequestContext, BuilderAux.IVIEW_RESOLVER);
+									hasRequestContext, resolver);
 						}
 					});
 
 		} else {
-			throw new NullPointerException(
-					"null uri || null controller object || null method handle");
+			throw new IllegalArgumentException(
+					"cannot build action for method [" + method + "]");
 		}
 
 	}

@@ -16,7 +16,6 @@
 package com.caibowen.gplume.web.actions;
 
 import com.caibowen.gplume.web.IAction;
-import com.caibowen.gplume.web.IView;
 import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
@@ -75,7 +74,7 @@ public class ViewAction implements IAction {
 			v = method.invoke(controller);
 		
 		if (v != null) {
-            viewResolver.resolve(context, (IView)v);
+            viewResolver.resolve(context, v);
 		}
 	}
 

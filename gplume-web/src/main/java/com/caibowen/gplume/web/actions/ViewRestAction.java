@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.actions;
 
-import com.caibowen.gplume.web.IView;
 import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
@@ -60,7 +59,7 @@ public class ViewRestAction extends ViewAction {
 			v = method.invoke(controller, var);
 		}
 		if (v != null) {
-            viewResolver.resolve(context, (IView) v);
+            viewResolver.resolve(context, v);
 		}
 	}
 

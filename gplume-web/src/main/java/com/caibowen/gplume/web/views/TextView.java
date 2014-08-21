@@ -15,15 +15,13 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.views;
 
-import java.io.PrintWriter;
+public class TextView {
 
-import com.caibowen.gplume.web.IView;
-import com.caibowen.gplume.web.RequestContext;
+	final String encoding;
+	final String type;
 
-public class TextView implements IView {
+    String content;
 
-	private final String encoding;
-	private final String type;
 	public TextView() {
 		this.encoding = PageAttributes.Encoding.UTF_8;
 		this.type = PageAttributes.Type.TEXT;
@@ -34,23 +32,10 @@ public class TextView implements IView {
 		this.type = type;
 	}
 
-	private String content;
 
 	public TextView setContent(String content) {
 		this.content = content;
 		return this;
-	}
-
-	@Override
-	public void resolve(RequestContext context) {
-		try {
-			context.response.setContentType(type);
-			context.response.setCharacterEncoding(encoding);
-			PrintWriter writer = context.response.getWriter();
-			writer.write(content);
-		} catch (Exception e) {
-			throw new RuntimeException("Error writing JSP", e);
-		}
 	}
 
 }

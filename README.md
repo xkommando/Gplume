@@ -15,7 +15,8 @@ Quick Start:
 ```XML
 <dependency>
 	<groupId>com.caibowen</groupId>
-	<artifactId>gplume-webex</artifactId><!--extensions for web develop-->
+	<!-- web develope extensions-->
+	<artifactId>gplume-webex</artifactId>
 	<version>1.5</version>
 </dependency>
 ```
@@ -118,6 +119,7 @@ Chaining processors in XML
 		</bean>
 	</property>
 </bean>
+<!--config view resolver-->
 <bean class="com.caibowen.gplume.web.WebConfig">
 	<property name="preProcessor" ref="headPrePrcessor"/>
 	<property name="pkgs">
@@ -128,7 +130,14 @@ Chaining processors in XML
 	<!--by default using Jsp view resolver-->
 	<property name="viewPrefix" value="/"/>
 	<property name="viewSuffix" value=".jsp" />
+	<!-- IView Resolver -->
+	<property name="ViewResolver"/>
+		<bean class="com.caibowen.gplume.webex.json.JsonViewResolver">
+			<property name="doPrettyPrint" value="true"/>
+		</bean>
+	</property>
 </bean>
+
 ```
 Handle request with method
 ```Java

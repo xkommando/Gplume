@@ -18,11 +18,10 @@ package com.caibowen.gplume.web.actions.stateful;
 import com.caibowen.gplume.common.CacheBuilder;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.web.IAction;
-import com.caibowen.gplume.web.IView;
+import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.actions.builder.BuilderAux;
 import com.caibowen.gplume.web.actions.stateful.actions.SimpleStatefulAction;
-import com.caibowen.gplume.web.actions.stateful.actions.StrStatefulAction;
 import com.caibowen.gplume.web.actions.stateful.actions.ViewStatefulAction;
 
 import javax.annotation.Nullable;
@@ -47,9 +46,11 @@ import java.util.Set;
 public class StatefulActionBuilder {
 	
 	public static IAction buildAction(final String uri, 
-									@Nullable Object object, 
-									Method method) {
-		Class<?> stateCls = method.getParameterTypes()[0];
+									@Nullable final Object object,
+									final Method method) {
+
+		Class<?>[] ps = method.getParameterTypes();
+        final StateGen gen = stateGen(ps[0]);
 		MethodHandle handle;
 		try {
 			handle = BuilderAux.LOOKUP.unreflect(method);
@@ -60,91 +61,38 @@ public class StatefulActionBuilder {
 		final MethodHandle handle$ = Modifier.isStatic(method.getModifiers())
 				? handle : handle.bindTo(object);
 
-		final StateGen gen = stateGen(stateCls);
-		
-		try {
-			if (method.getReturnType().equals(String.class))
-				return buildJSP(uri, gen, handle$);
-			
-			else if (IView.class.isAssignableFrom(method.getReturnType()))
-				return buildViewed(uri, object, method);
-			
-			else if (method.getReturnType().equals(void.class))
-				return buildSimple(uri, gen, handle$);
-			
-		} catch (IllegalAccessException | NoSuchMethodException
-				| SecurityException e) {
-			throw new RuntimeException(e);
-		}
-		
-		throw new IllegalArgumentException("cannot build action out of "  + method);
-	}
-	
-	
-	/**
-	 * 
-	 * void act(State s, RequestContext c)
-	 * 
-	 * @param uri
-	 * @param gen
-	 * @param handle$
-	 * @return
-	 * @throws IllegalAccessException
-	 * @throws NoSuchMethodException
-	 * @throws SecurityException
-	 */
-	private static IAction buildSimple(final String uri, 
-										final StateGen gen,
-										final MethodHandle handle$) throws IllegalAccessException, NoSuchMethodException, SecurityException {
-		
-		return BuilderAux.actMap.get(
-				BuilderAux.hash(uri, handle$, gen), 
-				new CacheBuilder<IAction>() {
-					@Override
-					public IAction build() {
-						return new SimpleStatefulAction(uri, handle$, gen);
-					}
-		});
-	}
+        if (method.getReturnType().equals(void.class)) {
 
-	private static IAction buildJSP(final String uri, 
-									final StateGen gen,
-									final MethodHandle handle$) throws IllegalAccessException, NoSuchMethodException, SecurityException {
+            return BuilderAux.actMap.get(
+                    BuilderAux.hash(uri, handle$, gen),
+                    new CacheBuilder<IAction>() {
+                        @Override
+                        public IAction build() {
+                            return new SimpleStatefulAction(uri, handle$, gen);
+                        }
+                    });
+        }
 
-		Class<?> ps[] = handle$.type().parameterArray();
-		final boolean hasReq = ps[ps.length - 1].equals(RequestContext.class);
-		
-		return BuilderAux.actMap.get(BuilderAux.hash(uri, handle$, gen, hasReq),
-				new CacheBuilder<IAction>() {
-					@Override
-					public IAction build() {
-						return new StrStatefulAction(
-                                uri, handle$, gen,
-                                hasReq, BuilderAux.STR_VIEW_RESOLVER);
-					}
-				});
-	}
-	
-	private static IAction 
-	buildViewed(final String uri, @Nullable final Object object, 
-			final Method method) throws IllegalAccessException, NoSuchMethodException, SecurityException {
-//ViewStatefulAction(String u, Method m, Object ctrl, boolean hasReq, StateGen g) {
+        final boolean hasReq = ps[ps.length - 1].equals(RequestContext.class);
 
-		Class<?> ps[] = method.getParameterTypes();
-		final boolean hasReq = ps[ps.length - 1].equals(RequestContext.class);
-		final StateGen gen = stateGen(ps[0]);
-		return BuilderAux.actMap.get(
-		BuilderAux.hash(uri, method, object, gen, hasReq),
-				new CacheBuilder<IAction>() {
-					@Override
-					public IAction build() {
-						return 
-						new ViewStatefulAction(uri, method, object, hasReq, gen, BuilderAux.IVIEW_RESOLVER);
-					}
-				});
-	}
-	
-	private static StateGen stateGen(Class<?> stateCls) {
+        final IViewResolver resolver =
+                BuilderAux.viewMatcher.findMatch(method.getReturnType());
+        if (resolver == null)
+            throw new IllegalArgumentException("cannot find resolver for method[" + method + "]");
+
+        return BuilderAux.actMap.get(BuilderAux.hash(uri, method, object, gen, hasReq),
+                        new CacheBuilder<IAction>() {
+            @Override
+            public IAction build() {
+                return new
+                        ViewStatefulAction(uri, method, object, hasReq, gen, resolver);
+            }
+        });
+
+    }
+
+
+    private static StateGen stateGen(Class<?> stateCls) {
 		
 		StateGen s = BuilderAux.stateMap.get(stateCls);
 		if (s != null)
