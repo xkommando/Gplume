@@ -140,9 +140,13 @@ public class WebConfig implements InitializingBean, Serializable {
         else
             _s = new HashSet<>();
 
+        /**
+         * default resolvers
+         */
         _s.add(_rStr);
         _s.add(new TextViewResolver());
         _s.add(new JumViewResolver());
+
         return new ArrayList<IViewResolver>(_s);
     }
 

@@ -19,6 +19,7 @@ package com.caibowen.gplume.web.actions.builder;
 
 import com.caibowen.gplume.web.IViewResolver;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -35,9 +36,17 @@ public class ViewMatcher {
 
     private Map<Class, IViewResolver> vMap = new HashMap<>(32);
 
+    @Nullable
     public IViewResolver findMatch(Class retKlass) {
         if (vMap.containsKey(retKlass))
             return vMap.get(retKlass);
+
+        IViewResolver best = findBest(retKlass);
+        vMap.put(retKlass, best);
+        return best;
+    }
+
+    private IViewResolver findBest(Class retKlass) {
 
         TreeMap<Integer, List<IViewResolver>> candidate = new TreeMap<>();
         candidate.put(Integer.MIN_VALUE, null);
@@ -55,7 +64,8 @@ public class ViewMatcher {
 
         List<IViewResolver> best = candidate.lastEntry().getValue();
         if (best == null || best.isEmpty() || candidate.lastEntry().getKey() < 0)
-            throw new IllegalStateException("cannot find view resolver for [" + retKlass + "]");
+            return null;
+
         if (best.size() > 1) {
             StringBuilder sb = new StringBuilder(256);
             sb.append("multi match view resolver for class [" + retKlass + "], they are:\r\n");
