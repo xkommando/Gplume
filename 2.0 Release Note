@@ -1,0 +1,17 @@
+				Gplume Framework 2.0 Release Note
+
+1. Gplume.
+	* add configration support.
+	* xml bean assembler refactored.
+	* add constructor injection.
+	* utilities, including str algorithem, immutable containers.
+
+2. Gplume Web.
+	* IView removed, now web controller can return arbitrary type.
+	* ActionFactory and builders refactored.
+
+3. Gplume Web Extension.
+	* add support for JSON return value
+	* add Freemarker and Velocity view resolvers
+
+

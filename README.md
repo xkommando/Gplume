@@ -141,6 +141,13 @@ Chaining processors in XML
 ```
 Handle request with method
 ```Java
+	// support arbitrary return type, customer view resolvers is binded before runing
+	class MyStrViewResolver implements IViewResolver;
+	class FreeMarkerResolver implements IViewResolver;
+```
+```Java
+// controller
+
 	@Handle(value={"/", "/index",
 			"/index.html", "/index.jsp"}})
 	public String index(RequestContext context) {
@@ -193,14 +200,14 @@ public class MyAction {
 	
 	@Semaphored(permit=300, timeout=2200)
 	@Handle(value={"login"}, httpMethods={HttpMethod.POST})
-	public IView login(MyAction reqScope, RequestContext req) {
+	public SomePoJo login(MyAction reqScope, RequestContext req) {
 		if (reqScope == null) //non-null requirements are not met.
 			return IView.get.textView("no public key in session");
 		else if (!reqScope.ok())
-			return IView.get.textView("password and email mismatch");
+			return Views.textView("password and email mismatch");
 		else {
 			req.session(true).setAttribute("this-user", reqScope.user);
-			return IView.get.jump("/user/" + reqScope.user.getNameURL());
+			return Jump.to("/user/" + reqScope.user.getNameURL());
 		}
 	}
 }
