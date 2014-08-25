@@ -25,8 +25,8 @@ import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.actions.PathValResolver;
 import com.caibowen.gplume.web.actions.RestAction;
 import com.caibowen.gplume.web.actions.ViewRestAction;
-import com.sun.istack.internal.Nullable;
 
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
@@ -167,7 +167,7 @@ class RestActionBuilder {
 	 * @param obj
 	 * @return null if not found
 	 */
-	private @Nullable static MethodHandle 
+	private @Nullable static MethodHandle
 	getRestHandle(Method method, Class<?> argClass, 
 					Object obj, boolean hasRequest) {
 		

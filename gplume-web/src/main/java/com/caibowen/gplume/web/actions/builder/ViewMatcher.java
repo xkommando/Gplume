@@ -46,7 +46,14 @@ public class ViewMatcher {
         return best;
     }
 
-    private IViewResolver findBest(Class retKlass) {
+
+    /**
+     *
+     * @param retKlass
+     * @return null if not found, leave exception to the upper layer
+     *
+     */
+    private @Nullable IViewResolver findBest(Class retKlass) {
 
         TreeMap<Integer, List<IViewResolver>> candidate = new TreeMap<>();
         candidate.put(Integer.MIN_VALUE, null);
@@ -62,13 +69,14 @@ public class ViewMatcher {
             }
         }
 
+        //leave exception to the upper layer
         List<IViewResolver> best = candidate.lastEntry().getValue();
         if (best == null || best.isEmpty() || candidate.lastEntry().getKey() < 0)
             return null;
 
         if (best.size() > 1) {
             StringBuilder sb = new StringBuilder(256);
-            sb.append("multi match view resolver for class [" + retKlass + "], they are:\r\n");
+            sb.append("multi match view resolver found for class [" + retKlass + "], they are:\r\n");
             for (IViewResolver _r : best)
                 sb.append(_r).append("\r\n");
             throw new IllegalStateException(sb.toString());

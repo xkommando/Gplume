@@ -33,58 +33,57 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 
 /**
- * json java bean »¥×ª¹¤¾ßÀà
  *
- * @author Yanxiaoxu
+ * @author BowenCai
  */
 public final class Jsons {
 
-    private final static ObjectMapper mapper = createMapper();
+    public static final ObjectMapper MAPPER = createMapper();
+
+    public static void setDateToLong(ObjectMapper mapper) {
+        final SimpleModule module = new SimpleModule();
+        module.addSerializer(Date.class, new Date2LongSerializer());
+        mapper.registerModule(module);
+    }
+
 
     public static ObjectMapper createMapper() {
         return createMapper(Include.NON_NULL);
     }
 
-    public static ObjectMapper createMapper4Spring() {
-        final ObjectMapper mapper = createMapper(Include.NON_NULL);
-        setDateToLong(mapper);
-        return mapper;
-    }
-
     public static ObjectMapper createMapper(Include inclusion) {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(inclusion);
-        mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);//ºöÂÔmap valueÎª¿Õ
+        mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);//ï¿½ï¿½ï¿½ï¿½map valueÎªï¿½ï¿½
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper;
     }
 
-    @Nullable
-    public static <T> T fromJson(String jsonString, Class<T> clazz) {
+    public static <T> T deserial(String jsonString, Class<T> clazz) {
         if (Str.Utils.isBlank(jsonString))
             return null;
         try {
-            return mapper.readValue(jsonString, clazz);
+            return MAPPER.readValue(jsonString, clazz);
         } catch (Exception e) {
-            return null;
+            throw  new RuntimeException(e);
         }
     }
 
-    public static <T> T fromJson(String jsonString, TypeReference typeReference) {
+    public static <T> T deserial(String jsonString, TypeReference typeReference) {
         if (Str.Utils.isBlank(jsonString)) return null;
 
         try {
-            return mapper.readValue(jsonString, typeReference);
+            return MAPPER.readValue(jsonString, typeReference);
         } catch (Exception e) {
-            return null;
+            throw  new RuntimeException(e);
         }
     }
 
-    public static String toJson(Object object) {
+    public static String serial(Object object) {
         try {
-            return mapper.writeValueAsString(object);
+            return MAPPER.writeValueAsString(object);
         } catch (Exception e) {
-            return null;
+            throw  new RuntimeException(e);
         }
     }
 
@@ -92,31 +91,23 @@ public final class Jsons {
     public static void setDateFormat(String pattern) {
         if (Str.Utils.notBlank(pattern)) {
             DateFormat df = new SimpleDateFormat(pattern);
-            mapper.getSerializationConfig().with(df);
-            mapper.getDeserializationConfig().with(df);
+            MAPPER.getSerializationConfig().with(df);
+            MAPPER.getDeserializationConfig().with(df);
         }
     }
 
-    public static ObjectMapper getMapper() {
-        return mapper;
-    }
 
-
-    public static JsonNode getValue(String json, String key) {
+    @Nullable
+    public static JsonNode getVal(String json, String key) {
         try {
-            final JsonNode node = mapper.readTree(json);
+            final JsonNode node = MAPPER.readTree(json);
             if (node == null) return null;
             return node.get(key);
         } catch (Exception e) {
-            return null;
+            throw  new RuntimeException(e);
         }
     }
 
-    public static void setDateToLong(ObjectMapper mapper) {
-        final SimpleModule module = new SimpleModule();
-        module.addSerializer(Date.class, new Date2LongSerializer());
-        mapper.registerModule(module);
-    }
 
     private static class Date2LongSerializer extends JsonSerializer<Date> {
 

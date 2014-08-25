@@ -35,5 +35,6 @@ public class VelocityViewResolver implements IViewResolver {
     @Override
     public void resolve(RequestContext ctx, Object view) throws Exception {
         String name = (String)view;
+        throw new UnsupportedOperationException();
     }
 }

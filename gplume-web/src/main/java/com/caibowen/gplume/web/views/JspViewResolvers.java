@@ -36,7 +36,7 @@ public class JspViewResolvers {
     /**
      * case 1 : viewPrefix="a"   -> PrefixResolver
      * case 2 : viewSuffix="b"   -> SuffixResolver
-     * case 3 : prefix="a" viewSuffix="b" -> PrefixSuffixResolver
+     * case 3 : prefix="a" and viewSuffix="b" -> PrefixSuffixResolver
      * otherwise : CompletePathViewResolver
      *
      * @return IViewResolver
