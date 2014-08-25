@@ -141,27 +141,26 @@ Chaining processors in XML
 ```
 Handle request with method
 ```Java
-	// support arbitrary return type, customer view resolvers is binded before runing
-	class MyStrViewResolver implements IViewResolver;
-	class FreeMarkerResolver implements IViewResolver;
+// Support arbitrary return type. Customer view resolvers is binded before runing
+class MyStrViewResolver implements IViewResolver;
+class FreeMarkerResolver implements IViewResolver;
 ```
 ```Java
 // controller
-
-	@Handle(value={"/", "/index",
-			"/index.html", "/index.jsp"}})
-	public String index(RequestContext context) {
-		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
-		return "index"; 
-	}
+@Handle(value={"/", "/index",
+	"/index.html", "/index.jsp"}})
+public String index(RequestContext context) {
+	context.putAttr("msg", nativeStr("gplumeIsRunning", context));
+	return "index"; 
+}
 	//number of concurrent requests is limited by this semapher
-	@Semaphored(permit=100, fair=false, timeout=1000)// when time is out, send http code 503 
-	@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"}
-			, httpMethods={HttpMethod.GET, HttpMethod.POST})
-	public FreeMarkerView happyBirthday(Date date) {
-		process(date);
-		return new FreeMarkerView(date);
-	}
+@Semaphored(permit=100, fair=false, timeout=1000)// when time is out, send http code 503 
+@Handle(value={"/your-birthday/{date formate like 1992-6-14::Date}"}
+	, httpMethods={HttpMethod.GET, HttpMethod.POST})
+public FreeMarkerView happyBirthday(Date date) {
+	process(date);
+	return new FreeMarkerView(date);
+}
 ```
 Handle request with an object storing current state
 ```Java
@@ -214,15 +213,15 @@ public class MyAction {
 ```
 Intercept requests
 ```java
-	@Intercept(value = { "/user*" }) // intercept request by URL
-	public void demo(RequestContext context, IAction action) throws Throwable {
-		if (hasLoggedIn(context)) {
-			action.perform(context);
-			after(context);
-		} else {
-			context.jumpTo("/login");
-		}
+@Intercept(value = { "/user*" }) // intercept request by URL
+public void demo(RequestContext context, IAction action) throws Throwable {
+	if (hasLoggedIn(context)) {
+		action.perform(context);
+		after(context);
+	} else {
+		context.jumpTo("/login");
 	}
+}
 ```
 #####Part Five. handle Event. 
 register listeners and publish events as:
