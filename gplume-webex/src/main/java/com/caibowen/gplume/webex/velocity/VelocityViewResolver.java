@@ -15,30 +15,25 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.web.views;
+package com.caibowen.gplume.webex.velocity;
 
+import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
 /**
- *
- * add a prefix and a suffix to the jsp name to make a complete path
- *
- * @author BowenCai
- *
-*/
-public class JspPrefixSuffixResolver extends JspSuffixResolver {
+ * @author bowen.cbw
+ * @since 8/25/2014.
+ */
+public class VelocityViewResolver implements IViewResolver {
 
-    private static final long serialVersionUID = 4685236015290815491L;
 
-    public final String prefix;
-
-    public JspPrefixSuffixResolver(String prefix, String suffix) {
-        super(suffix);
-        this.prefix = prefix;
+    @Override
+    public int fitness(Class val) {
+        return val == String.class ? 1 : -1;
     }
 
     @Override
-    public void resolve(RequestContext ctx, Object ret) throws Exception {
-        ctx.render(prefix + ret + suffix);
+    public void resolve(RequestContext ctx, Object view) throws Exception {
+        String name = (String)view;
     }
 }

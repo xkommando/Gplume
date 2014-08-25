@@ -21,20 +21,28 @@ import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
 /**
- *
- * resolve jsp by given name, the name is the complete path to the jsp file
- *
- * @author BowenCai
-*/
-public class JspCompletePathViewResolver implements IViewResolver {
+ * @author bowen.cbw
+ * @since 8/21/2014.
+ */
+public class JumpViewResolver implements IViewResolver {
 
     @Override
-    public int fitness(Class val) {
-        return val == String.class ? 1 : -1;
+    public int fitness(Class klass) {
+        return klass == JumpView.class ? 1 : -1;
     }
 
     @Override
-    public void resolve(RequestContext ctx, Object ret) throws Exception {
-        ctx.render((String)ret);
+    public void resolve(RequestContext ctx, Object view) throws Exception {
+        JumpView jv = (JumpView)view;
+        switch (jv.type) {
+            case 1:
+                ctx.passOff(jv.newURL);
+                return;
+            case 2:
+                ctx.jumpTo(jv.newURL);
+                return;
+            default:
+                throw new IllegalStateException();
+        }
     }
 }

@@ -61,7 +61,6 @@ public class WebConfig implements InitializingBean, Serializable {
 		this.errorHandler = errorHandler;
 	}
 
-
     // optional
     // by default it is JSP views resolver as the String resolver
     @Inject List<IViewResolver> viewResolvers;
@@ -131,7 +130,7 @@ public class WebConfig implements InitializingBean, Serializable {
 	}
 
     public List<IViewResolver> getViewResolvers() {
-        IViewResolver _rStr = getStrViewResolver();
+        IViewResolver _rStr = JspViewResolvers.get(viewPrefix, viewSuffix);
         LOG.info("setting default string view resolver {0}", _rStr.getClass().getName());
 
         HashSet<IViewResolver> _s;
@@ -145,42 +144,12 @@ public class WebConfig implements InitializingBean, Serializable {
          */
         _s.add(_rStr);
         _s.add(new TextViewResolver());
-        _s.add(new JumViewResolver());
+        _s.add(new JumpViewResolver());
 
         return new ArrayList<IViewResolver>(_s);
     }
 
-    /**
-     * case 1 : viewPrefix=""   -> PrefixResolver
-     * case 2 : viewSuffix=""   -> SuffixResolver
-     * case 3 : prefix="" viewSuffix="" -> PrefixSuffixResolver
-     * otherwise : CompletePathViewResolver
-     *
-     * @return
-     */
-    @Nonnull
-    private IViewResolver getStrViewResolver() {
 
-        int resolverType = 0;
-        if (Str.Utils.notBlank(viewPrefix)) {
-            resolverType++;
-            LOG.debug("views prefix {0}", viewPrefix);
-        }
-        if (Str.Utils.notBlank(viewSuffix)) {
-            resolverType += 3;
-            LOG.debug("views suffix {0}", viewSuffix);
-        }
-
-        if (resolverType == 1)
-            return new JspPrefixResolver(viewPrefix);
-        else if (resolverType == 3)
-            return new JspSuffixResolver(viewSuffix);
-        else if (resolverType == 4)
-            return new JspPrefixSuffixResolver(viewPrefix, viewSuffix);
-        else
-            return new JspCompletePathViewResolver();
-
-    }
 
     private static final long serialVersionUID = 657513014059796966L;
 
