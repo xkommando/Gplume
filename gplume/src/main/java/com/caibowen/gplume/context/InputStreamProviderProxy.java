@@ -16,6 +16,7 @@
 
 package com.caibowen.gplume.context;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import com.caibowen.gplume.misc.logging.Logger;
@@ -54,7 +55,7 @@ public class InputStreamProviderProxy implements InputStreamProvider {
     }
 
     @Override
-	public InputStream getStream(String path) {
+	public InputStream getStream(String path) throws IOException {
 		InputStreamProvider providerToUse = null;
 		if (Str.Utils.notBlank(path)) {
 			// build beans

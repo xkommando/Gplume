@@ -17,10 +17,18 @@
 
 package com.caibowen.gplume.webex.test;
 
+import com.caibowen.gplume.common.ImmutableArrayMap;
+import com.caibowen.gplume.webex.json.Jsons;
 import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonArrayFormatVisitor;
 import org.junit.Test;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @Auther bowen.cbw
@@ -31,10 +39,22 @@ public class JacksonTest {
 
     @Test
     public void t1() {
-        for (JsonEncoding e : JsonEncoding.values())
-            System.out.println(e.getJavaName());
+//        for (JsonEncoding e : JsonEncoding.values())
+//            System.out.println(e.getJavaName());
+//
+//        Charset s = Charset.defaultCharset();
+//        System.out.println(s.name());
 
-        Charset s = Charset.defaultCharset();
-        System.out.println(s.name());
+        ImmutableArrayMap map = new ImmutableArrayMap(new Object[][]{
+                {"key1", "val1"},
+                {"key2", 456},
+                {"789", "val3"}
+        });
+        String js = Jsons.serial(map);
+        Map m = Jsons.deserial(js, HashMap.class);
+        ImmutableArrayMap mm = new ImmutableArrayMap(m);
+        System.out.println(js);
+        System.out.println(mm.toJson());
+        System.out.println(mm);
     }
 }

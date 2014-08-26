@@ -55,6 +55,7 @@ public class SimpleAction implements IAction {
 	}
 
 	@Override
+    @Deprecated
 	public MethodHandle getMethodHandle() {
 		return methodHandle;
 	}

@@ -37,7 +37,7 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 
 	private final Object[][] table;
 
-	
+
 	// views on keys and values. lazy init
 	transient private Set<Entry<K, V>> entrySet;
 	transient private Object[] keys;
@@ -63,7 +63,20 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 		entrySet = null;
 	}
 
-	
+	public ImmutableArrayMap(Map<K, V> jdkMap) {
+        table = new Object[jdkMap.size()][2];
+        int i = 0;
+        for (Map.Entry e : jdkMap.entrySet()) {
+            table[i][0] = e.getKey();
+            table[i][1] = e.getValue();
+            i++;
+        }
+        // init when needed
+        keys = null;
+        vals = null;
+        entrySet = null;
+    }
+
 	public ImmutableArrayMap(Object[] keys, Object[] vals) {
 		if (keys.length != vals.length)
 			throw new IllegalArgumentException("key array length does not match value array length");
@@ -221,14 +234,33 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 		}
         return h;
 	}
-	
+
+
+    public String toJson() {
+        StringBuilder b = new StringBuilder(512);
+        b.append("{\r\n");
+        boolean added = false;
+        for (Object[] entry : table) {
+            b.append("\t\"").append(entry[0])
+                    .append("\" : \"")
+                    .append(entry[1]).append("\", \r\n");
+            added = true;
+        }
+        if (added) {
+            final int len = b.length();
+            b.delete(len - 4, len - 3);
+        }
+        b.append('}');
+        return b.toString();
+    }
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(512);
 		b.append("\"" + super.toString() + " : {\r\n");
 		boolean added = false;
 		for (Object[] entry : table) {
-			b.append('\"').append(entry[0])
+			b.append("\t\"").append(entry[0])
 					.append("\" : \"")
 			.append(entry[1]).append("\", \r\n");
 			added = true;

@@ -21,7 +21,7 @@ import javax.servlet.ServletContextListener;
 
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.ContextBooter;
-import com.caibowen.gplume.context.ServletContextInputStreamProvider;
+import com.caibowen.gplume.web.misc.ServletContextInputStreamProvider;
 
 /**
  * 

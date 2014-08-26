@@ -79,7 +79,9 @@ public class ViewAction implements IAction {
 	}
 
 	MethodHandle handle;
+
 	@Override
+    @Deprecated
 	public MethodHandle getMethodHandle() {
 		if (handle == null) {
 			try {
