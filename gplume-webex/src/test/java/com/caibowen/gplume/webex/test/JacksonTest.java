@@ -17,7 +17,10 @@
 
 package com.caibowen.gplume.webex.test;
 
+import com.caibowen.gplume.common.Base64;
+import com.caibowen.gplume.common.Codecs;
 import com.caibowen.gplume.common.ImmutableArrayMap;
+import com.caibowen.gplume.web.annotation.Intercept;
 import com.caibowen.gplume.webex.json.Jsons;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -25,6 +28,8 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonArrayFormatVisitor;
 import org.junit.Test;
 
+import java.net.URLEncoder;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +43,14 @@ public class JacksonTest {
 
 
     @Test
-    public void t1() {
+    public void t0() {
+        System.out.println(Integer.MAX_VALUE / 1000 / 3600);
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.array();
+    }
+
+//    @Test
+    public void t1() throws Throwable {
 //        for (JsonEncoding e : JsonEncoding.values())
 //            System.out.println(e.getJavaName());
 //

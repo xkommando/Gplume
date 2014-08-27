@@ -116,16 +116,28 @@ public class RequestContext implements Serializable {
 	
 	/**
 	 * reject this request
-	 * return 503, e.g., service unavailable
+	 * return 403, e.g., authentication failed
 	 */
 	public void reject() {
 		try {
-			response.sendError(503);
+			response.sendError(403);
 		} catch (Exception e) {
 			throw new RuntimeException("In request for [" 
-					+ this.path + "] Error sending 503 error", e);
+					+ this.path + "] Error sending 403 error", e);
 		}
 	}
+
+    /**
+     * set 503 service unavailable
+     */
+    public void setUnAvailiable() {
+        try {
+            response.sendError(503);
+        } catch (Exception e) {
+            throw new RuntimeException("In request for ["
+                    + this.path + "] Error sending 503 error", e);
+        }
+    }
 
 	/**
 	 * AKA, sendRedirect

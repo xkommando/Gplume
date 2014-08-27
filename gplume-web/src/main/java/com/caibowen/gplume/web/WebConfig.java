@@ -95,6 +95,11 @@ public class WebConfig implements InitializingBean, Serializable {
             center.setInjector(injector);
             LOG.info("setting injector {0}", injector.getClass().getName());
 
+            IRequestProcessor iter = this.preProcessor;
+            while (iter != null) {
+                injector.inject(iter);
+                iter = iter.getNext();
+            }
             // 2. preprocessor chain
             center.setPreProcessor(this.preProcessor);
 

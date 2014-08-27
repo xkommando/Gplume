@@ -28,10 +28,11 @@ package com.caibowen.gplume.web;
  */
 public interface IErrorHandler {
 
+    public void error(RequestContext ctx, int code);
 
-	public void http403(RequestContext requestContext);
+	public void http403(RequestContext ctx);
 	
-	public void http404(RequestContext requestContext);
+	public void http404(RequestContext ctx);
 	
-	public void http500(RequestContext requestContext);
+	public void http500(RequestContext ctx);
 }

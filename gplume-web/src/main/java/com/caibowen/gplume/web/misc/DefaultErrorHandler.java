@@ -15,12 +15,12 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.misc;
 
-import java.io.PrintWriter;
-
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
 import com.caibowen.gplume.web.IErrorHandler;
 import com.caibowen.gplume.web.RequestContext;
+
+import java.io.PrintWriter;
 
 
 /**
@@ -32,10 +32,11 @@ import com.caibowen.gplume.web.RequestContext;
 public class DefaultErrorHandler implements IErrorHandler {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultErrorHandler.class.getName());
-	
+
+
 //	5. HTTP error 401 (unauthorized)
 //	This error happens when a website visitor tries to access a restricted web page 
-//	but isn��t authorized to do so, usually because of a failed login attempt.
+//	but isn't authorized to do so, usually because of a failed login attempt.
 //
 //	4. HTTP error 400 (bad requestContext)
 //	This is basically an error message from the web server telling you 
@@ -54,15 +55,25 @@ public class DefaultErrorHandler implements IErrorHandler {
 //	Intended for use with rate limiting schemes.[18]
 	
 	
-//	And the most common HTTP error of all is������.
+//	And the most common HTTP error of all is
 //
 //	1. HTTP error 500 (internal server error)
 //	The description of this error pretty much says it all. 
-//	It��s a general-purpose error message for when a web server encounters
+//	It is a general-purpose error message for when a web server encounters
 //	some form of internal error. For example, the web server could be overloaded 
 //	and therefore unable to handle requests properly.
 
-	@Override
+
+    @Override
+    public void error(RequestContext ctx, int code) {
+        try {
+            ctx.response.sendError(code);
+        } catch (Exception e) {
+            LOG.error("error sending error [" + code + "] \r\n " + ctx.toString());
+        }
+    }
+
+    @Override
 	public void http403(RequestContext requestContext) {
 		PrintWriter out;
 		
