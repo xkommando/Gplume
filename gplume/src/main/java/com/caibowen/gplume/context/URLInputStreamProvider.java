@@ -33,14 +33,17 @@ public class URLInputStreamProvider implements InputStreamProvider{
 		try {
 			return new URI(path).toURL().openStream();
 		} catch (IOException | URISyntaxException e) {
-			throw new RuntimeException("", e);
+			throw new RuntimeException(e);
 		}
 	}
 
-	@Override
-	public String getContextPath() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getRealPath(String p) {
+        try {
+            return new URI(p).getPath();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

@@ -55,6 +55,10 @@ abstract class XMLAux implements IBeanAssembler {
         this.configCenter = configCenter;
     }
 
+    @Override
+    public ConfigCenter getConfigCenter() {
+        return configCenter;
+    }
 
     protected @Nonnull Class<?> getClass(Element element) {
         String clazzName = element.getAttribute(XMLTags.BEAN_CLASS).trim();

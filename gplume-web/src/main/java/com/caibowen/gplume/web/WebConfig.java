@@ -93,7 +93,7 @@ public class WebConfig implements InitializingBean, Serializable {
                 AppContext.beanAssembler.addBean("injector", injector);
             }
             center.setInjector(injector);
-            LOG.info("setting injector {0}", injector.getClass().getName());
+            LOG.info("injector {0} setted", injector.getClass().getName());
 
             IRequestProcessor iter = this.preProcessor;
             while (iter != null) {
@@ -127,7 +127,6 @@ public class WebConfig implements InitializingBean, Serializable {
 
             if (boo) LOG.info("ControlCenter set up");
             else LOG.info("cannot add [controlCenter] to beanAssembler");
-
 
 		} catch (Exception e) {
 			throw new RuntimeException("cannot build controlCenter", e);

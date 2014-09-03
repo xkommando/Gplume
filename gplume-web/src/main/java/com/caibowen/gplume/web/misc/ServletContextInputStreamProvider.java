@@ -44,8 +44,8 @@ public class ServletContextInputStreamProvider implements InputStreamProvider, S
     }
 
     @Override
-    public String getContextPath() {
-        throw new UnsupportedOperationException();
+    public String getRealPath(String p) {
+        return context.getRealPath(p);
     }
 
 }

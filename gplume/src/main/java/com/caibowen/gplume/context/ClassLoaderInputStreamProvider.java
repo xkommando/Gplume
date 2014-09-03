@@ -37,9 +37,8 @@ public class ClassLoaderInputStreamProvider implements InputStreamProvider{
 	}
 
 	@Override
-	public String getContextPath() {
-//		classLoader.
-		return null;
+	public String getRealPath(String p) {
+		return p;
 	}
 
 }

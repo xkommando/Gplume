@@ -28,7 +28,7 @@ import com.caibowen.gplume.web.RequestContext;
  */
 public class NativePkgInjector implements IRequestProcessor  {
 
-	@Inject WebI18nService i18nService;
+	@Inject IWebI18nService i18nService;
 	
 	@Override
 	public void process(RequestContext context) {
@@ -52,14 +52,14 @@ public class NativePkgInjector implements IRequestProcessor  {
 	/**
 	 * @return the i18nService
 	 */
-	public WebI18nService getI18nService() {
+	public IWebI18nService getI18nService() {
 		return i18nService;
 	}
 
 	/**
 	 * @param i18nService the i18nService to set
 	 */
-	public void setI18nService(WebI18nService i18nService) {
+	public void setI18nService(IWebI18nService i18nService) {
 		this.i18nService = i18nService;
 	}
 

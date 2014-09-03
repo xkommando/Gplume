@@ -26,6 +26,6 @@ import java.io.InputStream;
 public interface InputStreamProvider {
 	
 	public InputStream	getStream(String path) throws IOException;
-	public String 		getContextPath();
+	public String getRealPath(String path);
 		
 }

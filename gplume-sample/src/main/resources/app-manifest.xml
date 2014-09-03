@@ -27,7 +27,8 @@
         </property>
     </bean>
 
-	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
+	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.HotSwapWebI18n">
+        <property name="resolver" instance="com.caibowen.gplume.i18n.DefaultDialectResolver" />
 	    <property name="defaultLang" value="SimplifiedChinese"/>
         <property name="defaultTimeZone" value="ETC/GMT-8"/>
 	    <property name="pkgFiles">

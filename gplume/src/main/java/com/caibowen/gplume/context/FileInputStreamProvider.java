@@ -38,8 +38,8 @@ public class FileInputStreamProvider implements InputStreamProvider{
 	}
 
 	@Override
-	public String getContextPath() {
-		return new File(".").getParent();
+	public String getRealPath(String p) {
+		return new File(p).getAbsolutePath();
 	}
 
 }

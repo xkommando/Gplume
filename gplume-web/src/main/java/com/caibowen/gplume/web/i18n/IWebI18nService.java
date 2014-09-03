@@ -15,25 +15,17 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.webex.velocity;
+package com.caibowen.gplume.web.i18n;
 
-import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
 
 /**
  * @author bowen.cbw
- * @since 8/25/2014.
+ * @since 9/3/2014.
  */
-public class VelocityViewResolver implements IViewResolver {
+public interface IWebI18nService {
 
-    @Override
-    public int fitness(Class val) {
-        return val == String.class ? 1 : -1;
-    }
+    String ALTERNATIVES = "gplume_web_alternative_dialect";
 
-    @Override
-    public void resolve(RequestContext ctx, Object view) throws Exception {
-        String name = (String)view;
-        throw new UnsupportedOperationException();
-    }
+    void attachPkgTo(RequestContext ctx);
 }

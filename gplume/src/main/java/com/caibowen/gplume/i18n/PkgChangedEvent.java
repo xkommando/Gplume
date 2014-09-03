@@ -15,25 +15,21 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.webex.velocity;
+package com.caibowen.gplume.i18n;
 
-import com.caibowen.gplume.web.IViewResolver;
-import com.caibowen.gplume.web.RequestContext;
+import com.caibowen.gplume.event.AppEvent;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author bowen.cbw
- * @since 8/25/2014.
+ * @since 9/3/2014.
  */
-public class VelocityViewResolver implements IViewResolver {
+public class PkgChangedEvent extends AppEvent {
 
-    @Override
-    public int fitness(Class val) {
-        return val == String.class ? 1 : -1;
-    }
-
-    @Override
-    public void resolve(RequestContext ctx, Object view) throws Exception {
-        String name = (String)view;
-        throw new UnsupportedOperationException();
+    public final NativePackage newPkg;
+    public PkgChangedEvent(final NativePackage p, @Nonnull Object src) {
+        super(src);
+        this.newPkg = p;
     }
 }

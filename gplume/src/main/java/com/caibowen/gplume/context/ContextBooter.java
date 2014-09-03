@@ -16,7 +16,6 @@
 package com.caibowen.gplume.context;
 
 import com.caibowen.gplume.context.bean.ConfigCenter;
-import com.caibowen.gplume.i18n.I18nService;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
@@ -43,11 +42,6 @@ public class ContextBooter {
 
 	private static final Logger LOG 
 					= LoggerFactory.getLogger(ContextBooter.class);
-
-	/**
-	 * bean id for internationalization
-	 */
-	private static final String I18N_SERVICE_BEAN_ID = "i18nService";
 
 	// optional
 	private ClassLoader classLoader = ContextBooter.class.getClassLoader();
@@ -85,19 +79,6 @@ public class ContextBooter {
 		// register listeners
 		AppContext.beanAssembler
 				.inTake(AppContext.broadcaster.listenerRetreiver);
-		
-		// load language packages
-		I18nService service = AppContext.beanAssembler.getBean(I18N_SERVICE_BEAN_ID);
-		if (service != null) {
-			try {
-				service.loadFiles(streamProvider);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-			LOG.info(I18N_SERVICE_BEAN_ID + " ready to roll!");
-		} else {
-			LOG.info("No " + I18N_SERVICE_BEAN_ID + " found");
-		}
 	}
 	
 	/**

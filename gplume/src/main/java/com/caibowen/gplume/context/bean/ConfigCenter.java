@@ -41,7 +41,7 @@ import java.util.Properties;
  * @auther bowen.cbw
  * @since 8/15/2014.
  */
-public class ConfigCenter implements Serializable{
+public class ConfigCenter implements Serializable {
 
     private static final long serialVersionUID = -7772935889089989028L;
 
@@ -55,13 +55,16 @@ public class ConfigCenter implements Serializable{
         streamSupport = new InputStreamSupport(proxy);
     }
 
+    public InputStreamSupport getStreamSupport() {
+        return streamSupport;
+    }
+
     public void setDefaultStreamProvider(InputStreamProvider streamProvider) {
         proxy.setDefaultProvider(streamProvider);
     }
     public void setClassPathProvider(InputStreamProvider provider) {
         proxy.setClassPathProvider(provider);
     }
-
 
     public void withPath(String path, InputStreamCallback callback) {
         String _c = currentConfigName;

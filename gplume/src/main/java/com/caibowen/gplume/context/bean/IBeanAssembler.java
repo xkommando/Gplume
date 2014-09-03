@@ -35,6 +35,7 @@ public interface IBeanAssembler {
 	ClassLoader getClassLoader();
 
     void setConfigCenter(ConfigCenter configCenter);
+    ConfigCenter getConfigCenter();
 	
 	/**
 	 * build all beans.

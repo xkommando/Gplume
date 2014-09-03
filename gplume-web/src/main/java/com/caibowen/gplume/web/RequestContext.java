@@ -62,7 +62,7 @@ public class RequestContext implements Serializable {
 		this.response = null;
 		this.controlCenter = null;
 		this.httpmMthod = null;
-		this.path = null;//_u.substring(request.getContextPath().length());
+		this.path = null;//_u.substring(request.getRealPath().length());
 	}
 	
 	/**
@@ -137,6 +137,14 @@ public class RequestContext implements Serializable {
             throw new RuntimeException("In request for ["
                     + this.path + "] Error sending 503 error", e);
         }
+    }
+
+    public void error(int code) {
+        controlCenter.errorHandler.error(this, code);
+    }
+
+    public void error(int code, String message) {
+        controlCenter.errorHandler.error(this, code, message);
     }
 
 	/**

@@ -287,8 +287,8 @@ public class BeanEditor {
 				"cannot set bean [" 
 				+ obj.getClass().getSimpleName() 
 				+  "] with setter [" + setter.getName() + "]"
-				+ " require parameter type[" + paramTypes[0].getSimpleName() 
-				+ "] get property [" + (var == null ? "null" : var.getClass().getSimpleName())
+				+ " require parameter type[" + paramTypes[0].getName()
+				+ "] get property [" + (var == null ? "null" : var.getClass().getName())
 				+ "]", e);
 			}
 	}

@@ -56,35 +56,56 @@ public class InputStreamProviderProxy implements InputStreamProvider {
 
     @Override
 	public InputStream getStream(String path) throws IOException {
-		InputStreamProvider providerToUse = null;
-		if (Str.Utils.notBlank(path)) {
-			// build beans
-			if (path.startsWith("classpath:")) {
-				providerToUse = classPathProvider;
-				path = path.substring(10, path.length());
-				
-			} else if (path.startsWith("file:")) {
-				providerToUse = FILE_PROVIDER;
-				path = path.substring(5, path.length());
-				
-			} else if (path.startsWith("url:")) {
-				providerToUse = URL_PROVIDER;
-				path = path.substring(4, path.length());
-				
-			} else {
-				providerToUse = defaultProvider;
-			}
-		}
+        InputStreamProvider providerToUse = null;
 
+        if (Str.Utils.notBlank(path)) {
+            // build beans
+            if (path.startsWith("classpath:")) {
+                providerToUse = classPathProvider;
+                path = path.substring(10, path.length());
+
+            } else if (path.startsWith("file:")) {
+                providerToUse = FILE_PROVIDER;
+                path = path.substring(5, path.length());
+
+            } else if (path.startsWith("url:")) {
+                providerToUse = URL_PROVIDER;
+                path = path.substring(4, path.length());
+
+            } else {
+                providerToUse = defaultProvider;
+            }
+        }
         LOG.debug("using [" + providerToUse.getClass().getSimpleName() + "] to get [" + path + "]");
 		return providerToUse.getStream(path);
 	}
 
     private static final Logger LOG = LoggerFactory.getLogger(InputStreamProviderProxy.class);
 
+
 	@Override
-	public String getContextPath() {
-		throw new UnsupportedOperationException();
+	public String getRealPath(String path) {
+        InputStreamProvider providerToUse;
+        if (Str.Utils.notBlank(path)) {
+            // build beans
+            if (path.startsWith("classpath:")) {
+                providerToUse = classPathProvider;
+                path = path.substring(10, path.length());
+
+            } else if (path.startsWith("file:")) {
+                providerToUse = FILE_PROVIDER;
+                path = path.substring(5, path.length());
+
+            } else if (path.startsWith("url:")) {
+                providerToUse = URL_PROVIDER;
+                path = path.substring(4, path.length());
+
+            } else {
+                providerToUse = defaultProvider;
+            }
+            return providerToUse.getRealPath(path);
+        }
+        throw new NullPointerException();
 	}
 
 }
