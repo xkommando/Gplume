@@ -81,7 +81,8 @@ and
 
 specify them in the manifest.xml
 ```XML
-<bean id="i18nService" class="com.caibowen.gplume.web.i18n.WebI18nService">
+<!-- hot swap service. in production mode, use WebI18nService-->
+<bean id="i18nService" class="com.caibowen.gplume.web.i18n.HotSwapWebI18n">
 	<construct>
 		<props>
 			<en value-type="String">${lang_cn}</en>

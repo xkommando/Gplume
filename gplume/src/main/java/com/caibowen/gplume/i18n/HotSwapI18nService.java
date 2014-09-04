@@ -18,6 +18,7 @@
 package com.caibowen.gplume.i18n;
 
 import com.caibowen.gplume.common.Pair;
+import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.FileInputStreamProvider;
 import com.caibowen.gplume.context.InputStreamCallback;
 import com.caibowen.gplume.context.InputStreamSupport;
@@ -43,7 +44,9 @@ public class HotSwapI18nService extends GenI18nService implements InitializingBe
     protected final EnumMap<Dialect, Pair<Long, File>> fileTable
             = new EnumMap<Dialect, Pair<Long, File>>(Dialect.class);
 
-    InputStreamSupport fileStreamSupport = new InputStreamSupport(new FileInputStreamProvider());
+    // access file
+    protected InputStreamSupport fileStreamSupport = new InputStreamSupport(new FileInputStreamProvider());
+
     @Override
     public void afterPropertiesSet() throws Exception {
         super.afterPropertiesSet();
@@ -62,6 +65,10 @@ public class HotSwapI18nService extends GenI18nService implements InitializingBe
                 String k = (String) e.getKey();
                 String path = (String) e.getValue();
 
+                /**
+                 * use ConfigCenter streamSupport to get real path
+                 * use file inputstream provider to get actual data
+                 */
                 path = super.streamSupport.getStreamProvider().getRealPath(path);
                 File file = new File(path);
 
@@ -103,6 +110,13 @@ public class HotSwapI18nService extends GenI18nService implements InitializingBe
         return pkgTable.get(defaultLang);
     }
 
+    /**
+     * update properties if file has changed
+     *
+     * publish event
+     *
+     * @param lang
+     */
     protected void update(Dialect lang) {
 
         final Pair<Long, File> disk = fileTable.get(lang);
@@ -119,6 +133,7 @@ public class HotSwapI18nService extends GenI18nService implements InitializingBe
             disk.first = lm;
 
             PkgChangedEvent e = new PkgChangedEvent(getPkg(lang), this);
+            AppContext.broadcaster.broadcast(e);
         }
     }
 
