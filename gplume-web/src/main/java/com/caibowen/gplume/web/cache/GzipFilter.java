@@ -31,6 +31,9 @@
 
 package com.caibowen.gplume.web.cache;
 
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
@@ -61,6 +64,7 @@ public class GzipFilter implements Filter {
 	
     private boolean setVaryHeader;
 
+    private static final Logger LOG = LoggerFactory.getLogger(Package.class);
     /**
      * Performs initialisation.
      * 
@@ -87,16 +91,16 @@ public class GzipFilter implements Filter {
     	
 		String ecd = request.getHeader("Accept-Encoding");
 		if (ecd != null && ecd.indexOf("gzip") != -1) {
-			System.out.println("OK [" + ecd + "]");
+			LOG.debug("OK [" + ecd + "]");
 		} else {
-			System.out.println("cannot be gzipped [" + ecd + "]");
+            LOG.debug("cannot be gzipped [" + ecd + "]");
 		}
 		
         if (!PageCacheUtil.isIncluded(request) && PageCacheUtil.acceptsEncoding(request, "gzip") 
         		&& !response.isCommitted()) {
             // Client accepts zipped content
 
-System.out.println( ". Writing with gzip compression req ["  + request.getRequestURI() + "]");
+            LOG.debug(". Writing with gzip compression req ["  + request.getRequestURI() + "]");
             // Create a gzip stream
             final ByteArrayOutputStream compressed = new ByteArrayOutputStream();
             final GZIPOutputStream gzout = new GZIPOutputStream(compressed);
@@ -149,16 +153,13 @@ System.out.println( ". Writing with gzip compression req ["  + request.getReques
 
         } else {
             // Client does not accept zipped content - don't bother zipping
-System.out.println(". Writing without gzip compression because the request does not accept gzip.req [" + request.getRequestURI() + "]");
+            LOG.debug(". Writing without gzip compression because the request does not accept gzip.req [" + request.getRequestURI() + "]");
             chain.doFilter(request, response);
         }
     }
 
 	@Override
-	public void destroy() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void destroy() {}
 
 
 }

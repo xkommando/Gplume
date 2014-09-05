@@ -80,9 +80,9 @@ public class Updater {
 	}
 
 	static {
-		System.setProperty("http.proxyHost", "127.0.0.1");
+//		System.setProperty("http.proxyHost", "127.0.0.1");
+//		System.setProperty("http.proxyPort", "12345");
 //		System.setProperty("https.proxyHost", "127.0.0.1");
-		System.setProperty("http.proxyPort", "12345");
 //		System.setProperty("https.proxyPort", "12345");
 	}
 	public static void main(String[] args) {

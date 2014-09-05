@@ -19,6 +19,8 @@ import com.caibowen.gplume.web.IAction;
 import com.caibowen.gplume.web.RequestContext;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
+
 /**
  * 
  * @author BowenCai
@@ -28,8 +30,8 @@ public class Interception extends SimpleAction {
 	
 	private static final long serialVersionUID = 254538927443500914L;
 
-	public Interception(String u, MethodHandle handle) {
-		super(u, handle);
+	public Interception(String u, MethodHandle handle, Method _m) {
+		super(u, handle, _m);
 	}
 	
 	public void intercept(RequestContext requestContext, IAction action) throws Throwable {

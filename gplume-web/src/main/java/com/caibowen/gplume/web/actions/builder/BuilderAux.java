@@ -81,7 +81,7 @@ public class BuilderAux implements Serializable{
 	public static Interception
 	buildInterception(final String u, 
 						Object object, 
-						Method method) {
+						final Method method) {
 		
 		MethodHandle handle = findMethodeHandle(method, INTERCEPT_TYPE);
 		final MethodHandle $ = Modifier.isStatic(method.getModifiers())
@@ -90,7 +90,7 @@ public class BuilderAux implements Serializable{
 		return incMap.get(hash(u, handle), new CacheBuilder<Interception>() {
 			@Override
 			public Interception build() {
-				return new Interception(u , $);
+				return new Interception(u , $, method);
 			}
 		});
 	}

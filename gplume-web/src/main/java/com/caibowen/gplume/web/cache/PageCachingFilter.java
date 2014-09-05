@@ -95,8 +95,16 @@ import com.caibowen.gplume.context.AppContext;
 public class PageCachingFilter extends CachingFilter {
 	
     private SimpleDateFormat httpDateFormatter = null;
-	
 
+
+    @Override
+    public void init(FilterConfig arg0) throws ServletException {
+        ICacheProvider cacheProvider = AppContext.beanAssembler.getBean("pageCache");
+        setCacheProvider(cacheProvider);
+
+        httpDateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+        httpDateFormatter.setTimeZone(AppContext.defaults.timeZone);
+    }
     /**
      * Builds the PageInfo object by passing the request along the filter chain
      * <p>
@@ -117,7 +125,6 @@ public class PageCachingFilter extends CachingFilter {
      * @return a Serializable value object for the page or page fragment
      * @throws ServletException 
      * @throws IOException 
-     * @throws AlreadyGzippedException if an attempt is made to double gzip the body
      * @throws Exception
      *
      */
@@ -286,21 +293,9 @@ public class PageCachingFilter extends CachingFilter {
 	}
 
 	@Override
-	public void destroy() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void destroy() {	}
 
-	
-	@Override
-	public void init(FilterConfig arg0) throws ServletException {
-		// TODO Auto-generated method stub
-		ICacheProvider cacheProvider = AppContext.beanAssembler.getBean("pageCache");
-		setCacheProvider(cacheProvider);
-		
-		httpDateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-		httpDateFormatter.setTimeZone(AppContext.defaults.timeZone);
-	}
+
 
 
 }

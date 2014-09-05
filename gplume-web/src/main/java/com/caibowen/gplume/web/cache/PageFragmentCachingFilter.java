@@ -89,7 +89,6 @@ public class PageFragmentCachingFilter extends CachingFilter {
      * @return {@inheritDoc}
      * @throws ServletException 
      * @throws IOException 
-     * @throws AlreadyGzippedException {@inheritDoc}
      */
     @Override
 	protected PageData buildPageData(final HttpServletRequest request, 
@@ -128,16 +127,10 @@ public class PageFragmentCachingFilter extends CachingFilter {
     }
 
 	@Override
-	public void destroy() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void destroy() {}
 
 	@Override
-	public void init(FilterConfig arg0) throws ServletException {
-		// TODO Auto-generated method stub
-		
-	}
+	public void init(FilterConfig arg0) throws ServletException {}
 
 
 }

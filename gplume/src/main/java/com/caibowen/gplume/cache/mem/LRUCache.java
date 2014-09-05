@@ -56,6 +56,10 @@ public class LRUCache<K,V> implements Serializable {
 		}
 		return v;
 	}
+
+    public boolean contains(String k) {
+        return map.containsKey(k);
+    }
 	
 	public void put(K k, V v) {
 		synchronized (map) {

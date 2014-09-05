@@ -78,24 +78,13 @@ public class ViewAction implements IAction {
 		}
 	}
 
-	MethodHandle handle;
+    @Override
+    public Method method() {
+        return method;
+    }
 
-	@Override
-    @Deprecated
-	public MethodHandle getMethodHandle() {
-		if (handle == null) {
-			try {
-				handle = MethodHandles.lookup().unreflect(method);
-				handle = controller == null ? handle : handle.bindTo(controller);
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return handle;
-	}
-
-	@Override
-	public String getEffectiveURI() {
+    @Override
+	public String effectiveURI() {
 		return effectiveURI;
 	}
 }

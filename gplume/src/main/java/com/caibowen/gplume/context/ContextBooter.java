@@ -52,7 +52,12 @@ public class ContextBooter {
 	private String manifestPath;
 	
 	// require streamProvider
-	
+
+
+    /**
+     * set up configCenter
+     * start bean assembling
+     */
 	public void boot() {
 		// set classloader for beanAssembler
         ConfigCenter configCenter = new ConfigCenter();

@@ -20,6 +20,7 @@ import com.caibowen.gplume.web.actions.SimpleAction;
 import com.caibowen.gplume.web.actions.stateful.StateGen;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 
 
 /**
@@ -33,8 +34,8 @@ public class SimpleStatefulAction extends SimpleAction {
 	private static final long serialVersionUID = -8968416219169871432L;
 	protected final StateGen gen;
 	
-	public SimpleStatefulAction(String u, MethodHandle handle, StateGen g) {
-		super(u, handle);
+	public SimpleStatefulAction(String u, MethodHandle handle, Method _m, StateGen g) {
+		super(u, handle, _m);
 		this.gen = g;
 	}
 	

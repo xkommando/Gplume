@@ -68,7 +68,7 @@ public class StatefulActionBuilder {
                     new CacheBuilder<IAction>() {
                         @Override
                         public IAction build() {
-                            return new SimpleStatefulAction(uri, handle$, gen);
+                            return new SimpleStatefulAction(uri, handle$, method, gen);
                         }
                     });
         }

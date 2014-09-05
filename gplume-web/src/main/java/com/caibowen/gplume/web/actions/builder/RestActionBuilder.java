@@ -134,7 +134,7 @@ class RestActionBuilder {
 		Class<?> retKalss = method.getReturnType();
         IViewResolver resolver;
 		if (retKalss.equals(void.class)) {
-			return new RestAction(effectiveURI, handle, inMethodCall, pr);
+			return new RestAction(effectiveURI, handle, method, inMethodCall, pr);
 
 		} else if (null != (resolver = BuilderAux.viewMatcher.findMatch(retKalss))) {
 			return new ViewRestAction(effectiveURI, method, object,
