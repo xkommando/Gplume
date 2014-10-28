@@ -61,7 +61,7 @@ class SimpleActionBuilder {
 	 * @see com.caibowen.gplume.web.actions.RestAction
 	 */
 	public static IAction buildAction(final String uri, @Nonnull Object object,
-			Method method) {
+			final Method method) {
 		/**
 		 * set to null to indicate the static method and avoid methodhandle binding
 		 */
@@ -82,7 +82,7 @@ class SimpleActionBuilder {
 					new Function<Integer, IAction>() {
 						@Override
 						public IAction apply(Integer i) {
-							return new SimpleAction(uri, handle$);
+							return new SimpleAction(uri, handle$, method);
 						}
 					});
 

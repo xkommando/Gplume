@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ *
+ * alternative to GFilter, aim at server before Servlet 2.3
  * @author BowenCai
  */
 public class GServlet extends HttpServlet {

@@ -37,13 +37,18 @@ import java.lang.reflect.Field;
 public class ReqSetter implements IStateSetter {
 
 	private static final long serialVersionUID = 8117499794418545935L;
+
+
+    /**
+     * get value from RequestContext
+     */
 	@Nonnull 
 	protected final MethodHandle getter;
 	
 	@Nonnull
 	protected final String name;
 	
-	// Accessible field
+	// field to be set
 	@Nonnull 
 	protected final Field field;
 	

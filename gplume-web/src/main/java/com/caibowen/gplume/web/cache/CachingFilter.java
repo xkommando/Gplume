@@ -49,6 +49,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caibowen.gplume.cache.ICacheProvider;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
 
 
 /**
@@ -83,7 +85,8 @@ import com.caibowen.gplume.cache.ICacheProvider;
  * @author BowenCai
  */
 public abstract class CachingFilter implements Filter {
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(CachingFilter.class);
     /**
      * The cache holding the web pages. Ensure that all threads for a given
      * cache id are using the same instance of this.
@@ -116,7 +119,7 @@ public abstract class CachingFilter implements Filter {
 				// Page is not cached - build the response, cache it, and
 				// send to client
 				pageData = buildPageData(request, response, chain);
-System.out.println("building new cache[" + pageData.getDateCreated().getTime() + "]");
+                LOG.debug("building new cache[" + pageData.getDateCreated().getTime() + "]");
 				if (pageData.isOk()) {
 					cacheProvider.putAsync(key, pageData);
 				}
@@ -138,7 +141,6 @@ System.out.println("building new cache[" + pageData.getDateCreated().getTime() +
      * @return a Serializable value object for the page or page fragment
      * @throws ServletException 
      * @throws IOException 
-     * @throws AlreadyGzippedException
      *             if an attempt is made to double gzip the body
      * @throws Exception
      */
@@ -172,8 +174,7 @@ System.out.println("building new cache[" + pageData.getDateCreated().getTime() +
      * @param pageInfo
      * @throws IOException
      * @throws DataFormatException
-     * @throws ResponseHeadersNotModifiableException
-     * 
+     *
      */
     protected void writeResponse(final HttpServletRequest request,
             final HttpServletResponse response, final PageData pageInfo)
@@ -255,11 +256,11 @@ System.out.println("building new cache[" + pageData.getDateCreated().getTime() +
             if (var instanceof String) {
             	
                 if (setHeaders.contains(name)) {
-System.out.println("addHeader " + name + "  " + (String)var);
+                    LOG.debug("addHeader " + name + "  " + (String)var);
                     response.addHeader(name, (String)var);
                 } else {
                     setHeaders.add(name);
-System.out.println("addHeader " + name + "  " + (String)var);
+                    LOG.debug("addHeader " + name + "  " + (String)var);
                     response.setHeader(name, (String)var);
                 }
                 
@@ -267,23 +268,22 @@ System.out.println("addHeader " + name + "  " + (String)var);
             	
                 if (setHeaders.contains(name)) {
 
-System.out.println("addDateHeader " + name + "  " + (Long)var);
+                    LOG.debug("addDateHeader " + name + "  " + (Long)var);
                     response.addDateHeader(name, (Long) var);
                 } else {
                     setHeaders.add(name);
 
-System.out.println("setDateHeader " + name + "  " + (Long)var);
+                    LOG.debug("setDateHeader " + name + "  " + (Long)var);
                     response.setDateHeader(name, (Long)var);
                 }
 			} else if (var instanceof Integer) {
                 if (setHeaders.contains(name)) {
 
-System.out.println("addIntHeader " + name + "  " + (Integer)var);
+                    LOG.debug("addIntHeader " + name + "  " + (Integer)var);
                     response.addIntHeader(name, (Integer)var);
                 } else {
                     setHeaders.add(name);
-
-System.out.println("setIntHeader " + name + "  " + (Integer)var);
+                    LOG.debug("setIntHeader " + name + "  " + (Integer)var);
                     response.setIntHeader(name, (Integer)var);
                 }
 			} else {

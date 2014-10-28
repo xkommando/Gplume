@@ -63,13 +63,21 @@ public class DefaultErrorHandler implements IErrorHandler {
 //	some form of internal error. For example, the web server could be overloaded 
 //	and therefore unable to handle requests properly.
 
-
     @Override
     public void error(RequestContext ctx, int code) {
         try {
             ctx.response.sendError(code);
         } catch (Exception e) {
             LOG.error("error sending error [" + code + "] \r\n " + ctx.toString());
+        }
+    }
+    @Override
+    public void error(RequestContext ctx, int code, String message) {
+        try {
+            ctx.response.sendError(code, message);
+        } catch (Exception e) {
+            LOG.error("error sending error [" + code + "] message ["
+                    + message + "]\r\n " + ctx.toString());
         }
     }
 
@@ -80,6 +88,7 @@ public class DefaultErrorHandler implements IErrorHandler {
 		if (requestContext.response.isCommitted()) {
 			try {
 				requestContext.response.sendError(403, "error handling 403: response has been committed");
+                return;
 			} catch (Exception e) {
 				LOG.error("error setting response to 403: response already committed\n"
 										+ "error sending error response; Message[" + e.getMessage() + "]");

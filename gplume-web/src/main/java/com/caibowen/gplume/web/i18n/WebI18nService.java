@@ -15,14 +15,16 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.i18n;
 
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
-import com.caibowen.gplume.i18n.Dialect;
-import com.caibowen.gplume.i18n.I18nService;
-import com.caibowen.gplume.i18n.NativePackage;
+import com.caibowen.gplume.event.IAppListener;
+import com.caibowen.gplume.i18n.*;
 import com.caibowen.gplume.web.RequestContext;
 
 /**
@@ -30,55 +32,35 @@ import com.caibowen.gplume.web.RequestContext;
  * @author BowenCai
  *
  */
-public class WebI18nService extends I18nService {
+public class WebI18nService extends GenI18nService implements IWebI18nService {
 
 	private static final long serialVersionUID = 4782972973617957393L;
 
-	public static final String ALTERNATIVE = "gplume_web_alternative_dialect";
-	
-	/**
-	 * attach this package to the session or request
-	 * @param pkg
-	 * @param context
-	 */
-	public void attachPkgTo(@Nonnull NativePackage pkg, RequestContext context) {
+    protected NativePackage findPkg(RequestContext context) {
+        Dialect dialect = resolve(context.request.getHeader("accept-language"));
 
-		HttpSession session = context.request.getSession(true);
-		if (session != null) {
-			session.setAttribute(NativePackage.NAME, pkg);
-			session.setAttribute(ALTERNATIVE, getSupportedDialects());
-		} else {
-			context.putAttr(NativePackage.NAME, pkg);
-			context.putAttr(ALTERNATIVE, getSupportedDialects());
-		}
+        NativePackage pkg = getPkg(dialect);
+        if (pkg == null) {
+            pkg = getDefaultPkg();
+        }
+        return pkg;
 	}
-	
-	public void attachPkgTo(RequestContext context) {
-		
-		HttpSession session = context.request.getSession(true);
+
+    /**
+     * find and attach pkg to session and request
+     *
+     * @param ctx
+     */
+	@Override
+    public void attachPkgTo(RequestContext ctx) {
+		HttpSession session = ctx.request.getSession(true);
 		if (session != null) {
 			if (null == session.getAttribute(NativePackage.NAME)) {
-				Dialect dialect = resolve(context.request.getHeader("accept-language"));
-				if (dialect == Dialect.Unknown) {
-					dialect = Dialect.SimplifiedChinese;
-				}
-				NativePackage pkg = pkgTable.get(dialect);
-				if (pkg == null) {
-					pkg = getDefaultPkg();
-				}
 				Set<Dialect> all = getSupportedDialects();
-				session.setAttribute(NativePackage.NAME, pkg);
-				session.setAttribute(ALTERNATIVE, all);
+				session.setAttribute(NativePackage.NAME, findPkg(ctx));
+				session.setAttribute(ALTERNATIVES, all);
 			}
-		} else {
-			Dialect dialect = resolve(context.request.getHeader("accept-language"));
-			if (dialect == Dialect.Unknown) {
-				dialect = Dialect.SimplifiedChinese;
-			}
-			context.putAttr(ALTERNATIVE, getSupportedDialects());
-			context.putAttr(NativePackage.NAME, pkgTable.get(dialect));
-		}
+        }
+    }
 
-	}
-	
 }

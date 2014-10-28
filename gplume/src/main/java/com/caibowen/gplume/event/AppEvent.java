@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.event;
 
+import javax.annotation.Nonnull;
 import java.util.EventObject;
 
 /**
@@ -33,7 +34,7 @@ import java.util.EventObject;
 @SuppressWarnings("serial")
 public abstract class AppEvent extends EventObject {
 
-	public AppEvent(Object arg0) {
+	public AppEvent(@Nonnull Object arg0) {
 		super(arg0);
 	}
 

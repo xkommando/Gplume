@@ -10,7 +10,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!--infrastructure: IoC Container, Broadcaster, I18nService, and miscellany -->
+    <!--infrastructure: IoC Container, Broadcaster, GenI18nService, and miscellany -->
     <artifactId>gplume</artifactId>
     <version>2.0</version>
     <packaging>jar</packaging>

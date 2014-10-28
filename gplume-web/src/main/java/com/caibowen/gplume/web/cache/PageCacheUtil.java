@@ -108,7 +108,7 @@ public final class PageCacheUtil {
 
         //Check for 0 length body
         if (compressedBytes.length == EMPTY_GZIPPED_CONTENT_SIZE) {
-LOG.debug("===>>> DEBUG " + request.getRequestURL() + " resulted in an empty response.");
+            LOG.debug(request.getRequestURL() + " resulted in an empty response.");
             return true;
         } else {
             return false;
@@ -134,7 +134,7 @@ LOG.debug("===>>> DEBUG " + request.getRequestURL() + " resulted in an empty res
         //Check for NO_CONTENT
         if (responseStatus == HttpServletResponse.SC_NO_CONTENT) {
 
-        	LOG.debug("====>>> DEBUG  " + request.getRequestURL() + " resulted in a " + HttpServletResponse.SC_NO_CONTENT
+        	LOG.debug(request.getRequestURL() + " resulted in a " + HttpServletResponse.SC_NO_CONTENT
         + " response. Removing message body in accordance with RFC2616.");
             return true;
         }

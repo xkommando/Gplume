@@ -29,6 +29,7 @@ package com.caibowen.gplume.web;
 public interface IErrorHandler {
 
     public void error(RequestContext ctx, int code);
+    public void error(RequestContext ctx, int code, String message);
 
 	public void http403(RequestContext ctx);
 	

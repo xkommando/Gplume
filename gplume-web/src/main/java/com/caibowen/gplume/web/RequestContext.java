@@ -56,13 +56,13 @@ public class RequestContext implements Serializable {
 	private long timeModified;
 
 //for test only
-	public RequestContext() {
+	private RequestContext() {
 
 		this.request = null;
 		this.response = null;
 		this.controlCenter = null;
 		this.httpmMthod = null;
-		this.path = null;//_u.substring(request.getContextPath().length());
+		this.path = null;
 	}
 	
 	/**
@@ -108,7 +108,6 @@ public class RequestContext implements Serializable {
 		try {
 			dispatcher.forward(request, response);
 		} catch (ServletException | IOException e) {
-			
 			throw new RuntimeException("In request for [" 
 					+ this.path + "] Error forwarding[" + jspView + "]", e);
 		}
@@ -139,6 +138,14 @@ public class RequestContext implements Serializable {
         }
     }
 
+    public void error(int code) {
+        controlCenter.errorHandler.error(this, code);
+    }
+
+    public void error(int code, String message) {
+        controlCenter.errorHandler.error(this, code, message);
+    }
+
 	/**
 	 * AKA, sendRedirect
 	 * 
@@ -154,9 +161,11 @@ public class RequestContext implements Serializable {
 		}
 	}
 
+//    private static final String NAME = RequestContext.class.getName();
 	/**
 	 * pass this request to other handle
 	 * @WARN short circuit!
+     *
 	 * @param actionName
 	 */
 	public void passOff(String actionName) {

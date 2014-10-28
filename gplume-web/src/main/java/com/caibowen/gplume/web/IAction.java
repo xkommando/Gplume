@@ -17,6 +17,7 @@ package com.caibowen.gplume.web;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 
 
 /**
@@ -35,24 +36,20 @@ public interface IAction extends Serializable {
 	public static final String ACTION_NAME = IAction.class.getName();
 	
 	/**
-	 * 
 	 * @param requestContext
 	 * @throws Throwable
 	 */
 	public void perform(RequestContext requestContext) throws Throwable;
 
-	/**
-	 * if this method is not static, the returned method handle is binded to the object
-	 * and can be invoked without the object parameter
-	 * 
-	 * @return method handle
-	 */
-    @Deprecated
-	public MethodHandle getMethodHandle();
-	
+    /**
+     *
+     * @return underlying controller object
+     */
+    Method method();
+
 	/**
 	 * 
 	 * @return the uri for routing
 	 */
-	public String getEffectiveURI();
+	String effectiveURI();
 }

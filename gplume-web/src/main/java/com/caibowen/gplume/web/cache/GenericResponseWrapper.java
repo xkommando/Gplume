@@ -61,9 +61,7 @@ import com.caibowen.gplume.misc.logging.LoggerFactory;
  * that the target of the request has delivered its response.
  * <p/>
  * It uses the Wrapper pattern.
- *
- * @author <a href="mailto:gluck@thoughtworks.com">Greg Luck</a>
- * @version $Id: GenericResponseWrapper.java 793 2008-10-07 07:28:03Z gregluck $
+
  */
 public class GenericResponseWrapper extends HttpServletResponseWrapper implements Serializable {
 

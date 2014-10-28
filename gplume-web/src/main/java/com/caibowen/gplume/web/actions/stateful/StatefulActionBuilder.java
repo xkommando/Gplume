@@ -67,8 +67,13 @@ public class StatefulActionBuilder {
                     BuilderAux.hash(uri, handle$, gen),
                     new Function<Integer, IAction>() {
                         @Override
+<<<<<<< HEAD
                         public IAction apply(Integer s) {
                             return new SimpleStatefulAction(uri, handle$, gen);
+=======
+                        public IAction build() {
+                            return new SimpleStatefulAction(uri, handle$, method, gen);
+>>>>>>> 7d15d32cf7202ddd3b9d32e3c9a8c49b5673fcb0
                         }
                     });
         }

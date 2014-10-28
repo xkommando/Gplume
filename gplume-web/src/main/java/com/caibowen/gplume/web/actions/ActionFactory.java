@@ -122,7 +122,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 			IAction action = BuilderProxy
 							.buildAction(uri, method, ctrl);
 			
-			checkURI(action.getEffectiveURI());
+			checkURI(action.effectiveURI());
 			HttpMethod[] methods = info.httpMethods();
 //			System.out.print(uri);
 			for (HttpMethod hm : methods) {
@@ -130,7 +130,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 				if (LOG.isDebugEnabled())
 					LOG.debug("adding action from method[{0}]"
 							+ " URI [{1}] Method [{2}]"
-							, method.toString(), action.getEffectiveURI(), hm);
+							, method.toString(), action.effectiveURI(), hm);
 				
 				mappers[hm.ordinal()].add(action);
 			} // methods

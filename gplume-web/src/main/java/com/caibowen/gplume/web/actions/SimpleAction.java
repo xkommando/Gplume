@@ -19,6 +19,7 @@ import com.caibowen.gplume.web.IAction;
 import com.caibowen.gplume.web.RequestContext;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 
 
 /**
@@ -41,10 +42,13 @@ public class SimpleAction implements IAction {
 	 * controller object shall be binded to this handle if it is not a static function
 	 */
 	protected final MethodHandle		methodHandle;
+
+    protected final Method _m;
 	
-	public SimpleAction(String u, MethodHandle handle) {
+	public SimpleAction(String u, MethodHandle handle, Method mt) {
 		effectiveURI = u;
-		this.methodHandle = handle;
+		methodHandle = handle;
+        _m = mt;
 	}
 	
 	@Override
@@ -54,14 +58,13 @@ public class SimpleAction implements IAction {
 		methodHandle.invoke(requestContext);
 	}
 
-	@Override
-    @Deprecated
-	public MethodHandle getMethodHandle() {
-		return methodHandle;
-	}
+    @Override
+    public Method method() {
+        return _m;
+    }
 	
 	@Override
-	public String getEffectiveURI() {
+	public String effectiveURI() {
 		return effectiveURI;
 	}
 }

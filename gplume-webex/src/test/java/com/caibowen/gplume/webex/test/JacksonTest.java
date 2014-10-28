@@ -17,23 +17,13 @@
 
 package com.caibowen.gplume.webex.test;
 
-import com.caibowen.gplume.common.Base64;
-import com.caibowen.gplume.common.Codecs;
 import com.caibowen.gplume.common.ImmutableArrayMap;
-import com.caibowen.gplume.web.annotation.Intercept;
-import com.caibowen.gplume.webex.json.Jsons;
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonArrayFormatVisitor;
+import com.caibowen.gplume.webex.Jsons;
 import org.junit.Test;
 
-import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @Auther bowen.cbw

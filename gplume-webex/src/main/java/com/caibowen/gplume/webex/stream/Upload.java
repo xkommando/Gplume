@@ -17,6 +17,7 @@
 
 package com.caibowen.gplume.webex.stream;
 
+import com.caibowen.gplume.context.InputStreamCallback;
 import com.caibowen.gplume.context.InputStreamProvider;
 import com.caibowen.gplume.context.InputStreamSupport;
 import com.caibowen.gplume.web.RequestContext;
@@ -30,8 +31,16 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * <pre>
+ * usage:
+ * add enctype  &lt;form enctype="multipart/form-data" &gt;
+ *   Upload.open(requestContext).withPath("icon", new InputStreamCallback() ...
  *
- * @author bowen.cbw
+ *  Upload p = Upload.open(request);
+ *  p.withPath("icon 1", new InputStreamCallback()
+ *  p.withPath("icon 2", new InputStreamCallback()
+ *</pre>
+ *  @author bowen.cbw
  * @since 8/26/2014.
  */
 public class Upload extends InputStreamSupport {
@@ -66,7 +75,7 @@ public class Upload extends InputStreamSupport {
             }
 
             @Override
-            public String getContextPath() {
+            public String getRealPath(String p) {
                 throw new UnsupportedOperationException();
             }
         });

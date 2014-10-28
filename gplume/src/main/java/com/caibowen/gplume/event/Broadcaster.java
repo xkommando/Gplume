@@ -30,6 +30,8 @@ import com.caibowen.gplume.core.TypeTraits;
 import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
 /**
  * Register listener and broadcast event.
  * Listeners are stored in slots.
@@ -60,11 +62,11 @@ public class Broadcaster implements Serializable {
 	private static Broadcaster handle = null;	
 	private Broadcaster() {
 		slots = new HashMap<>(64);
-		hooks = new LinkedHashMap<>(32);
+		hooks = new LinkedHashMap<>(64);
 	}
 	
-	synchronized public static Broadcaster 
-	getInstance() {
+	synchronized public static Broadcaster
+    instance() {
 		if(handle == null) {
 			handle = new Broadcaster();
 		}
@@ -84,11 +86,12 @@ public class Broadcaster implements Serializable {
 	/**
 	 * add new event hook
 	 * @param hook
-	 * @param strongRef, maintain a strong ref or weakRef
+	 * @param isStrongRef, maintain a strong ref or weakRef
 	 * @return true if this set did not already contain the specified element
 	 */
 	public<T extends IEventHook> boolean 
 	register(T hook, boolean isStrongRef) {
+
 		Reference<? extends IEventHook> ref = 
 				isStrongRef ? new StrongRef<T>(hook) 
 							: new WeakRef<T>(hook);
@@ -240,13 +243,8 @@ public class Broadcaster implements Serializable {
 	 * @param event
 	 */
 	public<T extends AppEvent> void 
-	broadcast(T event) {
-		if (event == null) {
-			if (LOG.isDebugEnabled())
-				LOG.debug("null event");
-			return;
-		}
-		
+	broadcast(@Nonnull T event) {
+
 		Class<? extends AppEvent> eventClazz = event.getClass();
 
 		Map<Reference<? extends IAppListener<? extends AppEvent> >, Object> 
@@ -277,16 +275,18 @@ public class Broadcaster implements Serializable {
 				hk : hooks .entrySet()) {
 			
 			if (hk.getKey().get() != null) {
-				try {
-					IEventHook hook = hk.getKey().get();
-					if (hook != null) {
-						hook.catches(event);
-					}
-				} catch (Exception e) {
-					LOG.error("hook {0} catching event {1}", e, hk, event);
-				}
-			}
+                IEventHook hook = hk.getKey().get();
+                if (hook != null) {
+                    try {
+                        hook.catches(event);
+                    } catch (Exception e) {
+                        LOG.error("hook [{0}] catching event [{1}]", e, hk, event);
+                    }
+                }
+            }
 		}
+
+        LOG.debug("event [" + event + "] pusblished");
 	}
 	
 	/**

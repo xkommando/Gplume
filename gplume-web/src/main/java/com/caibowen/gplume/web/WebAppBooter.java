@@ -40,8 +40,7 @@ public class WebAppBooter implements ServletContextListener {
 	 * <li>set default locale, time zone</li> <li>build beans according to the
 	 * manifest file</li> <li>prepare localeService</li> <li>register all
 	 * listeners in the bean factory</li>
-	 * 
-	 * @see WebLocalPropertiesLoader
+	 *
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent event) {

@@ -43,7 +43,7 @@ public class ActionMapper<T extends IAction> implements Serializable {
 	public void 
 	add(final T action)throws IllegalArgumentException {
 
-		String s = action.getEffectiveURI();
+		String s = action.effectiveURI();
 		int len = s.length();
 		//  /*
 		if (s.charAt(len - 1) == '*') {

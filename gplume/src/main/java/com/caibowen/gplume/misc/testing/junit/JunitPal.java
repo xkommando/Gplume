@@ -28,7 +28,7 @@ import com.caibowen.gplume.misc.Str;
 /**
  * run with Junit4, will set up context and inject all properties for test instance
  * 
- * app-manifest.xml is specified in ManifestPath
+ * app-manifest.xml is specified in @ManifestPath
  * 
  * @author BowenCai
  *
@@ -38,7 +38,13 @@ public class JunitPal extends BlockJUnit4ClassRunner {
 	public JunitPal(Class<?> klass) throws InitializationError {
 		super(klass);
 	}
-	
+
+    /**
+     * create context, build beans and inject test object
+     *
+     * @return
+     * @throws Exception
+     */
 	@Override
 	protected Object createTest() throws Exception {
 		Object testObj = super.createTest();

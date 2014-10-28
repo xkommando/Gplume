@@ -19,6 +19,10 @@ package com.caibowen.gplume.webex.json;
 
 import com.caibowen.gplume.webex.Result;
 
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author bowen.cbw
  * @since 8/21/2014.
@@ -54,6 +58,13 @@ public class JsonResult<T> implements Result<T> {
         this.data = data;
     }
 
+    public JsonResult(String key, Object value) {
+        this.code = 200;
+        final Map<String, Object> data = new HashMap<String, Object>(32);
+        data.put(key, value);
+        this.data = (T) data;
+    }
+
     @Override
     public int code() {
         return code;
@@ -71,5 +82,44 @@ public class JsonResult<T> implements Result<T> {
 
     public boolean ok() {
         return code == 200;
+    }
+
+    public JsonResult put(String key, Object value) {
+        if (this.data == null) this.data = (T) new HashMap<String, Object>(32        );
+        final Map<String, Object> data = (Map<String, Object>) this.data;
+        data.put(key, value);
+        return this;
+    }
+
+    public JsonResult putId(long data) {
+        return put("id", data);
+    }
+
+    public JsonResult putList(@Nonnull Object data) {
+        return put("list", data);
+    }
+
+    public JsonResult putSuccess(boolean data) {
+        return put("success", data);
+    }
+
+    public JsonResult putTimestamp(long data) {
+        return put("timestamp", data);
+    }
+
+    public static JsonResult list(@Nonnull Object data) {
+        return new JsonResult("list", data);
+    }
+
+    public static JsonResult<Boolean> success(boolean data) {
+        return new JsonResult("success", data);
+    }
+
+    public static JsonResult<Long> id(long data) {
+        return new JsonResult("id", data);
+    }
+
+    public static JsonResult<Long> timestamp(long data) {
+        return new JsonResult("timestamp", data);
     }
 }

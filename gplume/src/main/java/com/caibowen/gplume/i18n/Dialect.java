@@ -109,7 +109,7 @@ public enum Dialect {
 	
 	/**
 	 * 
-	 * @param loc
+	 * @param str
 	 * @return unknown if not found
 	 */
 	public static Dialect parseISO639_1(String str) {
@@ -122,7 +122,7 @@ public enum Dialect {
 	}
 	public static void main(String...a) {
 		String head = "nl,es-es;q=0.8,zh-cn;q=0.6,zh-tw;q=0.4,en-us;q=0.2";
-		System.out.println(I18nService.resolve(head));
+		System.out.println(new DefaultDialectResolver().resolve(head));
 	}
 	/**
 	 * 

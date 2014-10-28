@@ -15,7 +15,7 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.webex.json;
+package com.caibowen.gplume.webex;
 
 import com.caibowen.gplume.misc.Str;
 import com.fasterxml.jackson.core.JsonGenerator;
