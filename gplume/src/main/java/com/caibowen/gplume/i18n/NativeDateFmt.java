@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import com.caibowen.gplume.cache.mem.SimpleCache;
-import com.caibowen.gplume.common.CacheBuilder;
+import com.caibowen.gplume.common.Function;
 import com.caibowen.gplume.common.Pair;
 
 /**
@@ -119,9 +119,9 @@ public class NativeDateFmt implements Serializable{
 	 */
 	public Pair<String,String> toMonthYear(final Date date) {
 
-		return cacheMonthYear.get(date, new CacheBuilder<Pair<String,String>>() {
+		return cacheMonthYear.get(date, new Function<Date, Pair<String,String>>() {
 			@Override
-			public Pair<String, String> build() {
+			public Pair<String, String> apply(Date d) {
 				Calendar calendar = Calendar.getInstance();
 				calendar.setTime(date);
 				int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -144,10 +144,10 @@ public class NativeDateFmt implements Serializable{
 	 * @return
 	 */
 	public String toDateTime(final Date date) {
-		return cacheDateTime.get(date, new CacheBuilder<String>() {
+		return cacheDateTime.get(date, new Function<Date, String>() {
 			@SuppressWarnings("synthetic-access")
 			@Override
-			public String build() {
+			public String apply(Date d) {
 				return DateTimeFormat.format(date);
 			}
 		});
@@ -160,10 +160,10 @@ public class NativeDateFmt implements Serializable{
 	 */
 	public String toMonthPost(final Long info) {
 		
-		return cacheMonthName.get(info, new CacheBuilder<String>() {
+		return cacheMonthName.get(info, new Function<Long, String>() {
 			@SuppressWarnings("synthetic-access")
 			@Override
-			public String build() {
+			public String apply(Long l) {
 				int month = (int)(info >> 32);
 				int number = info.intValue();
 				StringBuilder builder = new StringBuilder(48);
@@ -181,10 +181,10 @@ public class NativeDateFmt implements Serializable{
 	 * @return
 	 */
 	public String toMonthDay(final Date date) {
-		return cacheMonthDay.get(date, new CacheBuilder<String>() {
+		return cacheMonthDay.get(date, new Function<Date, String>() {
 			@SuppressWarnings("synthetic-access")
 			@Override
-			public String build() {
+			public String apply(Date d) {
 				@SuppressWarnings("deprecation")
 				int m = date.getMonth() + 1;
 				@SuppressWarnings("deprecation")

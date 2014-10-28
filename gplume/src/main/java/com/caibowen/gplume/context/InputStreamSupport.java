@@ -48,9 +48,9 @@ public class InputStreamSupport {
         try {
             inputStream = streamProvider.getStream(path);
             if (inputStream.available() < 1)
-                throw new IllegalStateException("not avaliable");
+                throw new IllegalStateException("not available[" + path + "] ");
         } catch (Exception e) {
-            throw new IllegalArgumentException("resource unavailable[" + path
+            throw new IllegalArgumentException("resource unavailable [" + path
                     + "] with provider [" + streamProvider.getClass().getName()
                     + "]", e);
 		}

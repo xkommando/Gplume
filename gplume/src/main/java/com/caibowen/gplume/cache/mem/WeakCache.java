@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import com.caibowen.gplume.common.CacheBuilder;
+import com.caibowen.gplume.common.Function;
 
 
 /**
@@ -69,10 +69,10 @@ public final class WeakCache<K, V> implements Serializable {
 		return value;
 	}
 	
-	public V get(K key, CacheBuilder<V> builder) {
+	public V get(K key, Function<K, V> builder) {
 		if (map == null) {
 			map = new WeakHashMap<K, WeakReference<V>>();
-			V var = builder.build();
+			V var = builder.apply(key);
 			synchronized (map) {
 				map.put(key, new WeakReference<V>(var));	
 			}
@@ -82,7 +82,7 @@ public final class WeakCache<K, V> implements Serializable {
 		WeakReference<V> reference = this.map.get(key);
 		V value;
 		if (reference == null) {
-			value = builder.build();
+			value = builder.apply(key);
 			synchronized (map) {
 				map.put(key, new WeakReference<V>(value));	
 			}
@@ -90,7 +90,7 @@ public final class WeakCache<K, V> implements Serializable {
 		} else {
 			value = reference.get();
 			if (value == null) {
-				value = builder.build();
+				value = builder.apply(key);
 				synchronized (map) {
 					this.map.put(key, new WeakReference<V>(value));	
 				}

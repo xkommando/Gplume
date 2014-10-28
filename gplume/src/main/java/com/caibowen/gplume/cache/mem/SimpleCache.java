@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.WeakHashMap;
 
-import com.caibowen.gplume.common.CacheBuilder;
+import com.caibowen.gplume.common.Function;
 
 /**
  * the cache entries are stored in two map: ConcurrentHashMap as eden
@@ -73,16 +73,13 @@ public final class SimpleCache<K,V> implements Serializable {
 	
 	/**
 	 * get value, create if not presented
-	 * @param k
-	 * @param calculator calculate the new value
-	 * @return
 	 */
-	public V get(K k, CacheBuilder<V> builder) {
+	public V get(K k, Function<K, V> builder) {
 		V v = this.eden.get(k);
 		if (v == null) {
 			synchronized (this) {
 				if (longterm == null) {
-					v = builder.build();
+					v = builder.apply(k);
 					this.eden.put(k, v);
 					return v;
 				} else {
@@ -90,7 +87,7 @@ public final class SimpleCache<K,V> implements Serializable {
 					if (v != null) {
 						this.eden.put(k, v);
 					} else {
-						v = builder.build();
+						v = builder.apply(k);
 						this.eden.put(k, v);
 						return v;
 					}

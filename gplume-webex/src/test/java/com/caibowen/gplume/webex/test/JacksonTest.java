@@ -57,16 +57,16 @@ public class JacksonTest {
 //        Charset s = Charset.defaultCharset();
 //        System.out.println(s.name());
 
-        ImmutableArrayMap map = new ImmutableArrayMap(new Object[][]{
-                {"key1", "val1"},
-                {"key2", 456},
-                {"789", "val3"}
-        });
-        String js = Jsons.serial(map);
-        Map m = Jsons.deserial(js, HashMap.class);
-        ImmutableArrayMap mm = new ImmutableArrayMap(m);
-        System.out.println(js);
-        System.out.println(mm.toJson());
-        System.out.println(mm);
+//        ImmutableArrayMap map = new ImmutableArrayMap(new Object[][]{
+//                {"key1", "val1"},
+//                {"key2", 456},
+//                {"789", "val3"}
+//        });
+//        String js = Jsons.serial(map);
+//        Map m = Jsons.deserial(js, HashMap.class);
+//        ImmutableArrayMap mm = new ImmutableArrayMap(m);
+//        System.out.println(js);
+//        System.out.println(mm.toJson());
+//        System.out.println(mm);
     }
 }

@@ -21,9 +21,24 @@ package com.caibowen.gplume.misc;
  * @author bowen.cbw
  * @since 8/26/2014.
  */
-public final class Bits {
+public final class Bytes {
 
-    private Bits(){}
+    private Bytes(){}
+
+    public static byte[] int2byte(int[]src) {
+        int srcLength = src.length;
+        byte[]dst = new byte[srcLength << 2];
+
+        for (int i=0; i<srcLength; i++) {
+            int x = src[i];
+            int j = i << 2;
+            dst[j++] = (byte) ((x >>> 24) & 0xff);
+            dst[j++] = (byte) ((x >>> 16) & 0xff);
+            dst[j++] = (byte) ((x >>> 8) & 0xff);
+            dst[j++] = (byte) ((x >>> 0) & 0xff);
+        }
+        return dst;
+    }
 
     public static final class shorts {
         public static final short add(byte a, byte b) {
@@ -231,8 +246,8 @@ public final class Bits {
         byte[] head = new byte[18];
         head[0] = uniKey ? (byte)0x01 : (byte)0x00;
         head[1] = renewable ? (byte)0x01 : (byte)0x00;
-        Bits.ints.fill(head, 2, keyLife);
-        Bits.ints.fill(head, 6, authLife);
+        Bytes.ints.fill(head, 2, keyLife);
+        Bytes.ints.fill(head, 6, authLife);
         return head;
     }
 

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.actions.stateful;
 
-import com.caibowen.gplume.common.CacheBuilder;
+import com.caibowen.gplume.common.Function;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.web.IAction;
 import com.caibowen.gplume.web.IViewResolver;
@@ -65,9 +65,9 @@ public class StatefulActionBuilder {
 
             return BuilderAux.actMap.get(
                     BuilderAux.hash(uri, handle$, gen),
-                    new CacheBuilder<IAction>() {
+                    new Function<Integer, IAction>() {
                         @Override
-                        public IAction build() {
+                        public IAction apply(Integer s) {
                             return new SimpleStatefulAction(uri, handle$, gen);
                         }
                     });
@@ -81,9 +81,9 @@ public class StatefulActionBuilder {
             throw new IllegalArgumentException("cannot find resolver for method[" + method + "]");
 
         return BuilderAux.actMap.get(BuilderAux.hash(uri, method, object, gen, hasReq),
-                        new CacheBuilder<IAction>() {
+                        new Function<Integer, IAction>() {
             @Override
-            public IAction build() {
+            public IAction apply(Integer i) {
                 return new
                         ViewStatefulAction(uri, method, object, hasReq, gen, resolver);
             }

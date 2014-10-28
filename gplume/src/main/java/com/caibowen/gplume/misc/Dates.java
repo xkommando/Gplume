@@ -22,7 +22,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.caibowen.gplume.cache.mem.WeakCache;
-import com.caibowen.gplume.common.CacheBuilder;
+import com.caibowen.gplume.common.Function;
 
 public class Dates {
 
@@ -33,9 +33,9 @@ public class Dates {
 		DATE_FORMAT_ISO8601.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 	public static String iso8601(final Date date) {
-		return CACHE_ISO8601.get(date, new CacheBuilder<String>() {
+		return CACHE_ISO8601.get(date, new Function<Date, String>() {
 			@Override
-			public String build() {
+			public String apply(Date d) {
 				return DATE_FORMAT_ISO8601.format(date);
 			}
 		});
@@ -45,9 +45,9 @@ public class Dates {
 	static final SimpleDateFormat RFC822_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
 	
 	public static String rfc822(final Date date) {
-		return CACHE_RFC822.get(date, new CacheBuilder<String>() {
+		return CACHE_RFC822.get(date, new Function<Date, String>() {
 			@Override
-			public String build() {
+			public String apply(Date d) {
 				return RFC822_FORMAT.format(date);
 			}
 		});

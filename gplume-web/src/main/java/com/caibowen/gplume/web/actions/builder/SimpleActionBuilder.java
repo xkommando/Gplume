@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.actions.builder;
 
-import com.caibowen.gplume.common.CacheBuilder;
+import com.caibowen.gplume.common.Function;
 import com.caibowen.gplume.web.IAction;
 import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
@@ -79,9 +79,9 @@ class SimpleActionBuilder {
 					
 			return BuilderAux.actMap.get(
 					BuilderAux.hash(uri, handle, handle),
-					new CacheBuilder<IAction>() {
+					new Function<Integer, IAction>() {
 						@Override
-						public IAction build() {
+						public IAction apply(Integer i) {
 							return new SimpleAction(uri, handle$);
 						}
 					});
@@ -91,9 +91,9 @@ class SimpleActionBuilder {
 			final Object $$$ = object;
 			return BuilderAux.actMap.get(
 					BuilderAux.hash(uri, method, object, hasRequestContext),
-					new CacheBuilder<IAction>() {
+					new Function<Integer, IAction>() {
 						@Override
-						public IAction build() {
+						public IAction apply(Integer i) {
 							return new ViewAction(uri, $$, $$$,
 									hasRequestContext, resolver);
 						}

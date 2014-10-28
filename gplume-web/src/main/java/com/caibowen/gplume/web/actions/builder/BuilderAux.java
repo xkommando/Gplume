@@ -16,12 +16,11 @@
 package com.caibowen.gplume.web.actions.builder;
 
 import com.caibowen.gplume.cache.mem.WeakCache;
-import com.caibowen.gplume.common.CacheBuilder;
+import com.caibowen.gplume.common.Function;
 import com.caibowen.gplume.web.IAction;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.actions.Interception;
 import com.caibowen.gplume.web.actions.SimpleAction;
-import com.caibowen.gplume.web.actions.ViewAction;
 import com.caibowen.gplume.web.actions.stateful.StateGen;
 
 import javax.annotation.Nonnull;
@@ -87,9 +86,9 @@ public class BuilderAux implements Serializable{
 		final MethodHandle $ = Modifier.isStatic(method.getModifiers())
 				? handle : handle.bindTo(object);
 		
-		return incMap.get(hash(u, handle), new CacheBuilder<Interception>() {
+		return incMap.get(hash(u, handle), new Function<Integer, Interception>() {
 			@Override
-			public Interception build() {
+			public Interception apply(Integer i) {
 				return new Interception(u , $);
 			}
 		});

@@ -380,12 +380,15 @@ abstract class XMLAux implements IBeanAssembler {
 
         Object val = null;
         if (prop == null) {
-            Constructor<?> ctor = klass.getDeclaredConstructor();
-            if (!ctor.isAccessible()) {
-                ctor.setAccessible(true);
+            try {
+                Constructor<?> ctor = klass.getDeclaredConstructor();
+                if (!ctor.isAccessible()) {
+                    ctor.setAccessible(true);
+                }
+                val = ctor.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("cannot find default constructor");
             }
-            val = ctor.newInstance();
-
         } else {
             Object inTag;
             if (null != (inTag = inTag(prop))) {
