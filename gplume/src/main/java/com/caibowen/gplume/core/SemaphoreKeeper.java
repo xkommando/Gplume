@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
+import com.caibowen.gplume.annotation.Semaphored;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
-
-import com.caibowen.gplume.annotation.Semaphored;
 
 
 /**

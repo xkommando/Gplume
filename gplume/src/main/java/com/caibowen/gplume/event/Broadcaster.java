@@ -15,14 +15,6 @@
  ******************************************************************************/
 package com.caibowen.gplume.event;
 
-import java.io.Serializable;
-import java.lang.ref.Reference;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.caibowen.gplume.common.StrongRef;
 import com.caibowen.gplume.common.WeakRef;
 import com.caibowen.gplume.context.bean.IAssemlberVisitor;
@@ -31,6 +23,13 @@ import com.caibowen.gplume.misc.logging.Logger;
 import com.caibowen.gplume.misc.logging.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.io.Serializable;
+import java.lang.ref.Reference;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Register listener and broadcast event.

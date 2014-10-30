@@ -15,14 +15,14 @@
  ******************************************************************************/
 package com.caibowen.gplume.cache.mem;
 
+import com.caibowen.gplume.common.Function;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import com.caibowen.gplume.common.Function;
 
 
 /**

@@ -18,8 +18,6 @@ package com.caibowen.gplume.common;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
-
 /*
  *  benchmark
   K/V : String Integer

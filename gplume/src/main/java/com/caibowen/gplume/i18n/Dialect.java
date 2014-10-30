@@ -15,12 +15,11 @@
  ******************************************************************************/
 package com.caibowen.gplume.i18n;
 
-import java.util.HashMap;
-import java.util.Locale;
+import com.caibowen.gplume.misc.Str;
 
 import javax.annotation.Nonnull;
-
-import com.caibowen.gplume.misc.Str;
+import java.util.HashMap;
+import java.util.Locale;
 
 
 /**

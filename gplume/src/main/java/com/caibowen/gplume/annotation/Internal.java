@@ -13,4 +13,5 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.SOURCE)
 public @interface Internal {
+    String value() default "This class is for internal use only";
 }

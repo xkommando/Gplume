@@ -15,22 +15,20 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
+import com.caibowen.gplume.context.AppContext;
+import com.caibowen.gplume.misc.Klass;
+import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.misc.logging.Logger;
+import com.caibowen.gplume.misc.logging.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import com.caibowen.gplume.context.AppContext;
-import com.caibowen.gplume.context.bean.IBeanAssembler;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
-import com.caibowen.gplume.misc.Klass;
-import com.caibowen.gplume.misc.Str;
 
 /**
  * Implementation of JSR 330 @Inject and @Named

@@ -16,11 +16,11 @@
 package com.caibowen.gplume.cache.mem;
 
 
+import com.caibowen.gplume.common.Function;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.WeakHashMap;
-
-import com.caibowen.gplume.common.Function;
 
 /**
  * the cache entries are stored in two map: ConcurrentHashMap as eden

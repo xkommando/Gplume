@@ -15,11 +15,11 @@
  ******************************************************************************/
 package com.caibowen.gplume.cache.mem;
 
+import com.caibowen.gplume.common.Function;
+
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.caibowen.gplume.common.Function;
 
 /**
  * LRU cache based on a synchronized LinkedHashMap

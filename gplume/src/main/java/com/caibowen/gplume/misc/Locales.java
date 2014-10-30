@@ -15,9 +15,8 @@
  ******************************************************************************/
 package com.caibowen.gplume.misc;
 
-import java.util.Locale;
-
 import javax.annotation.Nullable;
+import java.util.Locale;
 
 
 /**

@@ -15,19 +15,13 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import com.caibowen.gplume.misc.Klass;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import com.caibowen.gplume.misc.Klass;
 
 /**
  * Traits type information, as well as providing reflection utilities

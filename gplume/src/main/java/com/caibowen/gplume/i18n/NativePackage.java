@@ -15,14 +15,13 @@
  ******************************************************************************/
 package com.caibowen.gplume.i18n;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Properties;
+import com.caibowen.gplume.misc.Str;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import com.caibowen.gplume.misc.Str;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Properties;
 
 
 /**
