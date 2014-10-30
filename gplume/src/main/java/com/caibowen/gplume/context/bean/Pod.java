@@ -15,8 +15,8 @@
  ******************************************************************************/
 package com.caibowen.gplume.context.bean;
 
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nullable;

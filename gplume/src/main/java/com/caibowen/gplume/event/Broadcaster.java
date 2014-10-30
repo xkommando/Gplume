@@ -19,9 +19,8 @@ import com.caibowen.gplume.common.StrongRef;
 import com.caibowen.gplume.common.WeakRef;
 import com.caibowen.gplume.context.bean.IAssemlberVisitor;
 import com.caibowen.gplume.core.TypeTraits;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
-
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.lang.ref.Reference;

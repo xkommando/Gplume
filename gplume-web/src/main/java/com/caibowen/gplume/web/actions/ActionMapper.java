@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.actions;
 
-import com.caibowen.gplume.common.URITrie;
+import com.caibowen.gplume.common.URIPrefixTrie;
 import com.caibowen.gplume.web.IAction;
 
 import java.io.Serializable;
@@ -38,7 +38,7 @@ public class ActionMapper<T extends IAction> implements Serializable {
 	private HashMap<String, T> fixedURIMap = new HashMap<>(128);
 
 	// versatile actors, match /xyz/* or /sadfj*
-	private URITrie<T> multiURIMap = new URITrie<>();
+	private URIPrefixTrie<T> multiURIMap = new URIPrefixTrie<>();
 	
 	public void 
 	add(final T action)throws IllegalArgumentException {

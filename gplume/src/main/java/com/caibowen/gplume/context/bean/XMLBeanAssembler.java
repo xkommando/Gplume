@@ -16,8 +16,8 @@
 package com.caibowen.gplume.context.bean;
 
 import com.caibowen.gplume.context.InputStreamCallback;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 

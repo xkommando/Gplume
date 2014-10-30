@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.common;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
@@ -78,17 +79,17 @@ trie80667221
  * @since 2014-1-14
  * @param <V>
  */
-public class URITrie<V> implements Serializable {
+public class URIPrefixTrie<V> implements Serializable {
 
 	private static final long serialVersionUID = 6420673991145017909L;
 	
 	// from 45 to 126, note that TABLE is for indexing only, not all chars are valid for URI
 	// partial URI pattern is "^/[\\w\\-\\.~/_]{1,64}$"
-	protected static final char[] TABLE;
-	protected static final char OFFSET;
+	static final char[] TABLE;
+	private static final char OFFSET;
 	
 	// 82
-	protected static final int TABLE_LEN;
+	static final int TABLE_LEN;
 	// input checking
 	protected static final Pattern PATTERN;
 	
@@ -105,7 +106,7 @@ public class URITrie<V> implements Serializable {
 	protected int size;
 	protected TrieNode root;
 	
-	public URITrie(){
+	public URIPrefixTrie(){
 		size = 0;
 		root = new TrieNode(null, (int)('/' - OFFSET));// the char '/'
 	}
@@ -116,7 +117,7 @@ public class URITrie<V> implements Serializable {
 	 * @param rt
 	 * @param sz
 	 */
-	protected URITrie(TrieNode rt, int sz){
+	protected URIPrefixTrie(@Nonnull TrieNode rt, int sz){
 		this.size = sz;
 		this.root = rt;
 	}
@@ -128,7 +129,7 @@ public class URITrie<V> implements Serializable {
 	 * @param v
 	 * @return true value added, false value already exists at the branch(position is taken)
 	 */
-	synchronized public boolean branch(final String k, V v) {
+	synchronized public boolean branch(@Nonnull final String k, @Nonnull V v) {
 		
 		if (!PATTERN.matcher(k).matches()) {
 			throw new IllegalArgumentException("string [" + k +"] must matches regex " +
@@ -150,26 +151,19 @@ public class URITrie<V> implements Serializable {
 			 *   @see TrieNode()
 			 *   @see TrieNode.nodeAt()
 			 */
+
 			/**
 			 * now subs is needed, initialize it.
 			 * @param idx
 			 * @return
 			 */
-//			public TrieNode nodeAt(int idx) {
-//				if (subs == null) {
-//					subs = new TrieNode[TABLE_LEN];
-//				}
-//				return subs[idx];
-//			}
 			if (ptr.subs == null) {
 				ptr.subs = new TrieNode[TABLE_LEN];
 				ptr.subs[_idx] = new TrieNode(ptr, _idx); 
 			} else if (ptr.subs[_idx] == null) {
 				ptr.subs[_idx] = new TrieNode(ptr, _idx);
 			}
-//			if (ptr.nodeAt(_idx) == null) {
-//				ptr.subs[_idx] = new TrieNode(ptr, _idx);
-//			}
+
 			ptr = ptr.subs[_idx];
 			seqIdx++;
 		}
@@ -185,14 +179,14 @@ public class URITrie<V> implements Serializable {
 	
 	/**
 	 * 
-	 *  add a value to the tree, do nothing if no matching branch exists
+	 *  add a value to the existing branch of the tree, do nothing if no existing matching branch exists
 	 * 
 	 * @param k
 	 * @param v
 	 * @return true added to existing tree, false no matching branch exists 
 	 * or value already exists at the branch(position is taken)
 	 */
-	synchronized public boolean join(final String k, V v) {
+	synchronized public boolean join(@Nonnull String k, @Nonnull V v) {
 		
 		if (!PATTERN.matcher(k).matches()) {
 			throw new IllegalArgumentException("string must matches regex ^/[\\w\\-\\.~/]{1,64}$");
@@ -229,7 +223,7 @@ public class URITrie<V> implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public V getVar(final String k) {
+	public V get(final String k) {
 		
 		// check here to avoid array-index-out-of-range error
 		
@@ -266,7 +260,7 @@ public class URITrie<V> implements Serializable {
 	 * @param k
 	 * @return sub-tree from this branch
 	 */
-	public URITrie<V> getBranch(final String k) {
+	public URIPrefixTrie<V> getBranch(final String k) {
 		
 		// check here to avoid array-index-out-of-range error
 		
@@ -297,18 +291,18 @@ public class URITrie<V> implements Serializable {
 			ptr = _node;
 			seqIdx++;
 		}
-		return new URITrie<>(ptr, countVar(ptr));
+		return new URIPrefixTrie<>(ptr, countVar(ptr));
 	}
 	
 	/**
 	 * 
 	 * @param k
-	 * @return  the first value at the branch that is covered by 'k'.<b>
+	 * @return  the first value at the branch that is covered by 'k'.
 	 *  AKA, first value from the branch in which the branch is the prefix of 'k'
 	 * 
 	 */
 	@SuppressWarnings("unchecked")
-	public V matchPrefix(final String k) {
+	public V matchPrefix(String k) {
 		
 		// check here to avoid array-index-out-of-range error
 		
@@ -388,7 +382,7 @@ public class URITrie<V> implements Serializable {
 		
 		if (ptr != null) {
 			int sz = countVar(ptr);
-			return 0 == sz ? null : new URITrie<V>(ptr, sz).toString(); // covers k
+			return 0 == sz ? null : new URIPrefixTrie<V>(ptr, sz).toString(); // covers k
 		} else {
 			return null;
 		}

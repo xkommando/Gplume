@@ -66,27 +66,18 @@ class TnxUtils {
     }
 
 
-    static void restoreConnection(Transaction tnx) {
+    static void restoreConnection(Transaction tnx) throws SQLException {
         Connection con = tnx.holder.currentCon;
-        try {
-            int _prevIso = tnx.prevISOLevel;
-            if (_prevIso != TransactionConfig.DEFAULT_ISOLATION
-                    && _prevIso != con.getTransactionIsolation())
-                con.setTransactionIsolation(_prevIso);
+        int _prevIso = tnx.prevISOLevel;
+        if (_prevIso != TransactionConfig.DEFAULT_ISOLATION
+                && _prevIso != con.getTransactionIsolation())
+            con.setTransactionIsolation(_prevIso);
 
-            if (tnx.resetAutoCommit)
-                con.setAutoCommit(true);
+        if (tnx.resetAutoCommit)
+            con.setAutoCommit(true);
 
-            if (con.isReadOnly())
-                con.setReadOnly(false);
-        } catch (SQLException ex) {
-//            logger.debug("Could not close JDBC Connection", ex);
-            throw new JdbcException(ex);
-        } catch (Throwable ex) {
-//            logger.debug("Unexpected exception on closing JDBC Connection", ex);
-            throw new JdbcException(ex);
-        }
-
+        if (con.isReadOnly())
+            con.setReadOnly(false);
     }
 
 }

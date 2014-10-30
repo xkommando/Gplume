@@ -3,16 +3,21 @@ package com.caibowen.gplume.jdbc.transaction;
 import com.caibowen.gplume.jdbc.ConnectionHolder;
 import com.caibowen.gplume.jdbc.JdbcException;
 import com.caibowen.gplume.jdbc.LocalList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
+ *
  * @author BowenCai
  * @since 28-10-2014.
  */
 public class TransactionManager {
+
+    private final Logger LOG = LoggerFactory.getLogger(TransactionManager.class);
 
     private DataSource dataSource;
     public void setDataSource(DataSource dataSource) {
@@ -31,6 +36,9 @@ public class TransactionManager {
         tnx.holder = TnxUtils.getHolderForTnx(dataSource);
 
         TnxUtils.prepareForTnx(config, tnx);
+        if (LOG.isDebugEnabled())
+            LOG.debug("Creating new transaction: {} ", config.toString());
+
         return tnx;
     }
 
@@ -40,17 +48,26 @@ public class TransactionManager {
             throw new IllegalStateException(
                     "Transaction is already completed - do not call commit or rollback more than once per transaction");
         if (tnx.isRollbackOnly()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Transactional code has requested rollback");
+            }
             rollback(tnx);
             return;
         }
+
         if (tnx.savepoint != null) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("Releasing transaction savepoint");
             tnx.releaseSavepoint();
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Committing JDBC transaction on Connection {}", tnx.holder.currentCon.toString());
         }
         try {
             tnx.holder.currentCon.commit();
         }
         catch (SQLException ex) {
-            // LOGGGG
+            LOG.debug("rolling back transaction on application exception", ex);
             rollback(tnx);
             throw new JdbcException("Could not commit JDBC transaction", ex);
         }
@@ -61,6 +78,9 @@ public class TransactionManager {
         if (tnx.completed) {
             throw new IllegalStateException(
                     "Transaction is already completed - do not call commit or rollback more than once per transaction");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Rolling back JDBC transaction on Connection: {}", tnx.holder.currentCon.toString());
         }
         if (tnx.savepoint != null)
             tnx.rollbackToSavepoint();
@@ -73,18 +93,33 @@ public class TransactionManager {
 
     private void complete(Transaction tnx) {
 
-        TnxUtils.restoreConnection(tnx);
+        try {
+            TnxUtils.restoreConnection(tnx);
+        } catch (SQLException ex) {
+            LOG.debug("Could not reset JDBC Connection after transaction", ex);
+            throw new JdbcException(ex);
+        } catch (Throwable ex) {
+            LOG.debug("Unexpected exception on closing JDBC Connection", ex);
+            throw new JdbcException(ex);
+        }
+
         ConnectionHolder holder = tnx.holder;
+        holder.tnxActive = false;
+
+        // leave one there
         if (LocalList.size() > 1) {
             LocalList.remove(holder);
         }
-        holder.tnxActive = false;
+
         try {
             holder.deRef();
-        } catch (SQLException e) {
-            /// LOG
-            throw new JdbcException(e);
+        } catch (SQLException ex) {
+            LOG.debug("Could not close JDBC Connection", ex);
         }
+        catch (Throwable ex) {
+            LOG.debug("Unexpected exception on closing JDBC Connection", ex);
+        }
+
         tnx.completed = true;
     }
 

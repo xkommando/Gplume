@@ -17,8 +17,8 @@ package com.caibowen.gplume.web.actions.builder;
 
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Klass;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.caibowen.gplume.web.IAction;
 import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;

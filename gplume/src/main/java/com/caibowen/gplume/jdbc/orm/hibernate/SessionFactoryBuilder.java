@@ -1,4 +1,4 @@
-package com.caibowen.gplume.misc.orm.hibernate;
+package com.caibowen.gplume.jdbc.orm.hibernate;
 /*******************************************************************************
  * Copyright 2014 Bowen Cai
  * 

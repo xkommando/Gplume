@@ -17,8 +17,8 @@
 
 package com.caibowen.gplume.i18n;
 
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author bowen.cbw

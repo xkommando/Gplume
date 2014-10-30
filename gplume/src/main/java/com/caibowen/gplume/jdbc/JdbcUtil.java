@@ -10,6 +10,9 @@
  ******************************************************************************/
 package com.caibowen.gplume.jdbc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.sql.DataSource;
@@ -24,6 +27,7 @@ import java.sql.*;
  */
 public class JdbcUtil {
 
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcUtil.class);
     /**
      * it is guaranteed that the connection returned is held by the connectionHolder on the top of the list
      * @param dataSource
@@ -34,9 +38,12 @@ public class JdbcUtil {
     public static Connection acquireConnection(@Nonnull DataSource dataSource) throws SQLException{
         ConnectionHolder holder = LocalList.last();
         if (holder != null) {
-            if (holder.currentCon == null)
+            if (holder.currentCon == null) {
+                LOG.debug("Fetching JDBC Connection from DataSource");
                 holder.currentCon = dataSource.getConnection();
+            }
         } else {
+            LOG.debug("Fetching JDBC Connection from DataSource");
             holder = new ConnectionHolder(dataSource.getConnection());
             LocalList.push(holder);
         }

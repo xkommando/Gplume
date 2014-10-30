@@ -19,8 +19,8 @@ import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.InputStreamCallback;
 import com.caibowen.gplume.context.InputStreamSupport;
 import com.caibowen.gplume.context.bean.InitializingBean;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

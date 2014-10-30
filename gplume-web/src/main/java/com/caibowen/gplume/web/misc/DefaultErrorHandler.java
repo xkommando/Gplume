@@ -15,8 +15,8 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.misc;
 
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.caibowen.gplume.web.IErrorHandler;
 import com.caibowen.gplume.web.RequestContext;
 

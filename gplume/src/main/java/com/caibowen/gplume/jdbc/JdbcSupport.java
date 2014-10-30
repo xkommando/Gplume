@@ -18,6 +18,8 @@ import com.caibowen.gplume.jdbc.transaction.Transaction;
 import com.caibowen.gplume.jdbc.transaction.TransactionCallback;
 import com.caibowen.gplume.jdbc.transaction.TransactionConfig;
 import com.caibowen.gplume.jdbc.transaction.TransactionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -32,7 +34,9 @@ import java.util.Map;
  *
  * @since 2013-5-6
  */
-public class JdbcSupport implements JdbcOperations {
+public class JdbcSupport implements JdbcOperations, TransactionSupport {
+
+    private final Logger LOG = LoggerFactory.getLogger(JdbcSupport.class);
 
     public JdbcSupport() {
     }
@@ -68,9 +72,11 @@ public class JdbcSupport implements JdbcOperations {
     public void setQueryTimeout(int queryTimeout) {
         this.queryTimeout = queryTimeout;
     }
+    @Override
     public DataSource getDataSource() {
         return dataSource;
     }
+    @Override
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
         transactionManager.setDataSource(dataSource);
@@ -82,15 +88,19 @@ public class JdbcSupport implements JdbcOperations {
         return execute(TransactionConfig.DEFAULT, operations);
     }
 
+    @Override
     public <T> T execute(TransactionConfig cfg, TransactionCallback<T> operations) {
         Transaction tnx = transactionManager.begin(cfg);
         T ret = null;
         try {
             ret = operations.withTransaction(tnx);
         } catch (SQLException se) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("Initiating transaction rollback transaction {} on SQLException", tnx.toString(), se);
             transactionManager.rollback(tnx);
             throw new JdbcException(se);
-        } catch (Exception e) {
+        } catch (Exception e) {if (LOG.isDebugEnabled())
+            LOG.debug("Initiating transaction rollback transaction {} on exception", tnx.toString(), e);
             transactionManager.rollback(tnx);
             throw new JdbcException(e);
         }
@@ -126,9 +136,21 @@ public class JdbcSupport implements JdbcOperations {
         try {
             JdbcUtil.releaseConnection(con);
         } catch (SQLException ex) {
-//            logger.debug("Could not close JDBC Connection", ex);
+            LOG.debug("Could not close JDBC Connection", ex);
         } catch (Throwable ex) {
-//            logger.debug("Unexpected exception on closing JDBC Connection", ex);
+            LOG.debug("Unexpected exception on closing JDBC Connection", ex);
+        }
+    }
+
+    private void checkWarnings(Statement st) throws SQLException {
+        if (LOG.isDebugEnabled()) {
+            SQLWarning warningToLog = st.getWarnings();
+            while (warningToLog != null) {
+                LOG.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState()
+                        + "', error code '" + warningToLog.getErrorCode()
+                        + "', message [" + warningToLog.getMessage() + "]");
+                warningToLog = warningToLog.getNextWarning();
+            }
         }
     }
 
@@ -138,7 +160,9 @@ public class JdbcSupport implements JdbcOperations {
         try {
             stmt.close();
         } catch (SQLException e) {
-            // LOGGGGGGGGGGGGGGGGGGG
+            LOG.trace("Could not close JDBC Statement", e);
+        } catch (Throwable e) {
+            LOG.trace("Unexpected exception on closing JDBC Statement", e);
         }
     }
 
@@ -157,8 +181,12 @@ public class JdbcSupport implements JdbcOperations {
         try {
             st = psc.createStatement(connection);
             configStatement(st);
-            boolean out = st.execute();
-            return out;
+            boolean noRs = st.execute();
+            checkWarnings(st);
+            if (noRs)
+                return st.getUpdateCount() > 0;
+            else
+                return true;
         } catch (SQLException e) {
             closeStmt(st);
             releaseConnection(connection);
@@ -177,6 +205,7 @@ public class JdbcSupport implements JdbcOperations {
             st = creator.createStatement(connection);
             configStatement(st);
             int[] out = st.executeBatch();
+            checkWarnings(st);
             return out;
         } catch (SQLException e) {
             JdbcUtil.closeStatement(st);
@@ -198,6 +227,7 @@ public class JdbcSupport implements JdbcOperations {
             ps = psc.createStatement(connection);
             configStatement(ps);
             ps.execute();
+            checkWarnings(ps);
             T ret = null;
             if (cols != null) {
                 rs = ps.getGeneratedKeys();
@@ -225,6 +255,7 @@ public class JdbcSupport implements JdbcOperations {
         try {
             ps = creator.createStatement(connection);
             ps.executeBatch();
+            checkWarnings(ps);
             List<T> ret = null;
             if (cols != null) {
                 rs = ps.getGeneratedKeys();
@@ -254,6 +285,7 @@ public class JdbcSupport implements JdbcOperations {
             ps = psc.createStatement(connection);
             configStatement(ps);
             rs = ps.executeQuery();
+            checkWarnings(ps);
             T o = null;
             if (rs.next()) {
                 o = mapper.extract(rs);
@@ -282,6 +314,7 @@ public class JdbcSupport implements JdbcOperations {
             ps = psc.createStatement(connection);
             configStatement(ps);
             rs = ps.executeQuery();
+            checkWarnings(ps);
             List<T> ls = new ArrayList<>(8);
             while (rs.next()) {
                 ls.add(mapper.extract(rs));

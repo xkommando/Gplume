@@ -57,7 +57,7 @@ public class Transaction {
         this.rollbackOnly = rollbackOnly;
     }
 
-    public void rollbackToSavepoint() {
+    void rollbackToSavepoint() {
         rollback(this.savepoint);
     }
 

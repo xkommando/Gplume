@@ -17,8 +17,8 @@
 package com.caibowen.gplume.context;
 
 import com.caibowen.gplume.misc.Str;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;

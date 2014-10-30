@@ -18,8 +18,8 @@ package com.caibowen.gplume.core;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str;
-import com.caibowen.gplume.misc.logging.Logger;
-import com.caibowen.gplume.misc.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
