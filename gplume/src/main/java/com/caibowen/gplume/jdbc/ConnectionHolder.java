@@ -30,7 +30,7 @@ public class ConnectionHolder {
 
     public void deRef() throws SQLException {
         refCount--;
-        if (!tnxActive && refCount == 0 && currentCon != null) {
+        if (!tnxActive && refCount <= 0 && currentCon != null) {
             currentCon.close();
             currentCon = null;
         }
@@ -40,6 +40,12 @@ public class ConnectionHolder {
         return refCount;
     }
 
+    public void release() throws SQLException {
+        if (currentCon != null)
+            currentCon.close();
+        currentCon = null;
+        refCount = 0;
+    }
 
     @Override
     public String toString() {

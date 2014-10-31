@@ -14,10 +14,7 @@ import com.caibowen.gplume.jdbc.mapper.ColumnMapper;
 import com.caibowen.gplume.jdbc.mapper.MapExtractor;
 import com.caibowen.gplume.jdbc.mapper.RowMapping;
 import com.caibowen.gplume.jdbc.mapper.SingleColumMapper;
-import com.caibowen.gplume.jdbc.transaction.Transaction;
-import com.caibowen.gplume.jdbc.transaction.TransactionCallback;
-import com.caibowen.gplume.jdbc.transaction.TransactionConfig;
-import com.caibowen.gplume.jdbc.transaction.TransactionManager;
+import com.caibowen.gplume.jdbc.transaction.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +49,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     private int maxRow = 0;
     private int fetchSize = 0;
 
-    private TransactionManager transactionManager = new TransactionManager();
+    private JdbcTransactionManager transactionManager = new JdbcTransactionManager();
 
     public int getFetchSize() {
         return fetchSize;
@@ -90,17 +87,17 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
 
     @Override
     public <T> T execute(TransactionConfig cfg, TransactionCallback<T> operations) {
-        Transaction tnx = transactionManager.begin(cfg);
+        JdbcTransaction tnx = transactionManager.begin(cfg);
         T ret = null;
         try {
             ret = operations.withTransaction(tnx);
         } catch (SQLException se) {
             if (LOG.isDebugEnabled())
-                LOG.debug("Initiating transaction rollback transaction {} on SQLException", tnx.toString(), se);
+                LOG.debug("Initiating transaction rollback {} on SQLException", tnx.toString(), se);
             transactionManager.rollback(tnx);
             throw new JdbcException(se);
         } catch (Exception e) {if (LOG.isDebugEnabled())
-            LOG.debug("Initiating transaction rollback transaction {} on exception", tnx.toString(), e);
+            LOG.debug("Initiating transaction rollback {} on exception", tnx.toString(), e);
             transactionManager.rollback(tnx);
             throw new JdbcException(e);
         }

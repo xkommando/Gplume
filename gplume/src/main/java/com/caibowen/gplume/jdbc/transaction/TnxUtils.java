@@ -39,7 +39,7 @@ class TnxUtils {
         return holder;
     }
 
-    static void prepareForTnx(TransactionConfig config, Transaction tnx) {
+    static void prepareForTnx(TransactionConfig config, JdbcTransaction tnx) {
         ConnectionHolder holder = tnx.holder;
         Connection _con = holder.currentCon;
         try {
@@ -66,7 +66,7 @@ class TnxUtils {
     }
 
 
-    static void restoreConnection(Transaction tnx) throws SQLException {
+    static void restoreConnection(JdbcTransaction tnx) throws SQLException {
         Connection con = tnx.holder.currentCon;
         int _prevIso = tnx.prevISOLevel;
         if (_prevIso != TransactionConfig.DEFAULT_ISOLATION
