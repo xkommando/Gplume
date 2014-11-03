@@ -107,8 +107,11 @@ List<String> ids = jdbcSupport.batchInsert(new StatementCreator() {
     public PreparedStatement createStatement(@Nonnull Connection con) throws SQLException {
         PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO `model_talbe`(`id, `name`)VALUES (?,?)");
-        ps.setString(1, model.getId());
-        ps.setString(2, model.getName());
+        for (Model model : models) {
+            ps.setString(1, model.getId());
+            ps.setString(2, model.getName());
+            ps.addBatch();
+        }
         return ps;
     }
 }, new String[]{"id"}, RowMapping.STR_ROW_MAPPING) ;
