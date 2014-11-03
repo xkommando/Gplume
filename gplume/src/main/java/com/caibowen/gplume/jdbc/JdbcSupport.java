@@ -87,7 +87,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
 
     @Override
     public <T> T execute(TransactionConfig cfg, TransactionCallback<T> operations) {
-        JdbcTransaction tnx = transactionManager.begin(cfg);
+        Transaction tnx = transactionManager.begin(cfg);
         T ret = null;
         try {
             ret = operations.withTransaction(tnx);

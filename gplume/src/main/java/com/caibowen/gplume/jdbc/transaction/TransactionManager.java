@@ -7,9 +7,9 @@ import javax.annotation.Nonnull;
  * @since 31-10-2014.
  */
 public interface TransactionManager {
-    JdbcTransaction begin();
+    Transaction begin();
 
-    JdbcTransaction begin(@Nonnull TransactionConfig config);
+    Transaction begin(@Nonnull TransactionConfig config);
 
     void commit(@Nonnull Transaction tnx);
 

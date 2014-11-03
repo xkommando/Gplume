@@ -42,6 +42,11 @@ public class JdbcTransaction implements Transaction {
     }
 
     @Override
+    public boolean hasSavepoint() {
+        return savepoint != null;
+    }
+
+    @Override
     public boolean isCompleted() {
         return completed;
     }

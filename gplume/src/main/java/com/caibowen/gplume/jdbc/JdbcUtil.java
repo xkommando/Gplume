@@ -68,7 +68,7 @@ public class JdbcUtil {
 			try {
 				stmt.close();
 			} catch (SQLException e) {
-				throw new JdbcException("Could not clost statement", e);
+				throw new JdbcException("Could not close statement", e);
 			}
 		}
 	}

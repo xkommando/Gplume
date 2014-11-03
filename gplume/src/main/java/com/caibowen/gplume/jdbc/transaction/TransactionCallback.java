@@ -8,6 +8,6 @@ import javax.annotation.Nonnull;
  */
 public interface TransactionCallback<T> {
 
-    T withTransaction(@Nonnull JdbcTransaction transaction) throws Exception;
+    T withTransaction(@Nonnull Transaction transaction) throws Exception;
 
 }

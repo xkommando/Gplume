@@ -14,6 +14,8 @@ public interface Transaction {
     @Nonnull
     Savepoint createSavepoint(@Nonnull String name);
 
+    boolean hasSavepoint();
+
     boolean isCompleted();
 
     boolean isRollbackOnly();

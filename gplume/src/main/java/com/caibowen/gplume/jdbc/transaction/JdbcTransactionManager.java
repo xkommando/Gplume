@@ -25,12 +25,12 @@ public class JdbcTransactionManager implements TransactionManager {
     }
 
     @Override
-    public JdbcTransaction begin() {
+    public Transaction begin() {
         return begin(TransactionConfig.DEFAULT);
     }
 
     @Override
-    public JdbcTransaction begin(@Nonnull TransactionConfig config) {
+    public Transaction begin(@Nonnull TransactionConfig config) {
 
         JdbcTransaction tnx = new JdbcTransaction();
         tnx.completed = false;
@@ -46,8 +46,9 @@ public class JdbcTransactionManager implements TransactionManager {
 
 
     @Override
-    public void commit(@Nonnull JdbcTransaction tnx) {
-        if (tnx.completed)
+    public void commit(@Nonnull Transaction transaction) {
+        JdbcTransaction tnx = (JdbcTransaction)transaction;
+        if (tnx.isCompleted())
             throw new IllegalStateException(
                     "Transaction is already completed - do not call commit or rollback more than once per transaction");
         if (tnx.isRollbackOnly()) {
@@ -78,7 +79,8 @@ public class JdbcTransactionManager implements TransactionManager {
     }
 
     @Override
-    public void rollback(@Nonnull JdbcTransaction tnx) {
+    public void rollback(@Nonnull Transaction transaction) {
+        JdbcTransaction tnx = (JdbcTransaction)transaction;
         if (tnx.completed) {
             throw new IllegalStateException(
                     "Transaction is already completed - do not call commit or rollback more than once per transaction");

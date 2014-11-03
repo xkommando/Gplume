@@ -50,7 +50,7 @@ public class GServlet extends HttpServlet {
             controlCenter.init(config.getServletContext());
 
         } catch (Throwable e) {
-            LOG.fatal("error construct control center", e);
+            LOG.error("could not construct control center", e);
         }
 
         super.init(config);

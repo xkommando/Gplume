@@ -5,10 +5,32 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.caibowen</groupId>
-    <artifactId>gplumeframwork</artifactId>
+    <groupId>com.caibowen.gplumeframwork</groupId>
+    <artifactId>parent</artifactId>
     <packaging>pom</packaging>
     <version>2.0</version>
+
+    <name>Gplume Framework</name>
+    <url>https://github.com/xkommando/Gplume</url>
+    <description>
+        Light-weight multiparadigmatic Java web framework.
+    </description>
+
+    <licenses>
+        <license>
+            <name>Apache License Version 2.0</name>
+            <url>http://www.apache.org/licenses/</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Cai Bowen</name>
+            <email>feedback2bowen@outlook.com</email>
+            <url>http://www.caibowen.com</url>
+        </developer>
+    </developers>
+
     <modules>
         <module>gplume</module>
         <module>gplume-web</module>

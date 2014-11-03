@@ -61,7 +61,7 @@ public class GFilter implements Filter {
 			controlCenter.init(arg0.getServletContext());
 
 		} catch (Throwable e) {
-            LOG.fatal("error construct control center", e);
+            LOG.error("error construct control center", e);
 		}
 	}
 
