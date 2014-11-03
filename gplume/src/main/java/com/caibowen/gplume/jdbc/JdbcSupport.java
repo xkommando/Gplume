@@ -151,7 +151,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
         }
     }
 
-    public void closeStmt(Statement stmt) {
+    protected void closeStmt(Statement stmt) {
         if (stmt == null)
             return;
         try {

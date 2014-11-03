@@ -14,10 +14,10 @@ Quick Start:
 #####Part Zero: maven dependency
 ```XML
 <dependency>
-	<groupId>com.caibowen</groupId>
-	<!-- web develope extensions-->
+	<groupId>com.caibowen.gplumeframwork</groupId>
+	<!-- web developement extensions-->
 	<artifactId>gplume-webex</artifactId>
-	<version>1.5</version>
+	<version>1.0</version>
 </dependency>
 ```
 #####Part One: Configurate the web.xml:
@@ -99,7 +99,123 @@ use message tag in JSP
 	<gp:msg k="gplumeIsRunning" />
 </label>
 ```
-#####Part Four: Gplume Web MVC
+#####Part Four: Gplume JDBC Operations
+``` Java
+jdbcSupport.setDataSource(dataSource);
+List<String> ids = jdbcSupport.batchInsert(new StatementCreator() {
+    @Override
+    public PreparedStatement createStatement(@Nonnull Connection con) throws SQLException {
+        PreparedStatement ps = con.prepareStatement(
+                "INSERT INTO `model_talbe`(`id, `name`)VALUES (?,?)");
+        ps.setString(1, model.getId());
+        ps.setString(2, model.getName());
+        return ps;
+    }
+}, new String[]{"id"}, RowMapping.STR_ROW_MAPPING) ;
+
+List<Model> ls = jdbcSupport.queryForList(new StatementCreator() {
+        @Override
+        public PreparedStatement createStatement(@Nonnull Connection con) throws SQLException {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM `table_model`");
+            return ps;
+        }
+    }, new RowMapping<Model>() {
+        @Override
+        public Model extract(@Nonnull ResultSet rs) throws SQLException {
+            Model model = new Model();
+            model.setId(rs.getString(1))
+            model.setName(rs.getString(2));
+            return model;
+        }
+    });
+
+jdbcSupport.execute(new TransactionCallback<Object>() {
+    @Override
+    public Object withTransaction(@Nonnull Transaction tnx) throws Exception {
+        tnx.setRollbackOnly(true);
+        // operation 1
+        // operation 2
+        jdbcSupport.execute(new TransactionCallback<Object>() {
+            @Override // nested transaction is isolated from the outer one
+            public Object withTransaction(@Nonnull Transaction tnx) throws Exception {
+                tnx.setRollbackOnly(true);
+                throw new Exception();
+            }
+            });
+            // fail on any of the operations will trigger rollback automatically
+        return null;
+    }
+});
+```
+#####Part Five: ORM using Hibernate.
+Spring and Hibernate can be integrated to Gplume with just a few lines configuration:
+
+``` XML
+<!-- will set sessionFactory bean with id ${sessionFactoryID} in afterPropertiesSet() -->
+<bean class="com.caibowen.gplume.sample.test.SessionFactoryBuilder">
+	<property name="sessionFactoryID" value="sessionFactory"/>
+	<property name="dataSource" ref="dataSource" />
+	<property name="hibernateProperties">
+		<props>
+			<hibernate.dialect>org.hibernate.dialect.MySQL5Dialect</hibernate.dialect>
+		</props>
+	</property>
+	<property name="annotatedClasses">
+		<list> <!-- set field "Class[] annotatedClasses" -->
+			<value>com.caibowen.gplume.sample.model.Chapter</value>
+		</list>
+	</property>
+</bean>
+<!-- use HibernateDaoSupport-->
+<bean id="chapterDao" class="com.caibowen.gplume.sample.dao.ChapterDAO">
+	<property name="sessionFactory" ref="sessionFactory" />
+</bean>
+```
+ and the ChaperDAO 
+```Java
+public class ChapterDAO extends HibernateDaoSupport {
+	public List<Chapter> getAll() {
+		return getHibernateTemplate().find("from Chapter");
+	}
+}
+```
+#####Part Six. Handling Event. 
+register listeners and publish events as:
+```Java
+AppContext.broadcaster.register(new IEventHook() {
+@Override
+public void catches(AppEvent event) {
+		LOG.info("cought event {0} from source {1}"
+				, event.getClass().getSimpleName()
+				, event.getSource());
+	}
+}, false);//set false to keep a weak reference to this listener
+AppContext.broadcaster.register(new IAppListener<TimeChangedEvent>() {
+@Override
+public void onEvent(TimeChangedEvent event) {
+		LOG.info("time changed {0}", event.getTime());
+	}
+});// default is true
+TimeChangedEvent event = new TimeChangedEvent(this);
+event.setTime(new Date());
+AppContext.broadcaster.broadcast(event);
+```
+#####Part Seven. Test with Junit
+```Java
+@RunWith(JunitPal.class)
+@ManifestPath("file:src/manifest.xml") // read as file
+public class TestDemo {
+	@Named("controlCenter")
+	public AbstractControlCenter controlCenter;
+	@Test
+	public void test() {
+		System.out.println(controlCenter);
+		AppContext.broadcaster.broadcast(new WebAppStartedEvent(this));
+	}
+}
+```
+
+#####Part Eight: Gplume Web MVC
 Pre-process and after-process requests
 ```java
 public class SampleProcessor implements IRequestProcessor {
@@ -224,73 +340,7 @@ public void demo(RequestContext context, IAction action) throws Throwable {
 	}
 }
 ```
-#####Part Five. handle Event. 
-register listeners and publish events as:
-```Java
-AppContext.broadcaster.register(new IEventHook() {
-@Override
-public void catches(AppEvent event) {
-		LOG.info("cought event {0} from source {1}"
-				, event.getClass().getSimpleName()
-				, event.getSource());
-	}
-}, false);//set false to keep a weak reference to this listener
-AppContext.broadcaster.register(new IAppListener<TimeChangedEvent>() {
-@Override
-public void onEvent(TimeChangedEvent event) {
-		LOG.info("time changed {0}", event.getTime());
-	}
-});// default is true
-TimeChangedEvent event = new TimeChangedEvent(this);
-event.setTime(new Date());
-AppContext.broadcaster.broadcast(event);
-```
-#####Part Six: ORM using Hibernate.
-Spring and Hibernate can be integrated to Gplume with just a few lines configuration:
 
-``` XML
-<!-- will set sessionFactory bean with id ${sessionFactoryID} in afterPropertiesSet() -->
-<bean class="com.caibowen.gplume.sample.test.SessionFactoryBuilder">
-	<property name="sessionFactoryID" value="sessionFactory"/>
-	<property name="dataSource" ref="dataSource" />
-	<property name="hibernateProperties">
-		<props>
-			<hibernate.dialect>org.hibernate.dialect.MySQL5Dialect</hibernate.dialect>
-		</props>
-	</property>
-	<property name="annotatedClasses">
-		<list> <!-- set field "Class[] annotatedClasses" -->
-			<value>com.caibowen.gplume.sample.model.Chapter</value>
-		</list>
-	</property>
-</bean>
-<!-- use HibernateDaoSupport-->
-<bean id="chapterDao" class="com.caibowen.gplume.sample.dao.ChapterDAO">
-	<property name="sessionFactory" ref="sessionFactory" />
-</bean>
-```
- and the ChaperDAO 
-```Java
-public class ChapterDAO extends HibernateDaoSupport {
-	public List<Chapter> getAll() {
-		return getHibernateTemplate().find("from Chapter");
-	}
-}
-```
-#####Part Seven. Test with Junit
-```Java
-@RunWith(JunitPal.class)
-@ManifestPath("file:src/manifest.xml") // read as file
-public class TestDemo {
-	@Named("controlCenter")
-	public AbstractControlCenter controlCenter;
-	@Test
-	public void test() {
-		System.out.println(controlCenter);
-		AppContext.broadcaster.broadcast(new WebAppStartedEvent(this));
-	}
-}
-```
 ===========
 **************
 Gplume Overview
