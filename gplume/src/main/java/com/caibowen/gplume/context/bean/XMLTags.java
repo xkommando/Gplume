@@ -17,19 +17,25 @@ package com.caibowen.gplume.context.bean;
 
 
 /**
- * 
- * these properties serves as the XLD
+ *
  * @author BowenCai
  *
  */
 public final class XMLTags {
 	private XMLTags(){}
 
+
 	public static final String ROOT_BEANS = "beans";
+	public static final String NAMESPACE = "namespace";
+	public static final String USING_NS = "using";
+	public static final String NS_OPEN = "open";
+	public static final String NS_DELI = "::";
 
 	public static final String BEAN = "bean";
+
+	public static final String REQUIRED = "required";
+
     public static final String TYPE = "type";
-    public static final String VALUE_TYPE = "value-type";
 
     public static final String CONFIG = "config";
     public static final String SCOPE = "scope";
@@ -43,18 +49,19 @@ public final class XMLTags {
 
 
 	public static final String PROPERTIES = "properties";
-	public static final String BEAN_PROPERTY = "property";
+	public static final String BEAN_FIELD = "field";
 
 	/**
 	 * specify singleton bean, false by default
 	 */
 	public static final String BEAN_SINGLETON = "singleton";
 	
-	public static final String PROPERTY_NAME = "name";
+	public static final String FIELD_NAME = "name";
 
-	public static final String PROPERTY_INSTANCE = "instance";
-	public static final String PROPERTY_LIST = "list";
-	public static final String PROPERTY_MAP  = "props";
-	public static final String PROPERTY_VALUE = "value";
-	public static final String PROPERTY_REF = "ref";
+	public static final String FIELD_INSTANCE = "instance";
+	public static final String FIELD_LIST = "list";
+	public static final String FIELD_MAP = "map";
+	public static final String FIELD_SET = "set";
+	public static final String FIELD_VALUE = "val";
+	public static final String FILED_REF = "ref";
 }

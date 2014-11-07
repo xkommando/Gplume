@@ -99,22 +99,22 @@ public class Injector implements Serializable {
 		
 		Object var = null;
 		Set<Object> vars = AppContext.beanAssembler.getBeans(field.getType());
-		if (vars.size() != 1) {
+		if (vars.size() == 1) {
 			try {
 				BeanEditor.setProperty(object, field.getName(), 
 											vars.iterator().next());
 			} catch (Exception e) {
 				throw new RuntimeException(
-						MessageFormat.format("error inject field {0} of type {1}  in class {2}"
+						MessageFormat.format("error inject field [{}] of type [{}]  in class [{}]"
 								, field.getName(), field.getType()
 								, field.getDeclaringClass()));
 			}
 			
 		} else if (null != (var = AppContext.beanAssembler.getBean(field.getName()))) {
 			if (field.getType().isAssignableFrom(var.getClass())){
-				LOG.warn("cannot find bean for field [{0}] in class [{1}]"
-						+ "\r\n But find bean in beanAssemble with the same ID as the field id[{2}]"
-						+ "\r\n Setting field with this bean[{4}]"
+				LOG.warn("cannot find bean for field [{}] in class [{}]"
+						+ "\r\n But find bean in beanAssemble with the same ID as the field id[{}]"
+						+ "\r\n Setting field with this bean[{}]"
 						, field.getName()
 						, object.getClass().getName()
 						, field.getName()
@@ -124,7 +124,7 @@ public class Injector implements Serializable {
 					BeanEditor.setProperty(object, field.getName(), var);
 				} catch (Exception e) {
 					throw new RuntimeException(
-							MessageFormat.format("error inject field {0} of type {1}  in class {2}"
+							MessageFormat.format("error inject field {} of type {}  in class {}"
 									, field.getName(), field.getType()
 									, field.getDeclaringClass()));
 				}
@@ -132,14 +132,14 @@ public class Injector implements Serializable {
 		} else {
 			throw new NoSuchElementException("faild to set field[" 
 					+ field.getName() + "] in class[" + object.getClass().getName() +"]"
-					+ "\r\n cannot find bean with the assignale type or specified id for this field");
+					+ "\r\n cannot find bean with the assignable type or specified id for this field");
 		}	
 	}
 	
 	void withNamed(@Nonnull Object object, @Nonnull Field field) {
 		Named anno = field.getAnnotation(Named.class);
 		String curID = anno.value();
-		if (!Str.Utils.notBlank(curID)) {
+		if (Str.Utils.isBlank(curID)) {
 			curID = field.getName();
 		}					
 		Object var = AppContext.beanAssembler.getBean(curID);
@@ -153,64 +153,13 @@ public class Injector implements Serializable {
 			BeanEditor.setProperty(object, field.getName(), var);
 		} catch (Exception e) {
 			throw new RuntimeException(
-					MessageFormat.format("error inject field {0} of type {1} named {2} in class {3}"
+					MessageFormat.format("error inject field {} of type {} named {} in class {}"
 							, field.getName(), field.getType(), curID
 							, field.getDeclaringClass()));
 		}
 	}
 	
 }
-
-//
-//
-//	static class B {
-//		private int bb = 5;
-//		public void setBb(int bb) {
-//			this.bb = bb;
-//		}
-//		public void id() {
-//			System.out.println(bb);
-//		}
-//	}
-//	static class C extends B {
-//		private int bb = 6;
-//		private int cc = 7;
-//		public void setCc(int cc) {
-//			this.cc = cc;
-//		}
-//		@Override
-//		public void id() {
-//			System.out.println( bb + "  " + cc);
-//		}
-//	}
-//	
-//	static class D extends C {
-//		private short bb = 8;
-//		private int cc = 9;
-//		private int dd = 10;
-//		public void setDd(int dd) {
-//			this.dd = dd;
-//		}		
-//		public void setBb(Short bb) {
-//			this.bb = bb;
-//		}
-//		@Override
-//		public void id() {
-//			System.out.println( bb + "  " + cc + "   " + dd);
-//		}
-//	}
-//	
-//	public static void main(String...a) throws IllegalArgumentException, IllegalAccessException {
-//		B b = new B(); b.setBb(45);
-//		C c = new C(); c.setCc(46);
-//		D d = new D(); d.setDd(47); d.setBb(48);
-//		for (Field field : Injector.getEffectiveField(D.class)) {
-//			System.out.print(field.getDeclaringClass().getSimpleName() + "  " + field.getName() + "   ");
-//			field.setAccessible(true);
-//			System.out.println(field.getInt(d));
-//		}
-//	}
-
 
 
 

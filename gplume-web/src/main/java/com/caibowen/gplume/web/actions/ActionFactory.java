@@ -128,8 +128,8 @@ public class ActionFactory implements IActionFactory, Serializable {
 			for (HttpMethod hm : methods) {
 //				System.out.println(hm);
 				if (LOG.isDebugEnabled())
-					LOG.debug("adding action from method[{0}]"
-							+ " URI [{1}] Method [{2}]"
+					LOG.debug("adding action from method[{}]"
+							+ " URI [{}] Method [{}]"
 							, method.toString(), action.effectiveURI(), hm);
 				
 				mappers[hm.ordinal()].add(action);

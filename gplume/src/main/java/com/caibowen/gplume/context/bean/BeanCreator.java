@@ -20,8 +20,6 @@ package com.caibowen.gplume.context.bean;
 import com.caibowen.gplume.annotation.Internal;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
-import com.caibowen.gplume.misc.ClassFinder;
-import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.misc.Str.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +30,6 @@ import org.w3c.dom.NodeList;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
-import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -49,6 +46,7 @@ abstract class BeanCreator implements IBeanAssembler {
     protected ClassLoader classLoader;
 
     protected ConfigCenter configCenter;
+
     @Override
     public void setConfigCenter(ConfigCenter configCenter) {
         this.configCenter = configCenter;
@@ -84,13 +82,14 @@ abstract class BeanCreator implements IBeanAssembler {
         Node _n = beanElem.getFirstChild();
         while (_n != null && _n.getNextSibling() != null) {
             _n = _n.getNextSibling();
-            if (_n.getNodeName().equals(XMLTags.BEAN_CONSTRUCT)){
+            if (_n.getNodeName().equals(XMLTags.BEAN_CONSTRUCT)) {
                 Node iter;
                 if (_n.getFirstChild() != null
                         && null != (iter = _n.getFirstChild().getNextSibling()))
                     ctorElem = (Element)iter;
                 else
                     ctorElem = (Element)_n;
+
                 break;
             }
         }
@@ -98,11 +97,11 @@ abstract class BeanCreator implements IBeanAssembler {
     }
 
     /**
-     * For each property, there are 3 notation:
+     * For one field, there are 3 notation:
      *
-     * 1. <property id="Xyz"><value="Xyz"/></porperty>
+     * 1. <field name="Xyz"><val="Xyz"/></field>
      *
-     * 2. <property id="Xyz" value="Xyz"/>
+     * 2. <field name="Xyz" val="Xyz"/>
      *
      * 3. no property is needed.
      */
@@ -110,22 +109,11 @@ abstract class BeanCreator implements IBeanAssembler {
     buildBean(Element beanElem) throws Exception {
 
         Class<?> bnClass = getClass(beanElem);
-        int modi = bnClass.getModifiers();
-
-//          can be proxy
-//        if (Modifier.isAbstract(modi)) {
-//            throw new IllegalArgumentException("class[" + bnClass.getName()
-//                    + "] is abstract and cannot be instantiated");
-//        } else if (Modifier.isInterface(modi)) {
-//            throw new IllegalArgumentException("class[" + bnClass.getName()
-//                    + "] is interface and cannot be instantiated");
-//        }
-
         Object beanObj = construct(bnClass, beanElem);
 
-        LOG.trace("bean class[{}] created", bnClass.getName());
+        LOG.debug("bean class[{}] created", bnClass.getName());
 
-        NodeList _propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROPERTY);
+        NodeList _propLs = beanElem.getElementsByTagName(XMLTags.BEAN_FIELD);
         if (_propLs == null || _propLs.getLength() == 0) {
             // no property
             return beanObj;
@@ -138,19 +126,16 @@ abstract class BeanCreator implements IBeanAssembler {
             next = next.getNextSibling();
 
             if (next.getNodeType() == Node.ELEMENT_NODE
-                    && next.getNodeName().equals(XMLTags.BEAN_PROPERTY)) {
+                    && next.getNodeName().equals(XMLTags.BEAN_FIELD)) {
                 prop = (Element) next;
-            } else {
-                continue;
-            }
+            } else  continue;
 
-            String propName = prop.getAttribute(XMLTags.PROPERTY_NAME);
+            String propName = prop.getAttribute(XMLTags.FIELD_NAME);
             propName = configCenter.replaceIfPresent(propName.trim());
             if (!Utils.notBlank(propName))
                 throw new NullPointerException(
                         "Property name is empty. NodeName: ["
                                 + prop.getNodeName() + "]");
-
 
 //System.out.println("class [" + bnClass.getSimpleName() + "] prop[" + propName + "]");
 
@@ -164,30 +149,44 @@ abstract class BeanCreator implements IBeanAssembler {
                 else
                     BeanEditor.setProperty(beanObj, propName, _v );
 
-            } else {// properties outside
+                continue;
+            }
 
-                // check if is list, map or single value
-                boolean isList = false;
-                boolean isMap = false;
-                /**
-                 *
-                 * prop
-                 * |
-                 * first child -> next
-                 * 					|
-                 * 				    <list> or <value>
-                 */
-                Node iter = prop.getFirstChild().getNextSibling();
+            // properties outside
 
-                if (XMLTags.PROPERTY_LIST.equals(iter.getNodeName())) {
-                    isList = true;
-                    isMap = false;
-                } else if (XMLTags.PROPERTY_MAP.equals(iter.getNodeName())) {
-                    isList = false;
-                    isMap = true;
-                }
+            // check if is list, map, set or single value
+            // 1 -> single, 2 -> list, 3 -> set, 4 -> map
+            int container = 0;
+            /**
+             *
+             * prop
+             * |
+             * first child -> next
+             * 					|
+             * 				    <list> or <value>
+             */
+            Node iter = prop.getFirstChild().getNextSibling();
 
-                if (isMap) {
+            if (XMLTags.FIELD_LIST.equals(iter.getNodeName()))
+                container = 2;
+            else if (XMLTags.FIELD_SET.equals(iter.getNodeName()))
+                container = 3;
+            else if (XMLTags.FIELD_MAP.equals(iter.getNodeName()))
+                container = 4;
+
+            switch (container) {
+                case 2:
+                    // set list
+                    iter = iter.getFirstChild().getNextSibling();
+                    List<Object> beanList1 = buildList(iter);
+                    BeanEditor.setListProperty(beanObj, propName, beanList1);
+                    break;
+                case 3: // set
+                    iter = iter.getFirstChild().getNextSibling();
+                    List<Object> beanList2 = buildList(iter);
+                    BeanEditor.setSetProperty(beanObj, propName, beanList2);
+                    break;
+                case 4:
                     /**
                      * <list> or <map>
                      * |
@@ -198,32 +197,20 @@ abstract class BeanCreator implements IBeanAssembler {
                     iter = iter.getFirstChild().getNextSibling();
                     Properties properties = buildMap(iter, propName);
                     BeanEditor.setProperty(beanObj, propName, properties);
-
-                } else { // single value or list
-
-                    // second, use this list
-                    if (isList) {
-                        // set list or array
-                        iter = iter.getFirstChild().getNextSibling();
-                        List<Object> beanList = buildList(iter);
-                        BeanEditor.setListProperty(beanObj, propName, beanList);
-
+                    break;
+                default:
+                    List<Object> beanList3 = buildList(iter);
+                    if (beanList3.size() == 1) {
+                        BeanEditor.setProperty(beanObj, propName, beanList3.get(0));
                     } else {
-                        List<Object> beanList = buildList(iter);
-                        if (beanList.size() == 1) {
-                            BeanEditor.setProperty(beanObj, propName, beanList.get(0));
-                        } else {
-                            throw new IllegalArgumentException(
-                                    "Bean number miss match for property[" + propName
-                                            + "] in class ["
-                                            + bnClass.getName() + "]\n"
-                                            + "needs 1 actual " + beanList.size()
-                                            + "beans : " + beanList.toString());
-                        }
+                        throw new IllegalArgumentException(
+                                "Bean number miss match for property[" + propName
+                                        + "] in class ["
+                                        + bnClass.getName() + "]\n"
+                                        + "needs 1 actual " + beanList3.size()
+                                        + "beans : " + beanList3.toString());
                     }
-                }
-
-            } // props
+            }
 
         } // for properties
 
@@ -236,9 +223,9 @@ abstract class BeanCreator implements IBeanAssembler {
 
     private Object inTag(Element prop) throws Exception {
 
-        String varObj = prop.getAttribute(XMLTags.PROPERTY_INSTANCE);
-        String varStr = prop.getAttribute(XMLTags.PROPERTY_VALUE);
-        String varRef = prop.getAttribute(XMLTags.PROPERTY_REF);
+        String varObj = prop.getAttribute(XMLTags.FIELD_INSTANCE);
+        String varStr = prop.getAttribute(XMLTags.FIELD_VALUE);
+        String varRef = prop.getAttribute(XMLTags.FILED_REF);
 
         if (Utils.notBlank(varStr)) {
             // e.g., <property id="number" value="5"/>
@@ -252,19 +239,17 @@ abstract class BeanCreator implements IBeanAssembler {
 
         } else if (Utils.notBlank(varRef)) {
             // e.g., <property id="bean" ref="someOtherBean"/>
-            Object ref = getBean(varRef.trim());
+            Object ref = getBean(configCenter.replaceIfPresent(varRef.trim()));
             return ref;
 
         } else if (Utils.notBlank(varObj)) {
             // e.g. <property id="injector" instance="com.caibowen.gplume.core.Injector"/>
-            Class<?> klass = this.classLoader.loadClass(varObj);
+            Class<?> klass = this.classLoader.loadClass(configCenter.replaceIfPresent(varObj));
             Object obj = klass.newInstance();
             afterProcess(obj, null);
             return obj;
 
-        } else {
-            return null;
-        }
+        } else return null;
     }
 
 
@@ -275,8 +260,7 @@ abstract class BeanCreator implements IBeanAssembler {
             Element elemBn;
             if (iter.getNodeType() == Node.ELEMENT_NODE)
                 elemBn = (Element)iter;
-            else
-                continue;
+            else continue;
 
             String mapK = configCenter.replaceIfPresent(elemBn.getTagName().trim());
             if (properties.containsKey(mapK))
@@ -287,7 +271,7 @@ abstract class BeanCreator implements IBeanAssembler {
                     elemBn.getTextContent());
 
             String tgtType;
-            if (null != (tgtType = elemBn.getAttribute(XMLTags.VALUE_TYPE))) {
+            if (null != (tgtType = elemBn.getAttribute(XMLTags.TYPE))) {
                 Class k = Converter.getClass(configCenter.replaceIfPresent(tgtType.trim()));
                 mapV = Converter.slient.translateStr((String)mapV, k);
             }
@@ -319,32 +303,31 @@ abstract class BeanCreator implements IBeanAssembler {
             if (XMLTags.BEAN.equals(elemBn.getNodeName())) {
                 beanList.add(buildBean(elemBn));
 
-            } else if (XMLTags.PROPERTY_REF.equals(elemBn.getNodeName())) {
+            } else if (XMLTags.FILED_REF.equals(elemBn.getNodeName())) {
                 beanList.add(getBean(
                                 configCenter.replaceIfPresent(
                                         elemBn.getTextContent())
                         )
                 );
 
-            } else if (XMLTags.PROPERTY_VALUE.equals(elemBn.getNodeName())) {
+            } else if (XMLTags.FIELD_VALUE.equals(elemBn.getNodeName())) {
                 beanList.add(configCenter.replaceIfPresent(
                                 elemBn.getTextContent()
                         )
                 );
-            } else {
-                throw new IllegalArgumentException("Unknown property["
+            } else throw new IllegalArgumentException("Unknown property["
                         + iter.getNodeName() + "]");
-            }
+
             // skip node of #text
             iter = iter.getNextSibling().getNextSibling();
         }// while
         return beanList;
     }
 
-    protected void afterProcess(Object bean, String initName) throws Exception {
+    protected void afterProcess(Object bean, @Nullable String initName) throws Exception {
         if (bean instanceof BeanClassLoaderAware) {
             ((BeanClassLoaderAware)bean).setBeanClassLoader(this.classLoader);
-            LOG.info(
+            LOG.debug(
                     "classLoader aware  bean ["
                             + bean.getClass().getSimpleName()
                             + "] set classLoader [" + this.classLoader);
@@ -352,11 +335,10 @@ abstract class BeanCreator implements IBeanAssembler {
 
         if (bean instanceof InitializingBean) {
             ((InitializingBean) bean).afterPropertiesSet();
-            LOG.info(
+            LOG.debug(
                     "bean [" + bean.getClass().getSimpleName()
                             + "] initialized");
         }
-
 
         if (Utils.isBlank(initName))
             return;
@@ -381,17 +363,27 @@ abstract class BeanCreator implements IBeanAssembler {
     protected Object construct(@Nonnull Class klass,
                                @Nullable Element beanElem) throws Exception {
 
+        int _c = 0;
         String poxVal = beanElem.getAttribute(XMLTags.BEAN_PROXY);
-        if (Utils.isBlank(poxVal))
-            return newInstance(klass, findCtorElem(beanElem));
+        String poxRef = beanElem.getAttribute(XMLTags.FILED_REF);
+        _c += Utils.isBlank(poxVal) ? 0 : 1;
+        _c += Utils.isBlank(poxRef) ? 0 : 3;
+        switch (_c) {
+            case 0 : return newInstance(klass, findCtorElem(beanElem));
+            case 1 :
+                String poxHM = configCenter.replaceIfPresent(poxVal.trim());
+                Class poxHandle = getClass(poxHM);
+                if (! InvocationHandler.class.isAssignableFrom(poxHandle))
+                    throw new IllegalArgumentException("[" + poxHM + "] from [" + poxVal + "]is not a InvocationHandler");
 
-        String poxHM = configCenter.replaceIfPresent(poxVal.trim());
-        Class poxHandle = getClass(poxHM);
-        if (! InvocationHandler.class.isAssignableFrom(poxHandle))
-            throw new IllegalArgumentException("[" + poxHM + "] from [" + poxVal + "]is not a InvocationHandler");
-
-        InvocationHandler handler = (InvocationHandler)newInstance(poxHandle, findCtorElem(beanElem));
-        return Proxy.newProxyInstance(classLoader, new Class[]{klass}, handler);
+                InvocationHandler handler = (InvocationHandler)newInstance(poxHandle, findCtorElem(beanElem));
+                return Proxy.newProxyInstance(classLoader, new Class[]{klass}, handler);
+            case 3:
+                Object ref = getBean(configCenter.replaceIfPresent(poxRef.trim()));
+                return ref;
+            default:
+                throw new IllegalArgumentException("wrong config of InvocationHandler");
+        }
     }
 
     protected Object newInstance(@Nonnull Class klass,
@@ -412,12 +404,12 @@ abstract class BeanCreator implements IBeanAssembler {
         if (null != (_tagVal = inTag(prop)))
             return BeanEditor.construct(klass, _tagVal);
 
-        if (prop.getNodeName().equals(XMLTags.PROPERTY_MAP)) {
+        if (prop.getNodeName().equals(XMLTags.FIELD_MAP)) {
             prop = (Element) prop.getFirstChild().getNextSibling();
             Map m = buildMap(prop, "Constructor:" + klass.getName());
             return BeanEditor.construct(klass, m);
         }
-        if (prop.getNodeName().equals(XMLTags.PROPERTY_LIST)) {
+        if (prop.getNodeName().equals(XMLTags.FIELD_LIST)) {
             prop = (Element) prop.getFirstChild().getNextSibling();
             List ls = buildList(prop);
             return BeanEditor.construct(klass, ls);
@@ -426,8 +418,7 @@ abstract class BeanCreator implements IBeanAssembler {
         List ls = buildList(prop);
         if (ls.size() == 1)
             return BeanEditor.construct(klass, ls.get(0));
-        else
-            throw new IllegalArgumentException(
+        else throw new IllegalArgumentException(
                     "Bean number miss match , construct ["
                             + "] in class ["
                             + klass.getName() + "]"

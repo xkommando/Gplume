@@ -16,6 +16,7 @@
 package com.caibowen.gplume.web;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -54,12 +55,12 @@ public class GFilter implements Filter {
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
 
-		controlCenter = AppContext.beanAssembler.getBean("controlCenter");
-		
+		Set ctrols = AppContext.beanAssembler.getBeans(AbstractControlCenter.class);
+		if (ctrols.size() != 1)
+			throw new IllegalArgumentException("wrong number of control center, expect 1, find [" + ctrols.size() + "]");
+		controlCenter = (AbstractControlCenter)ctrols.iterator().next();
 		try {
-			
 			controlCenter.init(arg0.getServletContext());
-
 		} catch (Throwable e) {
             LOG.error("error construct control center", e);
 		}

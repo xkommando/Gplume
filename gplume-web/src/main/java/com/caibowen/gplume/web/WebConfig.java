@@ -93,7 +93,7 @@ public class WebConfig implements InitializingBean, Serializable {
                 AppContext.beanAssembler.addBean("injector", injector);
             }
             center.setInjector(injector);
-            LOG.info("injector {0} setted", injector.getClass().getName());
+            LOG.debug("injector {} setted", injector.getClass().getName());
 
             IRequestProcessor iter = this.preProcessor;
             while (iter != null) {
@@ -108,14 +108,14 @@ public class WebConfig implements InitializingBean, Serializable {
                     : new DefaultErrorHandler();
             center.setErrorHandler(_h);
 
-            LOG.info("setting default error handler {0}", _h.getClass().getName());
+            LOG.debug("setting default error handler {}", _h.getClass().getName());
 
             // 4. action factory
             IActionFactory factory = new ActionFactory();
             factory.setViewResolvers(getViewResolvers());
 
             center.setActionFactory(factory);
-            LOG.info("setting action factory {0}", factory.getClass().getName());
+            LOG.debug("setting action factory {}", factory.getClass().getName());
 
             // add controllers
             ControllerScanner scanner = new ControllerScanner();
@@ -125,8 +125,8 @@ public class WebConfig implements InitializingBean, Serializable {
 
 			boolean boo = AppContext.beanAssembler.addBean("controlCenter", center);
 
-            if (boo) LOG.info("ControlCenter set up");
-            else LOG.info("cannot add [controlCenter] to beanAssembler");
+            if (boo) LOG.debug("ControlCenter set up");
+            else LOG.debug("cannot add [controlCenter] to beanAssembler");
 
 		} catch (Exception e) {
 			throw new RuntimeException("cannot build controlCenter", e);
@@ -135,7 +135,7 @@ public class WebConfig implements InitializingBean, Serializable {
 
     public List<IViewResolver> getViewResolvers() {
         IViewResolver _rStr = JspViewResolvers.get(viewPrefix, viewSuffix);
-        LOG.info("setting default string view resolver {0}", _rStr.getClass().getName());
+        LOG.debug("setting default string view resolver {}", _rStr.getClass().getName());
 
         HashSet<IViewResolver> _s;
         if (viewResolvers != null && !viewResolvers.isEmpty())

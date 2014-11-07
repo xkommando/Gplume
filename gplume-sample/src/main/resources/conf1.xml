@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<beans>
+<beans namespace="conf1">
 	<bean id="birthdayCalculator" class="com.caibowen.gplume.sample.feature.BirthdayCalculator"/>
 </beans>

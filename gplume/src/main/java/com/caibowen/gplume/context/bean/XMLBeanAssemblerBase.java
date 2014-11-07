@@ -29,8 +29,6 @@ import javax.annotation.Nonnull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -41,76 +39,117 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public abstract class XMLBeanAssemblerBase extends BeanCreator {
-
-	protected static final String LOGGER_NAME = "BeanAssembler";
 	
-	private static final Logger LOG = LoggerFactory.getLogger(LOGGER_NAME);
+	private static final Logger LOG = LoggerFactory.getLogger(XMLBeanAssemblerBase.class);
 
-	protected Map<String, Pod> podMap = new ConcurrentHashMap<>(64);
+//	protected Map<String, Pod> podMap = new ConcurrentHashMap<>(64);
 
+    protected final PodTree tree = new PodTree();
 
-	public void setClassLoader(ClassLoader loader) {
+    protected String currentNamespace = Str.EMPTY;
+
+    protected String referedNamespace = Str.EMPTY;
+
+    public void setClassLoader(ClassLoader loader) {
 		this.classLoader = loader;
 	}
-	
 	@Nonnull
 	public ClassLoader getClassLoader() {
 		return this.classLoader;
 	}
-	
-	/**
+    public String getCurrentNamespace() {
+        return currentNamespace;
+    }
+    public void setCurrentNamespace(String currentNamespace) {
+        this.currentNamespace = currentNamespace;
+    }
+    public String getReferedNamespace() {
+        return referedNamespace;
+    }
+    public void setReferedNamespace(String referedNamespace) {
+        this.referedNamespace = referedNamespace;
+    }
+
+    /**
 	 * xml bean factory being singleton implies that this function is not
 	 * reenterable, thus it is thread safe
 	 * 
 	 * @throws Exception
 	 */
-	protected void doAssemble(Document doc) throws Exception {
+	synchronized protected void doAssemble(Document doc) throws Exception {
 
-		NodeList nodeList = doc.getChildNodes();
-		Node node = null;
+		NodeList _nodeList = doc.getChildNodes();
+		Element rootElem = null;
+        Node beanNodeIter = null;
 		
 		// escape comments etc, advance to the first node
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node tn = nodeList.item(i);
-			if (tn != null && tn.getNodeType() == Node.ELEMENT_NODE) {
-				node = tn.getFirstChild();
+		for (int i = 0; i < _nodeList.getLength(); i++) {
+			Node tn = _nodeList.item(i);
+			if (tn != null && tn.getNodeType() == Node.ELEMENT_NODE
+                    && XMLTags.ROOT_BEANS.equals(tn.getNodeName())) {
+                rootElem = (Element)tn;
+				beanNodeIter = tn.getFirstChild();
 				break;
 			}
 		}
 
-		if (node == null) { //  nothing
+		if (beanNodeIter == null) //  nothing
 			throw new IllegalArgumentException("no configuration found");
-		}
+
+        currentNamespace = getCurrentNS(rootElem);
+        referedNamespace = getRefNS(rootElem);
 
         // start to process
-		while (node.getNextSibling() != null) {
+		while (beanNodeIter.getNextSibling() != null) {
 
-			node = node.getNextSibling();
+			beanNodeIter = beanNodeIter.getNextSibling();
 			Element elem;
-			if (node.getNodeType() == Node.ELEMENT_NODE)
-				elem = (Element) node;
+			if (beanNodeIter.getNodeType() == Node.ELEMENT_NODE)
+				elem = (Element) beanNodeIter;
 			else continue;
 
-			switch (elem.getNodeName()) {
-			case XMLTags.CONFIG:
-				handleConfig(elem);
-				break;
-				
-			case XMLTags.PROPERTIES:
-				handleProperties(elem);
-				break;
-				
-			case XMLTags.BEAN:
-                handleBean(elem);
-                break;
+            switch (elem.getNodeName()) {
+                case XMLTags.CONFIG:
+                    handleConfig(elem);
+                    break;
 
-			default:
-                LOG.warn("unknown tag[" + elem.getNodeName() + "]");
-				break;
-			}
-		}
-		
+                case XMLTags.PROPERTIES:
+                    handleProperties(elem);
+                    break;
+
+                case XMLTags.BEAN:
+                    handleBean(elem);
+                    break;
+
+                case XMLTags.REQUIRED:
+                    handleRequire(elem);
+                    break;
+
+                default:
+                    LOG.error("unknown tag[" + elem.getNodeName() + "]");
+                    break;
+            }
+        }
+
 	}
+
+    String getCurrentNS(Element rootX) {
+        if (rootX == null)
+            throw new IllegalArgumentException("cannot find <beans>");
+        String nsStr = rootX.getAttribute(XMLTags.NAMESPACE);
+        if (Str.Utils.isBlank(nsStr))
+            return "";
+        return nsStr;
+    }
+
+    String getRefNS(Element rootX) {
+        if (rootX == null)
+            throw new IllegalArgumentException("cannot find <beans>");
+        String nsStr = rootX.getAttribute(XMLTags.USING_NS);
+        if (Str.Utils.isBlank(nsStr))
+            return "";
+        return nsStr;
+    }
 
     void handleBean(Element elem) throws Exception {
 
@@ -124,6 +163,7 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
             isSingleton = Converter.toBool(bnScope);
         }
         Object bean = null;
+
         if (isSingleton) {
             bean = super.buildBean(elem);
             pod = new Pod(bnId, null, bean);
@@ -132,10 +172,11 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
         }
 
         if (Str.Utils.notBlank(bnId)) {
-            podMap.put(bnId, pod);
+            if (! tree.addPod(currentNamespace + XMLTags.NS_DELI + bnId, pod))
+                throw new IllegalArgumentException("duplicated bean definition [" + bnId + "]");
         }
 
-        LOG.trace("Add Bean: id[{}] of class[{}] singleton ? {}",
+        LOG.debug("Add Bean: id[{}] of class[{}] singleton ? {}",
                 bnId, (bean != null ? bean.getClass().getName() : "unknown")
                 , isSingleton
         );
@@ -174,6 +215,9 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
         final DocumentBuilder builder =
                 DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
+        String oldCur = currentNamespace;
+        String oldRef = referedNamespace;
+        int oldsz = tree.size();
         configCenter.withPath(loc, new InputStreamCallback() {
             @Override
             public void doInStream(InputStream stream) throws Exception {
@@ -183,10 +227,12 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
             }
         });
 
-        LOG.debug("importing configuration from {0}, {1} beans created", loc, podMap.size());
+        currentNamespace = oldCur;
+        referedNamespace = oldRef;
+        LOG.debug("importing configuration from {}, {} beans created", loc, (tree.size() - oldsz));
     }
 
     void handleRequire(Element elem) {
-
+        throw new UnsupportedOperationException();
     }
  }

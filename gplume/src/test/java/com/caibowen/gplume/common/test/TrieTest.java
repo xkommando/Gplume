@@ -1,6 +1,5 @@
 package com.caibowen.gplume.common.test;
 
-import com.caibowen.gplume.cache.XXXPOX;
 import com.caibowen.gplume.common.collection.URIPrefixTrie;
 import com.caibowen.gplume.common.collection.URISuffixTrie;
 import org.junit.Assert;

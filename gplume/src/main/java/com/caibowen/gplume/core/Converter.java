@@ -228,7 +228,7 @@ public class Converter {
 	}
 //-----------------------------------------------------------------------------
 
-	public static Object translateList(List<String> varList, 
+	public static List translateList(List<String> varList,
 										Class<?> beanClass,
 										String propName) throws Exception {
 
@@ -265,7 +265,7 @@ public class Converter {
 			for (int i = 0; i < objs.length; i++) {
 				objs[i] = coreVars.get(i);
 			}
-			return objs;
+			return Arrays.asList(objs);
 			
 		} else {
 			return coreVars;

@@ -36,7 +36,12 @@ public interface IBeanAssembler {
 
     void setConfigCenter(ConfigCenter configCenter);
     ConfigCenter getConfigCenter();
-	
+
+	String getCurrentNamespace();
+	void setCurrentNamespace(String currentNamespace);
+	String getReferedNamespace();
+	void setReferedNamespace(String referedNamespace);
+
 	/**
 	 * build all beans.
 	 * 
@@ -124,6 +129,6 @@ public interface IBeanAssembler {
 	 * @param visitor
 	 * @throws Exception when creating beans (if bean is not singleton)
 	 */
-	void inTake(@Nonnull IAssemlberVisitor visitor);
+	void inTake(@Nonnull BeanVisitor visitor);
 
 }

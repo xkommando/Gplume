@@ -17,7 +17,7 @@ package com.caibowen.gplume.event;
 
 import com.caibowen.gplume.common.StrongRef;
 import com.caibowen.gplume.common.WeakRef;
-import com.caibowen.gplume.context.bean.IAssemlberVisitor;
+import com.caibowen.gplume.context.bean.BeanVisitor;
 import com.caibowen.gplume.core.TypeTraits;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -307,7 +307,7 @@ public class Broadcaster implements Serializable {
 	/**
 	 * visit bean factory and get listener beans registered.
 	 */
-	public IAssemlberVisitor listenerRetreiver = new IAssemlberVisitor() {
+	public BeanVisitor listenerRetreiver = new BeanVisitor() {
 		
 		@Override
 		public void visit(Object bean) {

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.context.bean;
 
+import com.caibowen.gplume.annotation.Internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -27,7 +28,8 @@ import javax.annotation.Nullable;
  * @author BowenCai
  *
  */
-public class Pod {
+@Internal
+class Pod {
 	
 	private static final Logger LOG 
 		= LoggerFactory.getLogger(Pod.class);
@@ -86,7 +88,7 @@ public class Pod {
 		description = null;
 		this.beanId = null;
 
-        LOG.info(
+        LOG.trace(
                 "bean id[{0}] class[" + (instance != null ? instance.getClass().getSimpleName() : "unknown")
                 + "] destroyed", beanId);
 	}
@@ -98,14 +100,7 @@ public class Pod {
 	Element getDescription() {
 		return description;
 	}
-	
-	/**
-	 * get bean instance internal, with out add age
-	 * @return
-	 */
-	Object getInternal() {
-		return instance;
-	}
+
 //---------------------------------------------------------
 	
 	public Object getInstance() {

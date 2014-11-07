@@ -12,14 +12,14 @@
 
     <!-- web infrastructure -->
     <artifactId>gplume-web</artifactId>
-    <version>2.0</version>
+    <version>${gp-web-version}</version>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.caibowen.gplumeframework</groupId>
             <artifactId>gplume</artifactId>
-            <version>2.0</version>
+            <version>${gp-version}</version>
         </dependency>
 
         <dependency>

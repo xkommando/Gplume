@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.caibowen.gplumeframework</groupId>
             <artifactId>gplume-webex</artifactId>
-            <version>1.0</version>
+            <version>${gp-webex-version}</version>
         </dependency>
 
         <dependency>

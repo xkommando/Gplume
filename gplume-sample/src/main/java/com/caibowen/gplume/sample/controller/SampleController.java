@@ -30,6 +30,7 @@ import com.caibowen.gplume.web.HttpMethod;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.annotation.Handle;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Cookie;
 import java.text.MessageFormat;
@@ -166,7 +167,8 @@ public class SampleController {
 	}
 
 
-	@Named("birthdayCalculator")
+//	@Named("conf1::birthdayCalculator")
+	@Inject
 	BirthdayCalculator birthdayCalculator;
 
 	public BirthdayCalculator getBirthdayCalculator() {

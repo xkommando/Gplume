@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans>
+<beans namespace="main" using="conf1">
 
 <!-- NEW -->
 <config>classpath:conf1.xml</config>
@@ -15,67 +15,67 @@
 
 <bean id="pox" class="com.caibowen.gplume.sample.model.XXX"
       proxy="com.caibowen.gplume.sample.model.XXXPOX">
-    <construct value="456" type="Integer"/>
-    <property name="name" value="hahahahhah" />
+    <construct val="456" type="Integer"/>
+    <field name="name" val="hahahahhah" />
 </bean>
 <!-- NEW  -->
 <!-- web app infrastructure -->
 
     <bean class="com.caibowen.gplume.sample.model.Tester">
-        <construct value="456" type="Integer"/>
-        <property name="map">
-            <props>
-                <k1 value-type="Integer">456</k1>
-                <k2 value-type="Double">456.45789</k2>
-            </props>
-        </property>
+        <construct val="456" type="Integer"/>
+        <field name="map">
+            <map>
+                <k1 type="Integer">456</k1>
+                <k2 type="Double">456.45789</k2>
+            </map>
+        </field>
     </bean>
 
 	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.HotSwapWebI18n">
-        <property name="resolver" instance="com.caibowen.gplume.i18n.DefaultDialectResolver" />
-	    <property name="defaultLang" value="SimplifiedChinese"/>
-        <property name="defaultTimeZone" value="ETC/GMT-8"/>
-	    <property name="pkgFiles">
-	        <props>
+        <field name="resolver" instance="com.caibowen.gplume.i18n.DefaultDialectResolver" />
+	    <field name="defaultLang" val="SimplifiedChinese"/>
+        <field name="defaultTimeZone" val="ETC/GMT-8"/>
+	    <field name="pkgFiles">
+	        <map>
 	            <en>/i18n/en.properties</en>
 	            <zh_CN>/${i18n_cn}/${i18n_cn2}</zh_CN>
-	        </props>
-	    </property>
+	        </map>
+	    </field>
 	</bean>
 
     <bean class="com.caibowen.gplume.web.WebConfig">
-        <property name="preProcessor">
+        <field name="preProcessor">
             <bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">
-                <property name="i18nService" ref="i18nService"/>
+                <field name="i18nService" ref="i18nService"/>
             </bean>
-        </property>
-        <property name="pkgs">
+        </field>
+        <field name="pkgs">
             <list>
-                <value>com.caibowen.gplume.sample</value>
+                <val>com.caibowen.gplume.sample</val>
             </list>
-        </property>
+        </field>
         <!-- using JSP view resolver by default -->
-        <property name="viewPrefix" value="/"/>
-        <property name="viewSuffix" value=".jsp" />
+        <field name="viewPrefix" val="/"/>
+        <field name="viewSuffix" val=".jsp" />
     </bean>
 
 	<!--<bean id="controlCenter" class="com.caibowen.gplume.web.SimpleControlCenter">-->
-		<!--<property name="preProcessor">-->
+		<!--<field name="preProcessor">-->
 			<!--<bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">-->
-				  <!--<property name="i18nService" ref="i18nService"/>-->
+				  <!--<field name="i18nService" ref="i18nService"/>-->
 			<!--</bean>-->
-		<!--</property>-->
-		<!--<property name="actionFactory" instance="com.caibowen.gplume.web.actions.ActionFactory" />-->
-		<!--<property name="injector" instance="${my_injector}" />-->
+		<!--</field>-->
+		<!--<field name="actionFactory" instance="com.caibowen.gplume.web.actions.ActionFactory" />-->
+		<!--<field name="injector" instance="${my_injector}" />-->
 	<!--</bean>-->
 	<!---->
     <!--<bean class="com.caibowen.gplume.web.misc.ControllerScanner">-->
-        <!--<property name="packages">-->
+        <!--<field name="packages">-->
             <!--<list>-->
-                <!--<value>com.caibowen.gplume.sample</value>-->
+                <!--<val>com.caibowen.gplume.sample</val>-->
             <!--</list>-->
-        <!--</property>-->
-        <!--<property name="controlCenterCallBack" ref="controlCenter"/>-->
+        <!--</field>-->
+        <!--<field name="controlCenterCallBack" ref="controlCenter"/>-->
     <!--</bean>-->
 
 </beans>
