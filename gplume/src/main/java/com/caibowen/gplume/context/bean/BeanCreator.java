@@ -17,9 +17,12 @@
 
 package com.caibowen.gplume.context.bean;
 
+import com.caibowen.gplume.annotation.Internal;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
+import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.misc.Str.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -28,14 +31,9 @@ import org.w3c.dom.NodeList;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  *  auxiliary for xml parsing
@@ -43,9 +41,10 @@ import java.util.Properties;
  * @author bowen.cbw
  * @since 8/16/2014.
  */
-abstract class XMLAux implements IBeanAssembler {
+@Internal
+abstract class BeanCreator implements IBeanAssembler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(XMLAux.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BeanCreator.class);
 
     protected ClassLoader classLoader;
 
@@ -60,17 +59,15 @@ abstract class XMLAux implements IBeanAssembler {
         return configCenter;
     }
 
-    protected @Nonnull Class<?> getClass(Element element) {
+
+    protected @Nonnull Class<?> getClass(String name) throws Exception {
+        return classLoader.loadClass(name);
+    }
+
+    protected @Nonnull Class<?> getClass(Element element) throws Exception {
         String clazzName = element.getAttribute(XMLTags.BEAN_CLASS).trim();
         clazzName = configCenter.replaceIfPresent(clazzName);
-        try {
-            return this.classLoader.loadClass(clazzName);
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    MessageFormat.format("cannot load class defined in XML " + element,
-                            clazzName)
-                    , e);
-        }
+        return getClass(clazzName);
     }
 
     /**
@@ -115,18 +112,18 @@ abstract class XMLAux implements IBeanAssembler {
         Class<?> bnClass = getClass(beanElem);
         int modi = bnClass.getModifiers();
 
-        if (Modifier.isAbstract(modi)) {
-            throw new IllegalStateException("class[" + bnClass.getName()
-                    + "] is abstract and cannot be instantiated");
-        } else if (Modifier.isInterface(modi)) {
-            throw new IllegalStateException("class[" + bnClass.getName()
-                    + "] is interface and cannot be instantiated");
-        }
+//          can be proxy
+//        if (Modifier.isAbstract(modi)) {
+//            throw new IllegalArgumentException("class[" + bnClass.getName()
+//                    + "] is abstract and cannot be instantiated");
+//        } else if (Modifier.isInterface(modi)) {
+//            throw new IllegalArgumentException("class[" + bnClass.getName()
+//                    + "] is interface and cannot be instantiated");
+//        }
 
-        Object beanObj = construct(bnClass, findCtorElem(beanElem));
+        Object beanObj = construct(bnClass, beanElem);
 
-        LOG.info("bean class[{0}] created", bnClass.getSimpleName());
-
+        LOG.trace("bean class[{}] created", bnClass.getName());
 
         NodeList _propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROPERTY);
         if (_propLs == null || _propLs.getLength() == 0) {
@@ -148,13 +145,12 @@ abstract class XMLAux implements IBeanAssembler {
             }
 
             String propName = prop.getAttribute(XMLTags.PROPERTY_NAME);
-            propName = configCenter.replaceIfPresent(propName);
-            if (!Str.Utils.notBlank(propName)) {
+            propName = configCenter.replaceIfPresent(propName.trim());
+            if (!Utils.notBlank(propName))
                 throw new NullPointerException(
-                        "Property id is empty. NodeName: ["
+                        "Property name is empty. NodeName: ["
                                 + prop.getNodeName() + "]");
 
-            }
 
 //System.out.println("class [" + bnClass.getSimpleName() + "] prop[" + propName + "]");
 
@@ -240,16 +236,11 @@ abstract class XMLAux implements IBeanAssembler {
 
     private Object inTag(Element prop) throws Exception {
 
-        String varObj = configCenter.replaceIfPresent(
-                prop.getAttribute(XMLTags.PROPERTY_INSTANCE));
+        String varObj = prop.getAttribute(XMLTags.PROPERTY_INSTANCE);
+        String varStr = prop.getAttribute(XMLTags.PROPERTY_VALUE);
+        String varRef = prop.getAttribute(XMLTags.PROPERTY_REF);
 
-        String varStr = configCenter.replaceIfPresent(
-                prop.getAttribute(XMLTags.PROPERTY_VALUE));
-
-        String varRef = configCenter.replaceIfPresent(
-                prop.getAttribute(XMLTags.PROPERTY_REF));
-
-        if (Str.Utils.notBlank(varStr)) {
+        if (Utils.notBlank(varStr)) {
             // e.g., <property id="number" value="5"/>
             // str value will casted to param type if needed
             String type;
@@ -259,15 +250,15 @@ abstract class XMLAux implements IBeanAssembler {
             } else
                 return varStr;
 
-        } else if (Str.Utils.notBlank(varRef)) {
+        } else if (Utils.notBlank(varRef)) {
             // e.g., <property id="bean" ref="someOtherBean"/>
             Object ref = getBean(varRef.trim());
             return ref;
 
-        } else if (Str.Utils.notBlank(varObj)) {
+        } else if (Utils.notBlank(varObj)) {
             // e.g. <property id="injector" instance="com.caibowen.gplume.core.Injector"/>
             Class<?> klass = this.classLoader.loadClass(varObj);
-            Object obj = construct(klass, null);
+            Object obj = klass.newInstance();
             afterProcess(obj, null);
             return obj;
 
@@ -367,7 +358,7 @@ abstract class XMLAux implements IBeanAssembler {
         }
 
 
-        if (Str.Utils.isBlank(initName))
+        if (Utils.isBlank(initName))
             return;
 
         Method m = bean.getClass().getDeclaredMethod(initName.trim());
@@ -379,49 +370,69 @@ abstract class XMLAux implements IBeanAssembler {
             m.invoke(bean);
     }
 
+
+    /**
+     * build new bean, if proxy specified, <construct></construct> is used for instantiating the invocation handler
+     * @param klass
+     * @param beanElem
+     * @return
+     * @throws Exception
+     */
     protected Object construct(@Nonnull Class klass,
+                               @Nullable Element beanElem) throws Exception {
+
+        String poxVal = beanElem.getAttribute(XMLTags.BEAN_PROXY);
+        if (Utils.isBlank(poxVal))
+            return newInstance(klass, findCtorElem(beanElem));
+
+        String poxHM = configCenter.replaceIfPresent(poxVal.trim());
+        Class poxHandle = getClass(poxHM);
+        if (! InvocationHandler.class.isAssignableFrom(poxHandle))
+            throw new IllegalArgumentException("[" + poxHM + "] from [" + poxVal + "]is not a InvocationHandler");
+
+        InvocationHandler handler = (InvocationHandler)newInstance(poxHandle, findCtorElem(beanElem));
+        return Proxy.newProxyInstance(classLoader, new Class[]{klass}, handler);
+    }
+
+    protected Object newInstance(@Nonnull Class klass,
                                @Nullable Element prop) throws Exception {
 
-        Object val = null;
         if (prop == null) {
             try {
                 Constructor<?> ctor = klass.getDeclaredConstructor();
                 if (!ctor.isAccessible()) {
                     ctor.setAccessible(true);
                 }
-                val = ctor.newInstance();
+                return ctor.newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("cannot find default constructor");
-            }
-        } else {
-            Object inTag;
-            if (null != (inTag = inTag(prop))) {
-                val = BeanEditor.construct(klass, inTag);
-
-            } else if (prop.getNodeName().equals(XMLTags.PROPERTY_MAP)) {
-                prop = (Element) prop.getFirstChild().getNextSibling();
-                Map m = buildMap(prop, "Constructor:" + klass.getName());
-                val = BeanEditor.construct(klass, m);
-
-            } else {
-                if (prop.getNodeName().equals(XMLTags.PROPERTY_LIST)) {
-                    prop = (Element) prop.getFirstChild().getNextSibling();
-                    List ls = buildList(prop);
-                    val = BeanEditor.construct(klass, ls);
-
-                } else {
-                    List ls = buildList(prop);
-                    if (ls.size() == 1)
-                        val = BeanEditor.construct(klass, ls.get(0));
-                    else
-                        throw new IllegalArgumentException(
-                                "Bean number miss match , construct ["
-                                        + "] in class ["
-                                        + klass.getName() + "]"
-                                        + "needs 1 actual " + ls.size());
-                }
+                throw new BeanAssemblingException("cannot find default constructor");
             }
         }
-        return val;
+        Object _tagVal;
+        if (null != (_tagVal = inTag(prop)))
+            return BeanEditor.construct(klass, _tagVal);
+
+        if (prop.getNodeName().equals(XMLTags.PROPERTY_MAP)) {
+            prop = (Element) prop.getFirstChild().getNextSibling();
+            Map m = buildMap(prop, "Constructor:" + klass.getName());
+            return BeanEditor.construct(klass, m);
+        }
+        if (prop.getNodeName().equals(XMLTags.PROPERTY_LIST)) {
+            prop = (Element) prop.getFirstChild().getNextSibling();
+            List ls = buildList(prop);
+            return BeanEditor.construct(klass, ls);
+        }
+
+        List ls = buildList(prop);
+        if (ls.size() == 1)
+            return BeanEditor.construct(klass, ls.get(0));
+        else
+            throw new IllegalArgumentException(
+                    "Bean number miss match , construct ["
+                            + "] in class ["
+                            + klass.getName() + "]"
+                            + "needs 1 actual " + ls.size());
+
+
     }
 }

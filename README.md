@@ -72,6 +72,10 @@ Spring-like configuration:
 		</list>
 	</property>
 </bean>
+<!-- support dynamic proxy-->
+<bean class="com.sample.MyInterface" proxy="com.sample.MyInvokeHanlder">
+	<construct name="what is this" value="invokeHanlderConstructor"/>
+</bean>
 ```
 #####Part Three: Internationalization. 
 add language packages 

@@ -41,9 +41,19 @@ public class InputStreamProviderProxy implements InputStreamProvider {
 
 	public static final InputStreamProvider FILE_PROVIDER = new FileInputStreamProvider();
 	public static final InputStreamProvider URL_PROVIDER = new URLInputStreamProvider();
+    public static final InputStreamProvider CLASSLOADER_PROVIDER = new ClassLoaderInputStreamProvider(InputStreamProviderProxy.class.getClassLoader());
 
-	public InputStreamProvider classPathProvider;
+    public static final InputStreamProviderProxy DEFAULT_PROXY = new InputStreamProviderProxy(FILE_PROVIDER);
+
+	public InputStreamProvider classPathProvider = CLASSLOADER_PROVIDER;
 	public InputStreamProvider defaultProvider;
+
+
+    public InputStreamProviderProxy() {}
+
+    public InputStreamProviderProxy(InputStreamProvider defaultProvider) {
+        this.defaultProvider = defaultProvider;
+    }
 
     public void setClassPathProvider(InputStreamProvider classPathProvider) {
         this.classPathProvider = classPathProvider;

@@ -13,9 +13,13 @@
 	<my_injector>com.caibowen.gplume.core.Injector</my_injector>
 </properties>
 
-
+<bean id="pox" class="com.caibowen.gplume.sample.model.XXX"
+      proxy="com.caibowen.gplume.sample.model.XXXPOX">
+    <construct value="456" type="Integer"/>
+    <property name="name" value="hahahahhah" />
+</bean>
 <!-- NEW  -->
-<!-- web app infrastracture -->
+<!-- web app infrastructure -->
 
     <bean class="com.caibowen.gplume.sample.model.Tester">
         <construct value="456" type="Integer"/>

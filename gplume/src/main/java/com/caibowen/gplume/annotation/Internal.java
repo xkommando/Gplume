@@ -10,8 +10,8 @@ import java.lang.annotation.*;
  * @since 28-10-2014.
  */
 @Documented
-@Target({ElementType.TYPE})
+@Target({ElementType.PACKAGE, ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.SOURCE)
 public @interface Internal {
-    String value() default "This class is for internal use only";
+    String value() default "internal use only";
 }

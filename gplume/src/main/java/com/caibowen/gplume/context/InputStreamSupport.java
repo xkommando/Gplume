@@ -25,7 +25,9 @@ import java.io.InputStream;
  *
  */
 public class InputStreamSupport {
-	
+
+	public static final InputStreamSupport DEFAULT_SUPPORT = new InputStreamSupport(InputStreamProviderProxy.DEFAULT_PROXY);
+
 	private InputStreamProvider streamProvider;
 	
 	public InputStreamSupport(){}
@@ -47,13 +49,13 @@ public class InputStreamSupport {
         InputStream inputStream = null;
         try {
             inputStream = streamProvider.getStream(path);
-            if (inputStream.available() < 1)
-                throw new IllegalStateException("not available[" + path + "] ");
         } catch (Exception e) {
             throw new IllegalArgumentException("resource unavailable [" + path
                     + "] with provider [" + streamProvider.getClass().getName()
                     + "]", e);
-		}
+        }
+        if (inputStream == null)
+            throw new IllegalStateException("not available[" + path + "] ");
 
         Exception ex = null;
 		try {

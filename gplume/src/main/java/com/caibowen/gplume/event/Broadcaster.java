@@ -56,20 +56,12 @@ public class Broadcaster implements Serializable {
 	slots;
 	
 	private Map< Reference<? extends IEventHook>, Object> hooks;
-	
-	private static Broadcaster handle = null;	
-	private Broadcaster() {
+
+	public Broadcaster() {
 		slots = new HashMap<>(64);
 		hooks = new LinkedHashMap<>(64);
 	}
-	
-	synchronized public static Broadcaster
-    instance() {
-		if(handle == null) {
-			handle = new Broadcaster();
-		}
-		return handle;
-	}
+
 	
 
 	/**

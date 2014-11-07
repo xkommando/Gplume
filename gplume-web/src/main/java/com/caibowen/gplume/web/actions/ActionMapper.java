@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.actions;
 
-import com.caibowen.gplume.common.URIPrefixTrie;
+import com.caibowen.gplume.common.collection.URIPrefixTrie;
 import com.caibowen.gplume.web.IAction;
 
 import java.io.Serializable;
@@ -49,9 +49,9 @@ public class ActionMapper<T extends IAction> implements Serializable {
 		if (s.charAt(len - 1) == '*') {
 			
 			final String _s = s.substring(0, len - 1);
-			final String bch = multiURIMap.covers_or_covered_by(_s);
+			final String bch = multiURIMap.coversOrCoveredBy(_s);
 			if (null == bch) {
-				if (multiURIMap.branch(_s, action)) {
+				if (multiURIMap.makeBranch(_s, action)) {
 					return;
 				}
 			}

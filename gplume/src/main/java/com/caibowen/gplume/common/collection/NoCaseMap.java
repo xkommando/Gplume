@@ -1,4 +1,4 @@
-package com.caibowen.gplume.common;
+package com.caibowen.gplume.common.collection;
 
 import java.util.HashMap;
 import java.util.Map;

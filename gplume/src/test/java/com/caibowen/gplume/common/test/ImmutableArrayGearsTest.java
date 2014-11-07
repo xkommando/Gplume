@@ -17,8 +17,8 @@
 
 package com.caibowen.gplume.common.test;
 
-import com.caibowen.gplume.common.ImmutableArrayMap;
-import com.caibowen.gplume.common.ImmutableArraySet;
+import com.caibowen.gplume.common.collection.ImmutableArrayMap;
+import com.caibowen.gplume.common.collection.ImmutableArraySet;
 import org.junit.Test;
 
 import java.util.*;

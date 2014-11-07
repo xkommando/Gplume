@@ -766,10 +766,9 @@ public class Str {
 	}
 	public static class Utils {
 
-        public static int choose(String input, String[] options, boolean caseSensitive) {
+        public static int choose(String input, String... options) {
             double dist = 0.0;
             int idx = -1;
-            if (caseSensitive)
                 for (int i = 0; i < options.length; i++) {
                     double ds = Math.getJaroWinklerDistance(input, options[i]);
                     if (ds >= dist) {
@@ -778,17 +777,22 @@ public class Str {
                     } else if (ds >= 1.0)
                         return i;
                 }
-            else
-                for (int i = 0; i < options.length; i++) {
-                    double ds = Math.getJaroWinklerDistance(input.toLowerCase(), options[i].toLowerCase());
-                    if (ds >= dist) {
-                        idx = i;
-                        dist = ds;
-                    } else if (ds >= 1.0)
-                        return i;
-                }
             return idx;
         }
+		public static int chooseIgnoreCase(String input, String... options) {
+			double dist = 0.0;
+			int idx = -1;
+			input = input.toLowerCase();
+			for (int i = 0; i < options.length; i++) {
+				double ds = Math.getJaroWinklerDistance(input, options[i].toLowerCase());
+				if (ds >= dist) {
+					idx = i;
+					dist = ds;
+				} else if (ds >= 1.0)
+					return i;
+			}
+			return idx;
+		}
 		/**
 		 * null or filled with space
 		 * @param s

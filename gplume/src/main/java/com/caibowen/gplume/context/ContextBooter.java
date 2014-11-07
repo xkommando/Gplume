@@ -85,7 +85,7 @@ public class ContextBooter {
 		AppContext.beanAssembler
 				.inTake(AppContext.broadcaster.listenerRetreiver);
 	}
-	
+
 	/**
 	 * @return the manifestPath
 	 */

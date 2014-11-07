@@ -6,8 +6,8 @@ import com.caibowen.gplume.jdbc.mapper.RowMapping;
 import com.caibowen.gplume.jdbc.transaction.Transaction;
 import com.caibowen.gplume.jdbc.transaction.TransactionCallback;
 
-import javax.activation.DataSource;
 import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,8 +21,8 @@ import java.util.List;
 public class JdbcExample {
 
     public void s() {
-        final Model model2;
-        final List<Model> models;
+        final Model model2 = null;
+        final List<Model> models = null;
         DataSource dataSource = null;
 
 
@@ -55,7 +55,7 @@ public class JdbcExample {
             @Override
             public Model extract(@Nonnull ResultSet rs) throws SQLException {
                 Model model = new Model();
-                model.setId(rs.getString(1))
+                model.setId(rs.getString(1));
                 model.setName(rs.getString(2));
                 return model;
             }

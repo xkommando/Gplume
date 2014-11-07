@@ -356,29 +356,13 @@ public class Converter {
 	@Nonnull
 	public static Boolean toBool(String string) {
 		if (string == null) {
-			throw new NullPointerException();
+			return null;
 		}
 		string = string.trim();
-		
-		boolean isTrue = string.equalsIgnoreCase("true") 
-				|| string.equalsIgnoreCase("on")
-				|| string.equalsIgnoreCase("yes") 
-				|| string.equalsIgnoreCase("1");
-		
-		if (isTrue) {
-			return Boolean.TRUE;
-			
-		} else {
-			boolean isFalse = string.equalsIgnoreCase("false") 
-					|| string.equalsIgnoreCase("off")
-					|| string.equalsIgnoreCase("no") 
-					|| string.equalsIgnoreCase("0");
-			if (isFalse) {
-				return Boolean.FALSE;
-			} else {
-				throw new IllegalArgumentException("cannot cast [" + string + "] to bool");
-			}
-		}
+		return Str.Utils.chooseIgnoreCase(string, "true", "false") == 0
+				|| Str.Utils.chooseIgnoreCase(string, "yes", "no") == 0
+				|| Str.Utils.chooseIgnoreCase(string, "on", "off") == 0
+				|| Str.Utils.chooseIgnoreCase(string, "1", "0") == 0;
 	}
 
     public static BigInteger toBigInteger(final String str) {

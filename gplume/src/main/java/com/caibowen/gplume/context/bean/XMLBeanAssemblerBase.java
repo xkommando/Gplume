@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author BowenCai
  *
  */
-public abstract class XMLBeanAssemblerBase extends XMLAux {
+public abstract class XMLBeanAssemblerBase extends BeanCreator {
 
 	protected static final String LOGGER_NAME = "BeanAssembler";
 	
@@ -81,16 +81,15 @@ public abstract class XMLBeanAssemblerBase extends XMLAux {
 		if (node == null) { //  nothing
 			throw new IllegalArgumentException("no configuration found");
 		}
-		
+
+        // start to process
 		while (node.getNextSibling() != null) {
 
 			node = node.getNextSibling();
 			Element elem;
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
+			if (node.getNodeType() == Node.ELEMENT_NODE)
 				elem = (Element) node;
-			} else {
-				continue;
-			}
+			else continue;
 
 			switch (elem.getNodeName()) {
 			case XMLTags.CONFIG:
@@ -136,7 +135,7 @@ public abstract class XMLBeanAssemblerBase extends XMLAux {
             podMap.put(bnId, pod);
         }
 
-        LOG.info("Add Bean: id[{0}] of class[{1}] singleton ? {2}",
+        LOG.trace("Add Bean: id[{}] of class[{}] singleton ? {}",
                 bnId, (bean != null ? bean.getClass().getName() : "unknown")
                 , isSingleton
         );
@@ -187,4 +186,7 @@ public abstract class XMLBeanAssemblerBase extends XMLAux {
         LOG.debug("importing configuration from {0}, {1} beans created", loc, podMap.size());
     }
 
+    void handleRequire(Element elem) {
+
+    }
  }

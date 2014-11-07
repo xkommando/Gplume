@@ -1,5 +1,7 @@
 package com.caibowen.gplume.jdbc;
 
+import java.text.MessageFormat;
+
 /**
  *  unchecked SQL exception
  * @author BowenCai
@@ -15,6 +17,9 @@ public class JdbcException extends RuntimeException {
         super(message);
     }
 
+    public JdbcException(String message, Object...args) {
+        super(MessageFormat.format(message, args));
+    }
 
     public JdbcException(String message, Throwable cause) {
         super(message, cause);

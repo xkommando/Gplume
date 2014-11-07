@@ -157,13 +157,13 @@ public class ConfigCenter implements Serializable {
             configs.put(currentConfigName, current);
             current.put(k, v);
             keyToConfigName.put(k, currentConfigName);
-            LOG.debug("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
+            LOG.trace("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
         } else {
             String old = current.get(k);
             if (old == null) {
                 current.put(k, v);
                 keyToConfigName.put(k, currentConfigName);
-                LOG.debug("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
+                LOG.trace("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
             } else {
                 if (old.equals(v))
                     LOG.warn("duplicated key ["
@@ -184,7 +184,7 @@ public class ConfigCenter implements Serializable {
         String old = globlaProperties.get(k);
         if (old == null) {
             globlaProperties.put(k, v);
-            LOG.debug("add global property: [" + k + "] -> [" + v + "]");
+            LOG.trace("add global property: [" + k + "] -> [" + v + "]");
         } else {
             if (old.equals(v))
                 LOG.warn("duplicated global key ["

@@ -16,6 +16,7 @@
 package com.caibowen.gplume.sample.controller;
 
 import com.caibowen.gplume.annotation.Semaphored;
+import com.caibowen.gplume.sample.model.XXX;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.event.AppEvent;
 import com.caibowen.gplume.event.IAppListener;
@@ -56,7 +57,7 @@ public class SampleController {
 			}
 			System.out.println();
 		}
-		context.render("index");
+		context.render("/index");
 	}
 	
 	
@@ -77,6 +78,9 @@ public class SampleController {
 			"/index.html",
 			"index"})
 	public String index(SampleController self, RequestContext context) {
+		XXX x = AppContext.beanAssembler.getBean("pox");
+		x.bark();
+
 		context.putAttr("msg", nativeStr("gplumeIsRunning", context));
 		context.putAttr("test_int", 123);
 		context.session(true).setAttribute("msg", "ctx msg");
@@ -98,7 +102,7 @@ public class SampleController {
 		
 		context.session(true).setAttribute("ints", ints);
 		
-		return "index";
+		return "/index";
 	}
 	
 	
@@ -158,7 +162,7 @@ public class SampleController {
 			context.putAttr("msg", nativeStr("dateIsWrong", context));
 		}
 		context.putAttr("date", date);
-		return "/happy.jsp";
+		return "happy.jsp";
 	}
 
 

@@ -67,8 +67,8 @@ public abstract class AppContext {
 	public static final String LOCALE 	= "locale";
 	public static final String TIME_ZONE = "timezone";
 	
-	public static final IBeanAssembler		beanAssembler = XMLBeanAssembler.instance();
-	public static final Broadcaster			broadcaster = Broadcaster.instance();
+	public static final IBeanAssembler		beanAssembler = new XMLBeanAssembler();
+	public static final Broadcaster			broadcaster = new Broadcaster();
 	
 	public static Date now() {
 		return defaults.calendar.getTime();

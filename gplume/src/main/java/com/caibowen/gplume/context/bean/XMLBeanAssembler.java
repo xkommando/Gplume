@@ -98,16 +98,8 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	 * 
 	 */
 	public static final boolean	REFLECT_ON_PRIVATE = false;
-	
-	private static IBeanAssembler handle = null;
-	private XMLBeanAssembler() {}
-	
-	synchronized public static IBeanAssembler instance() {
-		if(handle == null) {
-			handle = new XMLBeanAssembler();
-		}
-		return handle;
-	}
+
+	public XMLBeanAssembler() {}
 
 	public void assemble(@Nonnull final InputSource in) throws Exception {
 		
@@ -115,7 +107,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		Document doc = builder.parse(in);
 		doc.getDocumentElement().normalize();
 		super.doAssemble(doc);
-		LOG.info("Created {0} beans", podMap.size());
+		LOG.info("Created {} beans", podMap.size());
 	}
 	
 	@Override
@@ -219,7 +211,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		
 		oldPod.setInstance(bean);
 		super.podMap.put(id, oldPod);
-        LOG.debug("{0} of type {1} updated", id, bean.getClass().getName());
+        LOG.debug("{} of type {} updated", id, bean.getClass().getName());
 	}
 	
 	/**
@@ -234,7 +226,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		}
 		Pod pod = new Pod(id, null, bean);
 		super.podMap.put(id, pod);
-        LOG.debug("Bean {0} of type {1} added"
+        LOG.debug("Bean {} of type {} added"
                 , id
                 , bean.getClass().getName());
 
