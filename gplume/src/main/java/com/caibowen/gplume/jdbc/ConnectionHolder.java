@@ -70,8 +70,7 @@ public class ConnectionHolder {
 
         ConnectionHolder holder = (ConnectionHolder) o;
 
-        if (currentCon != null ? !currentCon.equals(holder.currentCon) : holder.currentCon != null) return false;
-        return true;
+        return !(currentCon != null ? !currentCon.equals(holder.currentCon) : holder.currentCon != null);
     }
 
     @Override

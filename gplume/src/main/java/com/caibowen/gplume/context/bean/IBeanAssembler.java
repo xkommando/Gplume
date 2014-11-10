@@ -39,8 +39,8 @@ public interface IBeanAssembler {
 
 	String getCurrentNamespace();
 	void setCurrentNamespace(String currentNamespace);
-	String getReferedNamespace();
-	void setReferedNamespace(String referedNamespace);
+	String getRefNamespace();
+	void setRefNamespace(String referedNamespace);
 
 	/**
 	 * build all beans.
@@ -120,7 +120,7 @@ public interface IBeanAssembler {
 	 */
 	boolean 		contains(@Nonnull String id);
 	
-	boolean 		isSingletion(@Nonnull String id);
+	boolean isSingleton(@Nonnull String id);
 
 	boolean 		contains(@Nonnull Class<?> clazz);
 

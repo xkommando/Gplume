@@ -37,7 +37,9 @@ public class Int8LIRSCache<V> {
     public Int8LIRSCache(int maxEntries) {
         this(maxEntries, 1, 16, maxEntries / 100);
     }
-
+    public Int8LIRSCache(int maxEntries, int averageMemory) {
+        this(maxEntries, averageMemory, 16, maxEntries / averageMemory / 100);
+    }
     /**
      * Create a new cache with the given memory size.
      *
@@ -50,11 +52,11 @@ public class Int8LIRSCache<V> {
     @SuppressWarnings("unchecked")
     public Int8LIRSCache(long maxMemory, int averageMemory,
                          int segmentCount, int stackMoveDistance) {
-        setMaxMemory(maxMemory);
-        setAverageMemory(averageMemory);
         Assert.isTrue(
                 Integer.bitCount(segmentCount) == 1,
                 "The segment count must be a power of 2, is " + segmentCount);
+        setMaxMemory(maxMemory);
+        setAverageMemory(averageMemory);
 
         this.segmentCount = segmentCount;
         this.segmentMask = segmentCount - 1;
@@ -127,7 +129,7 @@ public class Int8LIRSCache<V> {
      * @return the old value, or null if there was no resident entry
      */
     public V put(long key, V value) {
-        return put(key, value, sizeOf(value));
+        return put(key, value, averageMemory);
     }
 
     /**
@@ -161,16 +163,6 @@ public class Int8LIRSCache<V> {
         }
     }
 
-    /**
-     * Get the size of the given value. The default implementation returns the
-     * average memory as configured for this cache.
-     *
-     * @param value the value
-     * @return the size
-     */
-    protected int sizeOf(V value) {
-        return averageMemory;
-    }
 
     /**
      * Remove an entry. Both resident and non-resident entries can be

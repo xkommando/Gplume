@@ -80,6 +80,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		assemble(new InputSource(file.toURI().toASCIIString()));
 	}
 
+	@Override
 	public void assemble(@Nonnull final String path) throws Exception {
 		configCenter.withPath(path, new InputStreamCallback() {
             @Override
@@ -96,16 +97,14 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	@Override
 	public <T> T getBean(@Nonnull String id) {
 
-		String lid = getLocation(id);
-		if (lid == null)
+		Pod pod = super.tree.findByPartialId(id, currentNamespace, refNamespace);
+		if (pod == null)
 			return null;
-		Pod pod = super.tree.findPod(lid);
-
 		if (pod.isSingleton()) {
 			Object bn = pod.getInstance();
 			if (bn != null)
 				return (T)bn;
-			Pod p = super.tree.remove(lid);
+			Pod p = super.tree.removeByPartialId(id, currentNamespace, refNamespace);
 			try {
 				p.destroy();
 			} catch (Exception e) {
@@ -117,7 +116,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 				return (T) buildBean(pod.getDescription());
 			} catch (Exception e) {
 				throw new BeanAssemblingException(
-						"failed building non-singleton bean of id[" + lid + "]", e);
+						"failed building non-singleton bean of id[" + id + "]", e);
 			}
 		}
 	}
@@ -130,17 +129,19 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 
     /**
      * will not increase the bean age
-     * @param clazz
-     * @return
+     * @return a set of suitable beans
      */
 	@Override
 	public Set<Object> getBeans(@Nonnull final Class<?> clazz) {
 		final Set<Object> set = new HashSet<>(16);
-		super.tree.intake(new BeanVisitor() {
+		super.tree.intake(new BeanVisitor<Pod>() {
 			@Override
-			public void visit(Object bean) {
-				if (clazz.isInstance(bean))
-					set.add(bean);
+			public void visit(Pod p) {
+				Object bn;
+				if (null != p
+						&& null != (bn = p.getInstance())
+						&& clazz.isInstance(bn))
+					set.add(bn);
 			}
 		});
 		return set;
@@ -155,31 +156,30 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	
 	@Override
 	public void removeBean(@Nonnull String id) {
-		String lid = getLocation(id);
-		if (lid == null)
+		Pod pod = super.tree.removeByPartialId(id, currentNamespace, refNamespace);
+		if (pod == null)
 			return;
-		Pod pod = super.tree.remove(lid);
 		try {
 			pod.destroy();
 		} catch (Exception e) {
 			throw new RuntimeException(
-					"failed destroy bean of id[" + lid + "]", e);
+					"failed destroy bean of id[" + id + "]", e);
 		}
 
 	}
 
 	@Override
 	public <T> void updateBean(@Nonnull String id, @Nonnull T bean) {
-		String lid = getLocation(id);
-		if (lid == null)
+		Pod pod = super.tree.findByPartialId(id, currentNamespace, refNamespace);
+		if (pod == null)
 			return;
-		Pod pod = super.tree.findPod(lid);
-		if (pod == null || pod.getInstance() == null)
-			throw new NullPointerException("cannot find bean[" + lid + "]");
+
+		if (!pod.isSingleton())
+			pod.setDescription(null);
 
 		pod.setInstance(bean);
 
-        LOG.debug("{} of type {} updated", lid, bean.getClass().getName());
+        LOG.debug("{} of type {} updated", id, bean.getClass().getName());
 	}
 	
 	/**
@@ -193,7 +193,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 			return false;
 
 		Pod pod = new Pod(lid, null, bean);
-		super.tree.addPod(lid, pod);
+		super.tree.put(lid, pod);
         LOG.trace("Bean [{}] of type [{}] added"
 				, lid
 				, bean.getClass().getName());
@@ -202,41 +202,26 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	}
 	
 	@Override
-	public boolean contains(String id) {
-		return getLocation(id) != null;
+	public boolean contains(@Nonnull String id) {
+		return tree.findByPartialId(id, currentNamespace, refNamespace) != null;
 	}
 
 	@Override
-	public boolean isSingletion(String id) {
-		String lid = getLocation(id);
-		if (lid != null) {
-			Pod pod = super.tree.findPod(id);
+	public boolean isSingleton(@Nonnull String id) {
+		Pod pod = super.tree.findByPartialId(id, currentNamespace, refNamespace);
+		if (pod != null) {
 			return pod.isSingleton();
 		}
 		else
 			throw new NullPointerException("cannot find bean[" + id + "]");
 	}
 
-	private String getLocation(String id) {
-		if (tree.findPod(id) != null)
-			return id;
-		String lid = currentNamespace + XMLTags.NS_DELI + id;
-		if (tree.findPod(lid) != null)
-			return lid;
-		if (tree.findPod((lid = referedNamespace + XMLTags.NS_DELI + id)) != null)
-			return lid;
-
-		return null;
-	}
-	
 	/**
 	 * @param visitor
 	 * @throws Exception 
 	 */
 	@Override
-	public void inTake(BeanVisitor visitor) {
-		Exception ex = null;
-		String id = null;
+	public void inTake(@Nonnull BeanVisitor visitor) {
 		super.tree.intake(visitor);
 	}
 

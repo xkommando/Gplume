@@ -32,10 +32,14 @@ public class Int4LIRSCache<V> {
      * settings (an average size of 1 per entry, 16 segments, and stack move
      * distance equals to the maximum number of entries divided by 100).
      *
-     * @param maxEntries the maximum number of entries
+     * @param maxMemory the maximum number of entries
      */
-    public Int4LIRSCache(int maxEntries) {
-        this(maxEntries, 1, 16, maxEntries / 100);
+    public Int4LIRSCache(int maxMemory) {
+        this(maxMemory, 1, 16, maxMemory / 100);
+    }
+
+    public Int4LIRSCache(int maxMemory, int averageMemory) {
+        this(maxMemory, averageMemory, 16, maxMemory / averageMemory / 100);
     }
 
     /**
@@ -49,11 +53,11 @@ public class Int4LIRSCache<V> {
      */
     public Int4LIRSCache(int maxMemory, int averageMemory,
                          int segmentCount, int stackMoveDistance) {
-        setMaxMemory(maxMemory);
-        setAverageMemory(averageMemory);
         Assert.isTrue(
                 Integer.bitCount(segmentCount) == 1,
                 "The segment count must be a power of 2, is " + segmentCount);
+        setMaxMemory(maxMemory);
+        setAverageMemory(averageMemory);
 
         this.segmentCount = segmentCount;
         this.segmentMask = segmentCount - 1;
@@ -124,7 +128,7 @@ public class Int4LIRSCache<V> {
      * @return the old value, or null if there was no resident entry
      */
     public V put(int key, V value) {
-        return put(key, value, sizeOf(value));
+        return put(key, value, averageMemory);
     }
 
     /**
@@ -157,16 +161,6 @@ public class Int4LIRSCache<V> {
         }
     }
 
-    /**
-     * Get the size of the given value. The default implementation returns the
-     * average memory as configured for this cache.
-     *
-     * @param value the value
-     * @return the size
-     */
-    protected int sizeOf(V value) {
-        return averageMemory;
-    }
 
     /**
      * Remove an entry. Both resident and non-resident entries can be

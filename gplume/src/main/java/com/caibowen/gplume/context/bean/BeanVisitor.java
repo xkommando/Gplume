@@ -21,7 +21,7 @@ package com.caibowen.gplume.context.bean;
  * @author BowenCai
  *
  */
-public interface BeanVisitor {
+public interface BeanVisitor<T> {
 	
-	public void visit(Object bean);
+	public void visit(T bean);
 }

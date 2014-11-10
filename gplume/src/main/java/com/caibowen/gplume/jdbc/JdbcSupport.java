@@ -13,11 +13,12 @@ package com.caibowen.gplume.jdbc;
 import com.caibowen.gplume.jdbc.mapper.ColumnMapper;
 import com.caibowen.gplume.jdbc.mapper.MapExtractor;
 import com.caibowen.gplume.jdbc.mapper.RowMapping;
-import com.caibowen.gplume.jdbc.mapper.SingleColumMapper;
+import com.caibowen.gplume.jdbc.mapper.SingleColumnMapper;
 import com.caibowen.gplume.jdbc.transaction.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     @Override
     public <T> T execute(TransactionConfig cfg, TransactionCallback<T> operations) {
         Transaction tnx = transactionManager.begin(cfg);
-        T ret = null;
+        T ret;
         try {
             ret = operations.withTransaction(tnx);
         } catch (SQLException se) {
@@ -343,7 +344,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     public Map<String, Object> insert(final String sql, final String[] cols) {
 
         return insert(new StatementCreator() {
-
+            @Nonnull
             @Override
             public PreparedStatement createStatement(Connection con)
                     throws SQLException {
@@ -358,6 +359,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
                                       final String[] cols,
                                       final Object... params) {
         return insert(new StatementCreator() {
+            @Nonnull
             @Override
             public PreparedStatement createStatement(Connection con)
                     throws SQLException {
@@ -402,7 +404,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
      */
     @Override
     public <T> T queryForObject(StatementCreator psc, Class<T> type) {
-        return queryForObject(psc, new SingleColumMapper<>(type));
+        return queryForObject(psc, new SingleColumnMapper<>(type));
     }
 
 //-----------------------------------------------
@@ -455,7 +457,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
 
     @Override
     public <T> List<T> queryForList(StatementCreator psc, Class<T> type) {
-        return queryForList(psc, new SingleColumMapper<>(type));
+        return queryForList(psc, new SingleColumnMapper<>(type));
     }
 
 
@@ -519,6 +521,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
      */
     protected static StatementCreator getStatementCreator(final String sql) {
         return new StatementCreator() {
+            @Nonnull
             @Override
             public PreparedStatement createStatement(Connection con)
                     throws SQLException {
@@ -537,6 +540,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     protected static StatementCreator getStatementCreator(final String sql, final Object... params) {
         return new StatementCreator() {
 
+            @Nonnull
             @Override
             public PreparedStatement createStatement(Connection con)
                     throws SQLException {

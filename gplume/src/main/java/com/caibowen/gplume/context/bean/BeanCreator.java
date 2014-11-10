@@ -20,6 +20,7 @@ package com.caibowen.gplume.context.bean;
 import com.caibowen.gplume.annotation.Internal;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
+import com.caibowen.gplume.misc.Assert;
 import com.caibowen.gplume.misc.Str.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -239,8 +240,7 @@ abstract class BeanCreator implements IBeanAssembler {
 
         } else if (Utils.notBlank(varRef)) {
             // e.g., <property id="bean" ref="someOtherBean"/>
-            Object ref = getBean(configCenter.replaceIfPresent(varRef.trim()));
-            return ref;
+            return getBean(configCenter.replaceIfPresent(varRef.trim()));
 
         } else if (Utils.notBlank(varObj)) {
             // e.g. <property id="injector" instance="com.caibowen.gplume.core.Injector"/>
@@ -267,11 +267,12 @@ abstract class BeanCreator implements IBeanAssembler {
                 throw new IllegalArgumentException(
                         "duplicated map key for property[" + propName + "]");
 
-            Object mapV = configCenter.replaceIfPresent(
-                    elemBn.getTextContent());
+            String _v = elemBn.getTextContent();
+            Assert.hasText(_v);
+            Object mapV = configCenter.replaceIfPresent(_v);
 
             String tgtType;
-            if (null != (tgtType = elemBn.getAttribute(XMLTags.TYPE))) {
+            if (Utils.notBlank(tgtType = elemBn.getAttribute(XMLTags.TYPE))) {
                 Class k = Converter.getClass(configCenter.replaceIfPresent(tgtType.trim()));
                 mapV = Converter.slient.translateStr((String)mapV, k);
             }
@@ -361,7 +362,7 @@ abstract class BeanCreator implements IBeanAssembler {
      * @throws Exception
      */
     protected Object construct(@Nonnull Class klass,
-                               @Nullable Element beanElem) throws Exception {
+                               @Nonnull Element beanElem) throws Exception {
 
         int _c = 0;
         String poxVal = beanElem.getAttribute(XMLTags.BEAN_PROXY);
@@ -379,8 +380,7 @@ abstract class BeanCreator implements IBeanAssembler {
                 InvocationHandler handler = (InvocationHandler)newInstance(poxHandle, findCtorElem(beanElem));
                 return Proxy.newProxyInstance(classLoader, new Class[]{klass}, handler);
             case 3:
-                Object ref = getBean(configCenter.replaceIfPresent(poxRef.trim()));
-                return ref;
+                return getBean(configCenter.replaceIfPresent(poxRef.trim()));
             default:
                 throw new IllegalArgumentException("wrong config of InvocationHandler");
         }

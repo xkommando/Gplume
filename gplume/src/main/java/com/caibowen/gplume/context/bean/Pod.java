@@ -101,7 +101,11 @@ class Pod {
 		return description;
 	}
 
-//---------------------------------------------------------
+	public void setDescription(Element description) {
+		this.description = description;
+	}
+
+	//---------------------------------------------------------
 	
 	public Object getInstance() {
 		return instance;

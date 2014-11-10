@@ -30,6 +30,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 
+import static com.caibowen.gplume.misc.Str.EMPTY;
+
 
 /**
  * base class of XMLBeanAssemble
@@ -42,32 +44,36 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(XMLBeanAssemblerBase.class);
 
-//	protected Map<String, Pod> podMap = new ConcurrentHashMap<>(64);
+    protected final SpaceTree<Pod> tree = new SpaceTree<>();
 
-    protected final PodTree tree = new PodTree();
+    protected String currentNamespace = EMPTY;
 
-    protected String currentNamespace = Str.EMPTY;
+    protected String refNamespace = EMPTY;
 
-    protected String referedNamespace = Str.EMPTY;
-
-    public void setClassLoader(ClassLoader loader) {
+    @Override
+    public void setClassLoader(@Nonnull ClassLoader loader) {
 		this.classLoader = loader;
 	}
-	@Nonnull
+	@Override
+    @Nonnull
 	public ClassLoader getClassLoader() {
 		return this.classLoader;
 	}
+    @Override
     public String getCurrentNamespace() {
         return currentNamespace;
     }
+    @Override
     public void setCurrentNamespace(String currentNamespace) {
         this.currentNamespace = currentNamespace;
     }
-    public String getReferedNamespace() {
-        return referedNamespace;
+    @Override
+    public String getRefNamespace() {
+        return refNamespace;
     }
-    public void setReferedNamespace(String referedNamespace) {
-        this.referedNamespace = referedNamespace;
+    @Override
+    public void setRefNamespace(String refNamespace) {
+        this.refNamespace = refNamespace;
     }
 
     /**
@@ -97,7 +103,7 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
 			throw new IllegalArgumentException("no configuration found");
 
         currentNamespace = getCurrentNS(rootElem);
-        referedNamespace = getRefNS(rootElem);
+        refNamespace = getRefNS(rootElem);
 
         // start to process
 		while (beanNodeIter.getNextSibling() != null) {
@@ -133,28 +139,28 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
 
 	}
 
-    String getCurrentNS(Element rootX) {
+    protected static String getCurrentNS(Element rootX) {
         if (rootX == null)
             throw new IllegalArgumentException("cannot find <beans>");
         String nsStr = rootX.getAttribute(XMLTags.NAMESPACE);
         if (Str.Utils.isBlank(nsStr))
-            return "";
+            return EMPTY;
         return nsStr;
     }
 
-    String getRefNS(Element rootX) {
+    protected static String getRefNS(Element rootX) {
         if (rootX == null)
             throw new IllegalArgumentException("cannot find <beans>");
         String nsStr = rootX.getAttribute(XMLTags.USING_NS);
         if (Str.Utils.isBlank(nsStr))
-            return "";
+            return EMPTY;
         return nsStr;
     }
 
-    void handleBean(Element elem) throws Exception {
+    protected void handleBean(Element elem) throws Exception {
 
         String bnId = elem.getAttribute(XMLTags.BEAN_ID);
-        Pod pod = null;
+        Pod pod;
 
         String bnScope = elem.getAttribute(XMLTags.BEAN_SINGLETON);
 
@@ -172,7 +178,7 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
         }
 
         if (Str.Utils.notBlank(bnId)) {
-            if (! tree.addPod(currentNamespace + XMLTags.NS_DELI + bnId, pod))
+            if (! tree.put(currentNamespace + XMLTags.NS_DELI + bnId, pod))
                 throw new IllegalArgumentException("duplicated bean definition [" + bnId + "]");
         }
 
@@ -201,22 +207,21 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
      *
      * @param elem
      */
-    void handleProperties(Element elem) {
+    protected void handleProperties(Element elem) {
         configCenter.scanXMLElem(elem);
     }
 
     /**
      * build beans from other config file
-     * @param elem
      * @throws Exception
      */
-    void handleConfig(Element elem) throws Exception {
+    protected void handleConfig(Element elem) throws Exception {
         String loc = elem.getTextContent().trim();
         final DocumentBuilder builder =
                 DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
         String oldCur = currentNamespace;
-        String oldRef = referedNamespace;
+        String oldRef = refNamespace;
         int oldsz = tree.size();
         configCenter.withPath(loc, new InputStreamCallback() {
             @Override
@@ -228,7 +233,7 @@ public abstract class XMLBeanAssemblerBase extends BeanCreator {
         });
 
         currentNamespace = oldCur;
-        referedNamespace = oldRef;
+        refNamespace = oldRef;
         LOG.debug("importing configuration from {}, {} beans created", loc, (tree.size() - oldsz));
     }
 

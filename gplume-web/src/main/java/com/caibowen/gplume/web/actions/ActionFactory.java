@@ -40,6 +40,7 @@ import java.util.List;
 public class ActionFactory implements IActionFactory, Serializable {
 	
 	private static final long serialVersionUID = -4677797873703541912L;
+
 	private static final Logger LOG = LoggerFactory.getLogger(ActionFactory.class);
 	
 	private ActionMapper<IAction>[] mappers;

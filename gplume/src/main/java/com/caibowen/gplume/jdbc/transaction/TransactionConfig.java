@@ -62,9 +62,8 @@ public class TransactionConfig implements Serializable {
 
         if (isolationLevel != that.isolationLevel) return false;
         if (readOnly != that.readOnly) return false;
-        if (timeout != that.timeout) return false;
+        return timeout == that.timeout;
 
-        return true;
     }
 
     @Override

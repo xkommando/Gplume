@@ -13,7 +13,7 @@ import java.util.ArrayList;
 @Internal("internal list for connection holders")
 public class LocalList {
 
-    private static final ThreadLocal<ArrayList<?>> local = new ThreadLocal<>();
+    private static final ThreadLocal<ArrayList<Object>> local = new ThreadLocal<>();
 
     public static<E> void push(@Nonnull E item) {
         ArrayList arr = local.get();
@@ -64,8 +64,7 @@ public class LocalList {
         int idx = arr.size() - 1 - order;
         if (idx < 0)
             return null;
-        E last = (E)arr.get(idx);
-        return last;
+        return (E)arr.get(idx);
     }
 
     @Nullable
@@ -112,11 +111,9 @@ public class LocalList {
         return old;
     }
 
-    public boolean empty() {
+    public static boolean empty() {
         ArrayList arr = local.get();
-        if (arr == null)
-            return true;
-        return arr.size() == 0;
+        return arr == null || arr.size() == 0;
     }
 
     public static <E> int search(E o) {
@@ -137,7 +134,7 @@ public class LocalList {
         return arr.size();
     }
 
-    public void clear() {
+    public static void clear() {
         local.remove();
     }
 

@@ -54,9 +54,7 @@ public class SimpleControlCenter extends ControlCenter {
 		}
 		
 		try {
-			
 			action.perform(requestContext);
-			
 		} catch (UndeclaredThrowableException udefe) {
 
 			LOG.error(udefe.getMessage(),
@@ -64,25 +62,14 @@ public class SimpleControlCenter extends ControlCenter {
 			thrown = udefe;
 
 		} catch (IOException ioex) {
-
 			LOG.error("I/O :" + ioex.getCause(), ioex);
 			thrown = ioex;
-
 		} catch (ServletException servex) {
-
 			LOG.error("Servlet : " + servex.getCause(), servex);
 			thrown = servex;
-
-		} catch (Exception e) {
-
-			LOG.error(e.getMessage() + "\n Cause: " + e.getCause(), e);
-			thrown = e;
-
 		} catch (Throwable thr) {
-
 			LOG.error(thr.getMessage()
 					+ "\n Cause: " + thr.getCause(), thr);
-			
 			thrown = thr;
 		}
 
@@ -115,7 +102,7 @@ public class SimpleControlCenter extends ControlCenter {
 			}
 		} // for method
 		if (controllers == null) {
-			controllers = new ArrayList<Object>(32);
+			controllers = new ArrayList<>(32);
 		}
 		if (!controllers.contains(controller)) {
 			controllers.add(controller);

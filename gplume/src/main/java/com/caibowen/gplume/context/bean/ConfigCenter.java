@@ -47,24 +47,36 @@ public class ConfigCenter implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigCenter.class);
 
-    InputStreamProviderProxy proxy;
-    InputStreamSupport streamSupport;
+    protected InputStreamProviderProxy proxy;
+    protected InputStreamSupport streamSupport;
+
+
+    /**
+     * record the current working config file.
+     * when half, it is pointed at the main config file
+     */
+    private String currentConfigName;
+
+    /**
+     * local config
+     */
+    private final Map<String, Map<String, String>> configs;
+
+    /**
+     * map storing local config key and the file name;
+     */
+    private final Map<String, String> keyToConfigName;
+
+    private final Map<String, String> globalProperties;
 
     public ConfigCenter() {
-        proxy = new InputStreamProviderProxy();
-        streamSupport = new InputStreamSupport(proxy);
+        proxy = InputStreamProviderProxy.DEFAULT_PROXY;
+        streamSupport = InputStreamSupport.DEFAULT_SUPPORT;
+        globalProperties = new HashMap<>(64);
+        keyToConfigName = new HashMap<>(64);
+        configs = new HashMap<>(32);
     }
 
-    public InputStreamSupport getStreamSupport() {
-        return streamSupport;
-    }
-
-    public void setDefaultStreamProvider(InputStreamProvider streamProvider) {
-        proxy.setDefaultProvider(streamProvider);
-    }
-    public void setClassPathProvider(InputStreamProvider provider) {
-        proxy.setClassPathProvider(provider);
-    }
 
     synchronized public void withPath(String path, InputStreamCallback callback) {
         String _c = currentConfigName;
@@ -73,23 +85,6 @@ public class ConfigCenter implements Serializable {
         currentConfigName = _c;
     }
 
-    /**
-     * recored the current working config file.
-     * when half, it is pointed at the main config file
-     */
-    private String currentConfigName;
-
-    /**
-     * local config
-     */
-    private Map<String, Map<String, String>> configs = new HashMap<>(32);
-
-    /**
-     * map storing local config key and the file name;
-     */
-    private Map<String, String> keyToConfigName = new HashMap<String, String>(64);
-
-    private Map<String, String> globlaProperties = new HashMap<String, String>(64);
 
     synchronized public void scanXMLElem(Element elem) {
 
@@ -181,9 +176,9 @@ public class ConfigCenter implements Serializable {
     }
 
     private void addGlobal(String k, String v) {
-        String old = globlaProperties.get(k);
+        String old = globalProperties.get(k);
         if (old == null) {
-            globlaProperties.put(k, v);
+            globalProperties.put(k, v);
             LOG.debug("add global property: [" + k + "] -> [" + v + "]");
         } else {
             if (old.equals(v))
@@ -212,12 +207,14 @@ public class ConfigCenter implements Serializable {
     @Nonnull
     protected String replaceIfPresent(@Nonnull String name) {
         name = name.trim();
-        int lq = 0;
+        int lq;
         int rq = 0;
         int lastL = 0;
         StringBuilder b = new StringBuilder(name.length() * 3);
 
         lq = name.indexOf("${", rq);
+        if (lq == -1)
+            return name;
         while (lq != -1) {
             rq = name.indexOf('}', lq);
             if (rq == -1)
@@ -244,16 +241,15 @@ public class ConfigCenter implements Serializable {
     public String getVal(String k) {
         String conf = keyToConfigName.get(k);
         if (conf == null)
-            return globlaProperties.get(k);
+            return globalProperties.get(k);
         else
             return configs.get(conf).get(k);
     }
 
     public Entry getEntry(String k) {
-
         String confName = keyToConfigName.get(k);
         Map<String, String> conf = configs.get(confName);
-        return conf == null ? new Entry(confName, k, globlaProperties.get(k))
+        return conf == null ? new Entry(confName, k, globalProperties.get(k))
                 : new Entry(confName, k, conf.get(k));
     }
 
@@ -267,4 +263,16 @@ public class ConfigCenter implements Serializable {
             this.value = value;
         }
     }
+
+    public InputStreamSupport getStreamSupport() {
+        return streamSupport;
+    }
+
+    public void setDefaultStreamProvider(InputStreamProvider streamProvider) {
+        proxy.setDefaultProvider(streamProvider);
+    }
+    public void setClassPathProvider(InputStreamProvider provider) {
+        proxy.setClassPathProvider(provider);
+    }
+
 }

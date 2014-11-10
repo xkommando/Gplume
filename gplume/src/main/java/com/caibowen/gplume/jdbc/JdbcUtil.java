@@ -144,7 +144,7 @@ public class JdbcUtil {
 
 	public static Object getResultSetValue(@Nonnull ResultSet rs,
 											int index,
-											Class requiredType) throws SQLException {
+											@Nullable Class requiredType) throws SQLException {
 		if (requiredType == null) {
 			return getResultSetValue(rs, index);
 		}

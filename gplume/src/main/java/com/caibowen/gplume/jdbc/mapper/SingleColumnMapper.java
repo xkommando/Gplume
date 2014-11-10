@@ -12,6 +12,7 @@ package com.caibowen.gplume.jdbc.mapper;
 
 import com.caibowen.gplume.jdbc.JdbcUtil;
 
+import javax.annotation.Nonnull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -21,11 +22,11 @@ import java.sql.SQLException;
  *
  * @since 2013-5-6
  */
-public class SingleColumMapper<T> implements RowMapping<T> {
+public class SingleColumnMapper<T> implements RowMapping<T> {
 
 	Class<T> type;
 	
-	public SingleColumMapper(Class<T> type) {
+	public SingleColumnMapper(Class<T> type) {
 		this.type = type;
 	}
 
@@ -38,7 +39,7 @@ public class SingleColumMapper<T> implements RowMapping<T> {
 	}
 
 	@Override
-	public T extract(ResultSet rs) throws SQLException {
+	public T extract(@Nonnull ResultSet rs) throws SQLException {
 
 		T o = (T) JdbcUtil.getResultSetValue(rs, 1, type);
 		if (o != null && type.isInstance(o)) {

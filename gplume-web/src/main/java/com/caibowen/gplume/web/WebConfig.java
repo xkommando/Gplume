@@ -150,7 +150,7 @@ public class WebConfig implements InitializingBean, Serializable {
         _s.add(new TextViewResolver());
         _s.add(new JumpViewResolver());
 
-        return new ArrayList<IViewResolver>(_s);
+        return new ArrayList<>(_s);
     }
 
 

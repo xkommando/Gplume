@@ -39,6 +39,8 @@ import java.io.InputStream;
  */
 public class InputStreamProviderProxy implements InputStreamProvider {
 
+    private static final Logger LOG = LoggerFactory.getLogger(InputStreamProviderProxy.class);
+
 	public static final InputStreamProvider FILE_PROVIDER = new FileInputStreamProvider();
 	public static final InputStreamProvider URL_PROVIDER = new URLInputStreamProvider();
     public static final InputStreamProvider CLASSLOADER_PROVIDER = new ClassLoaderInputStreamProvider(InputStreamProviderProxy.class.getClassLoader());
@@ -88,8 +90,6 @@ public class InputStreamProviderProxy implements InputStreamProvider {
         LOG.debug("using [" + providerToUse.getClass().getSimpleName() + "] to get [" + path + "]");
 		return providerToUse.getStream(path);
 	}
-
-    private static final Logger LOG = LoggerFactory.getLogger(InputStreamProviderProxy.class);
 
 
 	@Override

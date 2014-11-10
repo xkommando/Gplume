@@ -98,16 +98,11 @@ public class ControlCenter extends AbstractControlCenter {
 			LOG.error("Servlet : " + servex.getCause(), servex);
 			thrown = servex;
 
-		} catch (Exception e) {
-
-			LOG.error(e.getMessage() + "\n Cause: " + e.getCause(), e);
-			thrown = e;
-
 		} catch (Throwable thr) {
 
 			LOG.error(thr.getMessage()
 					+ "\n Cause: " + thr.getCause(), thr);
-			
+
 			thrown = thr;
 		}
 
@@ -166,7 +161,7 @@ public class ControlCenter extends AbstractControlCenter {
 			}
 		} // for method
 		if (controllers == null) {
-			controllers = new ArrayList<Object>(32);
+			controllers = new ArrayList<>(32);
 		}
 		if (!controllers.contains(controller)) {
 			controllers.add(controller);
@@ -247,7 +242,7 @@ public class ControlCenter extends AbstractControlCenter {
 		LOG.info("control center destroyed");
 	}
 
-	protected List<String> scanHandleURI(Class<?> clazz) {
+	public static List<String> scanHandleURI(Class<?> clazz) {
 
 		List<String> urilist = new ArrayList<>(16);
 		// public only
@@ -266,7 +261,7 @@ public class ControlCenter extends AbstractControlCenter {
 		return urilist;
 	}
 		
-	protected List<String> scanInterceptURI(Class<?> clazz) {
+	public static List<String> scanInterceptURI(Class<?> clazz) {
 
 		List<String> urilist = new ArrayList<>(16);
 		// public only

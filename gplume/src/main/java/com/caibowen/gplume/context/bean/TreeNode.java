@@ -1,18 +1,17 @@
 package com.caibowen.gplume.context.bean;
 
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author BowenCai
  * @since 7-11-2014.
  */
-class TreeNode extends ConcurrentHashMap<String, Pod> {
+class TreeNode<T> extends ConcurrentHashMap<String, T> {
     private static final long serialVersionUID = -2808170053256196522L;
 
     public String name;
     public TreeNode parent;
-    public ConcurrentHashMap<String, TreeNode> children;
+    public ConcurrentHashMap<String, TreeNode<T> > children;
 
     TreeNode(String name,TreeNode parent) {
         super(16);
@@ -29,11 +28,9 @@ class TreeNode extends ConcurrentHashMap<String, Pod> {
         return ct;
     }
     void intake(BeanVisitor visitor) {
-        for (Pod p : this.values()) {
-            Object bn = p.getInstance();
-            if (bn != null)
-                visitor.visit(bn);
-        }
+        for (T p : this.values())
+            visitor.visit(p);
+
         if (children != null)
             for (TreeNode tn : children.values())
                 tn.intake(visitor);

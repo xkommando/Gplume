@@ -3,6 +3,7 @@ package com.caibowen.gplume.jdbc.mapper;
 
 import com.caibowen.gplume.common.collection.NoCaseMap;
 
+import javax.annotation.Nonnull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class MapExtractor implements RowMapping<Map<String, Object> > {
     public String[] cols;
 
     @Override
-    public Map<String, Object> extract(ResultSet rs) throws SQLException {
+    public Map<String, Object> extract(@Nonnull ResultSet rs) throws SQLException {
         Map<String, Object> map = new NoCaseMap<>(cols.length);
         if (rs.next()) {
             for (String key : cols) {
