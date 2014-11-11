@@ -2,23 +2,21 @@ package com.caibowen.gplume.cache.mem;
 
 import com.caibowen.gplume.misc.Assert;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * @author BowenCai
  * @param <V> the value type
  */
-public class Int8LIRSCache<V> {
+public class Int8LIRSCache<V> implements Serializable {
 
     /**
      * The maximum memory this cache should use.
      */
-    private long maxMemory;
-
-    /**
-     * The average memory used by one entry.
-     */
-    private int averageMemory;
+    private long capacity;
 
     private final Segment<V>[] segments;
 
@@ -32,31 +30,27 @@ public class Int8LIRSCache<V> {
      * settings (an average size of 1 per entry, 16 segments, and stack move
      * distance equals to the maximum number of entries divided by 100).
      *
-     * @param maxEntries the maximum number of entries
+     * @param capacity the maximum number of entries
      */
-    public Int8LIRSCache(int maxEntries) {
-        this(maxEntries, 1, 16, maxEntries / 100);
+    public Int8LIRSCache(int capacity) {
+        this(capacity, 16, capacity / 100);
     }
-    public Int8LIRSCache(int maxEntries, int averageMemory) {
-        this(maxEntries, averageMemory, 16, maxEntries / averageMemory / 100);
-    }
+
     /**
      * Create a new cache with the given memory size.
      *
-     * @param maxMemory the maximum memory to use (1 or larger)
-     * @param averageMemory the average memory (1 or larger)
+     * @param capacity the maximum memory to use (1 or larger)
      * @param segmentCount the number of cache segments (must be a power of 2)
      * @param stackMoveDistance how many other item are to be moved to the top
      *        of the stack before the current item is moved
      */
     @SuppressWarnings("unchecked")
-    public Int8LIRSCache(long maxMemory, int averageMemory,
+    public Int8LIRSCache(long capacity,
                          int segmentCount, int stackMoveDistance) {
+        setCapacity(capacity);
         Assert.isTrue(
                 Integer.bitCount(segmentCount) == 1,
                 "The segment count must be a power of 2, is " + segmentCount);
-        setMaxMemory(maxMemory);
-        setAverageMemory(averageMemory);
 
         this.segmentCount = segmentCount;
         this.segmentMask = segmentCount - 1;
@@ -71,7 +65,7 @@ public class Int8LIRSCache<V> {
      * Remove all entries.
      */
     public void clear() {
-        long max = Math.max(1, maxMemory / segmentCount);
+        long max = Math.max(1, capacity / segmentCount);
         int segmentLen = getSegmentLen(max);
         for (int i = 0; i < segmentCount; i++) {
             segments[i] = new Segment<V>(
@@ -82,7 +76,7 @@ public class Int8LIRSCache<V> {
     private int getSegmentLen(long max) {
         // calculate the size of the map array
         // assume a fill factor of at most 75%
-        long maxLen = (long) (max / averageMemory / 0.75);
+        long maxLen = max * 4 / 3;
         // the size needs to be a power of 2
         long l = 8;
         while (l < maxLen) {
@@ -116,20 +110,10 @@ public class Int8LIRSCache<V> {
      * @param key the key (may not be null)
      * @return the value, or null if there is no resident entry
      */
+    @Nullable
     public V peek(long key) {
         Entry<V> e = find(key);
         return e == null ? null : e.value;
-    }
-
-    /**
-     * Add an entry to the cache using the average memory size.
-     *
-     * @param key the key (may not be null)
-     * @param value the value (may not be null)
-     * @return the old value, or null if there was no resident entry
-     */
-    public V put(long key, V value) {
-        return put(key, value, averageMemory);
     }
 
     /**
@@ -139,10 +123,10 @@ public class Int8LIRSCache<V> {
      *
      * @param key the key (may not be null)
      * @param value the value (may not be null)
-     * @param memory the memory used for the given entry
      * @return the old value, or null if there was no resident entry
      */
-    public V put(long key, V value, int memory) {
+    @Nullable
+    public V put(long key, @Nonnull V value) {
         int hash = getHash(key);
         int segmentIndex = getSegmentIndex(hash);
         Segment<V> s = segments[segmentIndex];
@@ -159,7 +143,7 @@ public class Int8LIRSCache<V> {
                     segments[segmentIndex] = s;
                 }
             }
-            return s.put(key, hash, value, memory);
+            return s.put(key, hash, value);
         }
     }
 
@@ -171,21 +155,12 @@ public class Int8LIRSCache<V> {
      * @param key the key (may not be null)
      * @return the old value, or null if there was no resident entry
      */
+    @Nullable
     public V remove(long key) {
         int hash = getHash(key);
         return getSegment(hash).remove(key, hash);
     }
 
-    /**
-     * Get the memory used for the given key.
-     *
-     * @param key the key (may not be null)
-     * @return the memory, or 0 if there is no resident entry
-     */
-    public int getMemory(long key) {
-        int hash = getHash(key);
-        return getSegment(hash).getMemory(key, hash);
-    }
 
     /**
      * Get the value for the given key if the entry is cached. This method
@@ -195,6 +170,7 @@ public class Int8LIRSCache<V> {
      * @param key the key (may not be null)
      * @return the value, or null if there is no resident entry
      */
+    @Nullable
     public V get(long key) {
         int hash = getHash(key);
         return getSegment(hash).get(key, hash);
@@ -226,67 +202,33 @@ public class Int8LIRSCache<V> {
     }
 
     /**
-     * Get the currently used memory.
-     *
-     * @return the used memory
-     */
-    public long getUsedMemory() {
-        long x = 0;
-        for (Segment<V> s : segments) {
-            x += s.usedMemory;
-        }
-        return x;
-    }
-
-    /**
      * Set the maximum memory this cache should use. This will not
      * immediately cause entries to get removed however; it will only change
      * the limit. To resize the internal array, call the clear method.
      *
-     * @param maxMemory the maximum size (1 or larger)
+     * @param capacity the maximum size (1 or larger)
      */
-    public void setMaxMemory(long maxMemory) {
+    public void setCapacity(long capacity) {
         Assert.isTrue(
-                maxMemory > 0,
-                "Max memory must be larger than 0, is " +  maxMemory);
-        this.maxMemory = maxMemory;
+                capacity > 0,
+                "Max memory must be larger than 0, is " + capacity);
+        this.capacity = capacity;
         if (segments != null) {
-            long max = 1 + maxMemory / segments.length;
+            long max = 1 + capacity / segments.length;
             for (Segment<V> s : segments) {
-                s.setMaxMemory(max);
+                s.capacity = max;
             }
         }
     }
 
-    /**
-     * Set the average memory used per entry. It is used to calculate the
-     * length of the internal array.
-     *
-     * @param averageMemory the average memory used (1 or larger)
-     */
-    public void setAverageMemory(int averageMemory) {
-        Assert.isTrue(
-                averageMemory > 0,
-                "Average memory must be larger than 0, is " + averageMemory);
-        this.averageMemory = averageMemory;
-    }
-
-    /**
-     * Get the average memory used per entry.
-     *
-     * @return the average memory
-     */
-    public int getAverageMemory() {
-        return averageMemory;
-    }
 
     /**
      * Get the maximum memory to use.
      *
      * @return the maximum memory
      */
-    public long getMaxMemory() {
-        return maxMemory;
+    public long getCapacity() {
+        return capacity;
     }
 
     /**
@@ -294,8 +236,9 @@ public class Int8LIRSCache<V> {
      *
      * @return the entry set
      */
+    @Nonnull
     public synchronized Set<Map.Entry<Long, V>> entrySet() {
-        HashMap<Long, V> map = new HashMap<Long, V>();
+        HashMap<Long, V> map = new HashMap<Long, V>((int)capacity);
         for (long k : keySet()) {
             map.put(k,  find(k).value);
         }
@@ -307,11 +250,11 @@ public class Int8LIRSCache<V> {
      *
      * @return the set of keys
      */
+    @Nonnull
     public synchronized Set<Long> keySet() {
-        HashSet<Long> set = new HashSet<Long>();
-        for (Segment<V> s : segments) {
+        HashSet<Long> set = new HashSet<Long>((int)capacity);
+        for (Segment<V> s : segments)
             set.addAll(s.keySet());
-        }
         return set;
     }
 
@@ -349,7 +292,7 @@ public class Int8LIRSCache<V> {
     public int sizeHot() {
         int x = 0;
         for (Segment<V> s : segments) {
-            x += s.mapSize - s.queueSize - s.queue2Size;
+            x += s.entryCount - s.queueSize - s.queue2Size;
         }
         return x;
     }
@@ -362,7 +305,7 @@ public class Int8LIRSCache<V> {
     public int size() {
         int x = 0;
         for (Segment<V> s : segments) {
-            x += s.mapSize - s.queue2Size;
+            x += s.entryCount - s.queue2Size;
         }
         return x;
     }
@@ -375,8 +318,9 @@ public class Int8LIRSCache<V> {
      * @param nonResident true for non-resident entries
      * @return the key list
      */
+    @Nonnull
     public synchronized List<Long> keys(boolean cold, boolean nonResident) {
-        ArrayList<Long> keys = new ArrayList<Long>();
+        ArrayList<Long> keys = new ArrayList<Long>((int)capacity);
         for (Segment<V> s : segments) {
             keys.addAll(s.keys(cold, nonResident));
         }
@@ -388,8 +332,9 @@ public class Int8LIRSCache<V> {
      *
      * @return the entry set
      */
+    @Nonnull
     public List<V> values() {
-        ArrayList<V> list = new ArrayList<V>();
+        ArrayList<V> list = new ArrayList<V>((int)capacity);
         for (long k : keySet()) {
             V value = find(k).value;
             if (value != null) {
@@ -414,8 +359,13 @@ public class Int8LIRSCache<V> {
      * @param value the value
      * @return true if it is stored
      */
-    public boolean containsValue(Object value) {
-        return getMap().containsValue(value);
+    public boolean containsValue(@Nonnull Object value) {
+        for (long k : keySet()) {
+            V x = find(k).value;
+            if (x != null && x.equals(value))
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -423,8 +373,9 @@ public class Int8LIRSCache<V> {
      *
      * @return the map
      */
+    @Nonnull
     public Map<Long, V> getMap() {
-        HashMap<Long, V> map = new HashMap<Long, V>();
+        HashMap<Long, V> map = new HashMap<Long, V>((int)capacity);
         for (long k : keySet()) {
             V x = find(k).value;
             if (x != null) {
@@ -439,7 +390,7 @@ public class Int8LIRSCache<V> {
      *
      * @param m the map
      */
-    public void putAll(Map<Long, ? extends V> m) {
+    public void putAll(@Nonnull Map<Long, ? extends V> m) {
         for (Map.Entry<Long, ? extends V> e : m.entrySet()) {
             // copy only non-null entries
             put(e.getKey(), e.getValue());
@@ -451,12 +402,12 @@ public class Int8LIRSCache<V> {
      *
      * @param <V> the value type
      */
-    private static class Segment<V> {
+    private static class Segment<V> implements Serializable {
 
         /**
          * The number of (hot, cold, and non-resident) entries in the map.
          */
-        int mapSize;
+        int entryCount;
 
         /**
          * The size of the LIRS queue for resident cold entries.
@@ -474,11 +425,6 @@ public class Int8LIRSCache<V> {
         final Entry<V>[] entries;
 
         /**
-         * The currently used memory.
-         */
-        long usedMemory;
-
-        /**
          * How many other item are to be moved to the top of the stack before
          * the current item is moved.
          */
@@ -487,7 +433,7 @@ public class Int8LIRSCache<V> {
         /**
          * The maximum memory this cache should use.
          */
-        private long maxMemory;
+        long capacity;
 
         /**
          * The bit mask that is applied to the key hash code to get the index in
@@ -498,7 +444,7 @@ public class Int8LIRSCache<V> {
         /**
          * The LIRS stack size.
          */
-        private int stackSize;
+        int stackSize;
 
         /**
          * The stack of recently referenced elements. This includes all hot
@@ -531,13 +477,13 @@ public class Int8LIRSCache<V> {
         /**
          * Create a new cache segment.
          *
-         * @param maxMemory the maximum memory to use
+         * @param capacity the maximum memory to use
          * @param len the number of hash table buckets (must be a power of 2)
          * @param stackMoveDistance the number of other entries to be moved to
          *        the top of the stack before moving an entry to the top
          */
-        Segment(long maxMemory, int len, int stackMoveDistance) {
-            setMaxMemory(maxMemory);
+        Segment(long capacity, int len, int stackMoveDistance) {
+            this.capacity = capacity;
             this.stackMoveDistance = stackMoveDistance;
 
             // the bit mask has all bits set
@@ -555,8 +501,7 @@ public class Int8LIRSCache<V> {
             Entry<V>[] e = new Entry[len];
             entries = e;
 
-            mapSize = 0;
-            usedMemory = 0;
+            entryCount = 0;
             stackSize = queueSize = queue2Size = 0;
         }
 
@@ -570,7 +515,7 @@ public class Int8LIRSCache<V> {
          *            table buckets (must be a power of 2)
          */
         Segment(Segment<V> old, int resizeFactor) {
-            this(old.maxMemory,
+            this(old.capacity,
                     old.entries.length * resizeFactor,
                     old.stackMoveDistance);
             Entry<V> s = old.stack.stackPrev;
@@ -606,15 +551,13 @@ public class Int8LIRSCache<V> {
             int index = getHash(e.key) & mask;
             e.mapNext = entries[index];
             entries[index] = e;
-            usedMemory += e.memory;
-            mapSize++;
+            entryCount++;
         }
 
         private static <V> Entry<V> copy(Entry<V> old) {
             Entry<V> e = new Entry<V>();
             e.key = old.key;
             e.value = old.value;
-            e.memory = old.memory;
             e.topMove = old.topMove;
             return e;
         }
@@ -625,19 +568,7 @@ public class Int8LIRSCache<V> {
          * @return true if it contains more entries than hash table buckets.
          */
         public boolean isFull() {
-            return mapSize > mask;
-        }
-
-        /**
-         * Get the memory used for the given key.
-         *
-         * @param key the key (may not be null)
-         * @param hash the hash
-         * @return the memory, or 0 if there is no resident entry
-         */
-        int getMemory(long key, int hash) {
-            Entry<V> e = find(key, hash);
-            return e == null ? 0 : e.memory;
+            return entryCount > mask;
         }
 
         /**
@@ -664,11 +595,11 @@ public class Int8LIRSCache<V> {
                 if (e != stack.stackNext) {
                     if (stackMoveDistance == 0 ||
                             stackMoveCounter - e.topMove > stackMoveDistance) {
-                        accessHot(e);
+                        access(key, hash);
                     }
                 }
             } else {
-                access(e);
+                access(key, hash);
             }
             return value;
         }
@@ -677,25 +608,30 @@ public class Int8LIRSCache<V> {
          * Access an item, moving the entry to the top of the stack or front of
          * the queue if found.
          *
+         * @param key the key
          */
-        private synchronized void accessHot(Entry<V> e) {
-            if (e != stack.stackNext) {
-                if (stackMoveDistance == 0 ||
-                        stackMoveCounter - e.topMove > stackMoveDistance) {
-                    // move a hot entry to the top of the stack
-                    // unless it is already there
-                    boolean wasEnd = e == stack.stackPrev;
-                    removeFromStack(e);
-                    if (wasEnd) {
-                        // if moving the last entry, the last entry
-                        // could now be cold, which is not allowed
-                        pruneStack();
-                    }
-                    addToStack(e);
-                }
+        private synchronized void access(long key, int hash) {
+            Entry<V> e = find(key, hash);
+            if (e == null || e.value == null) {
+                return;
             }
-        }
-        private synchronized void access(Entry<V> e) {
+            if (e.isHot()) {
+                if (e != stack.stackNext) {
+                    if (stackMoveDistance == 0 ||
+                            stackMoveCounter - e.topMove > stackMoveDistance) {
+                        // move a hot entry to the top of the stack
+                        // unless it is already there
+                        boolean wasEnd = e == stack.stackPrev;
+                        removeFromStack(e);
+                        if (wasEnd) {
+                            // if moving the last entry, the last entry
+                            // could now be cold, which is not allowed
+                            pruneStack();
+                        }
+                        addToStack(e);
+                    }
+                }
+            } else {
                 removeFromQueue(e);
                 if (e.stackNext != null) {
                     // resident cold entries become hot
@@ -712,7 +648,7 @@ public class Int8LIRSCache<V> {
                 }
                 // in any case, the cold entry is moved to the top of the stack
                 addToStack(e);
-
+            }
         }
 
         /**
@@ -723,10 +659,9 @@ public class Int8LIRSCache<V> {
          * @param key the key (may not be null)
          * @param hash the hash
          * @param value the value (may not be null)
-         * @param memory the memory used for the given entry
          * @return the old value, or null if there was no resident entry
          */
-        synchronized V put(long key, int hash, V value, int memory) {
+        synchronized V put(long key, int hash, V value) {
             if (value == null) {
                 throw new IllegalArgumentException(
                         "The value may not be null");
@@ -742,16 +677,14 @@ public class Int8LIRSCache<V> {
             e = new Entry<V>();
             e.key = key;
             e.value = value;
-            e.memory = memory;
             int index = hash & mask;
             e.mapNext = entries[index];
             entries[index] = e;
-            usedMemory += memory;
-            if (usedMemory > maxMemory && mapSize > 0) {
+            entryCount++;
+            if (entryCount > capacity) {
                 // an old entry needs to be removed
                 evict(e);
             }
-            mapSize++;
             // added entries are always added to the stack
             addToStack(e);
             return old;
@@ -787,8 +720,7 @@ public class Int8LIRSCache<V> {
                 old = e.value;
                 last.mapNext = e.mapNext;
             }
-            mapSize--;
-            usedMemory -= e.memory;
+            entryCount--;
             if (e.stackNext != null) {
                 removeFromStack(e);
             }
@@ -820,7 +752,7 @@ public class Int8LIRSCache<V> {
             // ensure there are not too many hot entries: right shift of 5 is
             // division by 32, that means if there are only 1/32 (3.125%) or
             // less cold entries, a hot entry needs to become cold
-            while (queueSize <= (mapSize >>> 5) && stackSize > 0) {
+            while (queueSize <= (entryCount >>> 5) && stackSize > 0) {
                 convertOldestHotToCold();
             }
             if (stackSize > 0) {
@@ -829,12 +761,10 @@ public class Int8LIRSCache<V> {
             }
             // the oldest resident cold entries become non-resident
             // but at least one cold entry (the new one) must stay
-            while (usedMemory > maxMemory && queueSize > 1) {
+            while (entryCount > capacity && queueSize > 1) {
                 Entry<V> e = queue.queuePrev;
-                usedMemory -= e.memory;
                 removeFromQueue(e);
                 e.value = null;
-                e.memory = 0;
                 addToQueue(queue2, e);
                 // the size of the non-resident-cold entries needs to be limited
                 while (queue2Size + queue2Size > stackSize) {
@@ -1000,17 +930,6 @@ public class Int8LIRSCache<V> {
             return set;
         }
 
-        /**
-         * Set the maximum memory this cache should use. This will not
-         * immediately cause entries to get removed however; it will only change
-         * the limit. To resize the internal array, call the clear method.
-         *
-         * @param maxMemory the maximum size (1 or larger)
-         */
-        void setMaxMemory(long maxMemory) {
-            this.maxMemory = maxMemory;
-        }
-
     }
 
     /**
@@ -1022,7 +941,7 @@ public class Int8LIRSCache<V> {
      *
      * @param <V> the value type
      */
-    static class Entry<V> {
+    static class Entry<V> implements Serializable {
 
         /**
          * The key.
@@ -1033,11 +952,6 @@ public class Int8LIRSCache<V> {
          * The value. Set to null for non-resident-cold entries.
          */
         V value;
-
-        /**
-         * The estimated memory used.
-         */
-        int memory;
 
         /**
          * When the item was last moved to the top of the stack.

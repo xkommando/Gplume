@@ -40,7 +40,7 @@ import static com.caibowen.gplume.misc.Str.EMPTY;
  * @author BowenCai
  *
  */
-public abstract class XMLBeanAssemblerBase extends BeanCreator {
+public abstract class XMLBeanAssemblerBase extends BeanBuilder {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(XMLBeanAssemblerBase.class);
 

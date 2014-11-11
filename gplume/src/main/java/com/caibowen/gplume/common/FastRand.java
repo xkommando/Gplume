@@ -37,7 +37,7 @@ public final class FastRand {
 	/**
 	 * @return may be negative
 	 */
-	public static long nextFloat() {
+	public static float nextFloat() {
 		return nextInt();
 	}
 	
@@ -55,7 +55,7 @@ public final class FastRand {
 	 * 
 	 * @return may be negative
 	 */
-	public static long nextDouble() {
+	public static double nextDouble() {
 		return nextLong();
 	}
 	
@@ -79,12 +79,15 @@ public final class FastRand {
 			bed[cur] = (MAGIC_FACTOR1 * (bed[cur-1] ^ (bed[cur-1] >>> 30)) + cur);
 		}
 	}
-	private static synchronized int next(int bits) {
-		if (cur >= N) {
-			refresh();
-			cur = 0;
+	private static int next(int bits) {
+		int y;
+		synchronized (bed) {
+			if (cur >= N) {
+				refresh();
+				cur = 0;
+			}
+			y = bed[cur++];
 		}
-		int y = bed[cur++];
 		// Tempering
 		y ^= (y >>> 11);
 		y ^= (y << 7) & MAGIC_MASK1;
@@ -93,7 +96,7 @@ public final class FastRand {
 		return (y >>> (32-bits));
 	}
 	
-	synchronized private static void refresh() {
+	private static void refresh() {
 		
 		int y, kk;
 		for (kk = 0; kk < N-M; kk++) {

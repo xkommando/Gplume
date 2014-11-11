@@ -46,9 +46,6 @@ public class WeakRef<T> extends WeakReference<T> {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -57,7 +54,7 @@ public class WeakRef<T> extends WeakReference<T> {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof StrongRef)) {
+		if (!(obj instanceof WeakRef)) {
 			return false;
 		}
 		WeakRef<?> other = (WeakRef<?>) obj;

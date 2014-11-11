@@ -2,6 +2,8 @@ package com.caibowen.gplume.cache.mem;
 
 import com.caibowen.gplume.misc.Assert;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 
 /**
@@ -13,12 +15,7 @@ public class Int4LIRSCache<V> {
     /**
      * The maximum memory this cache should use.
      */
-    private int maxMemory;
-
-    /**
-     * The average memory used by one entry.
-     */
-    private int averageMemory;
+    private int capacity;
 
     private final Segment<V>[] segments;
 
@@ -32,32 +29,27 @@ public class Int4LIRSCache<V> {
      * settings (an average size of 1 per entry, 16 segments, and stack move
      * distance equals to the maximum number of entries divided by 100).
      *
-     * @param maxMemory the maximum number of entries
+     * @param capacity the maximum number of entries
      */
-    public Int4LIRSCache(int maxMemory) {
-        this(maxMemory, 1, 16, maxMemory / 100);
-    }
-
-    public Int4LIRSCache(int maxMemory, int averageMemory) {
-        this(maxMemory, averageMemory, 16, maxMemory / averageMemory / 100);
+    public Int4LIRSCache(int capacity) {
+        this(capacity, 16, capacity / 100);
     }
 
     /**
      * Create a new cache with the given memory size.
      *
-     * @param maxMemory the maximum memory to use (1 or larger)
-     * @param averageMemory the average memory (1 or larger)
+     * @param capacity the maximum memory to use (1 or larger)
      * @param segmentCount the number of cache segments (must be a power of 2)
      * @param stackMoveDistance how many other item are to be moved to the top
      *        of the stack before the current item is moved
      */
-    public Int4LIRSCache(int maxMemory, int averageMemory,
+    public Int4LIRSCache(int capacity,
                          int segmentCount, int stackMoveDistance) {
         Assert.isTrue(
                 Integer.bitCount(segmentCount) == 1,
                 "The segment count must be a power of 2, is " + segmentCount);
-        setMaxMemory(maxMemory);
-        setAverageMemory(averageMemory);
+
+        setCapacity(capacity);
 
         this.segmentCount = segmentCount;
         this.segmentMask = segmentCount - 1;
@@ -72,7 +64,7 @@ public class Int4LIRSCache<V> {
      * Remove all entries.
      */
     public void clear() {
-        int max = Math.max(1, maxMemory / segmentCount);
+        int max = Math.max(1, capacity / segmentCount);
         int segmentLen = getSegmentLen(max);
         for (int i = 0; i < segmentCount; i++) {
             segments[i] = new Segment<V>(
@@ -83,7 +75,7 @@ public class Int4LIRSCache<V> {
     private int getSegmentLen(long max) {
         // calculate the size of the map array
         // assume a fill factor of at most 75%
-        long maxLen = (long) (max / averageMemory / 0.75);
+        long maxLen = max * 4 / 3;
         // the size needs to be a power of 2
         long l = 8;
         while (l < maxLen) {
@@ -121,27 +113,16 @@ public class Int4LIRSCache<V> {
     }
 
     /**
-     * Add an entry to the cache using the average memory size.
-     *
-     * @param key the key (may not be null)
-     * @param value the value (may not be null)
-     * @return the old value, or null if there was no resident entry
-     */
-    public V put(int key, V value) {
-        return put(key, value, averageMemory);
-    }
-
-    /**
      * Add an entry to the cache. The entry may or may not exist in the
      * cache yet. This method will usually mark unknown entries as cold and
      * known entries as hot.
      *
      * @param key the key (may not be null)
      * @param value the value (may not be null)
-     * @param memory the memory used for the given entry
      * @return the old value, or null if there was no resident entry
      */
-    public V put(int key, V value, int memory) {
+    @Nullable
+    public V put(int key, @Nonnull V value) {
         int segmentIndex = (key >>> segmentShift) & segmentMask;
         Segment<V> s = segments[segmentIndex];
         // check whether resize is required:
@@ -157,111 +138,39 @@ public class Int4LIRSCache<V> {
                     segments[segmentIndex] = s;
                 }
             }
-            return s.put(key, value, memory);
+            return s.put(key, value);
         }
     }
 
-
-    /**
-     * Remove an entry. Both resident and non-resident entries can be
-     * removed.
-     *
-     * @param key the key (may not be null)
-     * @return the old value, or null if there was no resident entry
-     */
+    @Nullable
     public V remove(int key) {
         return getSegment(key).remove(key);
     }
 
-    /**
-     * Get the memory used for the given key.
-     *
-     * @param key the key (may not be null)
-     * @return the memory, or 0 if there is no resident entry
-     */
-    public int getMemory(int key) {
-        return getSegment(key).getMemory(key);
-    }
-
-    /**
-     * Get the value for the given key if the entry is cached. This method
-     * adjusts the internal state of the cache sometimes, to ensure commonly
-     * used entries stay in the cache.
-     *
-     * @param key the key (may not be null)
-     * @return the value, or null if there is no resident entry
-     */
+    @Nullable
     public V get(int key) {
         return getSegment(key).get(key);
     }
 
-    private Segment<V> getSegment(int hash) {
+    protected Segment<V> getSegment(int hash) {
         return segments[(hash >>> segmentShift) & segmentMask];
     }
 
-
-    /**
-     * Get the currently used memory.
-     *
-     * @return the used memory
-     */
-    public int getUsedMemory() {
-        int x = 0;
-        for (Segment<V> s : segments) {
-            x += s.usedMemory;
-        }
-        return x;
-    }
-
-    /**
-     * Set the maximum memory this cache should use. This will not
-     * immediately cause entries to get removed however; it will only change
-     * the limit. To resize the internal array, call the clear method.
-     *
-     * @param maxMemory the maximum size (1 or larger)
-     */
-    public void setMaxMemory(int maxMemory) {
+    public void setCapacity(int capacity) {
         Assert.isTrue(
-                maxMemory > 0,
-                "Max memory must be larger than 0, is " +  maxMemory);
-        this.maxMemory = maxMemory;
+                capacity > 0,
+                "Max memory must be larger than 0, is " + capacity);
+        this.capacity = capacity;
         if (segments != null) {
-            int max = 1 + maxMemory / segments.length;
+            int max = 1 + capacity / segments.length;
             for (Segment<V> s : segments) {
-                s.setMaxMemory(max);
+                s.capacity = max;
             }
         }
     }
 
-    /**
-     * Set the average memory used per entry. It is used to calculate the
-     * length of the internal array.
-     *
-     * @param averageMemory the average memory used (1 or larger)
-     */
-    public void setAverageMemory(int averageMemory) {
-        Assert.isTrue(
-                averageMemory > 0,
-                "Average memory must be larger than 0, is " + averageMemory);
-        this.averageMemory = averageMemory;
-    }
-
-    /**
-     * Get the average memory used per entry.
-     *
-     * @return the average memory
-     */
-    public int getAverageMemory() {
-        return averageMemory;
-    }
-
-    /**
-     * Get the maximum memory to use.
-     *
-     * @return the maximum memory
-     */
-    public int getMaxMemory() {
-        return maxMemory;
+    public int getCapacity() {
+        return capacity;
     }
 
     /**
@@ -269,8 +178,9 @@ public class Int4LIRSCache<V> {
      *
      * @return the entry set
      */
+    @Nonnull
     public synchronized Set<Map.Entry<Integer, V>> entrySet() {
-        HashMap<Integer, V> map = new HashMap<Integer, V>();
+        HashMap<Integer, V> map = new HashMap<Integer, V>(capacity);
         for (int k : keySet()) {
             map.put(k,  find(k).value);
         }
@@ -282,8 +192,9 @@ public class Int4LIRSCache<V> {
      *
      * @return the set of keys
      */
+    @Nonnull
     public synchronized Set<Integer> keySet() {
-        HashSet<Integer> set = new HashSet<Integer>();
+        HashSet<Integer> set = new HashSet<Integer>(capacity);
         for (Segment<V> s : segments) {
             set.addAll(s.keySet());
         }
@@ -324,7 +235,7 @@ public class Int4LIRSCache<V> {
     public int sizeHot() {
         int x = 0;
         for (Segment<V> s : segments) {
-            x += s.mapSize - s.queueSize - s.queue2Size;
+            x += s.entryCount - s.queueSize - s.queue2Size;
         }
         return x;
     }
@@ -337,7 +248,7 @@ public class Int4LIRSCache<V> {
     public int size() {
         int x = 0;
         for (Segment<V> s : segments) {
-            x += s.mapSize - s.queue2Size;
+            x += s.entryCount - s.queue2Size;
         }
         return x;
     }
@@ -350,8 +261,9 @@ public class Int4LIRSCache<V> {
      * @param nonResident true for non-resident entries
      * @return the key list
      */
+    @Nonnull
     public synchronized List<Integer> keys(boolean cold, boolean nonResident) {
-        ArrayList<Integer> keys = new ArrayList<Integer>();
+        ArrayList<Integer> keys = new ArrayList<Integer>(capacity);
         for (Segment<V> s : segments) {
             keys.addAll(s.keys(cold, nonResident));
         }
@@ -363,8 +275,9 @@ public class Int4LIRSCache<V> {
      *
      * @return the entry set
      */
+    @Nonnull
     public List<V> values() {
-        ArrayList<V> list = new ArrayList<V>();
+        ArrayList<V> list = new ArrayList<V>(capacity);
         for (int k : keySet()) {
             V value = find(k).value;
             if (value != null) {
@@ -389,8 +302,13 @@ public class Int4LIRSCache<V> {
      * @param value the value
      * @return true if it is stored
      */
-    public boolean containsValue(Object value) {
-        return getMap().containsValue(value);
+    public boolean containsValue(@Nonnull Object value) {
+        for (int k : keySet()) {
+            V x = find(k).value;
+            if (x != null && x.equals(value))
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -398,8 +316,9 @@ public class Int4LIRSCache<V> {
      *
      * @return the map
      */
+    @Nonnull
     public Map<Integer, V> getMap() {
-        HashMap<Integer, V> map = new HashMap<Integer, V>();
+        HashMap<Integer, V> map = new HashMap<Integer, V>(capacity);
         for (int k : keySet()) {
             V x = find(k).value;
             if (x != null) {
@@ -414,7 +333,7 @@ public class Int4LIRSCache<V> {
      *
      * @param m the map
      */
-    public void putAll(Map<Integer, ? extends V> m) {
+    public void putAll(@Nonnull Map<Integer, ? extends V> m) {
         for (Map.Entry<Integer, ? extends V> e : m.entrySet()) {
             // copy only non-null entries
             put(e.getKey(), e.getValue());
@@ -431,7 +350,12 @@ public class Int4LIRSCache<V> {
         /**
          * The number of (hot, cold, and non-resident) entries in the map.
          */
-        int mapSize;
+        int entryCount;
+
+        /**
+         * The maximum entry number this cache should use.
+         */
+        int capacity;
 
         /**
          * The size of the LIRS queue for resident cold entries.
@@ -449,20 +373,12 @@ public class Int4LIRSCache<V> {
         final Entry<V>[] entries;
 
         /**
-         * The currently used memory.
-         */
-        int usedMemory;
-
-        /**
          * How many other item are to be moved to the top of the stack before
          * the current item is moved.
          */
         private final int stackMoveDistance;
 
-        /**
-         * The maximum memory this cache should use.
-         */
-        private int maxMemory;
+
 
         /**
          * The bit mask that is applied to the key hash code to get the index in
@@ -506,13 +422,13 @@ public class Int4LIRSCache<V> {
         /**
          * Create a new cache segment.
          *
-         * @param maxMemory the maximum memory to use
+         * @param capacity the maximum memory to use
          * @param len the number of hash table buckets (must be a power of 2)
          * @param stackMoveDistance the number of other entries to be moved to
          *        the top of the stack before moving an entry to the top
          */
-        Segment(int maxMemory, int len, int stackMoveDistance) {
-            setMaxMemory(maxMemory);
+        Segment(int capacity, int len, int stackMoveDistance) {
+            this.capacity = capacity;
             this.stackMoveDistance = stackMoveDistance;
 
             // the bit mask has all bits set
@@ -530,8 +446,7 @@ public class Int4LIRSCache<V> {
             Entry<V>[] e = new Entry[len];
             entries = e;
 
-            mapSize = 0;
-            usedMemory = 0;
+            entryCount = 0;
             stackSize = queueSize = queue2Size = 0;
         }
 
@@ -545,7 +460,7 @@ public class Int4LIRSCache<V> {
          *            table buckets (must be a power of 2)
          */
         Segment(Segment<V> old, int resizeFactor) {
-            this(old.maxMemory,
+            this(old.capacity,
                     old.entries.length * resizeFactor,
                     old.stackMoveDistance);
             Entry<V> s = old.stack.stackPrev;
@@ -581,15 +496,13 @@ public class Int4LIRSCache<V> {
             int index = e.key & mask;
             e.mapNext = entries[index];
             entries[index] = e;
-            usedMemory += e.memory;
-            mapSize++;
+            entryCount++;
         }
 
         private static <V> Entry<V> copy(Entry<V> old) {
             Entry<V> e = new Entry<V>();
             e.key = old.key;
             e.value = old.value;
-            e.memory = old.memory;
             e.topMove = old.topMove;
             return e;
         }
@@ -600,19 +513,9 @@ public class Int4LIRSCache<V> {
          * @return true if it contains more entries than hash table buckets.
          */
         public boolean isFull() {
-            return mapSize > mask;
+            return entryCount > mask;
         }
 
-        /**
-         * Get the memory used for the given key.
-         *
-         * @param key the key (may not be null)
-         * @return the memory, or 0 if there is no resident entry
-         */
-        int getMemory(int key) {
-            Entry<V> e = find(key);
-            return e == null ? 0 : e.memory;
-        }
 
         /**
          * Get the value for the given key if the entry is cached. This method
@@ -695,10 +598,9 @@ public class Int4LIRSCache<V> {
          *
          * @param key the key (may not be null)
          * @param value the value (may not be null)
-         * @param memory the memory used for the given entry
          * @return the old value, or null if there was no resident entry
          */
-        synchronized V put(int key, V value, int memory) {
+        synchronized V put(int key, V value) {
             if (value == null) {
                 throw new IllegalArgumentException(
                         "The value may not be null");
@@ -714,16 +616,14 @@ public class Int4LIRSCache<V> {
             e = new Entry<V>();
             e.key = key;
             e.value = value;
-            e.memory = memory;
             int index = key & mask;
             e.mapNext = entries[index];
             entries[index] = e;
-            usedMemory += memory;
-            if (usedMemory > maxMemory && mapSize > 0) {
+            entryCount++;
+            if (entryCount > capacity && entryCount > 0) {
                 // an old entry needs to be removed
                 evict(e);
             }
-            mapSize++;
             // added entries are always added to the stack
             addToStack(e);
             return old;
@@ -758,8 +658,7 @@ public class Int4LIRSCache<V> {
                 old = e.value;
                 last.mapNext = e.mapNext;
             }
-            mapSize--;
-            usedMemory -= e.memory;
+            entryCount--;
             if (e.stackNext != null) {
                 removeFromStack(e);
             }
@@ -791,7 +690,7 @@ public class Int4LIRSCache<V> {
             // ensure there are not too many hot entries: right shift of 5 is
             // division by 32, that means if there are only 1/32 (3.125%) or
             // less cold entries, a hot entry needs to become cold
-            while (queueSize <= (mapSize >>> 5) && stackSize > 0) {
+            while (queueSize <= (entryCount >>> 5) && stackSize > 0) {
                 convertOldestHotToCold();
             }
             if (stackSize > 0) {
@@ -800,12 +699,10 @@ public class Int4LIRSCache<V> {
             }
             // the oldest resident cold entries become non-resident
             // but at least one cold entry (the new one) must stay
-            while (usedMemory > maxMemory && queueSize > 1) {
+            while (entryCount > capacity && queueSize > 1) {
                 Entry<V> e = queue.queuePrev;
-                usedMemory -= e.memory;
                 removeFromQueue(e);
                 e.value = null;
-                e.memory = 0;
                 addToQueue(queue2, e);
                 // the size of the non-resident-cold entries needs to be limited
                 while (queue2Size + queue2Size > stackSize) {
@@ -924,7 +821,7 @@ public class Int4LIRSCache<V> {
          * @return the key list
          */
         synchronized List<Integer> keys(boolean cold, boolean nonResident) {
-            ArrayList<Integer> keys = new ArrayList<Integer>();
+            ArrayList<Integer> keys = new ArrayList<Integer>(128);
             if (cold) {
                 Entry<V> start = nonResident ? queue2 : queue;
                 for (Entry<V> e = start.queueNext; e != start;
@@ -958,7 +855,7 @@ public class Int4LIRSCache<V> {
          * @return the set of keys
          */
         synchronized Set<Integer> keySet() {
-            HashSet<Integer> set = new HashSet<Integer>();
+            HashSet<Integer> set = new HashSet<Integer>(128);
             for (Entry<V> e = stack.stackNext; e != stack; e = e.stackNext) {
                 set.add(e.key);
             }
@@ -966,17 +863,6 @@ public class Int4LIRSCache<V> {
                 set.add(e.key);
             }
             return set;
-        }
-
-        /**
-         * Set the maximum memory this cache should use. This will not
-         * immediately cause entries to get removed however; it will only change
-         * the limit. To resize the internal array, call the clear method.
-         *
-         * @param maxMemory the maximum size (1 or larger)
-         */
-        void setMaxMemory(int maxMemory) {
-            this.maxMemory = maxMemory;
         }
 
     }
@@ -1001,11 +887,6 @@ public class Int4LIRSCache<V> {
          * The value. Set to null for non-resident-cold entries.
          */
         V value;
-
-        /**
-         * The estimated memory used.
-         */
-        int memory;
 
         /**
          * When the item was last moved to the top of the stack.

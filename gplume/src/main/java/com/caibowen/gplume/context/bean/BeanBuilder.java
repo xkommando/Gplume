@@ -40,9 +40,9 @@ import java.util.*;
  * @since 8/16/2014.
  */
 @Internal
-abstract class BeanCreator implements IBeanAssembler {
+abstract class BeanBuilder implements IBeanAssembler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeanCreator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BeanBuilder.class);
 
     protected ClassLoader classLoader;
 
