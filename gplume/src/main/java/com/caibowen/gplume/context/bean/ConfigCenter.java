@@ -144,7 +144,7 @@ public class ConfigCenter implements Serializable {
         }
     }
 
-    private void addLocal(String k, String v) {
+    public void addLocal(String k, String v) {
         Map<String, String> current = configs.get(currentConfigName);
 
         if (current == null) {
@@ -175,7 +175,7 @@ public class ConfigCenter implements Serializable {
         }
     }
 
-    private void addGlobal(String k, String v) {
+    public void addGlobal(String k, String v) {
         String old = globalProperties.get(k);
         if (old == null) {
             globalProperties.put(k, v);
@@ -206,15 +206,14 @@ public class ConfigCenter implements Serializable {
      */
     @Nonnull
     protected String replaceIfPresent(@Nonnull String name) {
-        name = name.trim();
-        int lq;
         int rq = 0;
-        int lastL = 0;
-        StringBuilder b = new StringBuilder(name.length() * 3);
-
-        lq = name.indexOf("${", rq);
+        int lq = name.indexOf("${", rq);
         if (lq == -1)
             return name;
+
+        name = name.trim();
+        int lastL = 0;
+        StringBuilder b = new StringBuilder(name.length() * 3);
         while (lq != -1) {
             rq = name.indexOf('}', lq);
             if (rq == -1)
@@ -262,6 +261,15 @@ public class ConfigCenter implements Serializable {
             this.key = key;
             this.value = value;
         }
+    }
+
+    public void clear() {
+        this.configs.clear();
+        this.proxy = null;
+        this.streamSupport = null;
+        this.currentConfigName = null;
+        this.globalProperties.clear();
+        this.keyToConfigName.clear();
     }
 
     public InputStreamSupport getStreamSupport() {

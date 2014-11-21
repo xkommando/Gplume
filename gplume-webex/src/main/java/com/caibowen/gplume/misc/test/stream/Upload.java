@@ -15,9 +15,8 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.webex.stream;
+package com.caibowen.gplume.misc.test.stream;
 
-import com.caibowen.gplume.context.InputStreamCallback;
 import com.caibowen.gplume.context.InputStreamProvider;
 import com.caibowen.gplume.context.InputStreamSupport;
 import com.caibowen.gplume.web.RequestContext;

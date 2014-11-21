@@ -10,7 +10,7 @@
 	<i18n_cn>i18n</i18n_cn>
     <i18n_cn2>zh_CN.properties</i18n_cn2>
 	<iso639_zh>zh_CN</iso639_zh>
-	<my_injector>com.caibowen.gplume.core.Injector</my_injector>
+	<my_injector>com.caibowen.gplume.context.bean.Injector</my_injector>
 </properties>
 
 <bean id="pox" class="com.caibowen.gplume.sample.model.XXX"
@@ -31,17 +31,7 @@
         </field>
     </bean>
 
-	<bean id="i18nService" class="com.caibowen.gplume.web.i18n.HotSwapWebI18n">
-        <field name="resolver" instance="com.caibowen.gplume.i18n.DefaultDialectResolver" />
-	    <field name="defaultLang" val="SimplifiedChinese"/>
-        <field name="defaultTimeZone" val="ETC/GMT-8"/>
-	    <field name="pkgFiles">
-	        <map>
-	            <en>/i18n/en.properties</en>
-	            <zh_CN>/${i18n_cn}/${i18n_cn2}</zh_CN>
-	        </map>
-	    </field>
-	</bean>
+
 
     <bean class="com.caibowen.gplume.web.WebConfig">
         <field name="preProcessor">
@@ -59,6 +49,17 @@
         <field name="viewSuffix" val=".jsp" />
     </bean>
 
+    <bean id="i18nService" class="com.caibowen.gplume.web.i18n.HotSwapWebI18n">
+        <field name="resolver" instance="com.caibowen.gplume.i18n.DefaultDialectResolver" />
+        <field name="defaultLang" val="SimplifiedChinese"/>
+        <field name="defaultTimeZone" val="ETC/GMT-8"/>
+        <field name="pkgFiles">
+            <map>
+                <en>/i18n/en.properties</en>
+                <zh_CN>/${i18n_cn}/${i18n_cn2}</zh_CN>
+            </map>
+        </field>
+    </bean>
 	<!--<bean id="controlCenter" class="com.caibowen.gplume.web.SimpleControlCenter">-->
 		<!--<field name="preProcessor">-->
 			<!--<bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">-->

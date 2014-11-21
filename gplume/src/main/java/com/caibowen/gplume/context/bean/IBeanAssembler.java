@@ -16,6 +16,8 @@
 package com.caibowen.gplume.context.bean;
 
 
+import com.caibowen.gplume.core.Injector;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
@@ -61,7 +63,9 @@ public interface IBeanAssembler {
 	 * @throws Exception
 	 */
 	void 			assemble(@Nonnull final String path) throws Exception;
-	
+
+
+	Object 			getForBuild(String id, boolean notNull, Class<?> tgtClass);
 	/**
 	 * 
 	 * @param id
@@ -120,7 +124,7 @@ public interface IBeanAssembler {
 	 */
 	boolean 		contains(@Nonnull String id);
 	
-	boolean isSingleton(@Nonnull String id);
+	boolean 		isSingleton(@Nonnull String id);
 
 	boolean 		contains(@Nonnull Class<?> clazz);
 
@@ -131,4 +135,5 @@ public interface IBeanAssembler {
 	 */
 	void inTake(@Nonnull BeanVisitor visitor);
 
+	Injector getInjector();
 }

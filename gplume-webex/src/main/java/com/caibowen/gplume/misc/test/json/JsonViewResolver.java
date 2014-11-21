@@ -15,15 +15,12 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.webex.json;
+package com.caibowen.gplume.misc.test.json;
 
+import com.alibaba.fastjson.JSON;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import javax.inject.Inject;
 
@@ -38,7 +35,6 @@ public class JsonViewResolver implements IViewResolver {
     @Inject
     private Boolean doPrettyPrint = Boolean.TRUE;
 
-    ObjectMapper mapper = new ObjectMapper();
 
 
     @Override
@@ -51,25 +47,25 @@ public class JsonViewResolver implements IViewResolver {
     public void resolve(RequestContext ctx, Object view) throws Exception {
 
         JsonResult jr = (JsonResult) view;
-        JsonEncoding encoding = JsonEncoding.UTF8;
-
-        JsonGenerator jsonGenerator =
-                this.mapper.getFactory().createGenerator(
-                        ctx.response.getOutputStream(),
-                        encoding);
-
-        if (this.mapper.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
-            jsonGenerator.useDefaultPrettyPrinter();
-        }
-        if (this.jsonPrefix != null) {
-            jsonGenerator.writeRaw(this.jsonPrefix);
-        }
-        this.mapper.writeValue(jsonGenerator, jr.data);
+        JSON.toJSONString(jr.data, doPrettyPrint);
+//        JsonEncoding encoding = JsonEncoding.UTF8;
+//
+//        JsonGenerator jsonGenerator =
+//                this.mapper.getFactory().createGenerator(
+//                        ctx.response.getOutputStream(),
+//                        encoding);
+//
+//        if (this.mapper.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
+//            jsonGenerator.useDefaultPrettyPrinter();
+//        }
+//        if (this.jsonPrefix != null) {
+//            jsonGenerator.writeRaw(this.jsonPrefix);
+//        }
+//        this.mapper.writeValue(jsonGenerator, jr.data);
     }
 
     public void setDoPrettyPrint(Boolean doPrettyPrint) {
         this.doPrettyPrint = doPrettyPrint;
-        this.mapper.configure(SerializationFeature.INDENT_OUTPUT, this.doPrettyPrint);
     }
 
     public void setJsonPrefix(String jsonPrefix) {

@@ -15,7 +15,7 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.webex;
+package com.caibowen.gplume.misc.test;
 
 
 import org.slf4j.Logger;

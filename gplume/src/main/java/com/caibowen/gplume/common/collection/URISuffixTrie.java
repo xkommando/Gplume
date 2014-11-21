@@ -18,7 +18,6 @@ public class URISuffixTrie<V> implements Trie<V>, Serializable {
 
     protected int size;
     protected TrieNode root;
-    //	protected ReadWriteLock lock = new ReentrantReadWriteLock();
     public URISuffixTrie(){
         size = 0;
         root = new TrieNode(null, '/' - URI_DEF.OFFSET);// the char '/'

@@ -84,8 +84,9 @@ public class Str {
 			return a > b ? a : b;
 		}
 		private static int min(int a, int b) {
-			return a > b ? a : b;
+			return a > b ? b : a;
 		}
+
 	    private static String getSetOfMatchingCharacterWithin(final CharSequence first, final CharSequence second, final int limit) {
 	        final StringBuilder common = new StringBuilder();
 	        final StringBuilder copy = new StringBuilder(second);

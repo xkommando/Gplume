@@ -25,17 +25,38 @@ public final class Bytes {
 
     private Bytes(){}
 
-    public static byte[] int2byte(int[]src) {
+    // compatible with ByteBuffer
+    public static byte[] ints2bytes(int[]src) {
         int srcLength = src.length;
-        byte[]dst = new byte[srcLength << 2];
+        byte[] dst = new byte[srcLength << 2];
 
-        for (int i=0; i<srcLength; i++) {
+        for (int i=0; i < srcLength; i++) {
             int x = src[i];
             int j = i << 2;
             dst[j++] = (byte) ((x >>> 24) & 0xff);
             dst[j++] = (byte) ((x >>> 16) & 0xff);
             dst[j++] = (byte) ((x >>> 8) & 0xff);
             dst[j++] = (byte) ((x >>> 0) & 0xff);
+        }
+        return dst;
+    }
+
+    public static int[] bytes2ints(byte[]src) {
+        int srcLength = src.length;
+        int[] dst = new int[srcLength >> 2];
+        for (int i = 0, bi = 0; i < dst.length; i++) {
+            dst[i] = 0;
+            int t = 0x000000FF & src[bi++];
+            dst[i] = dst[i] | (t << 24);
+
+            t = 0x000000FF & src[bi++];
+            dst[i] = dst[i] | (t << 16);
+
+            t = 0x000000FF & src[bi++];
+            dst[i] = dst[i] | (t << 8);
+
+            t = 0x000000FF & src[bi++];
+            dst[i] = dst[i] | (t);
         }
         return dst;
     }

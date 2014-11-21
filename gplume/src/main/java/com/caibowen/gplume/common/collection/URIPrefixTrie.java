@@ -111,7 +111,6 @@ public class URIPrefixTrie<V> implements Trie<V>, Serializable {
 
 	protected int size;
 	protected TrieNode root;
-//	protected ReadWriteLock lock = new ReentrantReadWriteLock();
 	public URIPrefixTrie(){
 		size = 0;
 		root = new TrieNode(null, '/' - URI_DEF.OFFSET);// the char '/'

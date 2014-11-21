@@ -248,7 +248,7 @@ public class Converter {
 						targetClass = argClasses.get(0);
 					} else {
 						throw new IllegalArgumentException(
-								"expect one generic type, get[" + argClasses + "]");
+								"expect 1 generic type, get[" + argClasses + "]");
 					}
 				}
 			}

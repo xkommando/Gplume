@@ -36,21 +36,29 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
 
     private final Logger LOG = LoggerFactory.getLogger(JdbcSupport.class);
 
+    private boolean traceSQL;
+
+    private DataSource dataSource;
+    private int queryTimeout;
+    private int maxRow;
+    private int fetchSize;
+
+    private JdbcTransactionManager transactionManager;
+
     public JdbcSupport() {
+        this(null);
     }
 
     public JdbcSupport(DataSource dataSource) {
         this.dataSource = dataSource;
+        transactionManager = new JdbcTransactionManager();
+        transactionManager.setDataSource(dataSource);
+        traceSQL = LOG.isTraceEnabled();
+        maxRow = 0;
+        fetchSize = 0;
     }
 
 //-----------------------------------------------------------------------------
-
-    private DataSource dataSource;
-    private int queryTimeout;
-    private int maxRow = 0;
-    private int fetchSize = 0;
-
-    private JdbcTransactionManager transactionManager = new JdbcTransactionManager();
 
     public int getFetchSize() {
         return fetchSize;
@@ -70,6 +78,13 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     public void setQueryTimeout(int queryTimeout) {
         this.queryTimeout = queryTimeout;
     }
+    public boolean isTraceSQL() {
+        return traceSQL;
+    }
+    public void setTraceSQL(boolean traceSQL) {
+        this.traceSQL = this.traceSQL && traceSQL;
+    }
+
     @Override
     public DataSource getDataSource() {
         return dataSource;
@@ -107,7 +122,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     }
 
 
-    private void configStatement(Statement st) throws SQLException{
+    private void configStatement(Statement st) throws SQLException {
         if (maxRow > 0)
             st.setMaxRows(maxRow);
         if (fetchSize > 0)
@@ -174,11 +189,14 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
      */
     @Override
     public boolean execute(StatementCreator psc) {
+
         PreparedStatement st = null;
         Connection connection = acquireConnection();
         try {
             st = psc.createStatement(connection);
             configStatement(st);
+            if (traceSQL)
+                LOG.trace("Executing prepared SQL statement[" + st + "]");
             boolean noRs = st.execute();
             checkWarnings(st);
             if (noRs)
@@ -202,6 +220,8 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
         try {
             st = creator.createStatement(connection);
             configStatement(st);
+            if (traceSQL)
+                LOG.trace("Batch executing prepared SQL statement[" + st + "]");
             int[] out = st.executeBatch();
             checkWarnings(st);
             return out;
@@ -224,6 +244,8 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
         try {
             ps = psc.createStatement(connection);
             configStatement(ps);
+            if (traceSQL)
+                LOG.trace("Executing prepared SQL statement[" + ps + "]");
             ps.execute();
             checkWarnings(ps);
             T ret = null;
@@ -253,11 +275,13 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
         try {
             ps = creator.createStatement(connection);
             ps.executeBatch();
+            if (traceSQL)
+                LOG.trace("Batch executing prepared SQL statement[" + ps + "]");
             checkWarnings(ps);
             List<T> ret = null;
             if (cols != null) {
                 rs = ps.getGeneratedKeys();
-                ret = new ArrayList<>(8);
+                ret = new ArrayList<>(16);
                 while (rs.next())
                     ret.add(extractor.extract(rs));
             }
@@ -282,6 +306,8 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
         try {
             ps = psc.createStatement(connection);
             configStatement(ps);
+            if (traceSQL)
+                LOG.trace("Executing prepared SQL statement[" + ps + "]");
             rs = ps.executeQuery();
             checkWarnings(ps);
             T o = null;
@@ -311,9 +337,11 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
             connection = acquireConnection();
             ps = psc.createStatement(connection);
             configStatement(ps);
+            if (traceSQL)
+                LOG.trace("Executing prepared SQL statement[" + ps + "]");
             rs = ps.executeQuery();
             checkWarnings(ps);
-            List<T> ls = new ArrayList<>(8);
+            List<T> ls = new ArrayList<>(16);
             while (rs.next()) {
                 ls.add(mapper.extract(rs));
             }

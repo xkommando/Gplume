@@ -93,28 +93,34 @@ class SpaceTree<T> implements Serializable {
         return true;
     }
 
-    public String getFullPath(String pid, String curNS, String refNS) {
-        if (find(pid) != null)
-            return pid;
-        String lid = curNS + XMLTags.NS_DELI + pid;
-        if (find(lid) != null)
-            return lid;
-        if (find((lid = refNS + XMLTags.NS_DELI + pid)) != null)
-            return lid;
+    public String createFullPath(String pid, @Nonnull String curNS) {
 
-        return null;
-    }
-
-    public String getFullPath(String pid, @Nonnull String...refNS) {
         String[] pNss = STR_TOK.split(pid);
         if (pNss.length == 1) { // most case.
-            String _id = refNS[0] + XMLTags.NS_DELI + pid;
-            T pod = find(_id);
-            if (pod != null)
-                return _id;
-            if (refNS.length > 1) {
-                _id = refNS[1] + XMLTags.NS_DELI + pid;
-                if (null != find(_id))
+            return curNS + XMLTags.NS_DELI + pid;
+        }
+
+        String[] curNss = STR_TOK.split(curNS);
+        int idx = strOverlap(curNss, 0, curNss.length, pNss, 0, pNss.length - 1);
+        if (idx == -1)
+            return curNS + XMLTags.NS_DELI + pid;
+        String[] fulp = new String[idx + pNss.length];
+        System.arraycopy(curNss, 0, fulp, 0, idx);
+        System.arraycopy(pNss, 0, fulp, idx, pNss.length);
+        return Str.Utils.join(fulp, XMLTags.NS_DELI);
+    }
+
+
+    public String getFullPath(String pid, @Nonnull String...refNS) {
+        T pod = find(pid);
+        if (pod != null)
+            return pid;
+        String[] pNss = STR_TOK.split(pid);
+        if (pNss.length == 1) { // most case.
+            for (String pf : refNS) {
+                String _id = pf + XMLTags.NS_DELI + pid;
+                pod = find(_id);
+                if (pod != null)
                     return _id;
             }
         }
@@ -142,15 +148,15 @@ class SpaceTree<T> implements Serializable {
      * @return
      */
     T findByPartialId(@Nonnull String pid, @Nonnull String...refNS) {
+        T pod = find(pid);
+        if (pod != null)
+            return pod;
         String[] pNss = STR_TOK.split(pid);
         if (pNss.length == 1) { // most case.
-            String _id = refNS[0] + XMLTags.NS_DELI + pid;
-            T pod = find(_id);
-            if (pod != null)
-                return pod;
-            if (refNS.length > 1) {
-                _id = refNS[1] + XMLTags.NS_DELI + pid;
-                if (null != (pod = find(_id)))
+            for (String pf : refNS) {
+                String _id = pf + XMLTags.NS_DELI + pid;
+                pod = find(_id);
+                if (pod != null)
                     return pod;
             }
         }

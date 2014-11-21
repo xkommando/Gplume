@@ -20,7 +20,10 @@ package com.caibowen.gplume.context.bean;
 import com.caibowen.gplume.annotation.Internal;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
+import com.caibowen.gplume.core.TypeTraits;
 import com.caibowen.gplume.misc.Assert;
+import com.caibowen.gplume.misc.ClassFinder;
+import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,22 +43,17 @@ import java.util.*;
  * @since 8/16/2014.
  */
 @Internal
-abstract class BeanBuilder implements IBeanAssembler {
+class BeanBuilder{
 
     private static final Logger LOG = LoggerFactory.getLogger(BeanBuilder.class);
 
     protected ClassLoader classLoader;
 
     protected ConfigCenter configCenter;
+    protected final IBeanAssembler assembler;
 
-    @Override
-    public void setConfigCenter(ConfigCenter configCenter) {
-        this.configCenter = configCenter;
-    }
-
-    @Override
-    public ConfigCenter getConfigCenter() {
-        return configCenter;
+    public BeanBuilder(IBeanAssembler assembler) {
+        this.assembler = assembler;
     }
 
 
@@ -96,6 +94,8 @@ abstract class BeanBuilder implements IBeanAssembler {
         }
         return ctorElem;
     }
+
+
 
     /**
      * For one field, there are 3 notation:
@@ -142,14 +142,8 @@ abstract class BeanBuilder implements IBeanAssembler {
 
             NodeList varList = prop.getChildNodes();
             if (varList == null || varList.getLength() == 0) {
-                Object _v = inTag(prop);
-                if (_v == null)
-                    throw new IllegalArgumentException("No value for property["
-                            + propName + "] in bean [" + beanObj
-                            + "]");
-                else
-                    BeanEditor.setProperty(beanObj, propName, _v );
-
+                Object _v = inTag(prop, true, Klass.findType(beanObj.getClass(), propName));
+                BeanEditor.setProperty(beanObj, propName, _v);
                 continue;
             }
 
@@ -222,9 +216,11 @@ abstract class BeanBuilder implements IBeanAssembler {
         return beanObj;
     }
 
-    private Object inTag(Element prop) throws Exception {
 
-        String varObj = prop.getAttribute(XMLTags.FIELD_INSTANCE);
+
+    private Object inTag(Element prop, boolean notNull, @Nullable Class<?> tgtClass) throws Exception {
+
+        String varInstance = prop.getAttribute(XMLTags.FIELD_INSTANCE);
         String varStr = prop.getAttribute(XMLTags.FIELD_VALUE);
         String varRef = prop.getAttribute(XMLTags.FILED_REF);
 
@@ -234,22 +230,36 @@ abstract class BeanBuilder implements IBeanAssembler {
             String type;
             if (null != (type = prop.getAttribute(XMLTags.TYPE))) {
                 type = configCenter.replaceIfPresent(type.trim());
-                return Converter.slient.translateStr(varStr, Converter.getClass(type));
+                Object ret = Converter.slient.translateStr(varStr, Converter.getClass(type));
+                if (notNull && ret == null)
+                    throw new IllegalArgumentException("Could not cast ["
+                            + varStr + "] to type[" + type + "]");
+
+                return ret;
             } else
                 return varStr;
 
         } else if (Utils.notBlank(varRef)) {
             // e.g., <property id="bean" ref="someOtherBean"/>
-            return getBean(configCenter.replaceIfPresent(varRef.trim()));
+            String _name = configCenter.replaceIfPresent(varRef.trim());
+            Object bn = assembler.getBean(_name);
+            if (bn != null)
+                return bn;
 
-        } else if (Utils.notBlank(varObj)) {
-            // e.g. <property id="injector" instance="com.caibowen.gplume.core.Injector"/>
-            Class<?> klass = this.classLoader.loadClass(configCenter.replaceIfPresent(varObj));
+            if (tgtClass == null) throw new NullPointerException();
+            return assembler.getForBuild(_name, notNull, tgtClass);
+
+        } else if (Utils.notBlank(varInstance)) {
+            // e.g. <property id="injector" instance="com.caibowen.gplume.context.bean.Injector"/>
+            Class<?> klass = this.classLoader.loadClass(configCenter.replaceIfPresent(varInstance));
             Object obj = klass.newInstance();
             afterProcess(obj, null);
             return obj;
 
-        } else return null;
+        } else if (notNull)
+            throw new IllegalStateException("Could not find required bean from XML element[" + prop + "]");
+        else
+            return null;
     }
 
 
@@ -305,9 +315,12 @@ abstract class BeanBuilder implements IBeanAssembler {
                 beanList.add(buildBean(elemBn));
 
             } else if (XMLTags.FILED_REF.equals(elemBn.getNodeName())) {
-                beanList.add(getBean(
+                String _s = elemBn.getTextContent();
+                if (Utils.isBlank(_s))
+                    throw new IllegalArgumentException("Empty reference");
+                beanList.add(assembler.getBean(
                                 configCenter.replaceIfPresent(
-                                        elemBn.getTextContent())
+                                        _s.trim())
                         )
                 );
 
@@ -344,7 +357,7 @@ abstract class BeanBuilder implements IBeanAssembler {
         if (Utils.isBlank(initName))
             return;
 
-        Method m = bean.getClass().getDeclaredMethod(initName.trim());
+        Method m = bean.getClass().getMethod(initName.trim());
         if (!m.isAccessible())
             m.setAccessible(true);
         if (Modifier.isStatic(m.getModifiers()))
@@ -355,7 +368,8 @@ abstract class BeanBuilder implements IBeanAssembler {
 
 
     /**
-     * build new bean, if proxy specified, <construct></construct> is used for instantiating the invocation handler
+     * build new bean, if proxy specified,
+     * <construct></construct> is used for instantiating the invocation handler
      * @param klass
      * @param beanElem
      * @return
@@ -376,11 +390,11 @@ abstract class BeanBuilder implements IBeanAssembler {
                 Class poxHandle = getClass(poxHM);
                 if (! InvocationHandler.class.isAssignableFrom(poxHandle))
                     throw new IllegalArgumentException("[" + poxHM + "] from [" + poxVal + "]is not a InvocationHandler");
-
+                // xml construct invocation handler
                 InvocationHandler handler = (InvocationHandler)newInstance(poxHandle, findCtorElem(beanElem));
                 return Proxy.newProxyInstance(classLoader, new Class[]{klass}, handler);
             case 3:
-                return getBean(configCenter.replaceIfPresent(poxRef.trim()));
+                return assembler.getForBuild(configCenter.replaceIfPresent(poxRef.trim()), false, klass);
             default:
                 throw new IllegalArgumentException("wrong config of InvocationHandler");
         }
@@ -400,8 +414,19 @@ abstract class BeanBuilder implements IBeanAssembler {
                 throw new BeanAssemblingException("cannot find default constructor");
             }
         }
-        Object _tagVal;
-        if (null != (_tagVal = inTag(prop)))
+        Object _tagVal = null;
+        try {
+            _tagVal = inTag(prop, false, null);
+        } catch (NullPointerException e) {
+            // referred bean not available yet
+            List<Class> cs = Klass.findCtorParam(klass);
+            if (cs.size() != 0) {
+                throw new IllegalStateException("Could not determine constructor parameter for [" + klass + "]");
+            }
+            _tagVal = inTag(prop, false, cs.get(0));
+        }
+
+        if (null != _tagVal)
             return BeanEditor.construct(klass, _tagVal);
 
         if (prop.getNodeName().equals(XMLTags.FIELD_MAP)) {
@@ -425,5 +450,13 @@ abstract class BeanBuilder implements IBeanAssembler {
                             + "needs 1 actual " + ls.size());
 
 
+    }
+
+    public void setConfigCenter(ConfigCenter configCenter) {
+        this.configCenter = configCenter;
+    }
+
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 }

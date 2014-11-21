@@ -1,4 +1,4 @@
-package com.caibowen.gplume.webex.freemarker;
+package com.caibowen.gplume.misc.test.freemarker;
 
 import com.caibowen.gplume.web.IViewResolver;
 import com.caibowen.gplume.web.RequestContext;

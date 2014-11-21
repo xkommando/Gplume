@@ -20,6 +20,7 @@ import com.caibowen.gplume.misc.Klass;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeMap;
@@ -33,6 +34,19 @@ import java.util.TreeMap;
  *
  */
 public class BeanEditor {
+
+	/**
+	 * This is a compile flag.
+	 * When this flag is enabled,fields that do not have a correspondent setter
+	 * will be set directly, regardless of its qualifier.
+	 *
+	 * However, In some environment, e.g., Google App Engine,
+	 * you cannot reflect on private field on some classes
+	 * due to different security policy.
+	 * So it is recommended that this flag is not open.
+	 *
+	 */
+	public static final boolean	REFLECT_ON_PRIVATE = true;
 
     /***
      *
@@ -57,13 +71,13 @@ public class BeanEditor {
         }
         if (q.size() > 0) {
             Constructor c = q.firstEntry().getValue();
-            if (!c.isAccessible())
+            if (!c.isAccessible() && REFLECT_ON_PRIVATE)
                 c.setAccessible(true);
             return c.newInstance(param);
 
         } else {
             throw new NoSuchMethodException(
-                    "cannot find constructor for class [" + klass.getName()
+                    "Could not find accessible constructor for class [" + klass.getName()
                     + "] that can be invoked with [" + param + "]");
         }
     }
@@ -89,7 +103,7 @@ public class BeanEditor {
 										Object var) throws Exception {
 
 		Class<?> bnClass = bean.getClass(); 
-		Method setter = TypeTraits.findSetter(bnClass, propName);
+		Method setter = Klass.findSetter(bnClass, propName);
 		if (setter == null) {
 			setField(bean, propName, var);
 		} else {
@@ -110,7 +124,7 @@ public class BeanEditor {
 
 		Class<?> bnClass = bean.getClass();
 		// try get setter
-		Method setter = TypeTraits.findSetter(bnClass, propName);
+		Method setter = Klass.findSetter(bnClass, propName);
 		// try convert list as String list
 		Object var = null;
 		try {
@@ -152,7 +166,7 @@ public class BeanEditor {
 
 		Class<?> bnClass = bean.getClass();
 		// try get setter
-		Method setter = TypeTraits.findSetter(bnClass, propName);
+		Method setter = Klass.findSetter(bnClass, propName);
 		// try convert list as String list
 		Object var = null;
 		try {
@@ -191,24 +205,20 @@ public class BeanEditor {
 		if (paramTypes != null && paramTypes.length == 1) {
 			if (Klass.isAssignable(var.getClass(), paramTypes[0])) {
 				// every thing is OK
-				if (Modifier.isStatic(setter.getModifiers())) {
+				if (Modifier.isStatic(setter.getModifiers()))
 					setter.invoke(null, var);
-				} else {
-					setter.invoke(obj, var);
-				}
-			} else {
-				throw new IllegalArgumentException(
+				else setter.invoke(obj, var);
+				return;
+			} else throw new IllegalArgumentException(
 					"cannot call setter[" 
 						+ setter.getName() + "] in object [" 
 						+ obj + "]"
 						+ "] setter parameter type[" + paramTypes[0].getName()
 						+ "] value type [" + var.getClass().getName() + "]");
-			}
-		} else {
-			throw new IllegalArgumentException(
+		}
+		throw new IllegalArgumentException(
 				"more than one parameter in setter[" + setter.getName() +"]"
 				+ "in object [" + obj + "]");
-		}
 	}
 	
 	/**
@@ -223,22 +233,19 @@ public class BeanEditor {
 
 		try {
 			Field field = obj.getClass().getDeclaredField(fieldName);
-			if (!field.isAccessible()) {
+			if (!field.isAccessible() && REFLECT_ON_PRIVATE)
 				field.setAccessible(true);
-			}
+
 			if (var instanceof String) {
 				var = Converter.slient.translateStr((String)var, field.getType());
-				if (var == null) {
+				if (var == null)
 					throw new IllegalArgumentException("cannot translate[" 
 							+ var + "] to [" + field.getType() + "] in field[" 
 							+ fieldName + "] in class[" + obj.getClass().getName() +"]");
-				}
 			}
-			if (Modifier.isStatic(field.getModifiers())) {
+			if (Modifier.isStatic(field.getModifiers()))
 				field.set(null, var);
-			} else {
-				field.set(obj, var);
-			}
+			else field.set(obj, var);
 		} catch (Exception e) {
 			throw new IllegalStateException(
 			"in class [" + obj.getClass().getName()
@@ -280,11 +287,9 @@ public class BeanEditor {
 							+ obj.getClass().getName() + "]");
 				}
 			}
-			if (Modifier.isStatic(setter.getModifiers())) {
+			if (Modifier.isStatic(setter.getModifiers()))
 				setter.invoke(null, var);
-			} else {
-				setter.invoke(obj, var);
-			}
+			else setter.invoke(obj, var);
 		} catch (Exception e) {
 			throw new RuntimeException(
 				"cannot set bean [" 

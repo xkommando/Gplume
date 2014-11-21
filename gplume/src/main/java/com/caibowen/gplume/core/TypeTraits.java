@@ -30,8 +30,14 @@ import java.util.Set;
  *
  */
 public final class TypeTraits {
-	
-	
+
+
+	/**
+	 * @param klass
+	 * @param fieldName
+	 * @return generic type actual type arg
+	 * @throws NoSuchFieldException
+	 */
 	public static List<Class<?>> 
 	findParamTypes(Class<?> klass, String fieldName) throws NoSuchFieldException {
 		
@@ -54,94 +60,13 @@ public final class TypeTraits {
 				"cannnot find field of id[" + fieldName 
 				+ "] in class [" + klass.getName() + "]");
 	}
-	
-	/**
-	 * find setter by fieldName from public methods of the class
-	 * parameter type and number and return type is not checked
-	 * 
-	 * @param clazz
-	 * @param fielddName
-	 * @return
-	 * @throws NoSuchMethodException 
-	 */
-	@Nullable
-	public static Method findSetter(Class<?> clazz, String fieldName) throws NoSuchMethodException {
 
-		String setterName = String.format("set%C%s",
-				fieldName.charAt(0), fieldName.substring(1));
-		for (Method method : clazz.getMethods()) {
-
-			if(method.getName().equals(setterName)
-				&& method.getReturnType().getName().equals("void")) {
-				return method;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * @param clazz
-	 * @param fieldName
-	 * @return
-	 * @throws NoSuchMethodException 
-	 */
-	@Nullable
-	public static Method findGetter(Class<?> clazz, String fieldName) throws NoSuchMethodException {
-
-		Field[] fields = clazz.getDeclaredFields();
-		Class<?> fieldClazz = null;
-
-		for (Field field : fields) {
-			if (field.getName().equals(fieldName)) {
-				fieldClazz = field.getType();
-				break;
-			}
-		}
-		
-		if (fieldClazz != null) {
-			// boolean: try isXyz
-			if (fieldClazz.equals(Boolean.class)
-					|| fieldClazz.equals(boolean.class)) {
-
-				String getterName = String.format("is%C%s",
-						fieldName.charAt(0), fieldName.substring(1));
-
-				for (Method method : clazz.getMethods()) {
-
-					if (method.getName().equals(getterName)
-							&& method.getReturnType().equals(fieldClazz)) {
-						return method;
-					}
-				}
-				// no isXyz for bool, try getXyz
-			} else {
-
-				String getterName = String.format("get%C%s",
-						fieldName.charAt(0), fieldName.substring(1));
-
-				for (Method method : clazz.getMethods()) {
-
-					if (method.getName().equals(getterName)
-							&& method.getReturnType().equals(fieldClazz)) {
-						return method;
-					}
-				}
-			} // else
-		}
-		
-		return null;
-	}
-	
 	public static Class<?> getClass(Type type, int i) {
 		
         if (type instanceof ParameterizedType) {
-        	
             return getGenericClass((ParameterizedType) type, i);
-            
         } else if (type instanceof TypeVariable) {
-        	
             return (Class<?>) getClass(((TypeVariable<?>) type).getBounds()[0], 0);
-        
         } else {
             return (Class<?>) type;
         }

@@ -15,7 +15,7 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.webex.test;
+package com.caibowen.gplume.misc.test.test;
 
 import org.junit.Test;
 

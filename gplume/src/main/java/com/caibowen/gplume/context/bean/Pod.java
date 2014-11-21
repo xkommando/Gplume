@@ -34,17 +34,17 @@ class Pod {
 	private static final Logger LOG 
 		= LoggerFactory.getLogger(Pod.class);
 
-	private String beanId;
+	public final String beanId;
 	
 	/**
 	 * if singleton, log description, instance == null
 	 */
-	private Element description;
+	Element description;
 	
 	/**
 	 * if singleton, description == null
 	 */
-	private Object instance;
+	Object instance;
 
 	/**
 	 * 
@@ -86,33 +86,10 @@ class Pod {
 		}
 		instance = null;
 		description = null;
-		this.beanId = null;
 
         LOG.trace(
                 "bean id[{0}] class[" + (instance != null ? instance.getClass().getSimpleName() : "unknown")
                 + "] destroyed", beanId);
-	}
-	
-	void setInstance(Object instance) {
-		this.instance = instance;
-	}
-	
-	Element getDescription() {
-		return description;
-	}
-
-	public void setDescription(Element description) {
-		this.description = description;
-	}
-
-	//---------------------------------------------------------
-	
-	public Object getInstance() {
-		return instance;
-	}
-
-	public String getBeanId() {
-		return beanId;
 	}
 	
 	public boolean isSingleton() {

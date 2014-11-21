@@ -29,6 +29,9 @@ import javax.annotation.Nonnull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.lang.reflect.Proxy;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static com.caibowen.gplume.misc.Str.EMPTY;
 
@@ -40,42 +43,52 @@ import static com.caibowen.gplume.misc.Str.EMPTY;
  * @author BowenCai
  *
  */
-public abstract class XMLBeanAssemblerBase extends BeanBuilder {
+public abstract class XMLBeanAssemblerBase implements IBeanAssembler  {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(XMLBeanAssemblerBase.class);
 
-    protected final SpaceTree<Pod> tree = new SpaceTree<>();
+    protected final SpaceTree<Pod> tree;
 
-    protected String currentNamespace = EMPTY;
+    protected String currentNamespace;
 
-    protected String refNamespace = EMPTY;
+    protected String refNamespace;
+    protected BeanBuilder beanBuilder;
+    protected Map<String, ProxyBean> deferred;
 
-    @Override
-    public void setClassLoader(@Nonnull ClassLoader loader) {
-		this.classLoader = loader;
-	}
-	@Override
+    public XMLBeanAssemblerBase() {
+        tree = new SpaceTree<>();
+        currentNamespace = EMPTY;
+        refNamespace = EMPTY;
+        deferred = new TreeMap<>();
+        beanBuilder = new BeanBuilder(this);
+    }
+
     @Nonnull
-	public ClassLoader getClassLoader() {
-		return this.classLoader;
-	}
     @Override
-    public String getCurrentNamespace() {
-        return currentNamespace;
-    }
-    @Override
-    public void setCurrentNamespace(String currentNamespace) {
-        this.currentNamespace = currentNamespace;
-    }
-    @Override
-    public String getRefNamespace() {
-        return refNamespace;
-    }
-    @Override
-    public void setRefNamespace(String refNamespace) {
-        this.refNamespace = refNamespace;
+    public Object getForBuild(String id, boolean notNull, Class<?> tgtClass) {
+        String _id = tree.createFullPath(id, currentNamespace);
+        ProxyBean pb = deferred.get(_id);
+        if (pb == null) {
+            pb = new ProxyBean();
+            deferred.put(_id, pb);
+        }
+        return Proxy.newProxyInstance(beanBuilder.classLoader, new Class[]{tgtClass}, pb);
     }
 
+    protected void prepareAssemble(Document doc) {
+    }
+    protected void finishAssemble(Document doc) {
+        for (Map.Entry<String, ProxyBean> e : deferred.entrySet()) {
+            String id = e.getKey();
+            ProxyBean pb = e.getValue();
+            Object realBean = getBean(id);
+            if (realBean == null)
+                throw new IllegalStateException("Could not find bean[" + id + "]");
+            if (pb.inited())
+                throw new IllegalStateException("Proxy Bean already has value");
+            pb.init(realBean);
+        }
+    }
     /**
 	 * xml bean factory being singleton implies that this function is not
 	 * reenterable, thus it is thread safe
@@ -83,6 +96,7 @@ public abstract class XMLBeanAssemblerBase extends BeanBuilder {
 	 * @throws Exception
 	 */
 	synchronized protected void doAssemble(Document doc) throws Exception {
+        prepareAssemble(doc);
 
 		NodeList _nodeList = doc.getChildNodes();
 		Element rootElem = null;
@@ -137,6 +151,7 @@ public abstract class XMLBeanAssemblerBase extends BeanBuilder {
             }
         }
 
+        finishAssemble(doc);
 	}
 
     protected static String getCurrentNS(Element rootX) {
@@ -160,6 +175,15 @@ public abstract class XMLBeanAssemblerBase extends BeanBuilder {
     protected void handleBean(Element elem) throws Exception {
 
         String bnId = elem.getAttribute(XMLTags.BEAN_ID);
+
+        boolean addBean = true;
+        if (Str.Utils.notBlank(bnId)) {
+            bnId = tree.createFullPath(bnId, currentNamespace);
+            if (tree.find(bnId) != null)
+                throw new IllegalArgumentException("duplicated bean definition [" + bnId + "]");
+
+        } else addBean = false;
+
         Pod pod;
 
         String bnScope = elem.getAttribute(XMLTags.BEAN_SINGLETON);
@@ -171,16 +195,14 @@ public abstract class XMLBeanAssemblerBase extends BeanBuilder {
         Object bean = null;
 
         if (isSingleton) {
-            bean = super.buildBean(elem);
+            bean = beanBuilder.buildBean(elem);
             pod = new Pod(bnId, null, bean);
         } else {
             pod = new Pod(bnId, elem, null);
         }
 
-        if (Str.Utils.notBlank(bnId)) {
-            if (! tree.put(currentNamespace + XMLTags.NS_DELI + bnId, pod))
-                throw new IllegalArgumentException("duplicated bean definition [" + bnId + "]");
-        }
+        if (addBean)
+            tree.put(bnId, pod);
 
         LOG.debug("Add Bean: id[{}] of class[{}] singleton ? {}",
                 bnId, (bean != null ? bean.getClass().getName() : "unknown")
@@ -208,7 +230,7 @@ public abstract class XMLBeanAssemblerBase extends BeanBuilder {
      * @param elem
      */
     protected void handleProperties(Element elem) {
-        configCenter.scanXMLElem(elem);
+        beanBuilder.configCenter.scanXMLElem(elem);
     }
 
     /**
@@ -223,7 +245,7 @@ public abstract class XMLBeanAssemblerBase extends BeanBuilder {
         String oldCur = currentNamespace;
         String oldRef = refNamespace;
         int oldsz = tree.size();
-        configCenter.withPath(loc, new InputStreamCallback() {
+        beanBuilder.configCenter.withPath(loc, new InputStreamCallback() {
             @Override
             public void doInStream(InputStream stream) throws Exception {
                 Document doc = builder.parse(stream);
@@ -240,4 +262,46 @@ public abstract class XMLBeanAssemblerBase extends BeanBuilder {
     void handleRequire(Element elem) {
         throw new UnsupportedOperationException();
     }
- }
+
+
+    @Override
+    public void setClassLoader(@Nonnull ClassLoader loader) {
+        beanBuilder.classLoader = loader;
+    }
+
+    @Override
+    @Nonnull
+    public ClassLoader getClassLoader() {
+        return beanBuilder.classLoader;
+    }
+
+    @Override
+    public String getCurrentNamespace() {
+        return currentNamespace;
+    }
+
+    @Override
+    public void setCurrentNamespace(String currentNamespace) {
+        this.currentNamespace = currentNamespace;
+    }
+
+    @Override
+    public String getRefNamespace() {
+        return refNamespace;
+    }
+
+    @Override
+    public void setRefNamespace(String refNamespace) {
+        this.refNamespace = refNamespace;
+    }
+
+    @Override
+    public void setConfigCenter(ConfigCenter configCenter) {
+        beanBuilder.setConfigCenter(configCenter);
+    }
+
+    @Override
+    public ConfigCenter getConfigCenter() {
+        return beanBuilder.configCenter;
+    }
+}

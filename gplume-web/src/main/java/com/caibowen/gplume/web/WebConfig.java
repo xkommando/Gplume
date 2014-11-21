@@ -18,7 +18,6 @@ package com.caibowen.gplume.web;
 import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.Injector;
-import com.caibowen.gplume.misc.Str;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.caibowen.gplume.web.actions.ActionFactory;
@@ -26,7 +25,6 @@ import com.caibowen.gplume.web.misc.ControllerScanner;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
 import com.caibowen.gplume.web.views.*;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -85,21 +83,14 @@ public class WebConfig implements InitializingBean, Serializable {
 	public void afterPropertiesSet() throws Exception {
 		try {
             SimpleControlCenter center = new SimpleControlCenter();
-
-            // 1. injector
-            Injector injector = AppContext.beanAssembler.getBean("injector");
-            if (injector == null) {
-                injector = new Injector();
-                AppContext.beanAssembler.addBean("injector", injector);
-            }
-            center.setInjector(injector);
-            LOG.debug("injector {} setted", injector.getClass().getName());
-
-            IRequestProcessor iter = this.preProcessor;
-            while (iter != null) {
-                injector.inject(iter);
-                iter = iter.getNext();
-            }
+            Injector ij = AppContext.beanAssembler.getInjector();
+            center.setInjector(ij);
+//
+//            IRequestProcessor iter = this.preProcessor;
+//            while (iter != null) {
+//                ij.inject(iter);
+//                iter = iter.getNext();
+//            }
             // 2. preprocessor chain
             center.setPreProcessor(this.preProcessor);
 
@@ -126,10 +117,10 @@ public class WebConfig implements InitializingBean, Serializable {
 			boolean boo = AppContext.beanAssembler.addBean("controlCenter", center);
 
             if (boo) LOG.debug("ControlCenter set up");
-            else LOG.debug("cannot add [controlCenter] to beanAssembler");
+            else LOG.debug("Could not add [controlCenter] to beanAssembler");
 
 		} catch (Exception e) {
-			throw new RuntimeException("cannot build controlCenter", e);
+			throw new RuntimeException("Could not build controlCenter", e);
 		}
 	}
 

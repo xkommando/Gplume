@@ -28,7 +28,7 @@ import java.util.concurrent.Future;
  * @author BowenCai
  *
  */
-interface ICacheProvider {
+public interface ICacheProvider {
 
 	/**
 	 * in second

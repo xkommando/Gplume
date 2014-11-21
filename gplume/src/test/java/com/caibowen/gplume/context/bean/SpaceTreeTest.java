@@ -18,17 +18,17 @@ public class SpaceTreeTest {
         t.put("id1::1::1", new Pod("pod1.1.1", null, "value1.1.1"));
         t.put("id2::1", new Pod("pod2.1", null, "value2.1"));
         Assert.assertEquals(t.size(), 4);
-        assertEquals(t.find("id1").getInstance(), "value1");
-        assertEquals(t.find("id1::1").getInstance(), "value1.1");
-        assertEquals(t.find("id1::1::1").getInstance(), "value1.1.1");
-        assertEquals(t.find("id2::1").getInstance(), "value2.1");
+        assertEquals(t.find("id1").instance, "value1");
+        assertEquals(t.find("id1::1").instance, "value1.1");
+        assertEquals(t.find("id1::1::1").instance, "value1.1.1");
+        assertEquals(t.find("id2::1").instance, "value2.1");
         t.remove("id1::1");
         t.remove("id1::1::1");
         Assert.assertEquals(t.size(), 2);
-        assertEquals(t.find("id1").getInstance(), "value1");
+        assertEquals(t.find("id1").instance, "value1");
         assertNull(t.find("id1::1"));
         assertNull(t.find("id1::1::1"));
-        assertEquals(t.find("id2::1").getInstance(), "value2.1");
+        assertEquals(t.find("id2::1").instance, "value2.1");
     }
 
     @Test

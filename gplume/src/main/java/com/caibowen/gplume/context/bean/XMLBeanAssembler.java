@@ -16,6 +16,7 @@
 package com.caibowen.gplume.context.bean;
 
 import com.caibowen.gplume.context.InputStreamCallback;
+import com.caibowen.gplume.core.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -46,18 +47,6 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	private static final long serialVersionUID = 1895612360389006713L;
 
 	private static final Logger LOG = LoggerFactory.getLogger(XMLBeanAssembler.class);
-	/**
-	 * This is a compile flag.
-	 * When this flag is enabled,fields that do not have a correspondent setter 
-	 * will be set directly, regardless of its qualifier.
-	 * 
-	 * However, In some environment, e.g., Google App Engine, 
-	 * you cannot reflect on private field on some classes 
-	 * due to different security policy.
-	 * So it is recommanded that this flag is not open.
-	 * 
-	 */
-	public static final boolean	REFLECT_ON_PRIVATE = true;
 
 	public XMLBeanAssembler() {}
 
@@ -82,7 +71,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 
 	@Override
 	public void assemble(@Nonnull final String path) throws Exception {
-		configCenter.withPath(path, new InputStreamCallback() {
+		beanBuilder.configCenter.withPath(path, new InputStreamCallback() {
             @Override
             public void doInStream(InputStream stream) throws Exception {
                 assemble(stream);
@@ -90,6 +79,11 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
         });
 	}
 
+	@Nonnull
+	@Override
+	public ConfigCenter configCenter() {
+		return beanBuilder.configCenter;
+	}
 	/**
 	 * @return null if not found or throw exception in failing to create non-singleton bean
 	 */
@@ -101,7 +95,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		if (pod == null)
 			return null;
 		if (pod.isSingleton()) {
-			Object bn = pod.getInstance();
+			Object bn = pod.instance;
 			if (bn != null)
 				return (T)bn;
 			Pod p = super.tree.removeByPartialId(id, currentNamespace, refNamespace);
@@ -113,7 +107,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 			return null;
 		} else {
 			try {
-				return (T) buildBean(pod.getDescription());
+				return (T) beanBuilder.buildBean(pod.description);
 			} catch (Exception e) {
 				throw new BeanAssemblingException(
 						"failed building non-singleton bean of id[" + id + "]", e);
@@ -121,11 +115,6 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		}
 	}
 
-    @Nonnull
-    @Override
-    public ConfigCenter configCenter() {
-        return configCenter;
-    }
 
     /**
      * will not increase the bean age
@@ -139,7 +128,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 			public void visit(Pod p) {
 				Object bn;
 				if (null != p
-						&& null != (bn = p.getInstance())
+						&& null != (bn = p.instance)
 						&& clazz.isInstance(bn))
 					set.add(bn);
 			}
@@ -175,9 +164,9 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 			return;
 
 		if (!pod.isSingleton())
-			pod.setDescription(null);
+			pod.description = null;
 
-		pod.setInstance(bean);
+		pod.instance = bean;
 
         LOG.debug("{} of type {} updated", id, bean.getClass().getName());
 	}
@@ -188,7 +177,7 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 	@Override
 	public boolean addBean(@Nonnull String id, 
 							@Nonnull Object bean) {
-		String lid = currentNamespace + XMLTags.NS_DELI + id;
+		String lid = tree.createFullPath(id, currentNamespace);
 		if (contains(lid))
 			return false;
 
@@ -225,4 +214,10 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		super.tree.intake(visitor);
 	}
 
+	private XMLInjector injector = new XMLInjector(this);
+
+	@Override
+	public Injector getInjector() {
+		return injector;
+	}
 }

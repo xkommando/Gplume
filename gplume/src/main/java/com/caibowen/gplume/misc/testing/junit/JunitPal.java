@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.misc.testing.junit;
 
+import com.caibowen.gplume.context.AppContext;
 import com.caibowen.gplume.context.ClassLoaderInputStreamProvider;
 import com.caibowen.gplume.context.ContextBooter;
 import com.caibowen.gplume.core.Injector;
@@ -54,7 +55,7 @@ public class JunitPal extends BlockJUnit4ClassRunner {
 				throw new NullPointerException("empty path");
 			}
 			prepareTest(testObj, path);
-			Injector injector = new Injector();
+			Injector injector = AppContext.beanAssembler.getInjector();
 			injector.inject(testObj);
 		}
 		return testObj;

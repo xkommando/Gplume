@@ -15,9 +15,9 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.webex.json;
+package com.caibowen.gplume.misc.test.json;
 
-import com.caibowen.gplume.webex.Result;
+import com.caibowen.gplume.misc.test.Result;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;

@@ -16,6 +16,7 @@
 package com.caibowen.gplume.misc;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -26,9 +27,122 @@ import java.util.*;
  *
  */
 public final class Klass {
-	
-	
-	/**
+    /**
+     *
+     * @param klass
+     * @param fieldName
+     * @return class of this field by setter parameter type or actual field type
+     * @throws NoSuchFieldException
+     */
+    public static Class<?>
+    findType(Class<?> klass, String fieldName) throws Exception {
+        Method setter = findSetter(klass, fieldName);
+        if (setter != null) {
+            Class[] ps = setter.getParameterTypes();
+            if (ps == null || ps.length != 1)
+                throw new IllegalArgumentException("Could not infer type of [" + fieldName + "]from setter[" + setter + "]");
+            return ps[0];
+        }
+        Field field = klass.getDeclaredField(fieldName);
+        return field.getType();
+    }
+
+    /**
+     * @param klass
+     * @return all parameters from one-parameter ctors
+     * @throws Exception
+     */
+    public static List<Class>
+    findCtorParam(Class<?> klass) throws Exception {
+        Constructor[] cts = klass.getDeclaredConstructors();
+        ArrayList als = new ArrayList();
+        for (Constructor ctor : cts) {
+            if (ctor.getParameterCount() == 1)
+                als.add(ctor.getParameterTypes()[0]);
+        }
+        return als;
+    }
+
+
+    /**
+     * find setter by fieldName from public methods of the class
+     * parameter type and number and return type is not checked
+     *
+     * @param clazz
+     * @param fielddName
+     * @return
+     * @throws NoSuchMethodException
+     */
+    @Nullable
+    public static Method findSetter(Class<?> clazz, String fieldName) throws NoSuchMethodException {
+
+        String setterName = String.format("set%C%s",
+                fieldName.charAt(0), fieldName.substring(1));
+        for (Method method : clazz.getMethods()) {
+
+            if(method.getName().equals(setterName)
+                    && method.getReturnType().getName().equals("void")) {
+                return method;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param clazz
+     * @param fieldName
+     * @return
+     * @throws NoSuchMethodException
+     */
+    @Nullable
+    public static Method findGetter(Class<?> clazz, String fieldName) throws NoSuchMethodException {
+
+        Field[] fields = clazz.getDeclaredFields();
+        Class<?> fieldClazz = null;
+
+        for (Field field : fields) {
+            if (field.getName().equals(fieldName)) {
+                fieldClazz = field.getType();
+                break;
+            }
+        }
+
+        if (fieldClazz != null) {
+            // boolean: try isXyz
+            if (fieldClazz.equals(Boolean.class)
+                    || fieldClazz.equals(boolean.class)) {
+
+                String getterName = String.format("is%C%s",
+                        fieldName.charAt(0), fieldName.substring(1));
+
+                for (Method method : clazz.getMethods()) {
+
+                    if (method.getName().equals(getterName)
+                            && method.getReturnType().equals(fieldClazz)) {
+                        return method;
+                    }
+                }
+                // no isXyz for bool, try getXyz
+            } else {
+
+                String getterName = String.format("get%C%s",
+                        fieldName.charAt(0), fieldName.substring(1));
+
+                for (Method method : clazz.getMethods()) {
+
+                    if (method.getName().equals(getterName)
+                            && method.getReturnType().equals(fieldClazz)) {
+                        return method;
+                    }
+                }
+            } // else
+        }
+
+        return null;
+    }
+
+
+    /**
 	 * compare java.lang.reflect.field by its id, if two field, 
 	 * although at different levels of inheritance, have the same id and type,
 	 * pick the one in the low inheritance level.
