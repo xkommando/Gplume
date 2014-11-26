@@ -247,7 +247,7 @@ class BeanBuilder{
                 return bn;
 
             if (tgtClass == null) throw new NullPointerException();
-            return assembler.getForBuild(_name, notNull, tgtClass);
+            return assembler.getForBuild(_name, true, tgtClass);
 
         } else if (Utils.notBlank(varInstance)) {
             // e.g. <property id="injector" instance="com.caibowen.gplume.context.bean.Injector"/>
@@ -394,7 +394,7 @@ class BeanBuilder{
                 InvocationHandler handler = (InvocationHandler)newInstance(poxHandle, findCtorElem(beanElem));
                 return Proxy.newProxyInstance(classLoader, new Class[]{klass}, handler);
             case 3:
-                return assembler.getForBuild(configCenter.replaceIfPresent(poxRef.trim()), false, klass);
+                return assembler.getForBuild(configCenter.replaceIfPresent(poxRef.trim()), true, klass);
             default:
                 throw new IllegalArgumentException("wrong config of InvocationHandler");
         }

@@ -83,7 +83,7 @@ public class SimpleControlCenter extends ControlCenter {
 	public void addController(Object controller, boolean doInject) throws Exception {
 		
 		if (doInject) {
-			injector.inject(controller);
+			injector.injectMediate(controller);
 		}
 		
 		Class<?> clazz = controller.getClass();

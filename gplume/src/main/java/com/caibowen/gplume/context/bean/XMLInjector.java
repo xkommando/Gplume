@@ -48,7 +48,7 @@ import java.util.Set;
  * throws IllegalAccessException 
  * else try
  * 1. @Named("id") 				-> get by ${id}
- * 2. @Named() no value set  	-> get by field id
+ * 2. @Named() no value set  	-> get by field name
  * 3. @Inject 					-> get by field class
  * 4. @Inject 					-> get by field id
  * 
@@ -57,7 +57,7 @@ import java.util.Set;
  * @author BowenCai
  *
  */
-class XMLInjector implements Serializable, Injector {
+class XMLInjector implements Injector, Serializable {
 
     private static final long serialVersionUID = -5041870626361257009L;
 	private static final Logger LOG = LoggerFactory.getLogger(XMLInjector.class);
@@ -84,78 +84,71 @@ class XMLInjector implements Serializable, Injector {
 	 */
 	@Override
 	public void inject(@Nonnull Object object) {
-		
+		doInject(object, false);
+	}
+
+	/**
+	 *
+	 * inject, if value currently not available(circular dependency), create proxy.
+	 *
+	 * @param object
+	 */
+	@Override
+	public void injectMediate(@Nonnull Object object) {
+		doInject(object, true);
+	}
+
+	protected void doInject(Object object, boolean withinProcess) {
 		Set<Field> fields = Klass.getEffectiveField(object.getClass());
-		
+
 		for (Field field : fields) {
 			// first try Named, if successed, we continue to next field
-			if (field.isAnnotationPresent(Named.class)) {
-				withNamed(object, field);
-			}
-			
-			// if Named failed, try inject, last attempt
-			else if (field.isAnnotationPresent(Inject.class)) {
-				withInject(object, field);
-			}
-			
+			if (field.isAnnotationPresent(Named.class))
+				withNamed(object, field, withinProcess);
+
+				// if Named failed, try inject, last attempt
+			else if (field.isAnnotationPresent(Inject.class))
+				withInject(object, field, withinProcess);
+
 			// pass off not annotated fields
 		} // foreach field
-		
 	}
 
-	public void withInject(Object object, Field field) {
-		
-		Object var = null;
+	public void withInject(Object object, Field field, boolean withinProcess) {
+
 		Set<Object> vars = assembler.getBeans(field.getType());
-		if (vars.size() == 1) {
-			try {
-				BeanEditor.setProperty(object, field.getName(),
-						vars.iterator().next());
-			} catch (Exception e) {
-				throw new RuntimeException(
-						MessageFormat.format("error inject field [{}] of type [{}]  in class [{}]"
-								, field.getName(), field.getType()
-								, field.getDeclaringClass()));
-			}
-			
-		} else if (null != (var = assembler.getBean(field.getName()))) {
-			if (field.getType().isAssignableFrom(var.getClass())){
-				LOG.warn("cannot find bean for field [{}] in class [{}]"
-						+ "\r\n But find bean in beanAssemble with the same ID as the field id[{}]"
-						+ "\r\n Setting field with this bean[{}]"
-						, field.getName()
-						, object.getClass().getName()
-						, field.getName()
-						, var.getClass().getName());
-				
-				try {
-					BeanEditor.setProperty(object, field.getName(), var);
-				} catch (Exception e) {
-					throw new RuntimeException(
-							MessageFormat.format("error inject field {} of type {}  in class {}"
-									, field.getName(), field.getType()
-									, field.getDeclaringClass()));
-				}
-			}
-		} else {
-			throw new NoSuchElementException("faild to set field[" 
-					+ field.getName() + "] in class[" + object.getClass().getName() +"]"
-					+ "\r\n cannot find bean with the assignable type or specified id for this field");
-		}	
+		Object var = null;
+		if (vars.size() == 1)
+			var = vars.iterator().next();
+		else if (null == var && withinProcess
+				&& null == (var = assembler.getForBuild(field.getName(), true, field.getDeclaringClass())))
+		throw new NoSuchElementException("Could not set field["
+				+ field.getName() + "] in class[" + object.getClass().getName() +"]"
+				+ "\r\n cannot find bean with the assignable type or specified id for this field");
+
+		try {
+			BeanEditor.setProperty(object, field.getName(), var);
+		} catch (Exception e) {
+			throw new RuntimeException(
+					MessageFormat.format("Could not inject field {} of type {}  in class {}"
+							, field.getName(), field.getType()
+							, field.getDeclaringClass()));
+		}
 	}
 
-	public void withNamed(@Nonnull Object object, @Nonnull Field field) {
+	public void withNamed(@Nonnull Object object, @Nonnull Field field, boolean withinProcess) {
 		Named anno = field.getAnnotation(Named.class);
 		String curID = anno.value();
 		if (Str.Utils.isBlank(curID)) {
 			curID = field.getName();
-		}					
-		Object var = assembler.getBean(curID);
-		if (var == null) {
-			throw new NullPointerException("cannot find bean with id [" 
+		}
+		Object var;
+		if (null == (var = assembler.getBean(curID))
+				&& withinProcess
+					&& null == (var = assembler.getForBuild(curID, true, field.getDeclaringClass())))
+			throw new NullPointerException("cannot find bean with id ["
 					+ curID + "] for property[" + field.getName() 
 					+ "] in class [" + object.getClass().getName() + "]");
-		}
 		
 		try {
 			BeanEditor.setProperty(object, field.getName(), var);

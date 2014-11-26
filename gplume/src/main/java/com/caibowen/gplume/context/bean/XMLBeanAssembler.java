@@ -135,7 +135,8 @@ public class XMLBeanAssembler extends XMLBeanAssemblerBase
 		});
 		return set;
 	}
-	
+
+
 	@Override
 	public boolean contains(@Nonnull Class<?> clazz) {
 		Set<Object> beans = getBeans(clazz);

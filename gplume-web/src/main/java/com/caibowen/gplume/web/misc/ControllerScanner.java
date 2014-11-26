@@ -71,7 +71,7 @@ public class ControllerScanner implements InitializingBean {
 	 * @throws Exception
 	 */
 	@Inject
-	public void setControlCenterCallBack(AbstractControlCenter controlCenter) throws Exception {
+	public void setControlCenter(AbstractControlCenter controlCenter) throws Exception {
 		this.controlCenter = controlCenter;
 	}
 

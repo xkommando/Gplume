@@ -111,7 +111,7 @@ public class WebConfig implements InitializingBean, Serializable {
             // add controllers
             ControllerScanner scanner = new ControllerScanner();
             scanner.setPackages(this.pkgs);
-            scanner.setControlCenterCallBack(center);
+            scanner.setControlCenter(center);
             scanner.afterPropertiesSet();
 
 			boolean boo = AppContext.beanAssembler.addBean("controlCenter", center);

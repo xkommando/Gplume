@@ -25,8 +25,6 @@ public interface Injector {
 	void inject(@Nonnull Object object);
 
 
-	void withInject(Object object, Field field);
-
-	void withNamed(@Nonnull Object object, @Nonnull Field field);
+	void injectMediate(@Nonnull Object object);
 
 }

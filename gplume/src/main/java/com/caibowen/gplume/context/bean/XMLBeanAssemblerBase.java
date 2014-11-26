@@ -31,6 +31,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import static com.caibowen.gplume.misc.Str.EMPTY;
@@ -65,18 +66,23 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler  {
 
     @Nonnull
     @Override
-    public Object getForBuild(String id, boolean notNull, Class<?> tgtClass) {
+    public Object getForBuild(@Nonnull String id, boolean createNew,
+                              @Nonnull Class<?> tgtClass) {
+
         String _id = tree.createFullPath(id, currentNamespace);
         ProxyBean pb = deferred.get(_id);
-        if (pb == null) {
-            pb = new ProxyBean();
+        if (pb == null && createNew) {
+            pb = new ProxyBean(tgtClass);
             deferred.put(_id, pb);
-        }
-        return Proxy.newProxyInstance(beanBuilder.classLoader, new Class[]{tgtClass}, pb);
+            return Proxy.newProxyInstance(beanBuilder.classLoader, new Class[]{tgtClass}, pb);
+        } else
+            throw new NoSuchElementException("cannot find proxy bean of id[" + id + "] for class[" + tgtClass + "]");
     }
 
     protected void prepareAssemble(Document doc) {
+        LOG.debug("Initializing assembling");
     }
+
     protected void finishAssemble(Document doc) {
         for (Map.Entry<String, ProxyBean> e : deferred.entrySet()) {
             String id = e.getKey();
@@ -88,6 +94,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler  {
                 throw new IllegalStateException("Proxy Bean already has value");
             pb.init(realBean);
         }
+        LOG.debug("Assembling finished");
     }
     /**
 	 * xml bean factory being singleton implies that this function is not

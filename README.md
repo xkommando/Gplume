@@ -25,7 +25,7 @@ Quick Start:
 ```XML
 <context-param>
 	<param-name>manifest</param-name>
-	<param-value>classpath:app-manifest.xml</param-value><!-- in your class path -->
+	<param-val>classpath:app-manifest.xml</param-val><!-- in your class path -->
 </context-param>
 <listener>
 	<listener-class>com.caibowen.gplume.web.WebAppBooter</listener-class>
@@ -43,39 +43,42 @@ Quick Start:
 #####Part Two: The IoC Container.
 Spring-like configuration:
 ```XML
-<config>some_other_config.xml</config>
-<config>so_many_configs.xml</config>
+<beans namespace="MyApp::internal::storage" using="internal::api">
+
+  <config>some_other_config.xml</config>
+  <config>so_many_configs.xml</config>
 
 <!--add global properties-->
-<properties import="kv_pairs.properties" scope="global">
-	<gplumeVersion>1.0.0.nightly</gplumeVersion>
-	<webErrorHandler>com.caibowen.web.misc.ErrorHandler</webErrorHandler>
-</properties>
+  <properties import="kv_pairs.properties" scope="global">
+    <gplumeVersion>1.0.0.nightly</gplumeVersion>
+    <webErrorHandler>com.caibowen.web.misc.ErrorHandler</webErrorHandler>
+  </properties>
 
 <!-- default scope: current file -->
-<properties import="kv_pairs_of_xml_format.xml" scope="file" />
+  <properties import="kv_pairs_of_xml_format.xml" scope="file"/>
 <!--all properties is accessible at run time-->
 
-<bean class="com.caibowen.gplume.web.WebConfig" aftercall="afterPropertySet">
+  <bean class="com.caibowen.gplume.web.WebConfig" aftercall="afterPropertySet">
     <construct> <!--constructor injection -->
         <list>
             <bean class="some.class"/>
-            <ref>someOtherBean</ref>
-            <value>literal</value>
+            <ref>MyApp::OtherNS::someOtherBean</ref>
+            <val>literal</val>
         </list>
     </construct>
-	<property name="preProcessor" ref="headPrePrcessor"/>
-	<property name="errorHandler" instance="${webErrorHandler}" />
-	<property name="pkgs">
-		<list>
-			<value>com.caibowen.web.controller</value>
-		</list>
-	</property>
-</bean>
+    <field name="preProcessor" ref="headPrePrcessor"/>
+    <field name="errorHandler" instance="${webErrorHandler}"/>
+    <field name="pkgs">
+        <list>
+            <val>com.caibowen.web.controller</val>
+        </list>
+    </field>
+  </bean>
 <!-- support dynamic proxy-->
-<bean class="com.sample.MyInterface" proxy="com.sample.MyInvokeHanlder">
-	<construct name="what is this" value="invokeHanlderConstructor"/>
-</bean>
+  <bean class="com.sample.MyInterface" proxy="com.sample.MyInvokeHanlder">
+    <construct name="what is this" value="invokeHanlderConstructor"/>
+  </bean>
+<beans>
 ```
 #####Part Three: Internationalization. 
 add language packages 
@@ -88,13 +91,13 @@ specify them in the manifest.xml
 <!-- hot swap service. in production mode, use WebI18nService-->
 <bean id="i18nService" class="com.caibowen.gplume.web.i18n.HotSwapWebI18n">
 	<construct>
-		<props>
+		<map>
 			<en value-type="String">${lang_cn}</en>
 			<zh_CN>/${i18base}/${i18_cn}</zh_CN>
-		</props>
+		</map>
 	</construct>
-	<property name="defaultLang" value="SimplifiedChinese"/>
-	<property name="${time_zone_name}" value="ETC/GMT-8"/>
+	<field name="defaultLang" value="SimplifiedChinese"/>
+	<field name="${time_zone_name}" value="ETC/GMT-8"/>
 </bean>
 ```
 use message tag in JSP
@@ -160,22 +163,22 @@ Spring and Hibernate can be integrated to Gplume with just a few lines configura
 ``` XML
 <!-- will set sessionFactory bean with id ${sessionFactoryID} in afterPropertiesSet() -->
 <bean class="com.caibowen.gplume.sample.test.SessionFactoryBuilder">
-	<property name="sessionFactoryID" value="sessionFactory"/>
-	<property name="dataSource" ref="dataSource" />
-	<property name="hibernateProperties">
-		<props>
+	<field name="sessionFactoryID" value="sessionFactory"/>
+	<field name="dataSource" ref="dataSource" />
+	<field name="hibernateProperties">
+		<map>
 			<hibernate.dialect>org.hibernate.dialect.MySQL5Dialect</hibernate.dialect>
-		</props>
-	</property>
-	<property name="annotatedClasses">
+		</map>
+	</field>
+	<field name="annotatedClasses">
 		<list> <!-- set field "Class[] annotatedClasses" -->
-			<value>com.caibowen.gplume.sample.model.Chapter</value>
+			<val>com.caibowen.gplume.sample.model.Chapter</val>
 		</list>
-	</property>
+	</field>
 </bean>
 <!-- use HibernateDaoSupport-->
 <bean id="chapterDao" class="com.caibowen.gplume.sample.dao.ChapterDAO">
-	<property name="sessionFactory" ref="sessionFactory" />
+	<field name="sessionFactory" ref="sessionFactory" />
 </bean>
 ```
  and the ChaperDAO 
@@ -237,29 +240,29 @@ Chaining processors in XML
 ```XML
 <bean id="headPrePrcessor" class="com.caibowen.gplume.web.i18n.NativePkgInjector">
 	<construct ref="i18nService"/>
-	<property name="next">
+	<field name="next">
 		<bean class="com.caibowen.web.plugin.ui.BackgroundImgPreprocessor">
-			<property name="next" instance="com.caibowen.web.plugin.statistic.LogRequestPreProcessor"/>
+			<field name="next" instance="com.caibowen.web.plugin.statistic.LogRequestPreProcessor"/>
 		</bean>
-	</property>
+	</field>
 </bean>
 <!--config view resolver-->
 <bean class="com.caibowen.gplume.web.WebConfig">
-	<property name="preProcessor" ref="headPrePrcessor"/>
-	<property name="pkgs">
+	<field name="preProcessor" ref="headPrePrcessor"/>
+	<field name="pkgs">
 		<list>
-			<value>com.caibowen.gplume.sample</value>
+			<val>com.caibowen.gplume.sample</val>
 		</list>
-	</property>
+	</field>
 	<!--by default using Jsp view resolver-->
-	<property name="viewPrefix" value="/"/>
-	<property name="viewSuffix" value=".jsp" />
+	<field name="viewPrefix" value="/"/>
+	<field name="viewSuffix" value=".jsp" />
 	<!-- IView Resolver -->
-	<property name="ViewResolver"/>
+	<field name="ViewResolver"/>
 		<bean class="com.caibowen.gplume.webex.json.JsonViewResolver">
-			<property name="doPrettyPrint" value="true"/>
+			<field name="doPrettyPrint" value="true"/>
 		</bean>
-	</property>
+	</field>
 </bean>
 
 ```
