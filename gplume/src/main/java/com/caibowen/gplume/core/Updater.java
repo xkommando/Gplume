@@ -38,7 +38,7 @@ public class Updater {
 			prepareConnection(connection);
 			connection.connect();
 
-			if (connection.getResponseCode() == 200) {
+			if (connection.getResponseCode() != 200) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(
 						connection.getInputStream()));
 				
@@ -54,7 +54,6 @@ public class Updater {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Gplume.VERSION_STR;
 		}
 		return Gplume.VERSION_STR;
 	}
@@ -64,7 +63,7 @@ public class Updater {
 	private static void prepareConnection(HttpURLConnection connection) {
 		
 		connection.addRequestProperty(HEADER_VERSION, Gplume.VERSION_STR);
-		connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847");
+		connection.setRequestProperty("User-Agent", sysInfo());
 		connection.setRequestProperty(HEADER_CODE, getCode());
 		connection.setRequestProperty("Connection", "close");
 		connection.setAllowUserInteraction(false);
@@ -78,7 +77,9 @@ public class Updater {
 	private static String getCode() {
 		return null;	
 	}
-
+	private static String sysInfo() {
+		return null;
+	}
 	static {
 //		System.setProperty("http.proxyHost", "127.0.0.1");
 //		System.setProperty("http.proxyPort", "12345");

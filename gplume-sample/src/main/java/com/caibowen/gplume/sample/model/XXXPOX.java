@@ -16,6 +16,11 @@ public class XXXPOX implements InvocationHandler {
         this.i = i;
     }
 
+    public XXXPOX(String s, int t) {
+        this.name = s;
+        this.i = t;
+    }
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getName().endsWith("bark")) {

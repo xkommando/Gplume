@@ -24,7 +24,6 @@ import com.caibowen.gplume.core.TypeTraits;
 import com.caibowen.gplume.misc.Assert;
 import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Klass;
-import com.caibowen.gplume.misc.Str.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -35,6 +34,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
 import java.util.*;
+
+import static com.caibowen.gplume.misc.Str.Utils.*;
 
 /**
  *  auxiliary for xml parsing
@@ -133,7 +134,7 @@ class BeanBuilder{
 
             String propName = prop.getAttribute(XMLTags.FIELD_NAME);
             propName = configCenter.replaceIfPresent(propName.trim());
-            if (!Utils.notBlank(propName))
+            if (!notBlank(propName))
                 throw new NullPointerException(
                         "Property name is empty. NodeName: ["
                                 + prop.getNodeName() + "]");
@@ -224,7 +225,7 @@ class BeanBuilder{
         String varStr = prop.getAttribute(XMLTags.FIELD_VALUE);
         String varRef = prop.getAttribute(XMLTags.FILED_REF);
 
-        if (Utils.notBlank(varStr)) {
+        if (notBlank(varStr)) {
             // e.g., <property id="number" value="5"/>
             // str value will casted to param type if needed
             String type;
@@ -239,7 +240,7 @@ class BeanBuilder{
             } else
                 return varStr;
 
-        } else if (Utils.notBlank(varRef)) {
+        } else if (notBlank(varRef)) {
             // e.g., <property id="bean" ref="someOtherBean"/>
             String _name = configCenter.replaceIfPresent(varRef.trim());
             Object bn = assembler.getBean(_name);
@@ -249,7 +250,7 @@ class BeanBuilder{
             if (tgtClass == null) throw new NullPointerException();
             return assembler.getForBuild(_name, true, tgtClass);
 
-        } else if (Utils.notBlank(varInstance)) {
+        } else if (notBlank(varInstance)) {
             // e.g. <property id="injector" instance="com.caibowen.gplume.context.bean.Injector"/>
             Class<?> klass = this.classLoader.loadClass(configCenter.replaceIfPresent(varInstance));
             Object obj = klass.newInstance();
@@ -282,7 +283,7 @@ class BeanBuilder{
             Object mapV = configCenter.replaceIfPresent(_v);
 
             String tgtType;
-            if (Utils.notBlank(tgtType = elemBn.getAttribute(XMLTags.TYPE))) {
+            if (notBlank(tgtType = elemBn.getAttribute(XMLTags.TYPE))) {
                 Class k = Converter.getClass(configCenter.replaceIfPresent(tgtType.trim()));
                 mapV = Converter.slient.translateStr((String)mapV, k);
             }
@@ -316,8 +317,9 @@ class BeanBuilder{
 
             } else if (XMLTags.FILED_REF.equals(elemBn.getNodeName())) {
                 String _s = elemBn.getTextContent();
-                if (Utils.isBlank(_s))
+                if (isBlank(_s))
                     throw new IllegalArgumentException("Empty reference");
+
                 beanList.add(assembler.getBean(
                                 configCenter.replaceIfPresent(
                                         _s.trim())
@@ -325,10 +327,16 @@ class BeanBuilder{
                 );
 
             } else if (XMLTags.FIELD_VALUE.equals(elemBn.getNodeName())) {
-                beanList.add(configCenter.replaceIfPresent(
-                                elemBn.getTextContent()
-                        )
-                );
+                String lit = configCenter.replaceIfPresent(
+                        elemBn.getTextContent().trim());
+
+                String tgtType;
+                if (notBlank(tgtType = elemBn.getAttribute(XMLTags.TYPE))) {
+                    Class k = Converter.getClass(configCenter.replaceIfPresent(tgtType.trim()));
+                    beanList.add(
+                            Converter.slient.translateStr(lit, k));
+                } else beanList.add(lit);
+
             } else throw new IllegalArgumentException("Unknown property["
                         + iter.getNodeName() + "]");
 
@@ -354,7 +362,7 @@ class BeanBuilder{
                             + "] initialized");
         }
 
-        if (Utils.isBlank(initName))
+        if (isBlank(initName))
             return;
 
         Method m = bean.getClass().getMethod(initName.trim());
@@ -381,8 +389,8 @@ class BeanBuilder{
         int _c = 0;
         String poxVal = beanElem.getAttribute(XMLTags.BEAN_PROXY);
         String poxRef = beanElem.getAttribute(XMLTags.FILED_REF);
-        _c += Utils.isBlank(poxVal) ? 0 : 1;
-        _c += Utils.isBlank(poxRef) ? 0 : 3;
+        _c += isBlank(poxVal) ? 0 : 1;
+        _c += isBlank(poxRef) ? 0 : 3;
         switch (_c) {
             case 0 : return newInstance(klass, findCtorElem(beanElem));
             case 1 :
@@ -411,9 +419,10 @@ class BeanBuilder{
                 }
                 return ctor.newInstance();
             } catch (Exception e) {
-                throw new BeanAssemblingException("cannot find default constructor");
+                throw new BeanAssemblingException("Could find default constructor");
             }
         }
+        // 2 try in tag
         Object _tagVal = null;
         try {
             _tagVal = inTag(prop, false, null);
@@ -429,27 +438,20 @@ class BeanBuilder{
         if (null != _tagVal)
             return BeanEditor.construct(klass, _tagVal);
 
+        // 3 try parse xml
         if (prop.getNodeName().equals(XMLTags.FIELD_MAP)) {
             prop = (Element) prop.getFirstChild().getNextSibling();
             Map m = buildMap(prop, "Constructor:" + klass.getName());
             return BeanEditor.construct(klass, m);
-        }
-        if (prop.getNodeName().equals(XMLTags.FIELD_LIST)) {
+
+        } else if (prop.getNodeName().equals(XMLTags.FIELD_LIST)) {
             prop = (Element) prop.getFirstChild().getNextSibling();
             List ls = buildList(prop);
             return BeanEditor.construct(klass, ls);
         }
 
         List ls = buildList(prop);
-        if (ls.size() == 1)
-            return BeanEditor.construct(klass, ls.get(0));
-        else throw new IllegalArgumentException(
-                    "Bean number miss match , construct ["
-                            + "] in class ["
-                            + klass.getName() + "]"
-                            + "needs 1 actual " + ls.size());
-
-
+        return BeanEditor.construct(klass, ls.toArray());
     }
 
     public void setConfigCenter(ConfigCenter configCenter) {

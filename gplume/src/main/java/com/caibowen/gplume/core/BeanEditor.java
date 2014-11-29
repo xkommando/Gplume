@@ -15,15 +15,13 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
+import com.caibowen.gplume.misc.Assert;
 import com.caibowen.gplume.misc.Klass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * set static or non-static property based on id,
@@ -48,6 +46,26 @@ public class BeanEditor {
 	 */
 	public static final boolean	REFLECT_ON_PRIVATE = true;
 
+	public static Object construct(Class klass, Object[] params) throws Exception {
+		Constructor candi = null;
+		int match = Integer.MAX_VALUE;
+		for (Constructor ctor : klass.getDeclaredConstructors()) {
+			Class<?>[] ps = ctor.getParameterTypes();
+			if (params.length != ps.length)
+				continue;
+			int _s = typeDiff(ps, params);
+			if (_s < match) {
+				match = _s;
+				candi = ctor;
+			}
+		}
+		Assert.isTrue(match < Integer.MAX_VALUE,
+				"Could not resolve matching constructor for [" + klass + "] with values[" + Arrays.toString(params));
+
+		if (!candi.isAccessible() && REFLECT_ON_PRIVATE)
+			candi.setAccessible(true);
+		return candi.newInstance(params);
+	}
     /***
      *
      * find the best suit constructor according to the parameter type and construct an instance
@@ -69,19 +87,45 @@ public class BeanEditor {
                 }
             }
         }
-        if (q.size() > 0) {
-            Constructor c = q.firstEntry().getValue();
-            if (!c.isAccessible() && REFLECT_ON_PRIVATE)
-                c.setAccessible(true);
-            return c.newInstance(param);
+		Assert.isTrue(!q.isEmpty(),
+				"Could not resolve matching constructor for ["
+						+ klass + "] with values[" + param + "]");
 
-        } else {
-            throw new NoSuchMethodException(
-                    "Could not find accessible constructor for class [" + klass.getName()
-                    + "] that can be invoked with [" + param + "]");
-        }
-    }
+		Constructor c = q.firstEntry().getValue();
+		if (!c.isAccessible() && REFLECT_ON_PRIVATE)
+			c.setAccessible(true);
+		return c.newInstance(param);
+	}
 
+	public static int typeDiff(Class<?>[] paramTypes, Object[] args) {
+		int result = 0;
+		for (int i = 0; i < paramTypes.length; i++) {
+			if (!Klass.isAssignableValue(paramTypes[i], args[i])) {
+				return Integer.MAX_VALUE;
+			}
+			if (args[i] != null) {
+				Class<?> paramType = paramTypes[i];
+				Class<?> superClass = args[i].getClass().getSuperclass();
+				while (superClass != null) {
+					if (paramType.equals(superClass)) {
+						result = result + 2;
+						superClass = null;
+					}
+					else if (Klass.isAssignable(paramType, superClass)) {
+						result = result + 2;
+						superClass = superClass.getSuperclass();
+					}
+					else {
+						superClass = null;
+					}
+				}
+				if (paramType.isInterface()) {
+					result = result + 1;
+				}
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * set property, 

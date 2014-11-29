@@ -206,14 +206,13 @@ public class ConfigCenter implements Serializable {
      */
     @Nonnull
     protected String replaceIfPresent(@Nonnull String name) {
-        int rq = 0;
-        int lq = name.indexOf("${", rq);
+        int lq = name.indexOf("${", 0);
         if (lq == -1)
             return name;
 
-        name = name.trim();
+        int rq;
         int lastL = 0;
-        StringBuilder b = new StringBuilder(name.length() * 3);
+        StringBuilder b = new StringBuilder(name.length() * 2);
         while (lq != -1) {
             rq = name.indexOf('}', lq);
             if (rq == -1)

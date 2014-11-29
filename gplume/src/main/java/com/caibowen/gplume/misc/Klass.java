@@ -181,6 +181,10 @@ public final class Klass {
 	}
 	
     public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
+
+    public static boolean isAssignableValue(Class<?> paramType, Object arg) {
+        return (arg != null ? isAssignable(paramType, arg.getClass()) : !paramType.isPrimitive());
+    }
     /**
      * Inclusivity literals for {@link #hierarchy(Class, Interfaces)}.
      * @since 3.2

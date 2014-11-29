@@ -22,7 +22,8 @@ package com.caibowen.gplume.core;
  *
  */
 public final class Gplume {
-	
+	private Gplume() {}
+
 	public static final String NAME = Gplume.class.getSimpleName();
 	
 	// last build

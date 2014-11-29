@@ -10,7 +10,7 @@ import java.util.Iterator;
  */
 public class Int8CircularList implements Serializable {
 
-    private long[] value;
+    private long[] data;
     private int head = 0;
     private int tail = 0;
 
@@ -21,7 +21,7 @@ public class Int8CircularList implements Serializable {
     }
 
     public Int8CircularList(int size) {
-        value = new long[size];
+        data = new long[size];
     }
 
     public boolean isEmpty() {
@@ -29,7 +29,7 @@ public class Int8CircularList implements Serializable {
     }
 
     public void ensureCapacity(int minCapacity) {
-        int oldCapacity = value.length;
+        int oldCapacity = data.length;
         if (minCapacity < oldCapacity)
             return;
 
@@ -40,7 +40,7 @@ public class Int8CircularList implements Serializable {
         toArray(newData);
         tail = size;
         head = 0;
-        value = newData;
+        data = newData;
     }
 
     public int size() {
@@ -54,7 +54,7 @@ public class Int8CircularList implements Serializable {
     public int indexOf(long elem) {
 
         for (int i = 0; i < size; i++)
-            if (elem == value[(i + head) % value.length])
+            if (elem == data[(i + head) % data.length])
                 return i;
 
         return -1;
@@ -63,7 +63,7 @@ public class Int8CircularList implements Serializable {
     public int lastIndexOf(long elem) {
 
         for (int i = size - 1; i >= 0; i--)
-            if (elem == value[(i + head) % value.length])
+            if (elem == data[(i + head) % data.length])
                 return i;
         return -1;
     }
@@ -77,11 +77,11 @@ public class Int8CircularList implements Serializable {
             a = (long[]) java.lang.reflect.Array.newInstance(
                     a.getClass().getComponentType(), size);
         if (head < tail) {
-            System.arraycopy(value, head, a, 0, tail - head);
+            System.arraycopy(data, head, a, 0, tail - head);
         } else {
-            System.arraycopy(value, head, a, 0,
-                    value.length - head);
-            System.arraycopy(value, 0, a, value.length - head,
+            System.arraycopy(data, head, a, 0,
+                    data.length - head);
+            System.arraycopy(data, 0, a, data.length - head,
                     tail);
         }
         return a;
@@ -95,44 +95,44 @@ public class Int8CircularList implements Serializable {
 
     public long get(int index) {
         rangeCheck(index);
-        return value[(index + head) % value.length];
+        return data[(index + head) % data.length];
     }
 
     public long front() {
-        return value[head];
+        return data[head];
     }
 
     public long back() {
-        return value[tail];
+        return data[tail];
     }
 
     public long popBack() {
-        long v = value[tail];
-        value[tail] = 0;
-        tail = (tail - 1 + value.length) % value.length;
+        long v = data[tail];
+        data[tail] = 0;
+        tail = (tail - 1 + data.length) % data.length;
         size--;
         return v;
     }
 
     public long popFront() {
-        long v = value[head];
-        value[head] = 0;
-        head = (head + 1) % value.length;
+        long v = data[head];
+        data[head] = 0;
+        head = (head + 1) % data.length;
         size--;
         return v;
     }
 
     public long set(int index, long element) {
         rangeCheck(index);
-        long oldValue = value[(index + head) % value.length];
-        value[(index + head) % value.length] = element;
+        long oldValue = data[(index + head) % data.length];
+        data[(index + head) % data.length] = element;
         return oldValue;
     }
 
     public boolean add(long o) {
         ensureCapacity(size + 2);
-        value[tail] = o;
-        tail = (tail + 1) % value.length;
+        data[tail] = o;
+        tail = (tail + 1) % data.length;
         size++;
         return true;
     }
@@ -140,22 +140,22 @@ public class Int8CircularList implements Serializable {
     public void add(int index, long element) {
         rangeCheck(index);
         ensureCapacity(size + 2);
-        int pos = (index + head) % value.length;
+        int pos = (index + head) % data.length;
         if (pos == tail) {
-            value[pos] = element;
-            tail = (tail + 1) % value.length;
+            data[pos] = element;
+            tail = (tail + 1) % data.length;
         } else if (pos == head) {
             head--;
-            value[head] = element;
+            data[head] = element;
         } else {
             if (head < pos && tail < pos) {
-                System.arraycopy(value, pos, value, pos - 1, pos - head + 1);
-                value[pos] = element;
-                head = (head - 1) % value.length;
+                System.arraycopy(data, pos, data, pos - 1, pos - head + 1);
+                data[pos] = element;
+                head = (head - 1) % data.length;
             } else {
-                System.arraycopy(value, pos, value, pos + 1, tail - pos);
-                value[pos] = element;
-                tail = (tail + 1 + value.length) % value.length;
+                System.arraycopy(data, pos, data, pos + 1, tail - pos);
+                data[pos] = element;
+                tail = (tail + 1 + data.length) % data.length;
             }
         }
 
@@ -164,33 +164,33 @@ public class Int8CircularList implements Serializable {
 
     public long remove(int index) {
         rangeCheck(index);
-        int pos = (index + head) % value.length;
+        int pos = (index + head) % data.length;
 
-        long ret = value[pos];
+        long ret = data[pos];
         size--;
-        value[pos] = 0L;
+        data[pos] = 0L;
 
         if (pos == head) {
-            head = (head + 1) % value.length;
+            head = (head + 1) % data.length;
         } else if (pos == tail) {
-            tail = (tail - 1 + value.length) % value.length;
+            tail = (tail - 1 + data.length) % data.length;
         } else {
             if (pos > head && pos > tail) { // tail/head/pos
-                System.arraycopy(value, head, value, head + 1,
+                System.arraycopy(data, head, data, head + 1,
                         pos - head);
-                head = (head + 1) % value.length;
+                head = (head + 1) % data.length;
             } else {
-                System.arraycopy(value, pos + 1, value, pos,
+                System.arraycopy(data, pos + 1, data, pos,
                         tail - pos - 1);
-                tail = (tail - 1 + value.length) % value.length;
+                tail = (tail - 1 + data.length) % data.length;
             }
         }
         return ret;
     }
 
     public void clear() {
-        for (int i = head; i != tail; i = (i + 1) % value.length)
-            value[i] = 0L;
+        for (int i = head; i != tail; i = (i + 1) % data.length)
+            data[i] = 0L;
         head = tail = size = 0;
     }
 
@@ -199,8 +199,8 @@ public class Int8CircularList implements Serializable {
         ensureCapacity(size + numNew + 2);
         Iterator<Long> e = c.iterator();
         for (int i = 0; i < numNew; i++) {
-            value[tail] = e.next();
-            tail = (tail + 1) % value.length;
+            data[tail] = e.next();
+            tail = (tail + 1) % data.length;
             size++;
         }
         return numNew != 0;
@@ -211,13 +211,13 @@ public class Int8CircularList implements Serializable {
             return "[]";
 
         StringBuilder sb = new StringBuilder(1024);
-        sb.append("capacity:").append(value.length).append(", ")
+        sb.append("capacity:").append(data.length).append(", ")
                 .append("size:").append(size).append(", ")
                 .append("head:").append(head).append(", ")
                 .append("tail").append(tail).append(", [");
 
-        for (int i = head; i != tail; i = (i + 1) % value.length) {
-            long _t = value[i];
+        for (int i = head; i != tail; i = (i + 1) % data.length) {
+            long _t = data[i];
             if (_t != 0)
                 sb.append(_t).append(',').append(' ');
         }
