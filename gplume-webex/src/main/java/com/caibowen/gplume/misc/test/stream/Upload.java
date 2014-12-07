@@ -17,8 +17,8 @@
 
 package com.caibowen.gplume.misc.test.stream;
 
-import com.caibowen.gplume.context.InputStreamProvider;
-import com.caibowen.gplume.context.InputStreamSupport;
+import com.caibowen.gplume.resource.InputStreamProvider;
+import com.caibowen.gplume.resource.InputStreamSupport;
 import com.caibowen.gplume.web.RequestContext;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;

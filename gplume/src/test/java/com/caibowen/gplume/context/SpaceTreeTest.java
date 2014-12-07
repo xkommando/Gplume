@@ -1,9 +1,9 @@
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
+import com.caibowen.gplume.context.Pod;
+import com.caibowen.gplume.context.SpaceTree;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 import static org.junit.Assert.*;
 

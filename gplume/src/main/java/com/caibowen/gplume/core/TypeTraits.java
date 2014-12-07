@@ -30,8 +30,7 @@ import java.util.Set;
  *
  */
 public final class TypeTraits {
-
-
+	private TypeTraits() {}
 	/**
 	 * @param klass
 	 * @param fieldName
@@ -149,7 +148,6 @@ public final class TypeTraits {
     			"cannot find [" + fieldName + "] in class [" + clazz.getName() + "]");
 	}
 
-	private TypeTraits(){}
 }
 
 

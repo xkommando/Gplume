@@ -36,12 +36,14 @@
         <module>gplume-web</module>
         <module>gplume-webex</module>
         <module>gplume-sample</module>
+        <module>gplume-scala</module>
     </modules>
 
     <properties>
         <gp-version>2.3</gp-version>
         <gp-web-version>2.0</gp-web-version>
         <gp-webex-version>1.0</gp-webex-version>
+        <gp-scala-version>1.0</gp-scala-version>
         <junit-version>4.9</junit-version>
     </properties>
 

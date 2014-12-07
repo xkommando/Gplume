@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.caibowen.gplume.event;
 
+import com.caibowen.gplume.annotation.Functional;
+
 import java.util.EventListener;
 
 /**
@@ -25,6 +27,7 @@ import java.util.EventListener;
  *
  * @param <T> the event type that this listener supports
  */
+@Functional
 public interface IAppListener<T extends AppEvent> extends EventListener {
 	
 	public void onEvent(T event);

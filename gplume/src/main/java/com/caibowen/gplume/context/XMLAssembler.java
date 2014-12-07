@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
-import com.caibowen.gplume.context.InputStreamCallback;
+import com.caibowen.gplume.context.bean.BeanVisitor;
 import com.caibowen.gplume.core.Injector;
+import com.caibowen.gplume.resource.InputStreamCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -41,14 +42,14 @@ import java.util.Set;
  * @since 2013-12-24
  * 
  */
-public class XMLBeanAssembler extends XMLBeanAssemblerBase
+public class XMLAssembler extends XMLAssemblerBase
 								implements Serializable {
 	
 	private static final long serialVersionUID = 1895612360389006713L;
 
-	private static final Logger LOG = LoggerFactory.getLogger(XMLBeanAssembler.class);
+	private static final Logger LOG = LoggerFactory.getLogger(XMLAssembler.class);
 
-	public XMLBeanAssembler() {}
+	public XMLAssembler() {}
 
 	public void assemble(@Nonnull final InputSource in) throws Exception {
 		

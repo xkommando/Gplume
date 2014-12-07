@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 
+import com.caibowen.gplume.context.bean.BeanVisitor;
 import com.caibowen.gplume.core.Injector;
 
 import javax.annotation.Nonnull;

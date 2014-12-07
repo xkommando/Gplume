@@ -14,7 +14,7 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.context;
+package com.caibowen.gplume.resource;
 
 import com.caibowen.gplume.misc.Str;
 import org.slf4j.Logger;

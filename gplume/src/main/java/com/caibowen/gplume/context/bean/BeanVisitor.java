@@ -16,11 +16,14 @@
 package com.caibowen.gplume.context.bean;
 
 
+import com.caibowen.gplume.annotation.Functional;
+
 /**
  * 
  * @author BowenCai
  *
  */
+@Functional
 public interface BeanVisitor<T> {
 	
 	public void visit(T bean);

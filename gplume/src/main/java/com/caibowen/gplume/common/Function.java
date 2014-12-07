@@ -15,9 +15,12 @@
  ******************************************************************************/
 package com.caibowen.gplume.common;
 
+import com.caibowen.gplume.annotation.Functional;
+
 /**
  * @param <V>
  */
+@Functional
 public interface Function<I, O> {
 	public O apply(I in);
 }

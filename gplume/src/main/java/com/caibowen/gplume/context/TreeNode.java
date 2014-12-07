@@ -1,4 +1,6 @@
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
+
+import com.caibowen.gplume.context.bean.BeanVisitor;
 
 import java.util.concurrent.ConcurrentHashMap;
 

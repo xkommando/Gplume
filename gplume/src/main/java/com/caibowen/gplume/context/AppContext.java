@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.caibowen.gplume.context;
 
-import com.caibowen.gplume.context.bean.IBeanAssembler;
-import com.caibowen.gplume.context.bean.XMLBeanAssembler;
 import com.caibowen.gplume.event.Broadcaster;
 
 import java.nio.charset.Charset;
@@ -67,7 +65,7 @@ public abstract class AppContext {
 	public static final String LOCALE 	= "locale";
 	public static final String TIME_ZONE = "timezone";
 	
-	public static final IBeanAssembler		beanAssembler = new XMLBeanAssembler();
+	public static final IBeanAssembler		beanAssembler = new XMLAssembler();
 	public static final Broadcaster			broadcaster = new Broadcaster();
 	
 	public static Date now() {

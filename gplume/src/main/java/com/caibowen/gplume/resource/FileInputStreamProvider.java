@@ -13,8 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+package com.caibowen.gplume.resource;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+
 /**
+ * 
  * @author BowenCai
  *
  */
-package com.caibowen.gplume.context;
+public class FileInputStreamProvider implements InputStreamProvider{
+
+	@Override
+	public InputStream getStream(String path) {
+		try {
+			return  new FileInputStream(path);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public String getRealPath(String p) {
+		return new File(p).getAbsolutePath();
+	}
+
+}

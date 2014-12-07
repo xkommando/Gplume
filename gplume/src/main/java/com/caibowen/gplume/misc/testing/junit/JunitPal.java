@@ -17,7 +17,7 @@
 package com.caibowen.gplume.misc.testing.junit;
 
 import com.caibowen.gplume.context.AppContext;
-import com.caibowen.gplume.context.ClassLoaderInputStreamProvider;
+import com.caibowen.gplume.resource.ClassLoaderInputStreamProvider;
 import com.caibowen.gplume.context.ContextBooter;
 import com.caibowen.gplume.core.Injector;
 import com.caibowen.gplume.misc.Str;

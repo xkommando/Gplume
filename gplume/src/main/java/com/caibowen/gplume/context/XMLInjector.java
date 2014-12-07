@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Injector;
@@ -62,9 +62,9 @@ class XMLInjector implements Injector, Serializable {
     private static final long serialVersionUID = -5041870626361257009L;
 	private static final Logger LOG = LoggerFactory.getLogger(XMLInjector.class);
 
-	final XMLBeanAssembler assembler;
+	final XMLAssembler assembler;
 
-	public XMLInjector(XMLBeanAssembler assembler) {
+	public XMLInjector(XMLAssembler assembler) {
 		this.assembler = assembler;
 	}
 

@@ -1,4 +1,4 @@
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 import java.text.MessageFormat;
 

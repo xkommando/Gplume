@@ -9,7 +9,6 @@ import javax.sql.DataSource;
  */
 public interface TransactionManager {
 
-
     void setDataSource(DataSource dataSource);
 
     Transaction begin();

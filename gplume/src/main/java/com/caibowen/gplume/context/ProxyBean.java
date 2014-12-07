@@ -1,4 +1,4 @@
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationHandler;

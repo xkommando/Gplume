@@ -262,43 +262,4 @@ public final class Bytes {
                 throw new ArrayIndexOutOfBoundsException();
         }
     }
-
-    public static byte[] buildHead(boolean uniKey, boolean renewable, int keyLife, int authLife) {
-        byte[] head = new byte[18];
-        head[0] = uniKey ? (byte)0x01 : (byte)0x00;
-        head[1] = renewable ? (byte)0x01 : (byte)0x00;
-        Bytes.ints.fill(head, 2, keyLife);
-        Bytes.ints.fill(head, 6, authLife);
-        return head;
-    }
-
-    public static void main(String...asfsdf) {
-        boolean unikey = true;
-        boolean renewable = true;
-        int keyExp = 454545;
-        int authExp = 454564;
-        byte[] h = buildHead(unikey, renewable, keyExp, authExp);
-
-        boolean uniKey2 = h[0] == (byte)0x00 ? false : true;
-        boolean renewable2 = h[1] == (byte)0x00 ? false : true;
-        int keyExp2 = ints.add(h, 2);
-        int authExp2 = ints.add(h, 6);
-
-//        byte b1 = 0;
-//        byte b2 = 0;
-//        byte b3 = 0;
-//        byte b4 = 0;
-//        byte b11 = -1;
-//        byte b22 = 0;
-//        byte b33 = 0;
-//        byte b44 = 0;
-//        long c = add(b1, b2, b3, b4, b11, b22, b33, b44);
-//
-//        for (int i = 0; i < 8; i++) {
-//            byte val = byteAt(c, i);
-//            System.out.println(val);
-//        }
-
-
-    }
 }

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.actions.stateful.setters;
 
-import com.caibowen.gplume.context.bean.IBeanAssembler;
+import com.caibowen.gplume.context.IBeanAssembler;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.actions.stateful.IStateSetter;
 

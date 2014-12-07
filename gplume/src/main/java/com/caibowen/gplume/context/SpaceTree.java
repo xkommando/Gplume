@@ -1,6 +1,7 @@
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 import com.caibowen.gplume.annotation.Internal;
+import com.caibowen.gplume.context.bean.BeanVisitor;
 import com.caibowen.gplume.misc.Str;
 
 import javax.annotation.Nonnull;

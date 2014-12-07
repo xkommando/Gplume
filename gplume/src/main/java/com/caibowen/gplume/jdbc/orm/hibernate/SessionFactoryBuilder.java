@@ -34,7 +34,7 @@ package com.caibowen.gplume.jdbc.orm.hibernate;
 //import org.hibernate.SessionFactory;
 //
 //import com.caibowen.gplume.context.bean.BeanIDAware;
-//import com.caibowen.gplume.context.bean.IBeanAssembler;
+//import com.caibowen.gplume.context.IBeanAssembler;
 //import com.caibowen.gplume.context.bean.IBeanAssemblerAware;
 //import com.caibowen.gplume.context.bean.InitializingBean;
 //

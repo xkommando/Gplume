@@ -20,6 +20,7 @@ import com.caibowen.gplume.misc.Klass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -32,6 +33,8 @@ import java.util.*;
  *
  */
 public class BeanEditor {
+
+	private BeanEditor(){}
 
 	/**
 	 * This is a compile flag.

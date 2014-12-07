@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
-import com.caibowen.gplume.context.InputStreamCallback;
+import com.caibowen.gplume.context.bean.BeanBuilder;
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.resource.InputStreamCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -44,9 +45,9 @@ import static com.caibowen.gplume.misc.Str.EMPTY;
  * @author BowenCai
  *
  */
-public abstract class XMLBeanAssemblerBase implements IBeanAssembler  {
+public abstract class XMLAssemblerBase implements IBeanAssembler {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(XMLBeanAssemblerBase.class);
+	private static final Logger LOG = LoggerFactory.getLogger(XMLAssemblerBase.class);
 
     protected final SpaceTree<Pod> tree;
 
@@ -56,7 +57,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler  {
     protected BeanBuilder beanBuilder;
     protected Map<String, ProxyBean> deferred;
 
-    public XMLBeanAssemblerBase() {
+    public XMLAssemblerBase() {
         tree = new SpaceTree<>();
         currentNamespace = EMPTY;
         refNamespace = EMPTY;
@@ -140,7 +141,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler  {
                     handleConfig(elem);
                     break;
 
-                case XMLTags.PROPERTIES:
+                case XMLTags.DEFINE:
                     handleProperties(elem);
                     break;
 
@@ -267,6 +268,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler  {
     }
 
     void handleRequire(Element elem) {
+
         throw new UnsupportedOperationException();
     }
 
@@ -304,7 +306,7 @@ public abstract class XMLBeanAssemblerBase implements IBeanAssembler  {
 
     @Override
     public void setConfigCenter(ConfigCenter configCenter) {
-        beanBuilder.setConfigCenter(configCenter);
+        beanBuilder.configCenter = configCenter;
     }
 
     @Override

@@ -13,32 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.context;
+package com.caibowen.gplume.resource;
 
+import java.io.IOException;
 import java.io.InputStream;
-
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
+ * 
  * 
  * @author BowenCai
  *
  */
-public class ClassLoaderInputStreamProvider implements InputStreamProvider{
-	
-	ClassLoader classLoader;
-	
-	public ClassLoaderInputStreamProvider(ClassLoader classLoader) {
-		this.classLoader = classLoader;
-	}
+public class URLInputStreamProvider implements InputStreamProvider{
 
 	@Override
 	public InputStream getStream(String path) {
-		return classLoader.getResourceAsStream(path);
+		try {
+			return new URI(path).toURL().openStream();
+		} catch (IOException | URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	@Override
-	public String getRealPath(String p) {
-		return p;
-	}
+    @Override
+    public String getRealPath(String p) {
+        try {
+            return new URI(p).getPath();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

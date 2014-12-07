@@ -1,5 +1,7 @@
 package com.caibowen.gplume.jdbc.mapper;
 
+import com.caibowen.gplume.annotation.Functional;
+
 import javax.annotation.Nonnull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,6 +13,7 @@ import java.sql.Timestamp;
  *
  * @since 2013-5-6
  */
+@Functional
 public interface RowMapping<T> {
 
 	T extract(@Nonnull ResultSet rs) throws SQLException;

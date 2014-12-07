@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.web.misc;
 
-import com.caibowen.gplume.context.InputStreamProvider;
+import com.caibowen.gplume.resource.InputStreamProvider;
 
 import java.io.InputStream;
 import java.io.Serializable;

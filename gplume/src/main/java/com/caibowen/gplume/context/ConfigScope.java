@@ -15,7 +15,7 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 /**
  * @Auther bowen.cbw

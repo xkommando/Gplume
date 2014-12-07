@@ -15,13 +15,13 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
-import com.caibowen.gplume.context.InputStreamCallback;
-import com.caibowen.gplume.context.InputStreamProvider;
-import com.caibowen.gplume.context.InputStreamProviderProxy;
-import com.caibowen.gplume.context.InputStreamSupport;
 import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.resource.InputStreamCallback;
+import com.caibowen.gplume.resource.InputStreamProvider;
+import com.caibowen.gplume.resource.InputStreamProviderProxy;
+import com.caibowen.gplume.resource.InputStreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -205,7 +205,7 @@ public class ConfigCenter implements Serializable {
      * @return
      */
     @Nonnull
-    protected String replaceIfPresent(@Nonnull String name) {
+    public String replaceIfPresent(@Nonnull String name) {
         int lq = name.indexOf("${", 0);
         if (lq == -1)
             return name;

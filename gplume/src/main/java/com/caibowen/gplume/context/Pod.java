@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 import com.caibowen.gplume.annotation.Internal;
+import com.caibowen.gplume.context.bean.BeanIDAware;
+import com.caibowen.gplume.context.bean.DisposableBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 
 /**
@@ -48,20 +48,20 @@ public final class XMLTags {
     public static final String BEAN_AFTER_CALL = "aftercall";
 
 
-	public static final String PROPERTIES = "properties";
-	public static final String BEAN_FIELD = "field";
+	public static final String DEFINE = "define";
+	public static final String BEAN_PROP = "prop";
 
 	/**
 	 * specify singleton bean, false by default
 	 */
 	public static final String BEAN_SINGLETON = "singleton";
 	
-	public static final String FIELD_NAME = "name";
+	public static final String PROP_NAME = "name";
 
-	public static final String FIELD_INSTANCE = "instance";
-	public static final String FIELD_LIST = "list";
-	public static final String FIELD_MAP = "map";
-	public static final String FIELD_SET = "set";
-	public static final String FIELD_VALUE = "val";
-	public static final String FILED_REF = "ref";
+	public static final String PROP_INSTANCE = "instance";
+	public static final String PROP_LIST = "list";
+	public static final String PROP_MAP = "map";
+	public static final String PROP_SET = "set";
+	public static final String PROP_VALUE = "val";
+	public static final String PROP_REF = "ref";
 }

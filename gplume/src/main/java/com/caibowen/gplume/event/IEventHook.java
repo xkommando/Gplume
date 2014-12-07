@@ -16,11 +16,14 @@
 package com.caibowen.gplume.event;
 
 
+import com.caibowen.gplume.annotation.Functional;
+
 /**
  * 
  * @author BowenCai
  *
  */
+@Functional
 public interface IEventHook {
 	
 	void catches(AppEvent event);

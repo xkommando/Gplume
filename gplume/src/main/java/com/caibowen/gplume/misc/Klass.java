@@ -27,6 +27,9 @@ import java.util.*;
  *
  */
 public final class Klass {
+
+    private Klass(){}
+
     /**
      *
      * @param klass
@@ -69,7 +72,7 @@ public final class Klass {
      * parameter type and number and return type is not checked
      *
      * @param clazz
-     * @param fielddName
+     * @param fieldName
      * @return
      * @throws NoSuchMethodException
      */
@@ -78,10 +81,13 @@ public final class Klass {
 
         String setterName = String.format("set%C%s",
                 fieldName.charAt(0), fieldName.substring(1));
+        // for scala class without @BeanProperty
+        String scalaSetter = fieldName + "_$eq";
         for (Method method : clazz.getMethods()) {
-
-            if(method.getName().equals(setterName)
-                    && method.getReturnType().getName().equals("void")) {
+            Class ret = method.getReturnType();
+            String mname = method.getName();
+            if (ret.equals(void.class)
+                && (mname.equals(setterName) || mname.equals(scalaSetter))) {
                 return method;
             }
         }
@@ -109,33 +115,25 @@ public final class Klass {
 
         if (fieldClazz != null) {
             // boolean: try isXyz
-            if (fieldClazz.equals(Boolean.class)
-                    || fieldClazz.equals(boolean.class)) {
+            String getterName = (fieldClazz.equals(Boolean.class)
+                    || fieldClazz.equals(boolean.class))
+                    ? String.format("is%C%s",
+                            fieldName.charAt(0), fieldName.substring(1))
+                    : String.format("get%C%s",
+                    fieldName.charAt(0), fieldName.substring(1));
 
-                String getterName = String.format("is%C%s",
-                        fieldName.charAt(0), fieldName.substring(1));
+            String scalaGetter = fieldName;
 
-                for (Method method : clazz.getMethods()) {
 
-                    if (method.getName().equals(getterName)
-                            && method.getReturnType().equals(fieldClazz)) {
-                        return method;
-                    }
+            for (Method method : clazz.getMethods()) {
+
+                if (method.getReturnType().equals(fieldClazz)
+                        && (method.getName().equals(getterName)
+                            || method.getName().equals(scalaGetter))) {
+
+                    return method;
                 }
-                // no isXyz for bool, try getXyz
-            } else {
-
-                String getterName = String.format("get%C%s",
-                        fieldName.charAt(0), fieldName.substring(1));
-
-                for (Method method : clazz.getMethods()) {
-
-                    if (method.getName().equals(getterName)
-                            && method.getReturnType().equals(fieldClazz)) {
-                        return method;
-                    }
-                }
-            } // else
+            }
         }
 
         return null;
@@ -183,7 +181,7 @@ public final class Klass {
     public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
 
     public static boolean isAssignableValue(Class<?> paramType, Object arg) {
-        return (arg != null ? isAssignable(paramType, arg.getClass()) : !paramType.isPrimitive());
+        return (arg != null ? isAssignable(arg.getClass(), paramType) : !paramType.isPrimitive());
     }
     /**
      * Inclusivity literals for {@link #hierarchy(Class, Interfaces)}.
@@ -1932,5 +1930,4 @@ public final class Klass {
         }
     }
 
-	private Klass(){}
 }

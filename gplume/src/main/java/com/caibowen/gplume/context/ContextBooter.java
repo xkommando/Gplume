@@ -15,8 +15,9 @@
  ******************************************************************************/
 package com.caibowen.gplume.context;
 
-import com.caibowen.gplume.context.bean.ConfigCenter;
 import com.caibowen.gplume.misc.Str;
+import com.caibowen.gplume.resource.ClassLoaderInputStreamProvider;
+import com.caibowen.gplume.resource.InputStreamProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

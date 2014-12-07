@@ -148,7 +148,7 @@ public class CircularArrayList extends AbstractList implements List, Serializabl
     public Object popFront() {
         Object v = value[head];
         value[head] = null;
-        head = head + 1 % value.length;
+        head = (head + 1) % value.length;
         size--;
         return v;
     }

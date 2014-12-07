@@ -18,11 +18,13 @@
 package com.caibowen.gplume.context.bean;
 
 import com.caibowen.gplume.annotation.Internal;
+import com.caibowen.gplume.context.BeanAssemblingException;
+import com.caibowen.gplume.context.ConfigCenter;
+import com.caibowen.gplume.context.IBeanAssembler;
+import com.caibowen.gplume.context.XMLTags;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
-import com.caibowen.gplume.core.TypeTraits;
 import com.caibowen.gplume.misc.Assert;
-import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Klass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +35,13 @@ import org.w3c.dom.NodeList;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import static com.caibowen.gplume.misc.Str.Utils.*;
+import static com.caibowen.gplume.misc.Str.Utils.isBlank;
+import static com.caibowen.gplume.misc.Str.Utils.notBlank;
 
 /**
  *  auxiliary for xml parsing
@@ -44,13 +50,13 @@ import static com.caibowen.gplume.misc.Str.Utils.*;
  * @since 8/16/2014.
  */
 @Internal
-class BeanBuilder{
+public class BeanBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeanBuilder.class);
 
-    protected ClassLoader classLoader;
+    public ClassLoader classLoader;
 
-    protected ConfigCenter configCenter;
+    public ConfigCenter configCenter;
     protected final IBeanAssembler assembler;
 
     public BeanBuilder(IBeanAssembler assembler) {
@@ -107,7 +113,7 @@ class BeanBuilder{
      *
      * 3. no property is needed.
      */
-    protected @Nonnull Object
+    public  @Nonnull Object
     buildBean(Element beanElem) throws Exception {
 
         Class<?> bnClass = getClass(beanElem);
@@ -115,9 +121,10 @@ class BeanBuilder{
 
         LOG.debug("bean class[{}] created", bnClass.getName());
 
-        NodeList _propLs = beanElem.getElementsByTagName(XMLTags.BEAN_FIELD);
+        NodeList _propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROP);
         if (_propLs == null || _propLs.getLength() == 0) {
             // no property
+            afterProcess(beanObj, beanElem);
             return beanObj;
         }
 
@@ -128,11 +135,11 @@ class BeanBuilder{
             next = next.getNextSibling();
 
             if (next.getNodeType() == Node.ELEMENT_NODE
-                    && next.getNodeName().equals(XMLTags.BEAN_FIELD)) {
+                    && next.getNodeName().equals(XMLTags.BEAN_PROP)) {
                 prop = (Element) next;
             } else  continue;
 
-            String propName = prop.getAttribute(XMLTags.FIELD_NAME);
+            String propName = prop.getAttribute(XMLTags.PROP_NAME);
             propName = configCenter.replaceIfPresent(propName.trim());
             if (!notBlank(propName))
                 throw new NullPointerException(
@@ -163,11 +170,11 @@ class BeanBuilder{
              */
             Node iter = prop.getFirstChild().getNextSibling();
 
-            if (XMLTags.FIELD_LIST.equals(iter.getNodeName()))
+            if (XMLTags.PROP_LIST.equals(iter.getNodeName()))
                 container = 2;
-            else if (XMLTags.FIELD_SET.equals(iter.getNodeName()))
+            else if (XMLTags.PROP_SET.equals(iter.getNodeName()))
                 container = 3;
-            else if (XMLTags.FIELD_MAP.equals(iter.getNodeName()))
+            else if (XMLTags.PROP_MAP.equals(iter.getNodeName()))
                 container = 4;
 
             switch (container) {
@@ -210,10 +217,7 @@ class BeanBuilder{
 
         } // for properties
 
-        String afterCall = configCenter.replaceIfPresent(
-                beanElem.getAttribute(XMLTags.BEAN_AFTER_CALL));
-
-        afterProcess(beanObj, afterCall);
+        afterProcess(beanObj, beanElem);
         return beanObj;
     }
 
@@ -221,9 +225,9 @@ class BeanBuilder{
 
     private Object inTag(Element prop, boolean notNull, @Nullable Class<?> tgtClass) throws Exception {
 
-        String varInstance = prop.getAttribute(XMLTags.FIELD_INSTANCE);
-        String varStr = prop.getAttribute(XMLTags.FIELD_VALUE);
-        String varRef = prop.getAttribute(XMLTags.FILED_REF);
+        String varInstance = prop.getAttribute(XMLTags.PROP_INSTANCE);
+        String varStr = prop.getAttribute(XMLTags.PROP_VALUE);
+        String varRef = prop.getAttribute(XMLTags.PROP_REF);
 
         if (notBlank(varStr)) {
             // e.g., <property id="number" value="5"/>
@@ -315,7 +319,7 @@ class BeanBuilder{
             if (XMLTags.BEAN.equals(elemBn.getNodeName())) {
                 beanList.add(buildBean(elemBn));
 
-            } else if (XMLTags.FILED_REF.equals(elemBn.getNodeName())) {
+            } else if (XMLTags.PROP_REF.equals(elemBn.getNodeName())) {
                 String _s = elemBn.getTextContent();
                 if (isBlank(_s))
                     throw new IllegalArgumentException("Empty reference");
@@ -326,7 +330,7 @@ class BeanBuilder{
                         )
                 );
 
-            } else if (XMLTags.FIELD_VALUE.equals(elemBn.getNodeName())) {
+            } else if (XMLTags.PROP_VALUE.equals(elemBn.getNodeName())) {
                 String lit = configCenter.replaceIfPresent(
                         elemBn.getTextContent().trim());
 
@@ -346,7 +350,8 @@ class BeanBuilder{
         return beanList;
     }
 
-    protected void afterProcess(Object bean, @Nullable String initName) throws Exception {
+    protected void afterProcess(Object bean, @Nullable Element beanElem) throws Exception {
+
         if (bean instanceof BeanClassLoaderAware) {
             ((BeanClassLoaderAware)bean).setBeanClassLoader(this.classLoader);
             LOG.debug(
@@ -361,7 +366,10 @@ class BeanBuilder{
                     "bean [" + bean.getClass().getSimpleName()
                             + "] initialized");
         }
-
+        if (beanElem == null)
+            return;
+        String initName = configCenter.replaceIfPresent(
+                beanElem.getAttribute(XMLTags.BEAN_AFTER_CALL));
         if (isBlank(initName))
             return;
 
@@ -388,7 +396,7 @@ class BeanBuilder{
 
         int _c = 0;
         String poxVal = beanElem.getAttribute(XMLTags.BEAN_PROXY);
-        String poxRef = beanElem.getAttribute(XMLTags.FILED_REF);
+        String poxRef = beanElem.getAttribute(XMLTags.PROP_REF);
         _c += isBlank(poxVal) ? 0 : 1;
         _c += isBlank(poxRef) ? 0 : 3;
         switch (_c) {
@@ -439,12 +447,12 @@ class BeanBuilder{
             return BeanEditor.construct(klass, _tagVal);
 
         // 3 try parse xml
-        if (prop.getNodeName().equals(XMLTags.FIELD_MAP)) {
+        if (prop.getNodeName().equals(XMLTags.PROP_MAP)) {
             prop = (Element) prop.getFirstChild().getNextSibling();
             Map m = buildMap(prop, "Constructor:" + klass.getName());
             return BeanEditor.construct(klass, m);
 
-        } else if (prop.getNodeName().equals(XMLTags.FIELD_LIST)) {
+        } else if (prop.getNodeName().equals(XMLTags.PROP_LIST)) {
             prop = (Element) prop.getFirstChild().getNextSibling();
             List ls = buildList(prop);
             return BeanEditor.construct(klass, ls);
@@ -454,11 +462,4 @@ class BeanBuilder{
         return BeanEditor.construct(klass, ls.toArray());
     }
 
-    public void setConfigCenter(ConfigCenter configCenter) {
-        this.configCenter = configCenter;
-    }
-
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
 }
