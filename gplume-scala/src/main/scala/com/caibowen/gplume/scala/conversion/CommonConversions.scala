@@ -1,11 +1,12 @@
 package com.caibowen.gplume.scala.conversion
 
 import java.io.InputStream
-import java.sql.{ResultSet, PreparedStatement, Connection}
+import java.sql.{Connection, PreparedStatement, ResultSet}
 import java.util.concurrent.Callable
 
+import com.caibowen.gplume.common.{Pair => GPair, Triple => GTriple}
 import com.caibowen.gplume.context.bean.BeanVisitor
-import com.caibowen.gplume.event.{AppEvent, IEventHook, IAppListener}
+import com.caibowen.gplume.event.{AppEvent, IAppListener, IEventHook}
 import com.caibowen.gplume.jdbc.StatementCreator
 import com.caibowen.gplume.jdbc.mapper.RowMapping
 import com.caibowen.gplume.jdbc.transaction.{Transaction, TransactionCallback}
@@ -32,10 +33,6 @@ object CommonConversions {
     override def doInStream(stream: InputStream): Unit = f(stream)
   }
 
-  @inline
-  implicit def makeFunction[I,O](f: I => O) = new com.caibowen.gplume.common.Function[I,O] {
-    override def apply(input: I): O = f(input)
-  }
 
   // ---------------- JDBC
 
@@ -45,7 +42,7 @@ object CommonConversions {
   }
 
   @inline
-  implicit def StatementCreator(f: Connection=>PreparedStatement) = new StatementCreator {
+  implicit def makeStatementCreator(f: Connection=>PreparedStatement) = new StatementCreator {
     override def createStatement(con: Connection): PreparedStatement = f(con)
   }
 
@@ -57,8 +54,8 @@ object CommonConversions {
   // ---------------- Event
 
   @inline
-  implicit def makeListener[T](f: T=>Unit) = new IAppListener[T] {
-    override def onEvent(e: T) = f(e)
+  implicit def makeListener(f: AppEvent=>Unit) = new IAppListener[AppEvent] {
+    override def onEvent(e: AppEvent) = f(e)
   }
 
   @inline
@@ -74,5 +71,17 @@ object CommonConversions {
     override def visit(e: T) = f(e)
   }
 
+  // ---------------- Other
+
+  @inline
+  implicit def makeFunction[I,O](f: I => O) = new com.caibowen.gplume.common.Function[I,O] {
+    override def apply(input: I): O = f(input)
+  }
+
+  @inline
+  implicit def makePair[T1,T2](tp: (T1,T2)) = new GPair[T1,T2](tp._1, tp._2)
+
+  @inline
+  implicit def makeTriple[T1,T2, T3](tp: (T1,T2, T3)) = new GTriple[T1,T2, T3](tp._1, tp._2, tp._3)
 
 }

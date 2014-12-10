@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.caibowen.gplume.context;
 
-import com.caibowen.gplume.context.bean.BeanBuilder;
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.resource.InputStreamCallback;
@@ -71,6 +70,9 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
                               @Nonnull Class<?> tgtClass) {
 
         String _id = tree.createFullPath(id, currentNamespace);
+        Object bn = tree.find(_id);
+        if (bn != null)
+            return bn;
         ProxyBean pb = deferred.get(_id);
         if (pb == null && createNew) {
             pb = new ProxyBean(tgtClass);
@@ -188,11 +190,10 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
         if (Str.Utils.notBlank(bnId)) {
             bnId = tree.createFullPath(bnId, currentNamespace);
             if (tree.find(bnId) != null)
-                throw new IllegalArgumentException("duplicated bean definition [" + bnId + "]");
+                throw new IllegalArgumentException("Duplicated bean definition [" + bnId + "]");
 
         } else addBean = false;
 
-        Pod pod;
 
         String bnScope = elem.getAttribute(XMLTags.BEAN_SINGLETON);
 
@@ -201,16 +202,17 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
             isSingleton = Converter.toBool(bnScope);
         }
         Object bean = null;
-
         if (isSingleton) {
-            bean = beanBuilder.buildBean(elem);
-            pod = new Pod(bnId, null, bean);
+            bean = beanBuilder.buildBean(elem, bnId);
+            if (addBean)
+                tree.put(bnId, new Pod(bnId, null, bean));
+            beanBuilder.afterProcess(bean, elem);
+
         } else {
-            pod = new Pod(bnId, elem, null);
+            if (addBean)
+                tree.put(bnId, new Pod(bnId, elem, null));
         }
 
-        if (addBean)
-            tree.put(bnId, pod);
 
         LOG.debug("Add Bean: id[{}] of class[{}] singleton ? {}",
                 bnId, (bean != null ? bean.getClass().getName() : "unknown")

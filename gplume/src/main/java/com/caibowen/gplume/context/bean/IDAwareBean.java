@@ -16,14 +16,20 @@
 package com.caibowen.gplume.context.bean;
 
 
+import javax.annotation.Nullable;
+
 /**
  * 
  * similar to Spring BeanNameAware
  * @author BowenCai
  *
  */
-public interface BeanIDAware {
+public interface IDAwareBean {
 
-	void setBeanID(String id);
+	/**
+	 *
+	 * @param id nullable, anonymous bean
+	 */
+	void setBeanID(@Nullable String id);
 
 }

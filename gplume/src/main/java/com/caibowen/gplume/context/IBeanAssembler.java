@@ -116,7 +116,7 @@ public interface IBeanAssembler {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public<T> void 		updateBean(@Nonnull String id, @Nonnull T bean); 
+	public<T> boolean updateBean(@Nonnull String id, @Nonnull T bean);
 	
 	/**
 	 * if contains bean of this id

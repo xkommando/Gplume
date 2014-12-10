@@ -19,7 +19,24 @@
     <!--<construct val="456" type="Integer"/>-->
     <construct>
         <val type="String">com.caibowen.gplume.sample</val>
-        <val type="Integer">22</val>
+        <!--<val type="Integer">22</val>-->
+        <list>
+            <val>11111</val>
+            <val>2222sdfgdg</val>
+            <list>
+                <val>${my_injector} haha ${iso639_zh}</val>
+                <map>
+                    <k1>v111111v</k1>
+                    <k2>v222222v</k2>
+                </map>
+                <val>bbbbbbbbb2222sdfgdg</val>
+                <map>
+                    <k1>v111111</k1>
+                    <k2>v2222</k2>
+                </map>
+            </list>
+            <val>4564fsd</val>
+        </list>
     </construct>
     <prop name="name" val="hahahahhah" />
 </bean>

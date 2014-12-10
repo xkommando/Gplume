@@ -29,7 +29,7 @@ import java.io.InputStream;
  * or classPathProvider
  *
  * for path str:
- * "classpath:aaa"  -> will use classPathProvider
+ * "classpath:aaa"  -> classPathProvider
  * "file:aaa"       -> FileInputStreamProvider
  * "url:aaa"        -> URLInputStreamProvider
  * "aaa"            -> defaultProvider

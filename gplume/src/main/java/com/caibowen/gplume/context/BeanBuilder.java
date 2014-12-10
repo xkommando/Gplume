@@ -15,13 +15,13 @@
  * *****************************************************************************
  */
 
-package com.caibowen.gplume.context.bean;
+package com.caibowen.gplume.context;
 
 import com.caibowen.gplume.annotation.Internal;
-import com.caibowen.gplume.context.BeanAssemblingException;
-import com.caibowen.gplume.context.ConfigCenter;
-import com.caibowen.gplume.context.IBeanAssembler;
-import com.caibowen.gplume.context.XMLTags;
+import com.caibowen.gplume.context.bean.AssemblerAwareBean;
+import com.caibowen.gplume.context.bean.ClassLoaderAwareBean;
+import com.caibowen.gplume.context.bean.IDAwareBean;
+import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.Assert;
@@ -50,7 +50,7 @@ import static com.caibowen.gplume.misc.Str.Utils.notBlank;
  * @since 8/16/2014.
  */
 @Internal
-public class BeanBuilder {
+class BeanBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeanBuilder.class);
 
@@ -74,35 +74,6 @@ public class BeanBuilder {
         return getClass(clazzName);
     }
 
-    /**
-     * if <construct /> exists :
-     *  if has content , move to content
-     *  else return original position
-     *
-     * @param beanElem
-     * @return
-     */
-    private @Nullable Element
-    findCtorElem(Element beanElem) {
-        Element ctorElem = null;
-        Node _n = beanElem.getFirstChild();
-        while (_n != null && _n.getNextSibling() != null) {
-            _n = _n.getNextSibling();
-            if (_n.getNodeName().equals(XMLTags.BEAN_CONSTRUCT)) {
-                Node iter;
-                if (_n.getFirstChild() != null
-                        && null != (iter = _n.getFirstChild().getNextSibling()))
-                    ctorElem = (Element)iter;
-                else
-                    ctorElem = (Element)_n;
-
-                break;
-            }
-        }
-        return ctorElem;
-    }
-
-
 
     /**
      * For one field, there are 3 notation:
@@ -113,18 +84,18 @@ public class BeanBuilder {
      *
      * 3. no property is needed.
      */
-    public  @Nonnull Object
-    buildBean(Element beanElem) throws Exception {
+    @Nonnull Object
+    buildBean(Element beanElem, @Nullable String beanID) throws Exception {
 
         Class<?> bnClass = getClass(beanElem);
         Object beanObj = construct(bnClass, beanElem);
 
         LOG.debug("bean class[{}] created", bnClass.getName());
 
+        beforeProcess(beanObj, beanID);
         NodeList _propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROP);
         if (_propLs == null || _propLs.getLength() == 0) {
             // no property
-            afterProcess(beanObj, beanElem);
             return beanObj;
         }
 
@@ -216,12 +187,58 @@ public class BeanBuilder {
             }
 
         } // for properties
-
-        afterProcess(beanObj, beanElem);
         return beanObj;
     }
 
+    protected void beforeProcess(Object bean, @Nullable String beanID) throws Exception {
+        if (bean instanceof ClassLoaderAwareBean) {
+            ((ClassLoaderAwareBean)bean).setBeanClassLoader(this.classLoader);
+            LOG.debug(
+                    "classLoader aware  bean ["
+                            + bean.getClass().getSimpleName()
+                            + "] set classLoader [" + this.classLoader);
+        }
+        if (bean instanceof IDAwareBean) {
+            ((IDAwareBean)bean).setBeanID(beanID);
+            LOG.debug(
+                    "classLoader aware  bean ["
+                            + bean.getClass().getSimpleName()
+                            + "] setting classLoader [" + this.classLoader);
+        }
+        if (bean instanceof AssemblerAwareBean) {
+            ((AssemblerAwareBean)bean).setAssembler(assembler);
+            LOG.debug(
+                    "AssemblerAwareBean bean ["
+                            + bean.getClass().getSimpleName()
+                            + "] setting assembler [" + this.classLoader);
+        }
 
+    }
+
+    protected void afterProcess(Object bean, @Nullable Element beanElem) throws Exception {
+
+        if (bean instanceof InitializingBean) {
+            ((InitializingBean) bean).afterPropertiesSet();
+            LOG.debug(
+                    "bean [" + bean.getClass().getSimpleName()
+                            + "] initialized");
+        }
+
+        if (beanElem == null)
+            return;
+        String initName = configCenter.replaceIfPresent(
+                beanElem.getAttribute(XMLTags.BEAN_AFTER_CALL));
+        if (isBlank(initName))
+            return;
+
+        Method m = bean.getClass().getMethod(initName.trim());
+        if (!m.isAccessible())
+            m.setAccessible(true);
+        if (Modifier.isStatic(m.getModifiers()))
+            m.invoke(null);
+        else
+            m.invoke(bean);
+    }
 
     private Object inTag(Element prop, boolean notNull, @Nullable Class<?> tgtClass) throws Exception {
 
@@ -232,8 +249,8 @@ public class BeanBuilder {
         if (notBlank(varStr)) {
             // e.g., <property id="number" value="5"/>
             // str value will casted to param type if needed
-            String type;
-            if (null != (type = prop.getAttribute(XMLTags.TYPE))) {
+            String type = prop.getAttribute(XMLTags.TYPE);
+            if (notBlank(type)) {
                 type = configCenter.replaceIfPresent(type.trim());
                 Object ret = Converter.slient.translateStr(varStr, Converter.getClass(type));
                 if (notNull && ret == null)
@@ -258,7 +275,8 @@ public class BeanBuilder {
             // e.g. <property id="injector" instance="com.caibowen.gplume.context.bean.Injector"/>
             Class<?> klass = this.classLoader.loadClass(configCenter.replaceIfPresent(varInstance));
             Object obj = klass.newInstance();
-            afterProcess(obj, null);
+            String propName = prop.getAttribute(XMLTags.PROP_NAME);
+            beforeProcess(obj, propName);
             return obj;
 
         } else if (notNull)
@@ -312,74 +330,84 @@ public class BeanBuilder {
      */
     private @Nonnull List<Object> buildList(Node iter) throws Exception {
         List<Object> beanList = new ArrayList<>(16);
+
         while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
-
             Element elemBn = (Element) iter;
+            String tagType = elemBn.getNodeName();
 
-            if (XMLTags.BEAN.equals(elemBn.getNodeName())) {
-                beanList.add(buildBean(elemBn));
+            switch (tagType) {
+                case XMLTags.BEAN:
+                    beanList.add(buildBean(elemBn, null));
+                    break;
+                case XMLTags.PROP_REF:
+                    String _s = elemBn.getTextContent();
+                    if (isBlank(_s))
+                        throw new IllegalArgumentException("Empty Reference");
 
-            } else if (XMLTags.PROP_REF.equals(elemBn.getNodeName())) {
-                String _s = elemBn.getTextContent();
-                if (isBlank(_s))
-                    throw new IllegalArgumentException("Empty reference");
+                    beanList.add(assembler.getBean(
+                                    configCenter.replaceIfPresent(
+                                            _s.trim())
+                            )
+                    );
+                    break;
+                case XMLTags.PROP_VALUE:
+                    String lit = configCenter.replaceIfPresent(
+                            elemBn.getTextContent().trim());
 
-                beanList.add(assembler.getBean(
-                                configCenter.replaceIfPresent(
-                                        _s.trim())
-                        )
-                );
-
-            } else if (XMLTags.PROP_VALUE.equals(elemBn.getNodeName())) {
-                String lit = configCenter.replaceIfPresent(
-                        elemBn.getTextContent().trim());
-
-                String tgtType;
-                if (notBlank(tgtType = elemBn.getAttribute(XMLTags.TYPE))) {
-                    Class k = Converter.getClass(configCenter.replaceIfPresent(tgtType.trim()));
-                    beanList.add(
-                            Converter.slient.translateStr(lit, k));
-                } else beanList.add(lit);
-
-            } else throw new IllegalArgumentException("Unknown property["
-                        + iter.getNodeName() + "]");
-
+                    String tgtType;
+                    if (notBlank(tgtType = elemBn.getAttribute(XMLTags.TYPE))) {
+                        Class k = Converter.getClass(configCenter.replaceIfPresent(tgtType.trim()));
+                        beanList.add(
+                                Converter.slient.translateStr(lit, k));
+                    } else beanList.add(lit);
+                    break;
+                case XMLTags.PROP_LIST:
+                    Element _prop = (Element)elemBn.getFirstChild().getNextSibling();
+                    beanList.add(buildList(_prop));
+                    break;
+                case XMLTags.PROP_MAP:
+                    Element _propM = (Element)elemBn.getFirstChild().getNextSibling();
+                    Map m = buildMap(_propM, "Constructor:");
+                    beanList.add(m);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown property["
+                            + iter.getNodeName() + "]");
+            }
             // skip node of #text
             iter = iter.getNextSibling().getNextSibling();
         }// while
+
         return beanList;
     }
 
-    protected void afterProcess(Object bean, @Nullable Element beanElem) throws Exception {
 
-        if (bean instanceof BeanClassLoaderAware) {
-            ((BeanClassLoaderAware)bean).setBeanClassLoader(this.classLoader);
-            LOG.debug(
-                    "classLoader aware  bean ["
-                            + bean.getClass().getSimpleName()
-                            + "] set classLoader [" + this.classLoader);
+    /**
+     * if <construct /> exists :
+     *  if has content , move to content
+     *  else return original position
+     *
+     * @param beanElem
+     * @return
+     */
+    private @Nullable Element
+    findCtorElem(Element beanElem) {
+        Element ctorElem = null;
+        Node _n = beanElem.getFirstChild();
+        while (_n != null && _n.getNextSibling() != null) {
+            _n = _n.getNextSibling();
+            if (_n.getNodeName().equals(XMLTags.BEAN_CONSTRUCT)) {
+                Node iter;
+                if (_n.getFirstChild() != null
+                        && null != (iter = _n.getFirstChild().getNextSibling()))
+                    ctorElem = (Element)iter;
+                else
+                    ctorElem = (Element)_n;
+
+                break;
+            }
         }
-
-        if (bean instanceof InitializingBean) {
-            ((InitializingBean) bean).afterPropertiesSet();
-            LOG.debug(
-                    "bean [" + bean.getClass().getSimpleName()
-                            + "] initialized");
-        }
-        if (beanElem == null)
-            return;
-        String initName = configCenter.replaceIfPresent(
-                beanElem.getAttribute(XMLTags.BEAN_AFTER_CALL));
-        if (isBlank(initName))
-            return;
-
-        Method m = bean.getClass().getMethod(initName.trim());
-        if (!m.isAccessible())
-            m.setAccessible(true);
-        if (Modifier.isStatic(m.getModifiers()))
-            m.invoke(null);
-        else
-            m.invoke(bean);
+        return ctorElem;
     }
 
 

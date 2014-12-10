@@ -16,7 +16,7 @@
 package com.caibowen.gplume.context;
 
 import com.caibowen.gplume.annotation.Internal;
-import com.caibowen.gplume.context.bean.BeanIDAware;
+import com.caibowen.gplume.context.bean.IDAwareBean;
 import com.caibowen.gplume.context.bean.DisposableBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,21 +62,7 @@ class Pod {
 		this.beanId = id;
 		this.description = d;
 		this.instance = instance;
-
-		process(beanId, instance);
 	}
-	
-	/**
-	 * process bean after creation and properties set.
-     *
-	 * @param id
-	 * @param bean
-	 */
-	static void process(String id, Object bean) {
-        if (bean != null && bean instanceof BeanIDAware) {
-            ((BeanIDAware) bean).setBeanID(id);
-        }
-    }
 
 	/**
 	 * destroy this bean

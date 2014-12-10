@@ -36,7 +36,6 @@ public class Triple<T1, T2, T3> implements Serializable {
 	public Triple() {}
 	
 	public Triple(T1 first, T2 second, T3 third) {
-		super();
 		this.first = first;
 		this.second = second;
 		this.third = third;

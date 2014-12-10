@@ -9,7 +9,6 @@ import static org.junit.Assert.*;
 
 public class SpaceTreeTest {
 
-
     @Test
     public void s1() {
         SpaceTree<Pod> t = new SpaceTree();

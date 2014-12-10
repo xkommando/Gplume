@@ -52,8 +52,11 @@ public class XMLAssembler extends XMLAssemblerBase
 	public XMLAssembler() {}
 
 	public void assemble(@Nonnull final InputSource in) throws Exception {
-		
-		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setIgnoringComments(true);
+		factory.setValidating(false);
+		factory.setCoalescing(true);
+		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document doc = builder.parse(in);
 		doc.getDocumentElement().normalize();
 		super.doAssemble(doc);
@@ -108,7 +111,7 @@ public class XMLAssembler extends XMLAssemblerBase
 			return null;
 		} else {
 			try {
-				return (T) beanBuilder.buildBean(pod.description);
+				return (T) beanBuilder.buildBean(pod.description, pod.beanId);
 			} catch (Exception e) {
 				throw new BeanAssemblingException(
 						"failed building non-singleton bean of id[" + id + "]", e);
@@ -160,10 +163,10 @@ public class XMLAssembler extends XMLAssemblerBase
 	}
 
 	@Override
-	public <T> void updateBean(@Nonnull String id, @Nonnull T bean) {
+	public <T> boolean updateBean(@Nonnull String id, @Nonnull T bean) {
 		Pod pod = super.tree.findByPartialId(id, currentNamespace, refNamespace);
 		if (pod == null)
-			return;
+			return false;
 
 		if (!pod.isSingleton())
 			pod.description = null;
@@ -171,6 +174,7 @@ public class XMLAssembler extends XMLAssemblerBase
 		pod.instance = bean;
 
         LOG.debug("{} of type {} updated", id, bean.getClass().getName());
+		return true;
 	}
 	
 	/**

@@ -38,7 +38,7 @@ package com.caibowen.gplume.context.bean;
  * @author BowenCai
  *
  */
-public interface BeanClassLoaderAware {
+public interface ClassLoaderAwareBean {
 
 	void setBeanClassLoader(ClassLoader classLoader);
 

@@ -1,7 +1,10 @@
 package com.caibowen.gplume.sample.model;
 
+import com.alibaba.fastjson.JSON;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * @author BowenCai
@@ -19,6 +22,12 @@ public class XXXPOX implements InvocationHandler {
     public XXXPOX(String s, int t) {
         this.name = s;
         this.i = t;
+    }
+
+    public XXXPOX(String eval, Object obj) {
+        System.out.println(eval + "\r\n-------------");
+        i = -1;
+        System.out.println(JSON.toJSONString(obj, true));
     }
 
     @Override

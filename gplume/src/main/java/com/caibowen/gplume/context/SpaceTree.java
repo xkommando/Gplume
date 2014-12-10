@@ -98,13 +98,20 @@ class SpaceTree<T> implements Serializable {
 
         String[] pNss = STR_TOK.split(pid);
         if (pNss.length == 1) { // most case.
-            return curNS + XMLTags.NS_DELI + pid;
+            if (Str.Utils.isBlank(curNS))
+                return pid;
+            else
+                return curNS + XMLTags.NS_DELI + pid;
         }
 
         String[] curNss = STR_TOK.split(curNS);
         int idx = strOverlap(curNss, 0, curNss.length, pNss, 0, pNss.length - 1);
-        if (idx == -1)
-            return curNS + XMLTags.NS_DELI + pid;
+        if (idx == -1) {
+            if (Str.Utils.isBlank(curNS))
+                return pid;
+            else
+                return curNS + XMLTags.NS_DELI + pid;
+        }
         String[] fulp = new String[idx + pNss.length];
         System.arraycopy(curNss, 0, fulp, 0, idx);
         System.arraycopy(pNss, 0, fulp, idx, pNss.length);
@@ -138,7 +145,7 @@ class SpaceTree<T> implements Serializable {
             if (p != null)
                 return Str.Utils.join(fulp, XMLTags.NS_DELI);
         }
-        return null;
+        return pid;
     }
 
     /**
@@ -149,10 +156,10 @@ class SpaceTree<T> implements Serializable {
      * @return
      */
     T findByPartialId(@Nonnull String pid, @Nonnull String...refNS) {
-        T pod = find(pid);
+        String[] pNss = STR_TOK.split(pid);
+        T pod = find(pNss);
         if (pod != null)
             return pod;
-        String[] pNss = STR_TOK.split(pid);
         if (pNss.length == 1) { // most case.
             for (String pf : refNS) {
                 String _id = pf + XMLTags.NS_DELI + pid;
@@ -171,8 +178,7 @@ class SpaceTree<T> implements Serializable {
             System.arraycopy(pNss, 0, fulp, idx, pNss.length);
             return find(fulp);
         }
-        throw new IllegalArgumentException("cannot find bean with id[" + pid
-                + "] referred namespace[" + Arrays.toString(refNS) + "]");
+        return null;
     }
 
     private static int strOverlap(String[] arr, int astar, int aend, String[] ptn, int ptnStart, int ptnEnd) {
