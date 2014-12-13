@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<beans>
+
+    <bean id="testObj" class="com.caibowen.gplume.scala.test.ScalaObj" aftercall="start">
+        <construct>
+            <list>
+                <val type="int">000</val>
+                <val>constructor injection</val>
+            </list>
+            <val type="double">6.666</val>
+        </construct>
+        <prop name="lsmap">
+            <list>
+                <val type="int">555</val>
+                <val>literal</val>
+                <map>
+                    <key1>va1</key1>
+                    <k2>val2</k2>
+                    <k3 type="int">123456</k3>
+                    <ke4 type="Date">2014-12-12</ke4>
+                </map>
+                <val type="double">12.34</val>
+                <list>
+                    <val type="int">1111</val>
+                    <val>stringstring</val>
+                </list>
+            </list>
+        </prop>
+        <prop name="map">
+            <map>
+                <klllllll>va1</klllllll>
+                <k3 type="int">123456</k3>
+            </map>
+        </prop>
+    </bean>
+
+</beans>

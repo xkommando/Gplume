@@ -30,6 +30,10 @@ public class XXXPOX implements InvocationHandler {
         System.out.println(JSON.toJSONString(obj, true));
     }
 
+    public void start() {
+        System.out.println("started");
+    }
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getName().endsWith("bark")) {

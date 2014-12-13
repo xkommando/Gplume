@@ -20,7 +20,6 @@ import com.caibowen.gplume.misc.Klass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -154,7 +153,7 @@ public class BeanEditor {
 		if (setter == null) {
 			setField(bean, propName, var);
 		} else {
-			callSetter(bean, setter, var);
+			invokeSetter(bean, setter, var);
 		}
 	}
 
@@ -227,7 +226,7 @@ public class BeanEditor {
 			if (setter != null) {
 				invokeIfValid(setter, bean, var);
 			} else {
-				// no setter, try set public field
+				// no setter, try set field
 				setField(bean, propName, var);
 			}
 			
@@ -312,7 +311,7 @@ public class BeanEditor {
 	 * @param var
 	 * @throws NoSuchMethodException
 	 */
-	public static void callSetter(@Nullable Object obj, 
+	public static void invokeSetter(@Nullable Object obj,
 									@Nonnull Method setter,
 									Object var) throws NoSuchMethodException {
 		

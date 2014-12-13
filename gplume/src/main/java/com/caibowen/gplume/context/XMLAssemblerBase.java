@@ -53,7 +53,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
     protected String currentNamespace;
 
     protected String refNamespace;
-    protected BeanBuilder beanBuilder;
+    protected IBeanBuilder beanBuilder;
     protected Map<String, ProxyBean> deferred;
 
     public XMLAssemblerBase() {
@@ -61,14 +61,29 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
         currentNamespace = EMPTY;
         refNamespace = EMPTY;
         deferred = new TreeMap<>();
-        beanBuilder = new BeanBuilder(this);
+        beanBuilder = new DefaultBeanBuilder();
+        beanBuilder.setAssembler(this);
     }
 
+    public XMLAssemblerBase(IBeanBuilder builder) {
+        tree = new SpaceTree<>();
+        currentNamespace = EMPTY;
+        refNamespace = EMPTY;
+        deferred = new TreeMap<>();
+        beanBuilder = builder;
+    }
+
+    /**
+     * create proxy for this bean
+     *
+     * @param id
+     * @param createNew
+     * @param tgtClass
+     * @return
+     */
     @Nonnull
-    @Override
     public Object getForBuild(@Nonnull String id, boolean createNew,
                               @Nonnull Class<?> tgtClass) {
-
         String _id = tree.createFullPath(id, currentNamespace);
         Object bn = tree.find(_id);
         if (bn != null)
@@ -77,7 +92,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
         if (pb == null && createNew) {
             pb = new ProxyBean(tgtClass);
             deferred.put(_id, pb);
-            return Proxy.newProxyInstance(beanBuilder.classLoader, new Class[]{tgtClass}, pb);
+            return Proxy.newProxyInstance(beanBuilder.getClassLoader(), new Class[]{tgtClass}, pb);
         } else
             throw new NoSuchElementException("cannot find proxy bean of id[" + id + "] for class[" + tgtClass + "]");
     }
@@ -206,6 +221,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
             bean = beanBuilder.buildBean(elem, bnId);
             if (addBean)
                 tree.put(bnId, new Pod(bnId, null, bean));
+
             beanBuilder.afterProcess(bean, elem);
 
         } else {
@@ -240,7 +256,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
      * @param elem
      */
     protected void handleProperties(Element elem) {
-        beanBuilder.configCenter.scanXMLElem(elem);
+        beanBuilder.getConfigCenter().scanXMLElem(elem);
     }
 
     /**
@@ -255,7 +271,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
         String oldCur = currentNamespace;
         String oldRef = refNamespace;
         int oldsz = tree.size();
-        beanBuilder.configCenter.withPath(loc, new InputStreamCallback() {
+        beanBuilder.getConfigCenter().withPath(loc, new InputStreamCallback() {
             @Override
             public void doInStream(InputStream stream) throws Exception {
                 Document doc = builder.parse(stream);
@@ -277,13 +293,13 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
 
     @Override
     public void setClassLoader(@Nonnull ClassLoader loader) {
-        beanBuilder.classLoader = loader;
+        beanBuilder.setClassLoader(loader);
     }
 
     @Override
     @Nonnull
     public ClassLoader getClassLoader() {
-        return beanBuilder.classLoader;
+        return beanBuilder.getClassLoader();
     }
 
     @Override
@@ -308,11 +324,11 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
 
     @Override
     public void setConfigCenter(ConfigCenter configCenter) {
-        beanBuilder.configCenter = configCenter;
+        beanBuilder.setConfigCenter(configCenter);
     }
 
     @Override
     public ConfigCenter getConfigCenter() {
-        return beanBuilder.configCenter;
+        return beanBuilder.getConfigCenter();
     }
 }

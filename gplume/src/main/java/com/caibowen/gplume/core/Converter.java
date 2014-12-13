@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.core;
 
+import com.caibowen.gplume.misc.Assert;
 import com.caibowen.gplume.misc.Klass;
 import com.caibowen.gplume.misc.Str;
 import com.caibowen.gplume.misc.Str.Utils;
@@ -788,7 +789,9 @@ public class Converter {
 
 	@Nonnull
 	public static Class<?> getClass(String typeName) {
-		return TYPE_TABLE.get(typeName);
+		Class<?> v = TYPE_TABLE.get(typeName);
+		Assert.notNull(v, "unknow class[" + typeName + "]");
+		return v;
 	}
 
 	

@@ -41,16 +41,16 @@ import org.slf4j.LoggerFactory;
  */
 public class ContextBooter {
 
-	private static final Logger LOG 
+	protected static final Logger LOG
 					= LoggerFactory.getLogger(ContextBooter.class);
 
 	// optional
-	private ClassLoader classLoader = ContextBooter.class.getClassLoader();
+	protected ClassLoader classLoader = ContextBooter.class.getClassLoader();
 	
 	// required if in web root, set by caller
-	private InputStreamProvider streamProvider;
+	protected InputStreamProvider streamProvider;
 	// required
-	private String manifestPath;
+	protected String manifestPath;
 	
 	// require streamProvider
 

@@ -30,8 +30,9 @@ import java.util.TimeZone;
  * @author BowenCai
  *
  */
-public abstract class AppContext {
-	
+public final class AppContext {
+	private AppContext(){}
+
 //	public static final boolean	DEBUG_FLAG = true;
 	
 //-----------------------------------------------------------------------------

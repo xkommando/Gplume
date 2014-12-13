@@ -15,7 +15,7 @@
 
 
 <bean id="pox" class="com.caibowen.gplume.sample.model.XXX"
-      proxy="com.caibowen.gplume.sample.model.XXXPOX">
+      proxy="com.caibowen.gplume.sample.model.XXXPOX" aftercall="start">
     <!--<construct val="456" type="Integer"/>-->
     <construct>
         <val type="String">com.caibowen.gplume.sample</val>

@@ -50,6 +50,9 @@ public class XMLAssembler extends XMLAssemblerBase
 	private static final Logger LOG = LoggerFactory.getLogger(XMLAssembler.class);
 
 	public XMLAssembler() {}
+	public XMLAssembler(IBeanBuilder builder) {
+		super(builder);
+	}
 
 	public void assemble(@Nonnull final InputSource in) throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -75,19 +78,20 @@ public class XMLAssembler extends XMLAssemblerBase
 
 	@Override
 	public void assemble(@Nonnull final String path) throws Exception {
-		beanBuilder.configCenter.withPath(path, new InputStreamCallback() {
-            @Override
-            public void doInStream(InputStream stream) throws Exception {
-                assemble(stream);
-            }
-        });
+		beanBuilder.getConfigCenter().withPath(path, new InputStreamCallback() {
+			@Override
+			public void doInStream(InputStream stream) throws Exception {
+				assemble(stream);
+			}
+		});
 	}
 
 	@Nonnull
 	@Override
 	public ConfigCenter configCenter() {
-		return beanBuilder.configCenter;
+		return beanBuilder.getConfigCenter();
 	}
+
 	/**
 	 * @return null if not found or throw exception in failing to create non-singleton bean
 	 */

@@ -50,19 +50,12 @@ import static com.caibowen.gplume.misc.Str.Utils.notBlank;
  * @since 8/16/2014.
  */
 @Internal
-class BeanBuilder {
+public class DefaultBeanBuilder implements IBeanBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeanBuilder.class);
+    private ClassLoader classLoader;
 
-    public ClassLoader classLoader;
-
-    public ConfigCenter configCenter;
-    protected final IBeanAssembler assembler;
-
-    public BeanBuilder(IBeanAssembler assembler) {
-        this.assembler = assembler;
-    }
-
+    private ConfigCenter configCenter;
+    private IBeanAssembler assembler;
 
     protected @Nonnull Class<?> getClass(String name) throws Exception {
         return classLoader.loadClass(name);
@@ -84,8 +77,9 @@ class BeanBuilder {
      *
      * 3. no property is needed.
      */
-    @Nonnull Object
-    buildBean(Element beanElem, @Nullable String beanID) throws Exception {
+    @Override
+    @Nonnull public
+    Object buildBean(Element beanElem, @Nullable String beanID) throws Exception {
 
         Class<?> bnClass = getClass(beanElem);
         Object beanObj = construct(bnClass, beanElem);
@@ -96,6 +90,7 @@ class BeanBuilder {
         NodeList _propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROP);
         if (_propLs == null || _propLs.getLength() == 0) {
             // no property
+            afterProcess(beanObj, null);
             return beanObj;
         }
 
@@ -190,7 +185,8 @@ class BeanBuilder {
         return beanObj;
     }
 
-    protected void beforeProcess(Object bean, @Nullable String beanID) throws Exception {
+    @Override
+    public void beforeProcess(Object bean, @Nullable String beanID) throws Exception {
         if (bean instanceof ClassLoaderAwareBean) {
             ((ClassLoaderAwareBean)bean).setBeanClassLoader(this.classLoader);
             LOG.debug(
@@ -215,32 +211,37 @@ class BeanBuilder {
 
     }
 
-    protected void afterProcess(Object bean, @Nullable Element beanElem) throws Exception {
+    @Override
+    public void afterProcess(Object bean, @Nullable Element beanElem) throws Exception {
 
-        if (bean instanceof InitializingBean) {
-            ((InitializingBean) bean).afterPropertiesSet();
+        Object realBean = Proxy.isProxyClass(bean.getClass()) ?
+                Proxy.getInvocationHandler(bean) : bean;
+
+        if (realBean instanceof InitializingBean) {
+            ((InitializingBean) realBean).afterPropertiesSet();
             LOG.debug(
-                    "bean [" + bean.getClass().getSimpleName()
+                    "bean [" + realBean.getClass().getSimpleName()
                             + "] initialized");
         }
 
         if (beanElem == null)
             return;
+
         String initName = configCenter.replaceIfPresent(
                 beanElem.getAttribute(XMLTags.BEAN_AFTER_CALL));
         if (isBlank(initName))
             return;
 
-        Method m = bean.getClass().getMethod(initName.trim());
+        Method m = realBean.getClass().getMethod(initName.trim());
         if (!m.isAccessible())
             m.setAccessible(true);
         if (Modifier.isStatic(m.getModifiers()))
             m.invoke(null);
         else
-            m.invoke(bean);
+            m.invoke(realBean);
     }
 
-    private Object inTag(Element prop, boolean notNull, @Nullable Class<?> tgtClass) throws Exception {
+    protected Object inTag(Element prop, boolean notNull, @Nullable Class<?> tgtClass) throws Exception {
 
         String varInstance = prop.getAttribute(XMLTags.PROP_INSTANCE);
         String varStr = prop.getAttribute(XMLTags.PROP_VALUE);
@@ -277,6 +278,7 @@ class BeanBuilder {
             Object obj = klass.newInstance();
             String propName = prop.getAttribute(XMLTags.PROP_NAME);
             beforeProcess(obj, propName);
+            afterProcess(obj, null);
             return obj;
 
         } else if (notNull)
@@ -286,7 +288,7 @@ class BeanBuilder {
     }
 
 
-    private @Nonnull
+    protected  @Nonnull
     Properties buildMap(Node iter, String propName) {
         Properties properties = new Properties();
         while (iter != null) {
@@ -328,7 +330,7 @@ class BeanBuilder {
      * @return
      * @throws Exception
      */
-    private @Nonnull List<Object> buildList(Node iter) throws Exception {
+    protected @Nonnull List<Object> buildList(Node iter) throws Exception {
         List<Object> beanList = new ArrayList<>(16);
 
         while (iter != null && iter.getNodeType() == Node.ELEMENT_NODE) {
@@ -390,7 +392,7 @@ class BeanBuilder {
      * @param beanElem
      * @return
      */
-    private @Nullable Element
+    private static  @Nullable Element
     findCtorElem(Element beanElem) {
         Element ctorElem = null;
         Node _n = beanElem.getFirstChild();
@@ -490,4 +492,33 @@ class BeanBuilder {
         return BeanEditor.construct(klass, ls.toArray());
     }
 
+    @Override
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    @Override
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    @Override
+    public ConfigCenter getConfigCenter() {
+        return configCenter;
+    }
+
+    @Override
+    public void setConfigCenter(ConfigCenter configCenter) {
+        this.configCenter = configCenter;
+    }
+
+    @Override
+    public IBeanAssembler getAssembler() {
+        return assembler;
+    }
+
+    @Override
+    public void setAssembler(IBeanAssembler assembler) {
+        this.assembler = assembler;
+    }
 }

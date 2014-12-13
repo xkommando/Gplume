@@ -1,5 +1,7 @@
 package com.caibowen.gplume.context;
 
+import org.w3c.dom.Element;
+
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -12,9 +14,9 @@ class ProxyBean implements InvocationHandler {
 
     Class<?> targetClass;
     Object realBean;
-
-    public ProxyBean(Class<?> targetClass) {
+    ProxyBean(Class<?> targetClass) {
         this.targetClass = targetClass;
+        this.realBean = null;
     }
 
     boolean inited() {
@@ -23,7 +25,6 @@ class ProxyBean implements InvocationHandler {
 
     void init(@Nonnull Object rb) {
         this.realBean = rb;
-//        targetClass = rb.getClass();
     }
 
     @Override
