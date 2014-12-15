@@ -2,6 +2,7 @@ package com.caibowen.gplume.scala.test
 
 import com.caibowen.gplume.resource.ClassLoaderInputStreamProvider
 import com.caibowen.gplume.scala.context.{AppContext, ContextBooter}
+import net.liftweb.json.{DefaultFormats, Serialization}
 
 /**
  * @author BowenCai
@@ -19,21 +20,20 @@ object AssembleTest extends App {
   Console.setOut(System.err)
 
   val obj = AppContext.beanAssembler.getBean("testObj").asInstanceOf[ScalaObj]
-//  val js = Serialization.writePretty(obj)(DefaultFormats)
-  println(obj.map)
-  println(obj.lsmap)
-//  val js = JSON.toJSONString(obj, true)
-//  println(js)
-//  <dependency>
-//    <groupId>net.liftweb</groupId>
-//    <artifactId>lift-json_2.10</artifactId>
-//    <version>2.5.1</version>
-//    <scope>test</scope>
-//  </dependency>
-//    <dependency>
-//      <groupId>com.alibaba</groupId>
-//      <artifactId>fastjson</artifactId>
-//      <version>1.1.15</version>
-//    </dependency>
+  val js1 = Serialization.writePretty(obj)(DefaultFormats)
+//  println(obj.map)
+//  println(obj.lsmap)
+//  val js2 = JSON.toJSONString(obj, true)
+  println(js1)
+//  println("\r\n\r\n\r\n")
+//  println(js2)
+
   println("Done")
 }
+
+
+
+
+
+
+

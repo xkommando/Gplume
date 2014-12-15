@@ -18,7 +18,20 @@ import com.caibowen.gplume.resource.InputStreamCallback
  */
 object CommonConversions {
 
-
+  def toJson(map: Map[Any, Any]): String ={
+    val b = new StringBuilder(128)
+    b.append("{")
+    map.foreach((t:(Any, Any))=>b.append('\"').append(t._1).append("\":\"").append(t._2).append("\",\r\n"))
+    b.append("}")
+    b.toString
+  }
+  def toJson(set: Set[Any]): String ={
+    val b = new StringBuilder(128)
+    b.append("[")
+    set.foreach(b.append('\"').append(_).append("\","))
+    b.append("]")
+    b.toString
+  }
   // ---------------- thread
   @inline
   implicit def makeRunnable(f: => Unit): Runnable = new Runnable() { def run() = f }
