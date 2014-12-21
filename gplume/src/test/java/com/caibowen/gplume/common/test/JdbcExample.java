@@ -44,7 +44,7 @@ public class JdbcExample {
             }
         }, new String[]{"id"}, RowMapping.STR_ROW_MAPPING) ;
 
-        List<Model> ls = jdbcSupport.queryForList(new StatementCreator() {
+        List<Model> ls = jdbcSupport.queryList(new StatementCreator() {
             @Nonnull
             @Override
             public PreparedStatement createStatement(@Nonnull Connection con) throws SQLException {

@@ -58,7 +58,6 @@ public abstract class AbstractControlCenter
 	 * optional.
 	 * visible to RequestContext
 	 */
-	@Inject
 	IErrorHandler errorHandler = new DefaultErrorHandler();
 	public IErrorHandler getErrorHandler() 
 	{ return errorHandler;}

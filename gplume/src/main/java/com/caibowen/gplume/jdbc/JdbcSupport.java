@@ -299,7 +299,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     }
 
     @Override
-    public <T> T queryForObject(StatementCreator psc, RowMapping<T> mapper) {
+    public <T> T queryObject(StatementCreator psc, RowMapping<T> mapper) {
         Connection connection = acquireConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -329,7 +329,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     }
 
     @Override
-    public <T> List<T> queryForList(StatementCreator psc, RowMapping<T> mapper) {
+    public <T> List<T> queryList(StatementCreator psc, RowMapping<T> mapper) {
         Connection connection = acquireConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -341,7 +341,7 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
                 LOG.trace("Executing prepared SQL statement[" + ps + "]");
             rs = ps.executeQuery();
             checkWarnings(ps);
-            List<T> ls = new ArrayList<>(16);
+            List<T> ls = new ArrayList<>(32);
             while (rs.next()) {
                 ls.add(mapper.extract(rs));
             }
@@ -417,13 +417,13 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
      * get object of requested type
      */
     @Override
-    public <T> T queryForObject(final String sql, Class<T> type) {
-        return queryForObject(getStatementCreator(sql), type);
+    public <T> T queryObject(final String sql, Class<T> type) {
+        return queryObject(getStatementCreator(sql), type);
     }
 
     @Override
-    public <T> T queryForObject(String sql, Class<T> type, Object... params) {
-        return queryForObject(getStatementCreator(sql, params), type);
+    public <T> T queryObject(String sql, Class<T> type, Object... params) {
+        return queryObject(getStatementCreator(sql, params), type);
     }
 
 
@@ -431,8 +431,8 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
      * get single object of requested type
      */
     @Override
-    public <T> T queryForObject(StatementCreator psc, Class<T> type) {
-        return queryForObject(psc, new SingleColumnMapper<>(type));
+    public <T> T queryObject(StatementCreator psc, Class<T> type) {
+        return queryObject(psc, new SingleColumnMapper<>(type));
     }
 
 //-----------------------------------------------
@@ -440,30 +440,30 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
 //-----------------------------------------------
 
     @Override
-    public <T> T queryForObject(final String sql, RowMapping<T> mapper) {
-        return queryForObject(getStatementCreator(sql), mapper);
+    public <T> T queryObject(final String sql, RowMapping<T> mapper) {
+        return queryObject(getStatementCreator(sql), mapper);
     }
 
     @Override
-    public <T> T queryForObject(final String sql,
+    public <T> T queryObject(final String sql,
                                 RowMapping<T> mapper,
                                 final Object... params) {
 
-        return queryForObject(getStatementCreator(sql, params), mapper);
+        return queryObject(getStatementCreator(sql, params), mapper);
     }
 
     @Override
-    public <T> List<T> queryForList(final String sql, RowMapping<T> mapper) {
+    public <T> List<T> queryList(final String sql, RowMapping<T> mapper) {
 
-        return queryForList(getStatementCreator(sql), mapper);
+        return queryList(getStatementCreator(sql), mapper);
     }
 
     @Override
-    public <T> List<T> queryForList(final String sql,
+    public <T> List<T> queryList(final String sql,
                                     RowMapping<T> mapper,
                                     final Object... params) {
 
-        return queryForList(getStatementCreator(sql, params), mapper);
+        return queryList(getStatementCreator(sql, params), mapper);
     }
 
 
@@ -473,19 +473,19 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
 //-----------------------------------------------
 
     @Override
-    public <T> List<T> queryForList(final String sql, Class<T> type) {
-        return queryForList(getStatementCreator(sql), type);
+    public <T> List<T> queryList(final String sql, Class<T> type) {
+        return queryList(getStatementCreator(sql), type);
     }
 
     @Override
-    public <T> List<T> queryForList(String sql, Class<T> type, Object... params) {
-        return queryForList(getStatementCreator(sql, params), type);
+    public <T> List<T> queryList(String sql, Class<T> type, Object... params) {
+        return queryList(getStatementCreator(sql, params), type);
     }
 
 
     @Override
-    public <T> List<T> queryForList(StatementCreator psc, Class<T> type) {
-        return queryForList(psc, new SingleColumnMapper<>(type));
+    public <T> List<T> queryList(StatementCreator psc, Class<T> type) {
+        return queryList(psc, new SingleColumnMapper<>(type));
     }
 
 
@@ -496,32 +496,32 @@ public class JdbcSupport implements JdbcOperations, TransactionSupport {
     public static final RowMapping<Map<String, Object>> COL_MAPPER = new ColumnMapper();
 
     @Override
-    public List<Map<String, Object>> queryForList(final String sql) {
-        return queryForList(getStatementCreator(sql), COL_MAPPER);
+    public List<Map<String, Object>> queryList(final String sql) {
+        return queryList(getStatementCreator(sql), COL_MAPPER);
     }
     @Override
-    public List<Map<String, Object>> queryForList(final String sql, Object... params) {
-        return queryForList(getStatementCreator(sql, params), COL_MAPPER);
+    public List<Map<String, Object>> queryList(final String sql, Object... params) {
+        return queryList(getStatementCreator(sql, params), COL_MAPPER);
     }
     @Override
-    public List<Map<String, Object>> queryForList(final StatementCreator psc) {
-        return queryForList(psc, COL_MAPPER);
-    }
-
-    @Override
-    public Map<String, Object> queryForMap(String sql) {
-        return queryForObject(sql, COL_MAPPER);
+    public List<Map<String, Object>> queryList(final StatementCreator psc) {
+        return queryList(psc, COL_MAPPER);
     }
 
     @Override
-    public Map<String, Object> queryForMap(String sql, Object... params) {
-        return queryForObject(sql, COL_MAPPER, params);
+    public Map<String, Object> queryMap(String sql) {
+        return queryObject(sql, COL_MAPPER);
+    }
+
+    @Override
+    public Map<String, Object> queryMap(String sql, Object... params) {
+        return queryObject(sql, COL_MAPPER, params);
     }
 
 
     @Override
-    public Map<String, Object> queryForMap(StatementCreator psc) {
-        return queryForObject(psc, COL_MAPPER);
+    public Map<String, Object> queryMap(StatementCreator psc) {
+        return queryObject(psc, COL_MAPPER);
     }
 
 

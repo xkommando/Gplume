@@ -35,8 +35,6 @@ public class JsonViewResolver implements IViewResolver {
     @Inject
     private Boolean doPrettyPrint = Boolean.TRUE;
 
-
-
     @Override
     public int fitness(Class klass) {
         return JsonResult.class.equals(klass) ? 1

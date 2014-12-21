@@ -102,14 +102,10 @@ class BeanBuilder extends JBeanBuilder {
   newInstance(@Nonnull klass: Class[_], @Nullable prop: Element): AnyRef = {
     if (prop == null) {
       try {
-        val ctor = klass.getDeclaredConstructor(null)
-        if (!ctor.isAccessible) ctor.setAccessible(true)
-        return ctor.newInstance().asInstanceOf[AnyRef]
-      }
-      catch {
-        case e: Exception => {
-          throw new BeanAssemblingException("Could find default constructor", e)
-        }
+        return klass.newInstance().asInstanceOf[AnyRef]
+      }catch {
+        case e:Throwable =>
+                  throw new BeanAssemblingException("Could not find default constructor", e)
       }
     }
     // 2 try in tag

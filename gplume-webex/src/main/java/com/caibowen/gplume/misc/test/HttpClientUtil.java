@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * http 最新工具类
+ * @Author CaiBowen
  */
 public final class HttpClientUtil {
     private final static Logger logger = LoggerFactory.getLogger(HttpClientUtil.class);

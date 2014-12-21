@@ -1,6 +1,6 @@
 package com.caibowen.gplume.scala
 
-/** scalaj.http
+/** http
   Copyright 2010 Jonathan Hoffman
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,8 @@ import javax.net.ssl.HostnameVerifier
 import java.util.zip.{GZIPInputStream, InflaterInputStream}
 
 import com.caibowen.gplume.common.Codecs
+
+import scala.annotation.tailrec
 
 /** Helper functions for modifying the underlying HttpURLConnection */
 object HttpOptions {
@@ -110,7 +112,7 @@ case class MultiPart(val name: String, val filename: String, val mime: String, v
 
 case class HttpException(val message: String, cause: Throwable) extends RuntimeException(message, cause)
 
-/** Result of executing a [[scalaj.http.HttpRequest]]
+/** Result of executing a [[http.HttpRequest]]
   * @tparam T the body response since it can be parsed directly to things other than String
   * @param body the Http response body
   * @param code the http response code from the status line
@@ -161,7 +163,7 @@ case class HttpResponse[T](body: T, code: Int, headers: Map[String, String]) {
   *
   * This is the workhorse of the scalaj-http library.
   *
-  * You shouldn't need to construct this manually. Use [[scalaj.http.Http.apply]] to get an instance
+  * You shouldn't need to construct this manually. Use [[http.Http.apply]] to get an instance
   *
   * The params, headers and options methods are all additive. They will always add things to the request. If you want to 
   * replace those things completely, you can do something like {{{.copy(params=newparams)}}}
@@ -570,6 +572,7 @@ object HttpConstants {
       val bos = new ByteArrayOutputStream
       val ba = new Array[Byte](4096)
 
+      @tailrec
       def readOnce {
         val len = in.read(ba)
         if (len > 0) bos.write(ba, 0, len)
@@ -609,7 +612,7 @@ object Http extends BaseHttp
 /**
   * Extends and override this class to setup your own defaults
   *
-  * @param proxy http proxy. You can use [[scalaj.http.HttpConstants.proxy]] to create one
+  * @param proxy http proxy. You can use [[http.HttpConstants.proxy]] to create one
   * @param options set things like timeouts, ssl handling, redirect following
   * @param charset charset to use for encoding request and decoding response
   * @param sendBufferSize buffer size for multipart posts
@@ -625,7 +628,7 @@ class BaseHttp (
   compress: Boolean = true
 ) {
 
-  /** Create a new [[scalaj.http.HttpRequest]]
+  /** Create a new [[http.HttpRequest]]
    *
    * @param url the full url of the request. Querystring params can be added to a get request with the .params methods
    */

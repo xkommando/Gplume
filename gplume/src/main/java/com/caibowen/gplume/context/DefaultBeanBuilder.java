@@ -457,7 +457,7 @@ public class DefaultBeanBuilder implements IBeanBuilder {
                 }
                 return ctor.newInstance();
             } catch (Exception e) {
-                throw new BeanAssemblingException("Could find default constructor");
+                throw new BeanAssemblingException("Could not find default constructor");
             }
         }
         // 2 try in tag

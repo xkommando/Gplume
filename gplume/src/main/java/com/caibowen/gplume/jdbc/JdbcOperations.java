@@ -48,30 +48,30 @@ public interface JdbcOperations {
     List<Map<String, Object>> batchInsert(StatementCreator creator, String[] cols);
 
 
-    <T> T queryForObject(StatementCreator psc, RowMapping<T> mapper); // 5
-	<T> T queryForObject(String sql, Class<T> type);
-	<T> T queryForObject(String sql, Class<T> type, Object... params);
-	<T> T queryForObject(StatementCreator psc, Class<T> type);
+    <T> T queryObject(StatementCreator psc, RowMapping<T> mapper); // 5
+	<T> T queryObject(String sql, Class<T> type);
+	<T> T queryObject(String sql, Class<T> type, Object... params);
+	<T> T queryObject(StatementCreator psc, Class<T> type);
 	
-	<T> T queryForObject(String sql, RowMapping<T> mapper);
-	<T> T queryForObject(String sql, RowMapping<T> mapper, Object... params);
+	<T> T queryObject(String sql, RowMapping<T> mapper);
+	<T> T queryObject(String sql, RowMapping<T> mapper, Object... params);
 
-    <T> List<T> queryForList(StatementCreator psc, RowMapping<T> mapper);// 6
+    <T> List<T> queryList(StatementCreator psc, RowMapping<T> mapper);// 6
 
-	<T> List<T> queryForList(String sql, Class<T> type);
-	<T> List<T> queryForList(String sql, Class<T> type, Object... params);
-	<T> List<T> queryForList(StatementCreator psc, Class<T> type);
+	<T> List<T> queryList(String sql, Class<T> type);
+	<T> List<T> queryList(String sql, Class<T> type, Object... params);
+	<T> List<T> queryList(StatementCreator psc, Class<T> type);
 	
-	<T> List<T> queryForList(String sql, RowMapping<T> mapper);
-	<T> List<T> queryForList(String sql, RowMapping<T> mapper, Object... params);
+	<T> List<T> queryList(String sql, RowMapping<T> mapper);
+	<T> List<T> queryList(String sql, RowMapping<T> mapper, Object... params);
 
-    List<Map<String, Object>> queryForList(String sql);
-    List<Map<String, Object>> queryForList(String sql, Object... params);
-    List<Map<String, Object>> queryForList(StatementCreator psc);
+    List<Map<String, Object>> queryList(String sql);
+    List<Map<String, Object>> queryList(String sql, Object... params);
+    List<Map<String, Object>> queryList(StatementCreator psc);
 
 
-	Map<String, Object> queryForMap(String sql);
-	Map<String, Object> queryForMap(String sql, Object... params);
-	Map<String, Object> queryForMap(StatementCreator psc);
+	Map<String, Object> queryMap(String sql);
+	Map<String, Object> queryMap(String sql, Object... params);
+	Map<String, Object> queryMap(StatementCreator psc);
 	
 }
