@@ -88,6 +88,6 @@ public class ReqDefaultValSetter extends ReqSetter {
 	public String toString() {
 		return "ReqDefaultValSetter [defaultVal=" + defaultVal + ", getter="
 				+ getter + ", name=" + name + ", field=" + field
-				+ ", nullable=" + nullable + "]";
+				+ ", required=" + nullable + "]";
 	}
 }

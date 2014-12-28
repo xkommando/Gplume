@@ -56,10 +56,10 @@
 //		@ReqParam("psw_cipher")
 //		String passwordCipher;
 //		
-//		@ReqParam(value="email_address", nullable = false)
+//		@ReqParam(value="email_address", required = false)
 //		String email;
 //		
-//		@SessionAttr(value="this_pubkey",nullable = false)
+//		@SessionAttr(value="this_pubkey",required = false)
 //		PublicKey key;
 //		
 //		User user;

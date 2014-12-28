@@ -110,7 +110,9 @@ public class StatefulActionBuilder {
 			}
 			if (!c.isAccessible())
 				c.setAccessible(true);
-			return new StateGen(setters, c);
+			StateGen _g = new StateGen(setters, c);
+			BuilderAux.stateMap.put(stateCls, _g);
+			return _g;
 			
 		} else {
 			// non-static inner class
@@ -144,7 +146,12 @@ public class StatefulActionBuilder {
 			return s;
 		}
 	}
-	
+
+	/**
+	 *
+	 * @param stateCls
+	 * @return list of setters for state object of this class
+	 */
 	private static List<IStateSetter> setters(Class<?> stateCls) {
 		
 		Field[] fs = stateCls.getDeclaredFields();
@@ -158,7 +165,8 @@ public class StatefulActionBuilder {
 	}
 	
 	/**
-	 * 
+	 * get referred class, used for inner class, e.g., nested non-static
+	 *
 	 * @param stateCls
 	 * @return null if no ref
 	 */

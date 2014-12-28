@@ -1,4 +1,4 @@
-package com.caibowen.gplume.scala.conversion
+package gplume.scala.conversion
 
 import java.io.InputStream
 import java.sql.{Connection, PreparedStatement, ResultSet}

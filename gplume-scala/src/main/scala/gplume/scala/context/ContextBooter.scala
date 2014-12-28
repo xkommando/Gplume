@@ -1,4 +1,4 @@
-package com.caibowen.gplume.scala.context
+package gplume.scala.context
 
 import com.caibowen.gplume.context.{ContextBooter => JBooter, ConfigCenter}
 import com.caibowen.gplume.misc.Str

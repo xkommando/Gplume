@@ -1,4 +1,4 @@
-package com.caibowen.gplume.scala.conversion
+package gplume.scala.conversion
 
 import com.caibowen.gplume.common.Base64
 import com.caibowen.gplume.misc.Str._

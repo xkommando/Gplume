@@ -1,7 +1,7 @@
-package com.caibowen.gplume.scala.test
+package gplume.scala.test
 
 import com.caibowen.gplume.resource.ClassLoaderInputStreamProvider
-import com.caibowen.gplume.scala.context.{AppContext, ContextBooter}
+import gplume.scala.context.{AppContext, ContextBooter}
 import net.liftweb.json.{DefaultFormats, Serialization}
 
 /**

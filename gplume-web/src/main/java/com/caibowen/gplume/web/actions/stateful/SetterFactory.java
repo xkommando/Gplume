@@ -53,8 +53,8 @@ import java.util.Map;
  * 
  * Strategies:
  * 
- * nullable ? 
- * annotated with @Nonnull && nullable
+ * required ?
+ * annotated with @Nonnull && required
  * 
  * name ? @Named value 
  * 			or @ReqAttr value 
@@ -98,7 +98,7 @@ public class SetterFactory {
 				field.setAccessible(true);
 			} catch (Exception e) {
 				throw new RuntimeException(
-					"cannot set not accessaible for field ["
+					"Could not set not accessible for field ["
 						+ field.getName() + "] in class ["
 						+ field.getDeclaringClass().getName() + "]");
 			}
@@ -123,7 +123,7 @@ public class SetterFactory {
 					, nullable(field));
 			
 			/**
-			 * ContextAttr
+			 * ContextAttr: request context
 			 */
 		} else if (field.isAnnotationPresent(ContextAttr.class)) {
 
@@ -134,7 +134,7 @@ public class SetterFactory {
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
 			/**
-			 * CookieVal
+			 * CookieVal: value from cookie
 			 */
 		} else if (field.isAnnotationPresent(CookieVal.class)) {
 
@@ -145,7 +145,7 @@ public class SetterFactory {
 			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
 			
 			/**
-			 * ReqAttr
+			 * ReqAttr: this request
 			 */
 		} else if (field.isAnnotationPresent(ReqAttr.class)) {
 
@@ -172,7 +172,7 @@ public class SetterFactory {
 //			PathVal ann = field.getAnnotation(PathVal.class);
 //			MethodHandle handle = anno2HandleMap.get(PathVal.class);
 //			return Str.Utils.notBlank(ann.defaultVal()) ? 
-//					new PathValDefaltSetter(handle, field, nullable(field) && ann.nullable(), , p)
+//					new PathValDefaltSetter(handle, field, required(field) && ann.required(), , p)
 //			
 //		}
 		/**
@@ -198,13 +198,13 @@ public class SetterFactory {
 					new ReqParamDefaultValSetter(handle
 					, named(field, ann.value())
 					, field
-					, nullable(field) && ann.nullable()
+					, nullable(field) && ann.required()
 					, Converter.slient.translateStr(ann.defaultVal(), field.getType()))
 			
 			: new ReqSetter(handle
 					, named(field, ann.value())
 					, field
-					, nullable(field) && ann.nullable());
+					, nullable(field) && ann.required());
 		}
 		return null;
 	}
@@ -268,7 +268,7 @@ public class SetterFactory {
 	}
 	
 	/**
-	 *  nullable -> silent Req.get faild ? null
+	 *  required -> silent Req.get faild ? null
 	 *  
 	 *  precast and get default Object, do not invoke exact
 	 *  nonnull -> silent Req.get failed? -> default;
@@ -282,7 +282,6 @@ public class SetterFactory {
 	
 	static {
 		try {
-			
 		
 		Class<RequestContext> klass = RequestContext.class;
 //		Converter.slient.translateStr("", Integer.class);
@@ -416,7 +415,7 @@ public class SetterFactory {
 				));
 		
 		} catch (Exception e) {
-			throw new RuntimeException("cannot construct SetterFactory", e);
+			throw new RuntimeException("Could not construct SetterFactory", e);
 		}
 	}
 }

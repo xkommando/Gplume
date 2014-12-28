@@ -1,4 +1,4 @@
-package com.caibowen.gplume.scala.context
+package gplume.scala.context
 
 import java.nio.charset.Charset
 import java.util.{Date, Calendar, TimeZone}
@@ -30,15 +30,15 @@ object AppContext {
   /**
    * config file location, written in web.xml
    */
-  val MANIFEST: String = "manifest"
-  val LOCALE: String = "locale"
-  val TIME_ZONE: String = "timezone"
-  private[this] val _beanBuilder = new com.caibowen.gplume.scala.context.BeanBuilder
+  val MANIFEST = "manifest"
+  val LOCALE  = "locale"
+  val TIME_ZONE = "timezone"
+  private[this] val _beanBuilder = new gplume.scala.context.BeanBuilder
   val beanAssembler: IBeanAssembler = new XMLAssembler(_beanBuilder)
   _beanBuilder.setAssembler(beanAssembler)
 
   val broadcaster = new Broadcaster
 
-  def now: Date = defaults.calendar.getTime
+  def now = defaults.calendar.getTime
 
 }

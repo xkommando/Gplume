@@ -38,7 +38,7 @@ public @interface CookieVal {
 	String value() default "";
 
 	/**
-	 * Whether the parameter is nullable.
+	 * Whether the parameter is required.
 	 */
 	boolean nullable() default true;
 	

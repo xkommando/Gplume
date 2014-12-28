@@ -102,7 +102,7 @@ public class ReqSetter implements IStateSetter {
 	@Override
 	public String toString() {
 		return "ReqSetter [getter=" + getter + ", name=" + name + ", field="
-				+ field + ", nullable=" + nullable + "]";
+				+ field + ", required=" + nullable + "]";
 	}
 
 }

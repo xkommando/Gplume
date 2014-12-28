@@ -1,4 +1,4 @@
-package com.caibowen.gplume.scala
+package gplume.scala
 
 /** scalaj.http
   Copyright 2010 Jonathan Hoffman

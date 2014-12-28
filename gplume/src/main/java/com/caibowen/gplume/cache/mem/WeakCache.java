@@ -17,6 +17,7 @@ package com.caibowen.gplume.cache.mem;
 
 import com.caibowen.gplume.common.Function;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
@@ -53,7 +54,8 @@ public final class WeakCache<K, V> implements Serializable {
 		}
 		return map.get(key) != null;
 	}
-	
+
+	@Nullable
 	public V get(K key) {
 		if (map == null) {
 			return null;

@@ -39,7 +39,7 @@ public class TagLink extends WriterTag {
 			return "dunplicated display id: displayName["
 					+ displayName + "] native id[" + nativeName + "]";
 		}
-		// nullable
+		// required
 //		else if (displayName == null && id == null) {
 //			return "null display id and  native id";
 //		}

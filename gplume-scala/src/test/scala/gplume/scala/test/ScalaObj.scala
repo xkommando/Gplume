@@ -1,4 +1,4 @@
-package com.caibowen.gplume.scala.test
+package gplume.scala.test
 
 import com.caibowen.gplume.context.bean.{IDAwareBean, InitializingBean}
 

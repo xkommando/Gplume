@@ -1,4 +1,4 @@
-package com.caibowen.gplume.scala.jdbc
+package gplume.scala.jdbc
 
 import java.sql.{ResultSet, Timestamp}
 
@@ -19,7 +19,7 @@ object RowMappings {
     def extract(rs: ResultSet) = rs.getShort(1)
   }
 
-  val INT_MAPPING = new JMapping[Integer] {
+  val INT_MAPPING = new JMapping[Int] {
     def extract(rs: ResultSet) = rs.getInt(1)
   }
 
