@@ -1,12 +1,17 @@
 package gplume.scala.jdbc
 
+import scala.collection.GenTraversableOnce
 import java.math.MathContext
-import java.sql._
+import java.sql.{Connection, Statement, PreparedStatement, ResultSet, Time, Timestamp}
 
 /**
  * Created by Bowen Cai on 12/27/2014.
  */
 object SQLOperation {
+
+//  private[gplume] def apply(value: String, parameters: Seq[Any] = Nil) = new SQLOperation(value, parameters)
+//
+//  def unapply(op: SQLOperation): Option[(String, Seq[Any])] = Some((op.stmt, op.parameters))
 
   // single value collectors
   val colBool = (rs: ResultSet) => rs.getBoolean(1)
@@ -28,7 +33,7 @@ object SQLOperation {
 //  no return
 //  def NRET[A, B]: A=>B = (a:A)=>{null.asInstanceOf[B]}
 
-  def bind(stmt: PreparedStatement, params: Seq[Any]): Unit = {
+  def bind(stmt: PreparedStatement, params: GenTraversableOnce[Any]): Unit = {
     if (params != null && params.size > 0) {
       var i = 0
       for (param <- params) {
@@ -63,9 +68,9 @@ class SQLOperation private[gplume](val stmt: String, var parameters: Seq[Any] = 
   import SQLOperation._
 
   def batchExe[A](prepare: Connection=>PreparedStatement = _.prepareStatement(stmt),
-                  paramsList: Seq[Seq[Any]],
+                  paramsList: GenTraversableOnce[GenTraversableOnce[Any]],
                   process: PreparedStatement => A)(implicit session: DBSession): A = {
-    val ps = session.connection.prepareStatement(stmt)
+    val ps = prepare(session.connection)
     paramsList.foreach(t=>{
       bind(ps, t)
       ps.addBatch()
@@ -96,7 +101,7 @@ class SQLOperation private[gplume](val stmt: String, var parameters: Seq[Any] = 
     if (hasResult)
       ps.getUpdateCount > 0
     else
-      false
+      true
   })
 
   def insert[A](extract: ResultSet => A)(implicit session: DBSession): Option[A]
@@ -109,8 +114,14 @@ class SQLOperation private[gplume](val stmt: String, var parameters: Seq[Any] = 
       None
   })
 
+  def batchInsert(paramsList: GenTraversableOnce[GenTraversableOnce[Any]])(implicit session: DBSession): Array[Int]
+  = batchExe(paramsList = paramsList,
+    process = ps => {
+      ps.executeBatch()
+    })
+
   def batchInsert[A](extract: ResultSet => A,
-                     paramsList: Seq[Seq[Any]])(implicit session: DBSession): List[A]
+                     paramsList: GenTraversableOnce[GenTraversableOnce[Any]])(implicit session: DBSession): List[A]
   = batchExe(_.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS),
     paramsList,
     ps => {

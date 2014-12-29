@@ -6,7 +6,7 @@ package gplume.scala.jdbc
  */
 object SQLInterpolation {
 
-  private case object padding
+  private case object PaddingParam
 
   implicit class SQLHelper(val s: StringContext) extends AnyVal {
 
@@ -16,12 +16,11 @@ object SQLInterpolation {
     }
 
     private def buildQuery(params: Seq[Any]): String = {
-      val sb = new StringBuilder(128)
-      s.parts.zipAll(params, "", padding).foreach(e => {
-        sb ++= e._1
-        addPlaceholders(sb, e._2)
-      })
-      sb.toString
+      s.parts.zipAll(params, "", PaddingParam).foldLeft(new StringBuilder(128))(
+        (sb, t)=>{
+        sb ++= t._1
+        addPlaceholders(sb, t._2)
+      }).toString
     }
 
     private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder = param match {
@@ -31,7 +30,8 @@ object SQLInterpolation {
       case s: Set[_] => addPlaceholders(sb, s.toList) // e.g. in clause
       case t: Traversable[_] => for (i <- 1 until t.size) sb.append('?').append(',')
         sb += '?'
-      case padding => sb
+      case `PaddingParam` => sb
+      case op: SQLOperation => sb ++= op.stmt
       case _ => sb += '?'
     }
   }

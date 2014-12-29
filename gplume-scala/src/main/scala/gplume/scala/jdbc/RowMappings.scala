@@ -5,9 +5,11 @@ import java.sql.{ResultSet, Timestamp}
 import com.caibowen.gplume.jdbc.mapper.{RowMapping => JMapping}
 
 /**
+ *
  * @author BowenCai
  * @since  17/12/2014.
  */
+@deprecated("Please use gplume.scala.jdbc instead of com.caibowen.gplume.jdbc")
 object RowMappings {
 
   val BOOLEAN_MAPPING = new JMapping[Boolean] {
