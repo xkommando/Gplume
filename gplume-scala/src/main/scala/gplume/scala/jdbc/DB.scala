@@ -27,8 +27,12 @@ class DB(ds: DataSource) {
 
   def readOnlySession[T](f: DBSession => T): T = withSession(new DBSession(ds.getConnection, true), f)
 
-  def transactional[T](operation: Transaction => T): T
-  = withSession(new DBSession(ds.getConnection, false), _.transactional(operation = operation))
+  def transactional[T](operation: DBSession => T): T
+  = withSession(new DBSession(ds.getConnection, false), _.transactional(operation =
+    tnx => operation(tnx.session)
+  ))
+
+  def execute(sqlStmt: String) = withSession(new DBSession(ds.getConnection, false), new SQLOperation(sqlStmt, null).execute(_))
 
 
 }

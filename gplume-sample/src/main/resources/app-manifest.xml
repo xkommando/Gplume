@@ -69,6 +69,11 @@
         <!-- using JSP view resolver by default -->
         <prop name="viewPrefix" val="/"/>
         <prop name="viewSuffix" val=".jsp" />
+        <prop name="defaultURIs">
+            <list>
+                <val>*.html</val>
+            </list>
+        </prop>
     </bean>
 
     <bean id="i18nService" class="com.caibowen.gplume.web.i18n.HotSwapWebI18n">

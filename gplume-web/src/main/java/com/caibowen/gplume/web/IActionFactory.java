@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.web;
 
+import com.caibowen.gplume.web.actions.IActionMapper;
 import com.caibowen.gplume.web.actions.Interception;
 
 import javax.annotation.Nonnull;
@@ -36,6 +37,14 @@ import java.util.List;
 public interface IActionFactory {
 
     void setViewResolvers(List<IViewResolver> resolvers);
+
+    /**
+     * set default mapper. only when no action is found in default mapper will other mapper be used
+     *
+     * this is used for static resources, e.g., request for static data will be forwarded by default servlet.
+     * @param mapper
+     */
+    void setDefaultMapper(IActionMapper mapper);
 
     void registerHandles(@Nullable String prefix,
                          @Nullable Object ctrl,

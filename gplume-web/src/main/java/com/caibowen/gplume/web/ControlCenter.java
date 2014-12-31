@@ -24,6 +24,7 @@ import com.caibowen.gplume.web.annotation.Handle;
 import com.caibowen.gplume.web.annotation.Intercept;
 
 import javax.inject.Inject;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -43,7 +44,7 @@ import java.util.List;
  * @author BowenCai
  * 
  */
-public class ControlCenter extends AbstractControlCenter {
+public class ControlCenter extends BaseControlCenter {
 
 	private static final long serialVersionUID = -5848401100999563548L;
 	
@@ -56,6 +57,51 @@ public class ControlCenter extends AbstractControlCenter {
 	}
 
 // -----------------------------------------------------------------------------
+
+	/**
+	 * called before any request processing
+	 *
+	 * @throws ClassNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @throws Throwable
+	 */
+	public void init(ServletContext context) throws Throwable {
+		/**
+		 * set servlet context
+		 */
+		setServletContext(context);
+
+		/**
+		 * build Actions
+		 */
+		for (Object ctrlObj : controllers) {
+			try {
+				addController(ctrlObj, true);
+			} catch (Exception e) {
+				throw new RuntimeException(
+						"error adding controller["
+								+ ctrlObj.getClass().getName() + "]\r\n"
+								+ e.getMessage(), e);
+			}
+		}
+
+		/**
+		 *  build processing chain: put this control center to the tail
+		 */
+		IRequestProcessor p = getPreProcessor();
+		if (p == null) {
+			setPreProcessor(this);
+		} else {
+			// controlCenter is the tail of process chain
+			while (p.getNext() != null) {
+				p = p.getNext();
+			}
+			p.setNext(this);
+		}
+		actionFactory.setDefaultMapper(buildDefaultMapper(context));
+		LOG.info("\t>>>>> Ready to roll! ");
+	}
 
 	@Override
 	public void handle(final String uri, RequestContext context) {

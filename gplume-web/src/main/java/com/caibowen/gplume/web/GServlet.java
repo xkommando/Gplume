@@ -39,7 +39,7 @@ public class GServlet extends HttpServlet {
     /**
      * necessary component
      */
-    private AbstractControlCenter controlCenter;
+    private BaseControlCenter controlCenter;
 
     @Override
     public void init(ServletConfig config) throws ServletException {

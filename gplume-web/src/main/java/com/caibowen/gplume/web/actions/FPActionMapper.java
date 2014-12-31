@@ -23,14 +23,11 @@ import java.util.HashMap;
 
 /**
  * 
- * 
- * handlers manage actions, and pass request,
- * along with its response, to the correspondent actor and the actor performs
- * 
+ * map by full uri or uri prefix
  * @author BowenCai
  *
  */
-public class ActionMapper<T extends IAction> implements Serializable {
+public class FPActionMapper<T extends IAction> implements Serializable, IActionMapper<T> {
 
 	private static final long serialVersionUID = 9039999917329134916L;
 
@@ -40,8 +37,9 @@ public class ActionMapper<T extends IAction> implements Serializable {
 	// versatile actors, match /xyz/* or /sadfj*
 	private URIPrefixTrie<T> multiURIMap = new URIPrefixTrie<>();
 	
-	public void 
-	add(final T action)throws IllegalArgumentException {
+	@Override
+	public void
+	add(String uri, final T action)throws IllegalArgumentException {
 
 		String s = action.effectiveURI();
 		int len = s.length();
@@ -68,6 +66,7 @@ public class ActionMapper<T extends IAction> implements Serializable {
 		}
 	}
 	
+	@Override
 	public boolean remove(final String uri) {
 
 		int len = uri.length();
@@ -79,16 +78,18 @@ public class ActionMapper<T extends IAction> implements Serializable {
 	}
 	
 
-	public IAction getAction(String actionName){
+	@Override
+	public IAction getAction(String uri){
 
-		IAction action = fixedURIMap.get(actionName);
+		IAction action = fixedURIMap.get(uri);
 		
 		if (action == null) {
-			action = multiURIMap.matchPrefix(actionName);
+			action = multiURIMap.matchPrefix(uri);
 		}
 		return action;
 	}
 	
+	@Override
 	public void clear() {
 		fixedURIMap.clear();
 		multiURIMap.clear();

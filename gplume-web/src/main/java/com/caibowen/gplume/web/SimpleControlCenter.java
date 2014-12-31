@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.caibowen.gplume.web.annotation.Controller;
 import com.caibowen.gplume.web.annotation.Handle;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -38,7 +39,14 @@ public class SimpleControlCenter extends ControlCenter {
 	private static final long serialVersionUID = -1948249520836896853L;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SimpleControlCenter.class);
-	
+
+
+	public void init(ServletContext context) throws Throwable {
+		super.init(context);
+		controllers = null;
+		defaultURIs = null;
+	}
+
 	@Override
 	public void handle(final String uri, RequestContext requestContext) {
 		Throwable thrown = null;

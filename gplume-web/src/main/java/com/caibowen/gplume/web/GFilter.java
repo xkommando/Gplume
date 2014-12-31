@@ -49,18 +49,18 @@ public class GFilter implements Filter {
 	/**
 	 *  required component
 	 */
-	private AbstractControlCenter controlCenter;
+	private BaseControlCenter controlCenter;
 
 	
 	@Override
-	public void init(FilterConfig arg0) throws ServletException {
+	public void init(FilterConfig fconfig) throws ServletException {
 
-		Set ctrols = AppContext.beanAssembler.getBeans(AbstractControlCenter.class);
+		Set ctrols = AppContext.beanAssembler.getBeans(BaseControlCenter.class);
 		if (ctrols.size() != 1)
 			throw new IllegalArgumentException("wrong number of control center, expect 1, find [" + ctrols.size() + "]");
-		controlCenter = (AbstractControlCenter)ctrols.iterator().next();
+		controlCenter = (BaseControlCenter)ctrols.iterator().next();
 		try {
-			controlCenter.init(arg0.getServletContext());
+			controlCenter.init(fconfig.getServletContext());
 		} catch (Throwable e) {
             LOG.error("error construct control center", e);
 		}

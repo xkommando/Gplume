@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -78,6 +79,10 @@ public class WebConfig implements InitializingBean, Serializable {
         this.viewSuffix = viewSuffix;
     }
 
+    @Inject List<String> defaultURIs;
+    public void setDefaultURIs(List<String> defaultURIs) {
+        this.defaultURIs = defaultURIs;
+    }
 
     @Override
 	public void afterPropertiesSet() throws Exception {
@@ -108,11 +113,14 @@ public class WebConfig implements InitializingBean, Serializable {
             center.setActionFactory(factory);
             LOG.debug("setting action factory {}", factory.getClass().getName());
 
-            // add controllers
+            //5. add controllers
             ControllerScanner scanner = new ControllerScanner();
             scanner.setPackages(this.pkgs);
-            scanner.setControlCenter(center);
-            scanner.afterPropertiesSet();
+            center.setControllers(scanner.getControllers());
+
+            //6. add default urls: default urls(usually point to static resources)
+            // will be passed to the default servlet provided by the servlet container
+            center.setDefaultURIs(staticURIs());
 
 			boolean boo = AppContext.beanAssembler.addBean("controlCenter", center);
 
@@ -123,6 +131,29 @@ public class WebConfig implements InitializingBean, Serializable {
 			throw new RuntimeException("Could not build controlCenter", e);
 		}
 	}
+
+    public Set<String> staticURIs(){
+        HashSet<String> us;
+        if (defaultURIs != null)
+            us = new HashSet<>(defaultURIs);
+        else
+            us = new HashSet<>(128);
+
+        us.add("*.css");
+        us.add("*.js");
+        us.add("*.ico");
+        us.add("*.png");
+        us.add("*.gif");
+        us.add("*.jpg");
+        us.add("*.htc");
+
+        us.add("*.eot");
+        us.add("*.svg");
+        us.add("*.ttf");
+        us.add("*.woff");
+
+        return us;
+    }
 
     public List<IViewResolver> getViewResolvers() {
         IViewResolver _rStr = JspViewResolvers.get(viewPrefix, viewSuffix);

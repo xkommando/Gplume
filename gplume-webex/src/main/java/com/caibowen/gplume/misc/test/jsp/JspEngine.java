@@ -25,7 +25,7 @@ import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.caibowen.gplume.web.AbstractControlCenter;
+import com.caibowen.gplume.web.BaseControlCenter;
 
 
 /**
@@ -37,7 +37,8 @@ public class JspEngine {
 
 	private static final Logger LOG  = LoggerFactory.getLogger(JspEngine.class.getName());
 	
-	@Inject AbstractControlCenter controlCenter;
+	@Inject
+	BaseControlCenter controlCenter;
 	
 	public String compile(Input input,
 							String jspFile, PrintWriter errWriter) {
@@ -65,11 +66,11 @@ public class JspEngine {
 		}
 	}
 
-	public AbstractControlCenter getControlCenter() {
+	public BaseControlCenter getControlCenter() {
 		return controlCenter;
 	}
 
-	public void setControlCenter(AbstractControlCenter controlCenter) {
+	public void setControlCenter(BaseControlCenter controlCenter) {
 		this.controlCenter = controlCenter;
 	}
 }

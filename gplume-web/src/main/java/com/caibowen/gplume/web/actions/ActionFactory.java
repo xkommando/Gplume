@@ -43,32 +43,42 @@ public class ActionFactory implements IActionFactory, Serializable {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ActionFactory.class);
 	
-	private ActionMapper<IAction>[] mappers;
+	private IActionMapper<IAction>[] mappers;
+	private IActionMapper<IAction> defaultMapper;
     private ViewMatcher matcher;
+
 	public ActionFactory() {
 		
 		final int enumCount = HttpMethod.class.getEnumConstants().length;
 
 		// last one is for interception
-		mappers = new ActionMapper[enumCount + 1];
+		mappers = new FPActionMapper[enumCount + 1];
 
 		for (int i = 0; i < enumCount; i++) {
-			mappers[i] = new ActionMapper<>();
+			mappers[i] = new FPActionMapper<>();
 		}
-		mappers[enumCount] = new ActionMapper<>();
+		mappers[enumCount] = new FPActionMapper<>();
 
         matcher = new ViewMatcher();
 	}
 
+	@Override
+	public void setDefaultMapper(IActionMapper mapper) {
+		defaultMapper = mapper;
+	}
 
-    public void setViewResolvers(List<IViewResolver> resolvers) {
+	public void setViewResolvers(List<IViewResolver> resolvers) {
         matcher.setResolvers(resolvers);
         BuilderAux.viewMatcher = this.matcher;
     }
 
 	@Override
 	public IAction findAction(HttpMethod httpmMthod, String uri) {
-		return mappers[httpmMthod.ordinal()].getAction(uri);
+		IAction a;
+		if (null != (a = defaultMapper.getAction(uri)))
+			return a;
+		else
+			return mappers[httpmMthod.ordinal()].getAction(uri);
 	}
 	
 	@Override
@@ -91,7 +101,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 				Interception i = BuilderProxy
 								.buildInterception(uri, ctrl, method);
 				
-				mappers[mappers.length - 1].add(i);
+				mappers[mappers.length - 1].add(uri, i);
 			}
 		} else {
 			throw new NullPointerException(
@@ -133,7 +143,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 							+ " URI [{}] Method [{}]"
 							, method.toString(), action.effectiveURI(), hm);
 				
-				mappers[hm.ordinal()].add(action);
+				mappers[hm.ordinal()].add(uri, action);
 			} // methods
 		}
 		
@@ -154,7 +164,7 @@ public class ActionFactory implements IActionFactory, Serializable {
 	@Override
 	public boolean removeHandle(String uri) {
 		boolean weDidIt = false;
-		for (ActionMapper<IAction> am : mappers) {
+		for (IActionMapper<IAction> am : mappers) {
 			weDidIt = weDidIt ||  am.remove(uri);
 		}
 		return weDidIt;

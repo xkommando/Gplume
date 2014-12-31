@@ -63,7 +63,7 @@ object SQLOperation {
     }
   }
 }
-class SQLOperation private[gplume](val stmt: String, var parameters: Seq[Any] = Vector()) {
+class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
 
   import SQLOperation._
 

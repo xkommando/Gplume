@@ -36,12 +36,11 @@ import javax.servlet.http.HttpServletResponseWrapper;
  * @author BowenCai
  *
  */
-public class Output extends HttpServletResponseWrapper {
+public class Output implements HttpServletResponse {
 
 	StringWriter writer;
 
     public Output() {
-        super(null);
         writer = new StringWriter(1024);
     }
 
@@ -105,20 +104,91 @@ public class Output extends HttpServletResponseWrapper {
 	
 	@Override
 	public int getBufferSize() { return 0x7fffffff; }
-	
-//	@Override
-//	public void addCookie(Cookie arg0) {}
-//
-//	@Override
-//	public void addDateHeader(String arg0, long arg1) {}
-//
-//	@Override
-//	public void addHeader(String arg0, String arg1) {}
-//
-//	@Override
-//	public void addIntHeader(String arg0, int arg1) {}
-//
-//	@Override
-//	public boolean containsHeader(String arg0) {return false;}
 
+
+	@Override
+	public void addCookie(Cookie arg0) {}
+
+	@Override
+	public void addDateHeader(String arg0, long arg1) {}
+
+	@Override
+	public void addHeader(String arg0, String arg1) {}
+
+	@Override
+	public void addIntHeader(String arg0, int arg1) {}
+
+	@Override
+	public boolean containsHeader(String arg0) {return false;}
+
+	//--
+	@Override
+	public String encodeURL(String url) {
+		return null;
+	}
+
+	@Override
+	public String encodeRedirectURL(String url) {
+		return null;
+	}
+
+	@Override
+	public String encodeUrl(String url) {
+		return null;
+	}
+
+	@Override
+	public String encodeRedirectUrl(String url) {
+		return null;
+	}
+
+	@Override
+	public void sendError(int sc, String msg) throws IOException {
+
+	}
+
+	@Override
+	public void sendError(int sc) throws IOException {
+
+	}
+
+	@Override
+	public void sendRedirect(String location) throws IOException {
+
+	}
+
+	@Override
+	public void setDateHeader(String name, long date) {
+
+	}
+
+	@Override
+	public void setHeader(String name, String value) {
+
+	}
+
+	@Override
+	public void setIntHeader(String name, int value) {
+
+	}
+
+	@Override
+	public void setStatus(int sc) {
+
+	}
+
+	@Override
+	public void setStatus(int sc, String sm) {
+
+	}
+
+	@Override
+	public void setLocale(Locale loc) {
+
+	}
+
+	@Override
+	public Locale getLocale() {
+		return null;
+	}
 }

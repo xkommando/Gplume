@@ -20,7 +20,7 @@ import com.caibowen.gplume.misc.ClassFinder;
 import com.caibowen.gplume.misc.Str;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.caibowen.gplume.web.AbstractControlCenter;
+import com.caibowen.gplume.web.BaseControlCenter;
 import com.caibowen.gplume.web.IAction;
 import com.caibowen.gplume.web.RequestContext;
 import com.caibowen.gplume.web.annotation.Handle;
@@ -54,8 +54,12 @@ public class ControllerScanner implements InitializingBean {
 	private static final Logger LOG = LoggerFactory.getLogger(ControllerScanner.class.getName());
 	
 	List<Object> controllers;
-	AbstractControlCenter controlCenter;
-	
+	BaseControlCenter controlCenter;
+
+	public List<Object> getControllers() {
+		return controllers;
+	}
+
 	@Inject public void setPackages(List<String> packages) {
 		// avoid redundant obj
 		Set<Object> ctrls = new HashSet<Object>();
@@ -71,7 +75,7 @@ public class ControllerScanner implements InitializingBean {
 	 * @throws Exception
 	 */
 	@Inject
-	public void setControlCenter(AbstractControlCenter controlCenter) throws Exception {
+	public void setControlCenter(BaseControlCenter controlCenter) throws Exception {
 		this.controlCenter = controlCenter;
 	}
 

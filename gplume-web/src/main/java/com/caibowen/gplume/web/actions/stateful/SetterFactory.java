@@ -98,9 +98,7 @@ public class SetterFactory {
 				field.setAccessible(true);
 			} catch (Exception e) {
 				throw new RuntimeException(
-					"Could not set not accessible for field ["
-						+ field.getName() + "] in class ["
-						+ field.getDeclaringClass().getName() + "]");
+					"Could not set not accessible for field [" + field +"]");
 			}
 	}
 	/**
@@ -198,7 +196,7 @@ public class SetterFactory {
 					new ReqParamDefaultValSetter(handle
 					, named(field, ann.value())
 					, field
-					, nullable(field) && ann.required()
+					, nullable(field) || ann.required()
 					, Converter.slient.translateStr(ann.defaultVal(), field.getType()))
 			
 			: new ReqSetter(handle
@@ -207,6 +205,7 @@ public class SetterFactory {
 					, nullable(field) && ann.required());
 		}
 		return null;
+//		throw new IllegalArgumentException("Could not build setter for [" + field + "] : no specified annotation found");
 	}
 
 	/**
@@ -415,7 +414,7 @@ public class SetterFactory {
 				));
 		
 		} catch (Exception e) {
-			throw new RuntimeException("Could not construct SetterFactory", e);
+			throw new RuntimeException("Could not construct SetterFactory: no getter methodHandle found from RequestContext", e);
 		}
 	}
 }

@@ -17,14 +17,18 @@ package com.caibowen.gplume.web;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caibowen.gplume.context.bean.DisposableBean;
+import com.caibowen.gplume.web.actions.DefaultAction;
+import com.caibowen.gplume.web.actions.IActionMapper;
+import com.caibowen.gplume.web.actions.SuffixActionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.caibowen.gplume.web.misc.DefaultErrorHandler;
@@ -37,14 +41,14 @@ import com.caibowen.gplume.web.misc.DefaultErrorHandler;
  * @author BowenCai
  *
  */
-public abstract class AbstractControlCenter 
+public abstract class BaseControlCenter
 							implements IRequestProcessor,
 									DisposableBean,
 									Serializable {
 	
 	private static final long serialVersionUID = -5906639792037911875L;
 	
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractControlCenter.class);// Logger.getLogger("ControlCenter");
+	private static final Logger LOG = LoggerFactory.getLogger(BaseControlCenter.class);// Logger.getLogger("ControlCenter");
 	
 	private ServletContext servletContext;
 	public void setServletContext(ServletContext servletContext) {
@@ -52,6 +56,14 @@ public abstract class AbstractControlCenter
 	}
 	public ServletContext	getServletContext() {
 		return servletContext;
+	}
+
+	List<String> staticURLs;
+	public List<String> getStaticURLs() {
+		return staticURLs;
+	}
+	public void setStaticURLs(List<String> staticURLs) {
+		this.staticURLs = staticURLs;
 	}
 
 	/**
@@ -71,51 +83,28 @@ public abstract class AbstractControlCenter
 	public List<Object> getControllers() {
 		return controllers;
 	}
-	
-	
-	/**
-	 * called before any request processing
-	 * 
-	 * @throws ClassNotFoundException
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws Throwable
-	 */
-	public void init(ServletContext context) throws Throwable {
-		/**
-		 * set servlet context
-		 */
-		setServletContext(context);
-		
-		/**
-		 * build Actions
-		 */
-		for (Object ctrlObj : controllers) {
-			try {
-				addController(ctrlObj, true);
-			} catch (Exception e) {
-				throw new RuntimeException(
-						"error adding controller["
-								+ ctrlObj.getClass().getName() + "]\r\n"
-								+ e.getMessage(), e);
-			}
-		}
-		/**
-		 *  build processing chain
-		 */
-		IRequestProcessor p = getPreProcessor();
-		if (p == null) {
-			setPreProcessor(this);
-		} else {
-			// controlCenter is the tail of process chain
-			while (p.getNext() != null) {
-				p = p.getNext();
-			}
-			p.setNext(this);
-		}
 
-		LOG.info("\t>>>>> Ready to roll! ");
+	protected Set<String> defaultURIs;
+	public Set<String> getDefaultURIs() {
+		return defaultURIs;
 	}
+	public void setDefaultURIs(Set<String> defaultURIs) {
+		this.defaultURIs = defaultURIs;
+	}
+
+	protected IActionMapper buildDefaultMapper(ServletContext context) {
+		RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
+		if (rd == null)
+			throw new IllegalStateException("Could not find default Servlet");
+		IAction da = new DefaultAction(rd);
+		IActionMapper am = new SuffixActionMapper();
+		for (String s : defaultURIs)
+			am.add(s, da);
+		return am;
+	}
+
+
+	public abstract void init(ServletContext context) throws Throwable;
 	/**
 	 * entery
 	 * 

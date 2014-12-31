@@ -17,7 +17,8 @@ class DBSession(val connection: Connection,
   connection.setReadOnly(readOnly)
 
   def isTnxActive = transaction.isDefined
-  
+  def tnx = transaction
+
   def checkWarnings(st: Statement) {
     if (log.isDebugEnabled) {
       var warningToLog: SQLWarning = st.getWarnings
@@ -52,11 +53,11 @@ class DBSession(val connection: Connection,
       case se: SQLException =>
         if (log.isDebugEnabled) log.debug(s"Initiating transaction rollback [$tnx] on SQLException[$se]")
         tnx.rollback()
-        throw new JdbcException(se)
+        throw se
       case e: Exception =>
         if (log.isDebugEnabled) log.debug(s"Initiating transaction rollback [$tnx] on exception[$e]")
         tnx.rollback()
-        throw new JdbcException(e)
+        throw e
     }
   }
 

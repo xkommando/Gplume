@@ -356,14 +356,26 @@ public class Converter {
 	
 	@Nonnull
 	public static Boolean toBool(String string) {
-		if (string == null) {
+		if (string == null)
 			return null;
+
+		String cs = string.trim().toLowerCase();
+		switch (cs) {
+			case "true":
+				return true;
+			case "false":
+				return false;
+			case "yes":
+				return true;
+			case "no":
+				return false;
+			case "1":
+				return true;
+			case "0":
+				return false;
+			default:
+				throw new IllegalArgumentException("Could not convert[" + string + "] to Boolean");
 		}
-		string = string.trim();
-		return Str.Utils.chooseIgnoreCase(string, "true", "false") == 0
-				|| Str.Utils.chooseIgnoreCase(string, "yes", "no") == 0
-				|| Str.Utils.chooseIgnoreCase(string, "on", "off") == 0
-				|| Str.Utils.chooseIgnoreCase(string, "1", "0") == 0;
 	}
 
     public static BigInteger toBigInteger(final String str) {

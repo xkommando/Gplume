@@ -46,7 +46,7 @@ public class RequestContext implements Serializable {
 
 	private static final long serialVersionUID = -8169661246935054100L;
 	
-	public final AbstractControlCenter controlCenter;
+	public final BaseControlCenter controlCenter;
 	
 	public final HttpServletRequest 	request;
 	public final HttpServletResponse 	response;
@@ -55,16 +55,21 @@ public class RequestContext implements Serializable {
 	
 	private long timeModified;
 
-//for test only
-	private RequestContext() {
-
-		this.request = null;
-		this.response = null;
-		this.controlCenter = null;
-		this.httpmMthod = null;
-		this.path = null;
+	public static String uri(HttpServletRequest request) {
+		//						  javax.servlet.forward.request_uri
+		String _u = (String) request.getAttribute("javax.servlet.include.request_uri");
+		if (_u == null) {
+			_u = request.getRequestURI();
+		}
+		int idx = _u.toLowerCase().lastIndexOf(";jsessionid=");
+		if (idx != -1) {
+			String prefix = _u.substring(0, idx);
+			int end = _u.lastIndexOf(';', idx + 12);
+			_u = end != -1 ? prefix + _u.substring(end) : prefix;
+		}
+		int prefixLen = request.getContextPath().length();
+		return prefixLen == 0 ? _u : _u.substring(prefixLen);
 	}
-	
 	/**
 	 *  created by ControlCenter controlCenter only
 	 * 
@@ -74,27 +79,13 @@ public class RequestContext implements Serializable {
 	//public for test only
 	public RequestContext(HttpServletRequest in, 
 							HttpServletResponse out, 
-							AbstractControlCenter c) {
+							BaseControlCenter c) {
 		
 		this.request = in;
 		this.response = out;
 		this.controlCenter = c;
 		this.httpmMthod = HttpMethod.lookup(in.getMethod());
-		
-		//						  javax.servlet.forward.request_uri
-		String _u = (String) in.getAttribute("javax.servlet.include.request_uri");
-		if (_u == null) {
-			_u = in.getRequestURI();
-		}
-		int idx = _u.toLowerCase().lastIndexOf(";jsessionid=");
-		if (idx != -1) {
-			String prefix = _u.substring(0, idx);
-			int end = _u.lastIndexOf(';', idx + 12);
-			_u = end != -1 ? prefix + _u.substring(end) : prefix;
-		}
-		
-		this.path = _u.substring(request.getContextPath().length());
-		
+		this.path = uri(in);
 		timeModified = System.currentTimeMillis();
 	}
 	

@@ -64,20 +64,20 @@ value VARCHAR(1023) )""")
   def tnx: Unit = {
     val db = new DB(ds)
     val r = Try {
-      db.transactional { tnx =>
-        implicit val session = tnx.session
+      db.transactional {implicit session=>
         val ins = sql"INSERT INTO `data` (key,value)VALUES(?, ?)".batchInsert(
           Seq(Seq("111", "222"),
             Seq("222", "333"),
             Seq("333", "444")
           )
         )
-        //      throw new RuntimeException
-        val ins2 = sql"INSERT INTO `data` (key,value)VALUES(?, ?)".batchInsert(
-          Seq(Seq("444", "555"),
-            Seq("555", "666")
+        db.transactional {implicit session =>
+          val ins2 = sql"INSERT INTO `data` (key,value)VALUES(?, ?)".batchInsert(
+            Seq(Seq("444", "555"),
+              Seq("555", "666")
+            )
           )
-        )
+        }
         throw new RuntimeException
       }
     }
@@ -85,6 +85,12 @@ value VARCHAR(1023) )""")
       val count = sql"SELECT COUNT (1) FROM `data`".single(colInt)
       println(count)
     }
+    db.execute("DELETE FROM `data`")
+    db.newSession{ implicit session =>
+      val count = sql"SELECT COUNT (1) FROM `data`".single(colInt)
+      println(count)
+    }
+    println(r)
   }
 }
 
