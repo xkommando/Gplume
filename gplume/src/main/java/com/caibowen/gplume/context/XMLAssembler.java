@@ -63,7 +63,6 @@ public class XMLAssembler extends XMLAssemblerBase
 		Document doc = builder.parse(in);
 		doc.getDocumentElement().normalize();
 		super.doAssemble(doc);
-		LOG.debug("Created {} beans", tree.size());
 	}
 	
 	@Override

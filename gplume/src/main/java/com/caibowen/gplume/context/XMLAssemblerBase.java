@@ -112,7 +112,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
                 throw new IllegalStateException("Proxy Bean already has value");
             pb.init(realBean);
         }
-        LOG.debug("Assembling finished");
+        LOG.debug("Assembling finished, {} beans, created", tree.size());
     }
     /**
 	 * xml bean factory being singleton implies that this function is not

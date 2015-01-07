@@ -3,7 +3,7 @@ package gplume.scala.test
 import com.zaxxer.hikari.HikariDataSource
 import gplume.scala.jdbc.{Transaction, DB, DBSession}
 import org.junit.{Before, Test}
-import gplume.scala.jdbc.SQLInterpolation._
+import gplume.scala.jdbc.SQLAux._
 import gplume.scala.jdbc.SQLOperation._
 
 import scala.Iterable
@@ -56,7 +56,7 @@ value VARCHAR(1023) )""")
     println(count)
     val k1q = sql"SELECT value from data where key = $k1 OR key = '333'".single(colStr)
     println(k1q)
-    val lsv = sql"SELECT value from data".list(colStr)
+    val lsv = sql"SELECT value from data".array(colStr)
     println(lsv)
   }
 

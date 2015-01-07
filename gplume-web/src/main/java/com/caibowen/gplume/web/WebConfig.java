@@ -104,14 +104,14 @@ public class WebConfig implements InitializingBean, Serializable {
                     : new DefaultErrorHandler();
             center.setErrorHandler(_h);
 
-            LOG.debug("setting default error handler {}", _h.getClass().getName());
+            LOG.debug("setting default error handler [{}]", _h.getClass().getName());
 
             // 4. action factory
             IActionFactory factory = new ActionFactory();
             factory.setViewResolvers(getViewResolvers());
 
             center.setActionFactory(factory);
-            LOG.debug("setting action factory {}", factory.getClass().getName());
+            LOG.debug("setting action factory [{}]", factory.getClass().getName());
 
             //5. add controllers
             ControllerScanner scanner = new ControllerScanner();

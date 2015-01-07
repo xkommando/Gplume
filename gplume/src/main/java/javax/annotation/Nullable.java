@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @TypeQualifierNickname
 @Nonnull(when = When.UNKNOWN)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Nullable {
 
 }

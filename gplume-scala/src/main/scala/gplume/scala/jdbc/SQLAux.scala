@@ -4,11 +4,27 @@ package gplume.scala.jdbc
 /**
  * Created by Bowen Cai on 12/27/2014.
  */
-object SQLInterpolation {
+object SQLAux {
 
   private case object PaddingParam
 
-  implicit class SQLHelper(val s: StringContext) extends AnyVal {
+  def quoteTo(param: String)(implicit b: StringBuilder): StringBuilder = {
+    b append '\''
+    for (c <- param) c match {
+      case '\n' => b append '\\' append 'n'
+      case '\r' => b append '\\' append 'r'
+      case '\t' => b append '\\' append 't'
+      case '\f' => b append '\\' append 'f'
+      case '\\' => b append '\\' append '\\'
+      case '\"' => b append '\\' append '\"'
+      case '\'' => b append '\\' append '\''
+      case '\032' => b append '\\' append 'Z'
+      case o => b append o
+    }
+    b append '\''
+  }
+
+  implicit class SQLInterpolation(val s: StringContext) extends AnyVal {
 
     def sql(params: Any*): SQLOperation = {
       val sq = params.toSeq
