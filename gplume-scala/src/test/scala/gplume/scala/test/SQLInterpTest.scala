@@ -52,9 +52,9 @@ value VARCHAR(1023) )""")
       )
     )
 
-    val count = sql"SELECT COUNT (1) FROM `data`".single(colInt)
+    val count = sql"SELECT COUNT (1) FROM `data`".first(colInt)
     println(count)
-    val k1q = sql"SELECT value from data where key = $k1 OR key = '333'".single(colStr)
+    val k1q = sql"SELECT value from data where key = $k1 OR key = '333'".first(colStr)
     println(k1q)
     val lsv = sql"SELECT value from data".array(colStr)
     println(lsv)
@@ -82,12 +82,12 @@ value VARCHAR(1023) )""")
       }
     }
     db.newSession{ implicit session =>
-      val count = sql"SELECT COUNT (1) FROM `data`".single(colInt)
+      val count = sql"SELECT COUNT (1) FROM `data`".first(colInt)
       println(count)
     }
     db.execute("DELETE FROM `data`")
     db.newSession{ implicit session =>
-      val count = sql"SELECT COUNT (1) FROM `data`".single(colInt)
+      val count = sql"SELECT COUNT (1) FROM `data`".first(colInt)
       println(count)
     }
     println(r)

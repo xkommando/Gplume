@@ -13,9 +13,9 @@ import scala.reflect.ClassTag
  */
 object SQLOperation {
 
-//  private[gplume] def apply(value: String, parameters: Seq[Any] = Nil) = new SQLOperation(value, parameters)
-//
-//  def unapply(op: SQLOperation): Option[(String, Seq[Any])] = Some((op.stmt, op.parameters))
+  def apply(value: String, parameters: Seq[Any] = Nil) = new SQLOperation(value, parameters)
+
+  def unapply(op: SQLOperation): Option[(String, Seq[Any])] = Some((op.stmt, op.parameters))
 
   // single value collectors
   @inline val colBool = (rs: ResultSet) => rs.getBoolean(1)
@@ -25,12 +25,14 @@ object SQLOperation {
   @inline val colLong = (rs: ResultSet) => rs.getLong(1)
   @inline val colFloat = (rs: ResultSet) => rs.getFloat(1)
   @inline val colDouble = (rs: ResultSet) => rs.getDouble(1)
+  @inline val colBytes = (rs: ResultSet) => rs.getBytes(1)
   @inline val colStr = (rs: ResultSet) => rs.getString(1)
   @inline val colDate = (rs: ResultSet) => rs.getDate(1)
   @inline val colTime= (rs: ResultSet) => rs.getTime(1)
-  @inline val colBytes = (rs: ResultSet) => rs.getBytes(1)
   @inline val colBigDecimal = (rs: ResultSet) => new BigDecimal(rs.getBigDecimal(1), MathContext.DECIMAL128)
   @inline val colObj = (rs: ResultSet) => rs.getObject(1)
+  @inline val colBlob = (rs: ResultSet) => rs.getBlob(1)
+  @inline val colClob = (rs: ResultSet) => rs.getClob(1)
 
   // no oeration
   def NOP[A]: A=>Unit = (a: A)=>{}
@@ -48,6 +50,7 @@ object SQLOperation {
           case p: BigDecimal => stmt.setBigDecimal(i, p.bigDecimal)
           case p: Boolean => stmt.setBoolean(i, p)
           case p: Byte => stmt.setByte(i, p)
+          case p: Array[Byte] => stmt.setBytes(i, p)
           case p: java.sql.Date => stmt.setDate(i, p)
           case p: Double => stmt.setDouble(i, p)
           case p: Float => stmt.setFloat(i, p)
@@ -162,7 +165,7 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
   })
 
   @inline
-  def single[A](@inline extract: ResultSet => A,
+  def first[A](@inline extract: ResultSet => A,
                 @inline before: PreparedStatement => Unit = NOP[PreparedStatement])
                (implicit session: DBSession): Option[A]
   = query[Option[A]](rs => {
@@ -170,7 +173,7 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
   }, before)(session)
 
   @inline
-  def single[A](@inline extract: ResultSet => A, default: A,
+  def first[A](@inline extract: ResultSet => A, default: A,
                 @inline before: PreparedStatement => Unit = NOP[PreparedStatement])
                (implicit session: DBSession): A
   = query[A](rs => {
@@ -184,6 +187,7 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
       val head = extract(rs)
       val ab = Array.newBuilder[A](ClassTag(head.getClass))
       ab.sizeHint(16)
+      ab += head
       while (rs.next())
         ab += extract(rs)
       mutable.WrappedArray.make(ab.result())

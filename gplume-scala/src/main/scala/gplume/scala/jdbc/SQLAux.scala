@@ -11,12 +11,13 @@ object SQLAux {
   def quoteTo(param: String)(implicit b: StringBuilder): StringBuilder = {
     b append '\''
     for (c <- param) c match {
+      case '\b' => b append '\\' append 'b'
+      case '\f' => b append '\\' append 'f'
       case '\n' => b append '\\' append 'n'
       case '\r' => b append '\\' append 'r'
       case '\t' => b append '\\' append 't'
-      case '\f' => b append '\\' append 'f'
       case '\\' => b append '\\' append '\\'
-      case '\"' => b append '\\' append '\"'
+      case '"' => b append '\\' append '"'
       case '\'' => b append '\\' append '\''
       case '\032' => b append '\\' append 'Z'
       case o => b append o
