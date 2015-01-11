@@ -2,7 +2,7 @@ package gplume.scala.jdbc
 
 import javax.annotation.Nullable
 
-import scala.collection.{mutable, GenTraversableOnce}
+import scala.collection.{GenTraversableOnce, mutable}
 import java.math.MathContext
 import java.sql.{Connection, Statement, PreparedStatement, ResultSet, Time, Timestamp}
 
@@ -36,8 +36,8 @@ object SQLOperation {
 
   // no oeration
   def NOP[A]: A=>Unit = (a: A)=>{}
-//  no return
-//  def NRET[A, B]: A=>B = (a:A)=>{null.asInstanceOf[B]}
+  //  no return
+  //  def NRET[A, B]: A=>B = (a:A)=>{null.asInstanceOf[B]}
 
   def bind(stmt: PreparedStatement, params: GenTraversableOnce[Any]): Unit = {
     if (params != null && params.size > 0) {
@@ -70,25 +70,35 @@ object SQLOperation {
     }
   }
 }
-class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
+class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
 
   import SQLOperation.NOP
 
-  private[this] var ps: PreparedStatement = _
+  var queryTimeout = 5
 
-  def bind(params: GenTraversableOnce[Any],
-           @inline prepare: Connection=>PreparedStatement = _.prepareStatement(stmt))
-          (implicit session: DBSession): SQLOperation = {
-
-    ps = prepare(session.connection)
-    SQLOperation.bind(ps, params)
+  def bind(params: Seq[Any]): SQLOperation = {
+    parameters = params
     this
   }
 
-  def batchExe[A](@inline prepare: Connection=>PreparedStatement = _.prepareStatement(stmt),
+  //  def batchExe[A](paramsList: Seq[Seq[Any]])(implicit session: DBSession): Array[Int]
+  //  = batchExe(paramsList = parameters, process = ps=>ps.executeBatch())(session)
+
+  def exe[A](@inline prepare: Connection=>PreparedStatement,
+             @inline process: PreparedStatement => A)
+            (implicit session: DBSession): A = {
+
+    val ps = prepare(session.connection)
+    SQLOperation.bind(ps, parameters)
+    val a = process(ps)
+    ps.close()
+    a
+  }
+
+  def batchExe[A](@inline prepare: Connection=>PreparedStatement,
                   paramsList: GenTraversableOnce[GenTraversableOnce[Any]],
                   @inline process: PreparedStatement => A)(implicit session: DBSession): A = {
-    ps = prepare(session.connection)
+    val ps = prepare(session.connection)
     paramsList.foreach(t=>{
       SQLOperation.bind(ps, t)
       ps.addBatch()
@@ -98,23 +108,15 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
     a
   }
 
-//  def batchExe[A](paramsList: Seq[Seq[Any]])(implicit session: DBSession): Array[Int]
-//  = batchExe(paramsList = parameters, process = ps=>ps.executeBatch())(session)
-
-  def exe[A](@inline prepare: Connection=>PreparedStatement = _.prepareStatement(stmt),
-            @inline process: PreparedStatement => A)
-             (implicit session: DBSession): A = {
-
-    ps = prepare(session.connection)
-    SQLOperation.bind(ps, parameters)
-    val a = process(ps)
-    ps.close()
-    a
+  var getStmt = (con: Connection)=>{
+    val ps = con.prepareStatement(stmt)
+    ps.setQueryTimeout(queryTimeout)
+    ps
   }
 
   @inline
   def execute(implicit session: DBSession)
-  = exe(process = ps => {
+  = exe(getStmt, ps => {
     val hasResult = ps.execute()
     session.checkWarnings(ps)
     if (hasResult)
@@ -123,10 +125,17 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
       true
   })
 
+  var getStmtForInsert = (con: Connection)=>{
+    val ps = con.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+    ps.setQueryTimeout(queryTimeout)
+    ps
+  }
+
   @inline
   def insert[A](@inline extract: ResultSet => A)(implicit session: DBSession): Option[A]
-  = exe(_.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS), ps=>{
+  = exe(getStmtForInsert, ps=>{
     ps.execute()
+    session.checkWarnings(ps)
     val rs = ps.getGeneratedKeys
     if (rs.next())
       Some(extract(rs))
@@ -136,26 +145,30 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
 
   @inline
   def batchInsert(paramsList: GenTraversableOnce[GenTraversableOnce[Any]])(implicit session: DBSession): Array[Int]
-  = batchExe(paramsList = paramsList,
-    process = ps => {
-      ps.executeBatch()
+  = batchExe(getStmt,
+  paramsList,
+    ps => {
+      val updateCounts = ps.executeBatch()
+      session.checkWarnings(ps)
+      updateCounts
     })
 
   @inline
   def batchInsert[A](@inline extract: ResultSet => A,
                      paramsList: GenTraversableOnce[GenTraversableOnce[Any]])(implicit session: DBSession): mutable.WrappedArray[A]
-  = batchExe(_.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS),
+  = batchExe(getStmtForInsert,
     paramsList,
     ps => {
       ps.executeBatch()
+      session.checkWarnings(ps)
       collectArray(ps.getGeneratedKeys, extract)
     })
 
   @inline
   def query[A](mapper: ResultSet => A,
-              @inline before: PreparedStatement => Unit = NOP[PreparedStatement])
-              (implicit session: DBSession): A
-  = exe(process = ps => {
+               @inline before: PreparedStatement => Unit)
+                (implicit session: DBSession): A
+  = exe(getStmt, ps => {
     before(ps)
     val rs = ps.executeQuery()
     session.checkWarnings(ps)
@@ -166,23 +179,15 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
 
   @inline
   def first[A](@inline extract: ResultSet => A,
-                @inline before: PreparedStatement => Unit = NOP[PreparedStatement])
-               (implicit session: DBSession): Option[A]
+               @inline before: PreparedStatement => Unit = NOP[PreparedStatement])
+              (implicit session: DBSession): Option[A]
   = query[Option[A]](rs => {
     if (rs.next()) Some(extract(rs)) else None
   }, before)(session)
 
-  @inline
-  def first[A](@inline extract: ResultSet => A, default: A,
-                @inline before: PreparedStatement => Unit = NOP[PreparedStatement])
-               (implicit session: DBSession): A
-  = query[A](rs => {
-    if (rs.next()) extract(rs) else default
-  }, before)(session)
-
   @Nullable
   @inline
-  def collectArray[A](rs: ResultSet, @inline extract: ResultSet => A): mutable.WrappedArray[A] = {
+  def collectArray[A](rs: ResultSet, @inline extract: ResultSet => A): Array[A] = {
     if (rs.next()) {
       val head = extract(rs)
       val ab = Array.newBuilder[A](ClassTag(head.getClass))
@@ -190,17 +195,26 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
       ab += head
       while (rs.next())
         ab += extract(rs)
-      mutable.WrappedArray.make(ab.result())
+      ab.result()
     } else null.asInstanceOf[Array[A]]
   }
 
   @inline
+  def collectMap[K,V](rs: ResultSet, @inline extract: ResultSet => (K,V)): Map[K,V] = {
+    val mb = Map.newBuilder[K,V]
+    mb.sizeHint(32)
+    while (rs.next())
+      mb += extract(rs)
+    mb.result()
+  }
+
+  @inline
   def collectList[A](rs: ResultSet, @inline extract: ResultSet => A): List[A] = {
-      val ab = List.newBuilder[A]
-      ab.sizeHint(16)
-      while (rs.next())
-        ab += extract(rs)
-      ab.result()
+    val ab = List.newBuilder[A]
+    ab.sizeHint(16)
+    while (rs.next())
+      ab += extract(rs)
+    ab.result()
   }
 
   @inline
@@ -215,19 +229,25 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = Vector()) {
   @Nullable
   @inline
   def array[A](extract: ResultSet => A,
-              before: PreparedStatement => Unit = NOP[PreparedStatement])
-             (implicit session: DBSession): mutable.WrappedArray[A]
-  = query[mutable.WrappedArray[A]](collectArray(_, extract), before)(session)
+               before: PreparedStatement => Unit = NOP[PreparedStatement])
+              (implicit session: DBSession): Array[A]
+  = query[Array[A]](collectArray(_, extract), before)(session)
 
   @inline
   def list[A](extract: ResultSet => A,
-               before: PreparedStatement => Unit = NOP[PreparedStatement])
-              (implicit session: DBSession): List[A]
+              before: PreparedStatement => Unit = NOP[PreparedStatement])
+             (implicit session: DBSession): List[A]
   = query[List[A]](collectList(_, extract), before)(session)
 
   @inline
   def vector[A](extract: ResultSet => A,
-              before: PreparedStatement => Unit = NOP[PreparedStatement])
-             (implicit session: DBSession): Vector[A]
+                before: PreparedStatement => Unit = NOP[PreparedStatement])
+               (implicit session: DBSession): Vector[A]
   = query[Vector[A]](collectVec(_, extract), before)(session)
+
+  @inline
+  def map[K,V](extract: ResultSet => (K,V),
+               before: PreparedStatement => Unit = NOP[PreparedStatement])
+              (implicit session: DBSession): Map[K,V]
+  = query[Map[K,V]](collectMap(_, extract), before)(session)
 }

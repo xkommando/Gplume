@@ -7,7 +7,7 @@ import java.sql.Savepoint
  */
 class Transaction private[gplume](val session: DBSession,
                                   // <config>
-                                  resetAutoCommit: Boolean,
+                                  var resetAutoCommit: Boolean,
                                   var rollBackOnly: Boolean,
                                  // </config>
                                   private[this] val previousISOLevel: Int,

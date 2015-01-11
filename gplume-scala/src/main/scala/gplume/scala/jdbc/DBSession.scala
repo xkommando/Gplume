@@ -8,13 +8,12 @@ import gplume.scala.LogSupport
 /**
  * Created by Bowen Cai on 12/27/2014.
  */
-class DBSession(val connection: Connection,
-                val readOnly: Boolean,
-                private[this] var transaction: Option[Transaction] = None)
-  extends LogSupport
-  with Closeable {
+case class DBSession(connection: Connection,
+                readOnly: Boolean) extends LogSupport with Closeable {
 
   connection.setReadOnly(readOnly)
+
+  private[this] var transaction: Option[Transaction] = None
 
   def isTnxActive = transaction.isDefined
   def tnx = transaction
@@ -29,13 +28,12 @@ class DBSession(val connection: Connection,
     }
   }
 
-  def transactional[A](prepare: Connection=>Unit = t=>{
-    if (t.getAutoCommit)
-      t.setAutoCommit(false)
+  def transactional[A](prepare: Connection=>Unit = con=>{
+    if (con.getAutoCommit)
+      con.setAutoCommit(false)
   }, operation: Transaction => A): A
   = if (isTnxActive) throw new IllegalStateException("Could not begin transaction: session is already transaction active")
     else {
-
     connection.setAutoCommit(false)
     val tnx = new Transaction(this)
     this.transaction = Some(tnx)
@@ -61,8 +59,5 @@ class DBSession(val connection: Connection,
     }
   }
 
-
-  override def close(): Unit ={
-    connection.close()
-  }
+  override def close() = connection.close()
 }

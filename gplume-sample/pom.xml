@@ -19,6 +19,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.caibowen.gplumeframework</groupId>
+            <artifactId>gplume-scala</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.4</version>
