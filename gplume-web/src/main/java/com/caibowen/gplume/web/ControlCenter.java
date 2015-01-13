@@ -157,7 +157,6 @@ public class ControlCenter extends BaseControlCenter {
 			errorHandler.http500(context);
 		}
 	}
-
 // -----------------------------------------------------------------------------
 
 	@Override

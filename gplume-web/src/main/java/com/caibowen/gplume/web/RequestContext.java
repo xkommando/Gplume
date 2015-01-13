@@ -103,7 +103,11 @@ public class RequestContext implements Serializable {
 					+ this.path + "] Error forwarding[" + jspView + "]", e);
 		}
 	}
-	
+
+	public void renderAsStatic() {
+		controlCenter.handleStatic(this);
+	}
+
 	/**
 	 * reject this request
 	 * return 403, e.g., authentication failed

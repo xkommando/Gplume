@@ -91,15 +91,51 @@ public abstract class BaseControlCenter
 	public void setDefaultURIs(Set<String> defaultURIs) {
 		this.defaultURIs = defaultURIs;
 	}
+	protected String defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
+	protected DefaultAction defaultAction;
+
+	public String getDefaultServletName() {
+		return defaultServletName;
+	}
+	public DefaultAction getDefaultAction() {
+		return defaultAction;
+	}
+
+	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish */
+	private static final String COMMON_DEFAULT_SERVLET_NAME = "default";
+
+	/** Default Servlet name used by Google App Engine */
+	private static final String GAE_DEFAULT_SERVLET_NAME = "_ah_default";
+
+	/** Default Servlet name used by Resin */
+	private static final String RESIN_DEFAULT_SERVLET_NAME = "resin-file";
+
+	/** Default Servlet name used by WebLogic */
+	private static final String WEBLOGIC_DEFAULT_SERVLET_NAME = "FileServlet";
+
+	/** Default Servlet name used by WebSphere */
+	private static final String WEBSPHERE_DEFAULT_SERVLET_NAME = "SimpleFileServlet";
 
 	protected IActionMapper buildDefaultMapper(ServletContext context) {
-		RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
-		if (rd == null)
-			throw new IllegalStateException("Could not find default Servlet");
-		IAction da = new DefaultAction(rd);
+		RequestDispatcher rd = getServletContext().getNamedDispatcher(COMMON_DEFAULT_SERVLET_NAME);
+		if (rd != null) {
+			defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
+		} else if (null != (rd = getServletContext().getNamedDispatcher(GAE_DEFAULT_SERVLET_NAME))) {
+			defaultServletName = GAE_DEFAULT_SERVLET_NAME;
+		} else if (null != (rd = getServletContext().getNamedDispatcher(RESIN_DEFAULT_SERVLET_NAME))) {
+			defaultServletName = RESIN_DEFAULT_SERVLET_NAME;
+		} else if (null != (rd = getServletContext().getNamedDispatcher(WEBLOGIC_DEFAULT_SERVLET_NAME))) {
+			defaultServletName = WEBLOGIC_DEFAULT_SERVLET_NAME;
+		} else if (null != (rd = getServletContext().getNamedDispatcher(WEBSPHERE_DEFAULT_SERVLET_NAME))) {
+			defaultServletName = WEBLOGIC_DEFAULT_SERVLET_NAME;
+		} else {
+			throw new IllegalStateException("Unable to locate the default servlet for serving static content. " +
+				"Please set the 'defaultServletName' property explicitly.");
+		}
+		defaultAction = new DefaultAction(rd);
 		IActionMapper am = new SuffixActionMapper();
 		for (String s : defaultURIs)
-			am.add(s, da);
+			am.add(s, defaultAction);
 		return am;
 	}
 
@@ -125,8 +161,16 @@ public abstract class BaseControlCenter
 	 * any requseContext can enter this function at any time.
 	 * but be caution about the uri, it may cause short-circuit
 	 */
-	abstract public void 	handle(String uri, final RequestContext requestContext);
-	
+	abstract public void 	handle(String uri, RequestContext requestContext);
+
+	public void handleStatic(RequestContext requestContext) {
+		try {
+			defaultAction.perform(requestContext);
+		} catch (Throwable t) {
+			throw new RuntimeException("Failed handle request[" + requestContext.path + "] to static resource.", t);
+		}
+	}
+
 	/**
 	 * control center is the tail of processing chain, no next
 	 */

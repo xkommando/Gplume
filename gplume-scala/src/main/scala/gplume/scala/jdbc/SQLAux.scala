@@ -1,5 +1,8 @@
 package gplume.scala.jdbc
 
+import java.math.BigDecimal
+import java.sql._
+
 
 /**
  * Created by Bowen Cai on 12/27/2014.
@@ -34,10 +37,10 @@ object SQLAux {
 
     private def buildQuery(params: Seq[Any]): String = {
       s.parts.zipAll(params, "", PaddingParam).foldLeft(new StringBuilder(128))(
-        (sb, t)=>{
-        sb ++= t._1
-        addPlaceholders(sb, t._2)
-      }).toString
+        (sb, t) => {
+          sb ++= t._1
+          addPlaceholders(sb, t._2)
+        }).toString
     }
 
     private def addPlaceholders(sb: StringBuilder, param: Any): StringBuilder = param match {
@@ -51,6 +54,82 @@ object SQLAux {
       case op: SQLOperation => sb ++= op.stmt
       case _ => sb += '?'
     }
+
   }
 
+  def lookupColumnName(i: Int)(implicit rsmd: ResultSetMetaData): String = {
+    val name = rsmd.getColumnLabel(i)
+    if (name == null || name.isEmpty)
+      rsmd.getCatalogName(i)
+    else
+      name
+  }
+
+  def getResultSetValue(index: Int)(implicit rs: ResultSet): AnyRef = {
+    val obj = rs.getObject(index)
+    if (obj == null)
+      return None
+    val className = obj.getClass.getName
+    obj match {
+      case blob: Blob => blob.getBytes(1, blob.length.toInt)
+      case clob: Clob => clob.getSubString(1, clob.length.toInt)
+      case _ if className eq "oracle.sql.TIMESTAMP" => rs.getTimestamp(index)
+      case _ if className eq "oracle.sql.TIMESTAMPTZ" => rs.getTimestamp(index)
+      case _ if className.startsWith("oracle.sql.DATE") =>
+        val metaDataClassName = rs.getMetaData.getColumnClassName(index)
+        if (("java.sql.Timestamp" == metaDataClassName) || ("oracle.sql.TIMESTAMP" == metaDataClassName))
+          rs.getTimestamp(index)
+        else rs.getDate(index)
+      case d: Date if "java.sql.Timestamp" == rs.getMetaData.getColumnClassName(index) => rs.getDate(index)
+    }
+  }
+//
+//  def getResultSetValue(index: Int, requiredType: Class[_])(implicit rs: ResultSet): Option[Any] = {
+//    import scala.reflect.runtime.universe._
+//    typeOf
+//    val obj = requiredType match {
+//      case s:String => rs.getString(index)
+//      case Boolean => rs.getBoolean(index)
+//      case Byte => rs.getByte(index)
+//      case Short => rs.getShort(index)
+//      case Int => rs.getInt(index)
+//      case Long => rs.getLong(index)
+//      case Float => rs.getFloat(index)
+//      case Double => rs.getDouble(index)
+//      case BigDecimal => rs.getBigDecimal(index)
+//      case Date => rs.getDate(index)
+//      case Timestamp => rs.getTimestamp(index)
+//      case Time => rs.getTime(index)
+////      case Array[Byte] => rs.getBytes(index)
+//      case Blob => rs.getBlob(index)
+//      case Clob => rs.getClob(index)
+//      case _ => rs.getObject(index, requiredType).asInstanceOf[AnyRef]
+//    }
+//    if (rs.wasNull()) None else Some(obj)
+//  }
 }
+
+//spring jdbc support JdbcUtils => getResultSetValue
+//    if (obj.isInstanceOf[Blob]) {
+//      val blob = obj.asInstanceOf[Blob]
+//      return blob.getBytes(1, blob.length.toInt)
+//    }
+//    else if (obj.isInstanceOf[Clob]) {
+//      val clob = obj.asInstanceOf[Clob]
+//      return clob.getSubString(1, clob.length.toInt)
+//    }
+//    else if (("oracle.sql.TIMESTAMP" == className) || ("oracle.sql.TIMESTAMPTZ" == className)) {
+//      return rs.getTimestamp(index)
+//    }
+//    else if (className != null && className.startsWith("oracle.sql.DATE")) {
+//      val metaDataClassName = rs.getMetaData.getColumnClassName(index)
+//      return if (("java.sql.Timestamp" == metaDataClassName) || ("oracle.sql.TIMESTAMP" == metaDataClassName))
+//        rs.getTimestamp(index)
+//      else rs.getDate(index)
+//    }
+//    else if (obj.isInstanceOf[Date]) {
+//      if ("java.sql.Timestamp" == rs.getMetaData.getColumnClassName(index)) {
+//        return rs.getTimestamp(index)
+//      }
+//    }
+//    return obj

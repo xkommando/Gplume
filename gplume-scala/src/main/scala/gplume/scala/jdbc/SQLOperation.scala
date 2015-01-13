@@ -4,7 +4,7 @@ import javax.annotation.Nullable
 
 import scala.collection.{GenTraversableOnce, mutable}
 import java.math.MathContext
-import java.sql.{Connection, Statement, PreparedStatement, ResultSet, Time, Timestamp}
+import java.sql.{Connection, Statement, PreparedStatement, ResultSet}
 
 import scala.reflect.ClassTag
 
@@ -62,17 +62,69 @@ object SQLOperation {
           case p: java.sql.Time => stmt.setTime(i, p)
           case p: java.sql.Timestamp => stmt.setTimestamp(i, p)
           case p: java.net.URL => stmt.setURL(i, p)
-          case p: java.util.Date => stmt.setTimestamp(i, new Timestamp(p.getTime))
+          case p: java.util.Date => stmt.setTimestamp(i, new java.sql.Timestamp(p.getTime))
           case p: java.io.InputStream => stmt.setBinaryStream(i, p)
           case p => stmt.setObject(i, p)
         }
       }
     }
   }
+
+  @Nullable
+  @inline
+  def collectArray[A](rs: ResultSet, @inline extract: ResultSet => A): Array[A] = {
+    if (rs.next()) {
+      val head = extract(rs)
+      val ab = Array.newBuilder[A](ClassTag(head.getClass))
+      ab.sizeHint(16)
+      ab += head
+      while (rs.next())
+        ab += extract(rs)
+      ab.result()
+    } else null.asInstanceOf[Array[A]]
+  }
+
+  @inline
+  def collectMap[K,V](rs: ResultSet, @inline extract: ResultSet => (K,V)): Map[K,V] = {
+    val mb = Map.newBuilder[K,V]
+    mb.sizeHint(32)
+    while (rs.next())
+      mb += extract(rs)
+    mb.result()
+  }
+
+  @inline
+  def collectList[A](rs: ResultSet, @inline extract: ResultSet => A): List[A] = {
+    val ab = List.newBuilder[A]
+    ab.sizeHint(16)
+    while (rs.next())
+      ab += extract(rs)
+    ab.result()
+  }
+
+  @inline
+  def collectVec[A](rs: ResultSet, @inline extract: ResultSet => A): Vector[A] = {
+    val ab = Vector.newBuilder[A]
+    ab.sizeHint(16)
+    while (rs.next())
+      ab += extract(rs)
+    ab.result()
+  }
+
+  def collectToMap(implicit rs: ResultSet): Map[String, AnyRef] = {
+    import SQLAux._
+    implicit val md = rs.getMetaData
+    val columnCount = md.getColumnCount
+    val mb = Map.newBuilder[String, AnyRef]
+    mb.sizeHint(columnCount * 4 / 3 + 1)
+    for (i <- 1 to columnCount)
+      mb += lookupColumnName(i) -> getResultSetValue(i)
+    mb.result()
+  }
 }
 class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
 
-  import SQLOperation.NOP
+  import SQLOperation._
 
   var queryTimeout = 5
 
@@ -185,46 +237,6 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
     if (rs.next()) Some(extract(rs)) else None
   }, before)(session)
 
-  @Nullable
-  @inline
-  def collectArray[A](rs: ResultSet, @inline extract: ResultSet => A): Array[A] = {
-    if (rs.next()) {
-      val head = extract(rs)
-      val ab = Array.newBuilder[A](ClassTag(head.getClass))
-      ab.sizeHint(16)
-      ab += head
-      while (rs.next())
-        ab += extract(rs)
-      ab.result()
-    } else null.asInstanceOf[Array[A]]
-  }
-
-  @inline
-  def collectMap[K,V](rs: ResultSet, @inline extract: ResultSet => (K,V)): Map[K,V] = {
-    val mb = Map.newBuilder[K,V]
-    mb.sizeHint(32)
-    while (rs.next())
-      mb += extract(rs)
-    mb.result()
-  }
-
-  @inline
-  def collectList[A](rs: ResultSet, @inline extract: ResultSet => A): List[A] = {
-    val ab = List.newBuilder[A]
-    ab.sizeHint(16)
-    while (rs.next())
-      ab += extract(rs)
-    ab.result()
-  }
-
-  @inline
-  def collectVec[A](rs: ResultSet, @inline extract: ResultSet => A): Vector[A] = {
-    val ab = Vector.newBuilder[A]
-    ab.sizeHint(16)
-    while (rs.next())
-      ab += extract(rs)
-    ab.result()
-  }
 
   @Nullable
   @inline
@@ -250,4 +262,8 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
                before: PreparedStatement => Unit = NOP[PreparedStatement])
               (implicit session: DBSession): Map[K,V]
   = query[Map[K,V]](collectMap(_, extract), before)(session)
+
+  def autoMap(before: PreparedStatement => Unit = NOP[PreparedStatement])
+         (implicit session: DBSession): Map[String, AnyRef]
+  = query[Map[String, AnyRef]](collectToMap(_), before)(session)
 }

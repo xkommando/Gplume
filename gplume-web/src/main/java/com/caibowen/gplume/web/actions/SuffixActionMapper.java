@@ -1,12 +1,10 @@
 package com.caibowen.gplume.web.actions;
 
-import com.caibowen.gplume.common.collection.URIPrefixTrie;
 import com.caibowen.gplume.common.collection.URISuffixTrie;
 import com.caibowen.gplume.web.IAction;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
-import java.util.HashMap;
 
 /**
  * Created by Bowen Cai on 12/31/2014.
