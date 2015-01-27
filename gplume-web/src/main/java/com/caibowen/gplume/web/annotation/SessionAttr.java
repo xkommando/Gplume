@@ -40,7 +40,7 @@ public @interface SessionAttr {
 	/**
 	 * Whether the parameter is required.
 	 */
-	boolean nullable() default true;
+	boolean required() default true;
 	
 	/**
 	 * alternative/default value of this attribute, used if value is empty

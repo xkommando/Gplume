@@ -86,12 +86,12 @@ public class ControllerScanner implements InitializingBean {
 	
 	private static List<Object> findControllers(String pkg) {
 		
-		if (!Str.Utils.notBlank(pkg)) {
+		if (Str.Utils.isBlank(pkg)) {
 			throw new IllegalArgumentException(
 					"no pkg specified["+pkg+']');
 		}
 		
-		ArrayList<Object> ctrls = new ArrayList<Object>(64);
+		ArrayList<Object> ctrls = new ArrayList<>(64);
 
 		List<Class<?>> allClazz =  ClassFinder.find(pkg, 
 									Thread.currentThread().getContextClassLoader());
@@ -102,7 +102,7 @@ public class ControllerScanner implements InitializingBean {
                     try {
                         ctl = class1.newInstance();
                     } catch (Exception e) {
-                        LOG.error("error construct class ", e);
+                        LOG.error("Could not instantiate web controller[" + class1.getName() + "] with default constructor", e);
                         continue;
                     }
                     ctrls.add(ctl);
@@ -145,7 +145,7 @@ public class ControllerScanner implements InitializingBean {
 				 	String urls = Str.Utils.join(method.getAnnotation(Handle.class).value(), " ");
 				 	LOG.warn(
 				 			"handle for [{0}] of method [{1}] "
-				 			+ "in class [{0}] is not accessible "
+				 			+ "in class [{0}] is not operational "
 				 			+ "because the class is abstract"
 				 			, urls
 				 			, method.toString()
@@ -156,8 +156,8 @@ public class ControllerScanner implements InitializingBean {
 					 String urls = Str.Utils.join(method.getAnnotation(Handle.class).value(), " ");
 					 LOG.warn(
 							 "handle for [{0}] of method [{1}] "
-							 + "in class [{0}] is not accessible "
-							 + "becase the class is a non-static nested class"
+							 + "in class [{0}] is not operational "
+							 + "because the class is a non-static nested class"
 							 , urls
 							 , method.toString()
 							 , clazz.getName());
@@ -169,11 +169,11 @@ public class ControllerScanner implements InitializingBean {
 				
 			} else if (method.isAnnotationPresent(Intercept.class)) {
 				Class<?> params[] = method.getParameterTypes();
-				boolean paramOK = params.length == 2 
+				boolean matchParams = params.length == 2
 						&& params[0].equals(RequestContext.class)
 						&& params[1].equals(IAction.class);
 				
-				if (!paramOK) {
+				if (!matchParams) {
 					return false;
 					
 				} else if (isAbstract) {

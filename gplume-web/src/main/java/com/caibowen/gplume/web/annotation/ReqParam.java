@@ -40,7 +40,7 @@ public @interface ReqParam {
 	/**
 	 * Whether the parameter is required.
 	 */
-	boolean required() default true;
+	boolean required() default false;
 	
 	/**
 	 *  default value of this attribute, used if is null

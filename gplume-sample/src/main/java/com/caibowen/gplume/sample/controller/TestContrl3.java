@@ -21,7 +21,7 @@ public class TestContrl3 {
 		String msg;
 		@ReqAttr(defaultVal="159")
 		int test_int;
-		@SessionAttr(nullable=false, defaultVal="1992-6-14")
+		@SessionAttr(required=false, defaultVal="1992-6-14")
 		Date date;
 		
 		@Nullable

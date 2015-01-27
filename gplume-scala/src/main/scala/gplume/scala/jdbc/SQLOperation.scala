@@ -2,6 +2,8 @@ package gplume.scala.jdbc
 
 import javax.annotation.Nullable
 
+import gplume.scala.{Tuples, Tuple0}
+
 import scala.collection.{GenTraversableOnce, mutable}
 import java.math.MathContext
 import java.sql.{Connection, Statement, PreparedStatement, ResultSet}
@@ -39,44 +41,13 @@ object SQLOperation {
   //  no return
   //  def NRET[A, B]: A=>B = (a:A)=>{null.asInstanceOf[B]}
 
-  def bind(stmt: PreparedStatement, params: GenTraversableOnce[Any]): Unit = {
-    if (params != null && params.size > 0) {
-      var i = 0
-      for (param <- params) {
-        i = i + 1
-        param match {
-          case null => stmt.setObject(i, null)
-          case p: java.sql.Array => stmt.setArray(i, p)
-          case p: BigDecimal => stmt.setBigDecimal(i, p.bigDecimal)
-          case p: Boolean => stmt.setBoolean(i, p)
-          case p: Byte => stmt.setByte(i, p)
-          case p: Array[Byte] => stmt.setBytes(i, p)
-          case p: java.sql.Date => stmt.setDate(i, p)
-          case p: Double => stmt.setDouble(i, p)
-          case p: Float => stmt.setFloat(i, p)
-          case p: Int => stmt.setInt(i, p)
-          case p: Long => stmt.setLong(i, p)
-          case p: Short => stmt.setShort(i, p)
-          case p: java.sql.SQLXML => stmt.setSQLXML(i, p)
-          case p: String => stmt.setString(i, p)
-          case p: java.sql.Time => stmt.setTime(i, p)
-          case p: java.sql.Timestamp => stmt.setTimestamp(i, p)
-          case p: java.net.URL => stmt.setURL(i, p)
-          case p: java.util.Date => stmt.setTimestamp(i, new java.sql.Timestamp(p.getTime))
-          case p: java.io.InputStream => stmt.setBinaryStream(i, p)
-          case p => stmt.setObject(i, p)
-        }
-      }
-    }
-  }
-
   @Nullable
   @inline
   def collectArray[A](rs: ResultSet, @inline extract: ResultSet => A): Array[A] = {
     if (rs.next()) {
       val head = extract(rs)
       val ab = Array.newBuilder[A](ClassTag(head.getClass))
-      ab.sizeHint(16)
+      ab.sizeHint(32)
       ab += head
       while (rs.next())
         ab += extract(rs)
@@ -87,7 +58,7 @@ object SQLOperation {
   @inline
   def collectMap[K,V](rs: ResultSet, @inline extract: ResultSet => (K,V)): Map[K,V] = {
     val mb = Map.newBuilder[K,V]
-    mb.sizeHint(32)
+    mb.sizeHint(64)
     while (rs.next())
       mb += extract(rs)
     mb.result()
@@ -96,7 +67,7 @@ object SQLOperation {
   @inline
   def collectList[A](rs: ResultSet, @inline extract: ResultSet => A): List[A] = {
     val ab = List.newBuilder[A]
-    ab.sizeHint(16)
+    ab.sizeHint(32)
     while (rs.next())
       ab += extract(rs)
     ab.result()
@@ -105,54 +76,65 @@ object SQLOperation {
   @inline
   def collectVec[A](rs: ResultSet, @inline extract: ResultSet => A): Vector[A] = {
     val ab = Vector.newBuilder[A]
-    ab.sizeHint(16)
+    ab.sizeHint(32)
     while (rs.next())
       ab += extract(rs)
     ab.result()
   }
 
-  def collectToMap(implicit rs: ResultSet): Map[String, AnyRef] = {
-    import SQLAux._
+  def collectToMap(implicit rs: ResultSet): Map[String, Any] = {
     implicit val md = rs.getMetaData
     val columnCount = md.getColumnCount
-    val mb = Map.newBuilder[String, AnyRef]
+    if (columnCount <= 0 || !rs.next())
+      return Map.empty[String, Any]
+    val mb = Map.newBuilder[String, Any]
     mb.sizeHint(columnCount * 4 / 3 + 1)
     for (i <- 1 to columnCount)
-      mb += lookupColumnName(i) -> getResultSetValue(i)
+      mb += SQLAux.lookupColumnName(i) -> SQLAux.getResultSetValue(i)
     mb.result()
   }
+
+  def collectToProduct(implicit rs: ResultSet): Product = {
+    implicit val md = rs.getMetaData
+    val columnCount = md.getColumnCount
+    if (columnCount <= 0 || !rs.next())
+      return Tuple0
+    val mb = Array.newBuilder[AnyRef]
+    mb.sizeHint(columnCount * 4 / 3 + 1)
+    for (i <- 1 to columnCount)
+      mb += SQLAux.getResultSetValue(i)
+    Tuples.toTuple(mb.result())
+  }
 }
-class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
+class SQLOperation (val stmt: String, var parameters: Seq[Any] = Nil) {
+
+  var queryTimeout: Int = 5
 
   import SQLOperation._
 
-  var queryTimeout = 5
-
-  def bind(params: Seq[Any]): SQLOperation = {
-    parameters = params
+  def bind(params: Any*): SQLOperation = {
+    parameters = Seq(params: _*)
     this
   }
 
-  //  def batchExe[A](paramsList: Seq[Seq[Any]])(implicit session: DBSession): Array[Int]
-  //  = batchExe(paramsList = parameters, process = ps=>ps.executeBatch())(session)
 
-  def exe[A](@inline prepare: Connection=>PreparedStatement,
+  def exe[A](@inline prepare: Connection => PreparedStatement,
              @inline process: PreparedStatement => A)
             (implicit session: DBSession): A = {
 
     val ps = prepare(session.connection)
-    SQLOperation.bind(ps, parameters)
+    SQLAux.bind(ps, parameters)
     val a = process(ps)
     ps.close()
     a
   }
 
-  def batchExe[A](@inline prepare: Connection=>PreparedStatement,
+  def batchExe[A](@inline prepare: Connection => PreparedStatement,
                   paramsList: GenTraversableOnce[GenTraversableOnce[Any]],
                   @inline process: PreparedStatement => A)(implicit session: DBSession): A = {
     val ps = prepare(session.connection)
-    paramsList.foreach(t=>{
-      SQLOperation.bind(ps, t)
+    paramsList.foreach(t => {
+      SQLAux.bind(ps, t)
       ps.addBatch()
     })
     val a = process(ps)
@@ -160,11 +142,18 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
     a
   }
 
-  var getStmt = (con: Connection)=>{
+  var getStmt = (con: Connection) => {
     val ps = con.prepareStatement(stmt)
     ps.setQueryTimeout(queryTimeout)
     ps
   }
+
+  def batchExe[A](paramsList: Seq[Seq[Any]])(implicit session: DBSession): Array[Int]
+  = batchExe(getStmt, paramsList, ps => {
+    val updateCounts = ps.executeBatch()
+    session.checkWarnings(ps)
+    updateCounts
+  })(session)
 
   @inline
   def execute(implicit session: DBSession)
@@ -175,9 +164,9 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
       ps.getUpdateCount > 0
     else
       true
-  })
+  })(session)
 
-  var getStmtForInsert = (con: Connection)=>{
+  var getStmtForInsert = (con: Connection) => {
     val ps = con.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
     ps.setQueryTimeout(queryTimeout)
     ps
@@ -185,7 +174,7 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
 
   @inline
   def insert[A](@inline extract: ResultSet => A)(implicit session: DBSession): Option[A]
-  = exe(getStmtForInsert, ps=>{
+  = exe(getStmtForInsert, ps => {
     ps.execute()
     session.checkWarnings(ps)
     val rs = ps.getGeneratedKeys
@@ -198,7 +187,7 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
   @inline
   def batchInsert(paramsList: GenTraversableOnce[GenTraversableOnce[Any]])(implicit session: DBSession): Array[Int]
   = batchExe(getStmt,
-  paramsList,
+    paramsList,
     ps => {
       val updateCounts = ps.executeBatch()
       session.checkWarnings(ps)
@@ -219,7 +208,7 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
   @inline
   def query[A](mapper: ResultSet => A,
                @inline before: PreparedStatement => Unit)
-                (implicit session: DBSession): A
+              (implicit session: DBSession): A
   = exe(getStmt, ps => {
     before(ps)
     val rs = ps.executeQuery()
@@ -258,12 +247,22 @@ class SQLOperation (val stmt: String, var parameters: Seq[Any] = null) {
   = query[Vector[A]](collectVec(_, extract), before)(session)
 
   @inline
-  def map[K,V](extract: ResultSet => (K,V),
-               before: PreparedStatement => Unit = NOP[PreparedStatement])
-              (implicit session: DBSession): Map[K,V]
-  = query[Map[K,V]](collectMap(_, extract), before)(session)
+  def map[K, V](extract: ResultSet => (K, V),
+                before: PreparedStatement => Unit = NOP[PreparedStatement])
+               (implicit session: DBSession): Map[K, V]
+  = query[Map[K, V]](collectMap(_, extract), before)(session)
 
   def autoMap(before: PreparedStatement => Unit = NOP[PreparedStatement])
-         (implicit session: DBSession): Map[String, AnyRef]
-  = query[Map[String, AnyRef]](collectToMap(_), before)(session)
+             (implicit session: DBSession): Map[String, Any]
+  = query[Map[String, Any]](collectToMap(_), before)(session)
+
+  def product(before: PreparedStatement => Unit = NOP[PreparedStatement])
+           (implicit session: DBSession): Product
+  = query[Product](collectToProduct(_), before)(session)
+
+  //  def int(idx: Int)
+  //         (implicit session: DBSession): Int = {
+  //    query[Int](rs=>if(rs.next()) rs.getInt(idx) else -1, NOP)(session)
+  //  }
+
 }

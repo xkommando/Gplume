@@ -40,7 +40,7 @@ public @interface CookieVal {
 	/**
 	 * Whether the parameter is required.
 	 */
-	boolean nullable() default true;
+	boolean required() default false;
 	
 	/**
 	 * default value of this attribute, used if is null

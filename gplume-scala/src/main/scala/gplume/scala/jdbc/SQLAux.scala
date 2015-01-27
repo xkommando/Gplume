@@ -1,7 +1,9 @@
 package gplume.scala.jdbc
 
-import java.math.BigDecimal
-import java.sql._
+import java.math.MathContext
+import java.sql.{Date, Blob, Clob, ResultSetMetaData, PreparedStatement, ResultSet}
+
+import scala.collection.GenTraversableOnce
 
 
 /**
@@ -81,32 +83,40 @@ object SQLAux {
           rs.getTimestamp(index)
         else rs.getDate(index)
       case d: Date if "java.sql.Timestamp" == rs.getMetaData.getColumnClassName(index) => rs.getDate(index)
+      case d => d
     }
   }
-//
-//  def getResultSetValue(index: Int, requiredType: Class[_])(implicit rs: ResultSet): Option[Any] = {
-//    import scala.reflect.runtime.universe._
-//    typeOf
-//    val obj = requiredType match {
-//      case s:String => rs.getString(index)
-//      case Boolean => rs.getBoolean(index)
-//      case Byte => rs.getByte(index)
-//      case Short => rs.getShort(index)
-//      case Int => rs.getInt(index)
-//      case Long => rs.getLong(index)
-//      case Float => rs.getFloat(index)
-//      case Double => rs.getDouble(index)
-//      case BigDecimal => rs.getBigDecimal(index)
-//      case Date => rs.getDate(index)
-//      case Timestamp => rs.getTimestamp(index)
-//      case Time => rs.getTime(index)
-////      case Array[Byte] => rs.getBytes(index)
-//      case Blob => rs.getBlob(index)
-//      case Clob => rs.getClob(index)
-//      case _ => rs.getObject(index, requiredType).asInstanceOf[AnyRef]
-//    }
-//    if (rs.wasNull()) None else Some(obj)
-//  }
+
+  def bind(stmt: PreparedStatement, params: GenTraversableOnce[Any]): Unit =
+    if (params != null && params.size > 0) {
+      var i = 0
+      for (param <- params) {
+        i = i + 1
+        param match {
+          case null => stmt.setObject(i, null)
+          case p: java.sql.Array => stmt.setArray(i, p)
+          case p: BigDecimal =>
+            stmt.setBigDecimal(i, p.bigDecimal)
+          case p: Boolean => stmt.setBoolean(i, p)
+          case p: Byte => stmt.setByte(i, p)
+          case p: Array[Byte] => stmt.setBytes(i, p)
+          case p: java.sql.Date => stmt.setDate(i, p)
+          case p: Double => stmt.setDouble(i, p)
+          case p: Float => stmt.setFloat(i, p)
+          case p: Int => stmt.setInt(i, p)
+          case p: Long => stmt.setLong(i, p)
+          case p: Short => stmt.setShort(i, p)
+          case p: java.sql.SQLXML => stmt.setSQLXML(i, p)
+          case p: String => stmt.setString(i, p)
+          case p: java.sql.Time => stmt.setTime(i, p)
+          case p: java.sql.Timestamp => stmt.setTimestamp(i, p)
+          case p: java.net.URL => stmt.setURL(i, p)
+          case p: java.util.Date => stmt.setTimestamp(i, new java.sql.Timestamp(p.getTime))
+          case p: java.io.InputStream => stmt.setBinaryStream(i, p)
+          case p => stmt.setObject(i, p)
+        }
+      }
+    }
 }
 
 //spring jdbc support JdbcUtils => getResultSetValue

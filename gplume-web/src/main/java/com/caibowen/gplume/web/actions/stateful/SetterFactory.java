@@ -90,7 +90,6 @@ import java.util.Map;
  */
 public class SetterFactory {
 	
-	
 	private static void setAccessible(Field field) {
 		
 		if (!field.isAccessible())
@@ -129,7 +128,7 @@ public class SetterFactory {
 			ContextAttr ann = field.getAnnotation(ContextAttr.class);
 			MethodHandle handle = anno2HandleMap.get(ContextAttr.class.hashCode());
 			
-			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
+			return reqSetter(handle, field, ann.value(), ann.defaultVal(), !ann.required());
 			
 			/**
 			 * CookieVal: value from cookie
@@ -140,7 +139,7 @@ public class SetterFactory {
 			CookieVal ann = field.getAnnotation(CookieVal.class);
 			MethodHandle handle = anno2HandleMap.get(CookieVal.class.hashCode());
 			
-			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
+			return reqSetter(handle, field, ann.value(), ann.defaultVal(), !ann.required());
 			
 			/**
 			 * ReqAttr: this request
@@ -151,7 +150,7 @@ public class SetterFactory {
 			ReqAttr ann = field.getAnnotation(ReqAttr.class);
 			MethodHandle handle = anno2HandleMap.get(ReqAttr.class.hashCode());
 			
-			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
+			return reqSetter(handle, field, ann.value(), ann.defaultVal(), !ann.required());
 			
 			/**
 			 * SessionAttr
@@ -162,7 +161,7 @@ public class SetterFactory {
 			SessionAttr ann = field.getAnnotation(SessionAttr.class);
 			MethodHandle handle = anno2HandleMap.get(SessionAttr.class.hashCode());
 			
-			return reqSetter(handle, field, ann.value(), ann.defaultVal(), ann.nullable());
+			return reqSetter(handle, field, ann.value(), ann.defaultVal(), !ann.required());
 			
 		}
 		// rest API not supported
@@ -196,13 +195,13 @@ public class SetterFactory {
 					new ReqParamDefaultValSetter(handle
 					, named(field, ann.value())
 					, field
-					, nullable(field) || ann.required()
+					, !ann.required()
 					, Converter.slient.translateStr(ann.defaultVal(), field.getType()))
 			
 			: new ReqSetter(handle
 					, named(field, ann.value())
 					, field
-					, nullable(field) && ann.required());
+					,!ann.required());
 		}
 		return null;
 //		throw new IllegalArgumentException("Could not build setter for [" + field + "] : no specified annotation found");

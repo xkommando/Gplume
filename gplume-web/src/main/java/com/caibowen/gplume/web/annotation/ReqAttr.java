@@ -40,7 +40,7 @@ public @interface ReqAttr {
 	/**
 	 * Whether the parameter is required.
 	 */
-	boolean nullable() default true;
+	boolean required() default true;
 	
 	/**
 	 * default value of this attribute, used if is null

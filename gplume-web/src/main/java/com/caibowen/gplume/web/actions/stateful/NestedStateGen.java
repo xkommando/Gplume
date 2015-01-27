@@ -48,9 +48,12 @@ class NestedStateGen extends StateGen {
 	public Object gen(RequestContext req) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		Object state = ctor.newInstance(referred);
-		for (IStateSetter setter : setters) {
-			setter.setWith(req, state);
+		try {
+			for (IStateSetter setter : setters)
+				setter.setWith(req, state);
+			return state;
+		} catch(Throwable t) {
+			return null;
 		}
-		return state;
 	}
 }

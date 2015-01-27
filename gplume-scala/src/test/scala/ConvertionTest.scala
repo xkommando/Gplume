@@ -4,9 +4,9 @@
 //import org.junit.runner.RunWith
 //
 ///**
-// * @author BowenCai
-// * @since  10/12/2014.
-// */
+//* @author BowenCai
+//* @since  10/12/2014.
+//*/
 //@RunWith(classOf[_root_.com.caibowen.gplume.scala.misc.testing.JunitPal])
 //@ManifestPath("classpath:test_scala_assemble.xml")
 //class ConvertionTest {
