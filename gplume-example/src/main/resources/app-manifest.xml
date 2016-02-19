@@ -54,7 +54,6 @@
     </bean>
 
 
-
     <bean class="com.caibowen.gplume.web.WebConfig">
         <prop name="preProcessor">
             <bean class="com.caibowen.gplume.web.i18n.NativePkgInjector">

@@ -27,9 +27,12 @@ public class Codecs {
 	public static final class hex {
 
 		private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
-		
-		public static char[] toChars(byte[] bytes) {
-			
+
+		public static String toHexStr(byte[] bytes) {
+			return new String(toHexChars(bytes));
+		}
+
+		public static char[] toHexChars(byte[] bytes) {
 		    char[] hexChars = new char[bytes.length * 2];
 		    for ( int j = 0; j < bytes.length; j++ ) {
 		        int v = bytes[j] & 0xFF;
@@ -38,15 +41,19 @@ public class Codecs {
 		    }
 		    return hexChars;
 		}
-		
-		public static byte[] fromChars(char[] chars) {
-			byte[] bytes = new byte[chars.length / 2];
-			for (int i = 0; i < chars.length; i += 2) {
-				bytes[i/2] = (byte) ((Character.digit(chars[i], 16) << 4)
-                        + Character.digit(chars[i], 16));
-			}
-			return bytes;
-		}
+
+        public static byte[] fromHexChars(char[] chars) {
+            byte[] bytes = new byte[chars.length / 2];
+            int len = chars.length;
+            for (int i = 0, j = 0; j < len; i++) {
+                int f = Character.digit(chars[j], 16) << 4;
+                j++;
+                f = f | Character.digit(chars[j], 16);
+                j++;
+                bytes[i] = (byte) (f & 0xFF);
+            }
+            return bytes;
+        }
 		
 		public static byte[] fromStr(String s) {
 		    int len = s.length();
@@ -56,6 +63,64 @@ public class Codecs {
 		                             + Character.digit(s.charAt(i+1), 16));
 		    }
 		    return data;
+		}
+
+		/** Mask for bit 0 of a byte. */
+		private static final int BIT_0 = 1;
+
+		/** Mask for bit 1 of a byte. */
+		private static final int BIT_1 = 0x02;
+
+		/** Mask for bit 2 of a byte. */
+		private static final int BIT_2 = 0x04;
+
+		/** Mask for bit 3 of a byte. */
+		private static final int BIT_3 = 0x08;
+
+		/** Mask for bit 4 of a byte. */
+		private static final int BIT_4 = 0x10;
+
+		/** Mask for bit 5 of a byte. */
+		private static final int BIT_5 = 0x20;
+
+		/** Mask for bit 6 of a byte. */
+		private static final int BIT_6 = 0x40;
+
+		/** Mask for bit 7 of a byte. */
+		private static final int BIT_7 = 0x80;
+
+		private static final int[] BITS = {BIT_0, BIT_1, BIT_2, BIT_3, BIT_4, BIT_5, BIT_6, BIT_7};
+
+		public static char[] toBinChars(final byte[] raw) {
+			final char[] l_ascii = new char[raw.length << 3];
+			for (int ii = 0, jj = l_ascii.length - 1; ii < raw.length; ii++, jj -= 8) {
+				for (int bits = 0; bits < BITS.length; ++bits) {
+					if ((raw[ii] & BITS[bits]) == 0) {
+						l_ascii[jj - bits] = '0';
+					} else {
+						l_ascii[jj - bits] = '1';
+					}
+				}
+			}
+			return l_ascii;
+		}
+		public static String toBinStr(final byte[] raw) {
+			return new String(toBinChars(raw));
+		}
+
+		public static byte[] fromBinStr(String s) {
+			return fromBinChars(s.toCharArray());
+		}
+		public static byte[] fromBinChars(final char[] ascii) {
+			final byte[] l_raw = new byte[ascii.length >> 3];
+			for (int ii = 0, jj = ascii.length - 1; ii < l_raw.length; ii++, jj -= 8) {
+				for (int bits = 0; bits < BITS.length; ++bits) {
+					if (ascii[jj - bits] == '1') {
+						l_raw[ii] |= BITS[bits];
+					}
+				}
+			}
+			return l_raw;
 		}
 	}
 	

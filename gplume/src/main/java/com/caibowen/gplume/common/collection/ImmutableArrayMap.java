@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.caibowen.gplume.common.collection;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -24,11 +24,11 @@ import java.util.*;
  *  map key and value is nullable.
  *  
  *  WARN:
- *  	there is no guarantee that keys in this map is unique
+ *  	There is no guarantee that keys in this map is unique
  *  	Given two equal keys, the reading method, i.e,  get() and contains()
  *  	will check for the first key incurred in the array only
  *  
- * @author bowen.cbw
+ * @author bowen.cbw@alibaba-inc.com
  *
  */
 public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializable {
@@ -40,20 +40,25 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 
 	// views on keys and values. lazy init
 	transient private Set<Entry<K, V>> entrySet;
-	transient private Object[] keys;
-	transient private Object[] vals;
+	transient private ImmutableArraySet<K> keys;
+	transient private ImmutableArraySet<V> vals;
 	
 	public ImmutableArrayMap(Object[][] values) {
-		
-		// check if it is a n*2 array
-		for (int i = 0; i != values.length; ++i) {
-			Object[] pair = values[i];
-			if (pair == null || pair.length != 2) {
-				throw new IllegalArgumentException(
-					pair == null ? "enpty entry at index [" + i + "]" :
-					pair.length > 0 ? 
-					"multi-value for key[" + pair[0] + "] at index [" + i + "]"					
-					: "empty entry at index " + i);	
+		this(values, true);
+	}
+
+	public ImmutableArrayMap(Object[][] values, boolean doCheck) {
+		if (doCheck) {
+			// check if it is a n*2 array
+			for (int i = 0; i != values.length; ++i) {
+				Object[] pair = values[i];
+				if (pair == null || pair.length != 2) {
+					throw new IllegalArgumentException(
+							pair == null ? "enpty entry at index [" + i + "]" :
+									pair.length > 0 ?
+											"multi-value for key[" + pair[0] + "] at index [" + i + "]"
+											: "empty entry at index " + i);
+				}
 			}
 		}
 		table = values;
@@ -71,10 +76,6 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
             table[i][1] = e.getValue();
             i++;
         }
-        // init when needed
-        keys = null;
-        vals = null;
-        entrySet = null;
     }
 
 	public ImmutableArrayMap(Object[] keys, Object[] vals) {
@@ -85,8 +86,20 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 			table[i][0] = keys[i];
 			table[i][1] = vals[i];
 		}
-        this.keys = keys;
-        this.vals = vals;
+	}
+
+	public TreeMap<K, V> toTreeMap() {
+		return (TreeMap<K, V>) addTo(new TreeMap<K, V>());
+	}
+	public HashMap<K, V> toHashMap() {
+		return (HashMap<K, V>) addTo(new HashMap<K, V>(table.length));
+	}
+
+	public Map<K, V> addTo(Map<K, V> jdkMap) {
+		for (int i = 0; i != table.length; i++) {
+			jdkMap.put((K)table[i][0], (V)table[i][1]);
+		}
+		return jdkMap;
 	}
 
 	@Override
@@ -103,7 +116,7 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 	public boolean containsKey(Object key) {
 		if (key == null) {
 			for (Object[] entry : table)
-				if (entry[1] == null)
+				if (entry[0] == null)
 					return true;
 		} else {
 			for (Object[] entry : table)
@@ -164,28 +177,29 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 	@Override
 	public Set<K> keySet() {
 		if (keys == null) {
-			keys = new Object[table.length];
+			Object[] keya = new Object[table.length];
 			for (int i = 0; i < table.length; i++) {
-				keys[i] = table[i][0];
+				keya[i] = table[i][0];
 			}
+			keys = new ImmutableArraySet<>(keya);
 		}
-		return new ImmutableArraySet<K>(keys);
+		return keys;
 	}
 
 	@Override
 	public Collection<V> values() {
 		if (vals == null) {
-			vals = new Object[table.length];
+			Object[] vala = new Object[table.length];
 			for (int i = 0; i < table.length; i++) {
-				vals[i] = table[i][1];
+				vala[i] = table[i][1];
 			}
+			vals = new ImmutableArraySet<>(vala);
 		}
-		return new ImmutableArraySet<V>(vals);
+		return vals;
 	}
 
 	@Override
 	public Set<Entry<K, V>> entrySet() {
-
 		Set<Entry<K, V>> es = entrySet;
 		return es != null ? es
 				: (entrySet = new AbstractSet<Entry<K,V>>() {
@@ -220,44 +234,28 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 					}
 				});
 	}
-	
+
 	@Override
 	public int hashCode() {
-        int h = 0;
-        for (Object[] entry : table) {
-        	Object k = entry[0];
-        	Object v = entry[1];
-        	int eh = (k == null ? 0 : k.hashCode()) 
-        			 ^ (v == null ? 0 : v.hashCode());
-        	
+		int h = 0;
+		for (Object[] entry : table) {
+			Object k = entry[0];
+			Object v = entry[1];
+			int eh = (k == null ? 0 : k.hashCode())
+					^ (v == null ? 0 : v.hashCode());
 			h += eh;
 		}
-        return h;
+		return h;
 	}
 
 
-    public String toJson() {
-        StringBuilder b = new StringBuilder(512);
-        b.append("{\r\n");
-        boolean added = false;
-        for (Object[] entry : table) {
-            b.append("\t\"").append(entry[0])
-                    .append("\" : \"")
-                    .append(entry[1]).append("\", \r\n");
-            added = true;
-        }
-        if (added) {
-            final int len = b.length();
-            b.delete(len - 4, len - 3);
-        }
-        b.append('}');
-        return b.toString();
-    }
-
+	/**
+	 * @return json string representing this map
+	 */
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(512);
-		b.append("\"" + super.toString() + " : {\r\n");
+		b.append("\"").append(super.toString()).append(" : {\r\n");
 		boolean added = false;
 		for (Object[] entry : table) {
 			b.append("\t\"").append(entry[0])
@@ -266,7 +264,7 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 			added = true;
 		}
 		if (added) {
-			final int len = b.length();
+			int len = b.length();
 			b.delete(len - 4, len - 3);
 		}
 		b.append('}');
@@ -322,8 +320,7 @@ public class ImmutableArrayMap<K, V> implements Map<K, V>, Cloneable, Serializab
 	
 	public Object clone() {
 		try {
-			ImmutableArrayMap<K, V> m = (ImmutableArrayMap<K, V>) super.clone();
-			return m;
+			return super.clone();
 		} catch (Exception e) {
 			throw new RuntimeException("this exception will never throw");
 		}

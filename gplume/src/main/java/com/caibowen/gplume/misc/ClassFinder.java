@@ -19,7 +19,7 @@ package com.caibowen.gplume.misc;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -42,7 +42,11 @@ public final class ClassFinder {
 		ArrayList<Class<?>> classes = new ArrayList<>(128);
 		try {
 			while (resources.hasMoreElements()) {
-				File f = new File(resources.nextElement().getFile());
+                String name = resources.nextElement().getFile();
+                if (-1 != name.lastIndexOf('%')) {
+                    name = URLDecoder.decode(name, "UTF-8");
+                }
+				File f = new File(name);
 				if (!f.exists())
 					continue;
 				List<Class<?>> subClasses;

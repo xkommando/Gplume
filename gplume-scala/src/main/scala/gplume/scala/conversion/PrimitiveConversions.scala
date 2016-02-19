@@ -8,9 +8,10 @@ import com.caibowen.gplume.common.Base64
  * @author BowenCai
  * @since  04/12/2014.
  */
-object ByteConversions {
+object PrimitiveConversions {
 
   class ByteExt(private[this] val array: Array[Byte] ) {
+
     def hexlify(from: Int, to: Int): String = {
       val out = new StringBuffer
       for (i <- from until to) {
@@ -28,6 +29,12 @@ object ByteConversions {
 
   }
 
+  class CharExt(private[this] val ch: Char) {
+    def pinyin(): String = ???
+    def isChinese: Boolean = ???
+  }
 
-  implicit def ApplyConversion(s: Array[Byte]) = new ByteExt(s)
+
+  implicit def ApplyBytesConversion(s: Array[Byte]) = new ByteExt(s)
+  implicit def ApplyCharConversion(s: Char) = new CharExt(s)
 }

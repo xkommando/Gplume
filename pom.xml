@@ -35,7 +35,7 @@
         <module>gplume</module>
         <module>gplume-web</module>
         <module>gplume-webex</module>
-        <module>gplume-sample</module>
+        <module>gplume-example</module>
         <module>gplume-scala</module>
     </modules>
 

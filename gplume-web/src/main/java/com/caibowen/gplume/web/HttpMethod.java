@@ -25,9 +25,6 @@ public enum HttpMethod {
 
 	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
 	
-//	public static final HttpMethod[] ALL = {GET, POST, PUT, PATCH, DELETE, OPTIONS, TRACE};
-//	public static final HttpMethod[] GET_POST = {GET, POST};
-	
     public static HttpMethod lookup(CharSequence seq) {
     	
         switch(seq.charAt(0)) {

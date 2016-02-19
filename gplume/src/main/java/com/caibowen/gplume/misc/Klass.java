@@ -60,7 +60,7 @@ public final class Klass {
         Constructor[] cts = klass.getDeclaredConstructors();
         ArrayList als = new ArrayList();
         for (Constructor ctor : cts) {
-            if (ctor.getParameterCount() == 1)
+            if (ctor.getParameterTypes().length == 1)
                 als.add(ctor.getParameterTypes()[0]);
         }
         return als;

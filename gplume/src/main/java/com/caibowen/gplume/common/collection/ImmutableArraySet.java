@@ -14,17 +14,20 @@
  * limitations under the License.
  ******************************************************************************/
 package com.caibowen.gplume.common.collection;
-        import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
+
+import java.io.Serializable;
+import java.util.*;
 
 
 /**
- * 
- * @author bowen.cbw
+ *  set wrapper for a one dimension array.
  *
- * @param <V>
+ *
+ *  WARN:
+ *  	There is no guarantee that value in this set is unique, and values are nullable.
+ *
+ * @author bowen.cbw@alibaba-inc.com
+ *
  */
 public class ImmutableArraySet<V> implements Set<V>, Cloneable, Serializable {
 	
@@ -34,6 +37,30 @@ public class ImmutableArraySet<V> implements Set<V>, Cloneable, Serializable {
 
 	public ImmutableArraySet(Object[] value) {
 		this.value = value;
+	}
+
+	public ImmutableArraySet(Set<V> jdkSet) {
+		value = new Object[jdkSet.size()];
+		int i = 0;
+		for (V v : jdkSet) {
+			value[i] = v;
+			i++;
+		}
+	}
+
+	public TreeSet<V> toTreeSet() {
+		return (TreeSet<V>) addTo(new TreeSet<V>());
+	}
+
+	public HashSet<V> toHashSet() {
+		return (HashSet<V>) addTo(new HashSet<V>(value.length));
+	}
+
+	public Set<V> addTo(Set<V> jdkSet) {
+		for (int i = 0; i != value.length; i++) {
+			jdkSet.add((V)value[i]);
+		}
+		return jdkSet;
 	}
 
 	@Override
@@ -132,11 +159,15 @@ public class ImmutableArraySet<V> implements Set<V>, Cloneable, Serializable {
 	public void clear() {
         throw new UnsupportedOperationException();
 	}
-	
+
+	/**
+	 *
+	 * @return json string representing the set
+     */
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder(256);
-		b.append("\"" + super.toString() + " : [");
+		b.append("\"").append(super.toString()).append(" : [");
 		boolean added = false;
 		for (Object object : value) {
 			b.append('\"').append(object).append("\", ");
@@ -183,8 +214,7 @@ public class ImmutableArraySet<V> implements Set<V>, Cloneable, Serializable {
 	 */
 	public Object clone() {
 		try {
-			ImmutableArraySet<V> s = (ImmutableArraySet<V>) super.clone();
-			return s;
+			return super.clone();
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException("this exception will never throw");
 		}

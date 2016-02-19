@@ -25,7 +25,7 @@ public class NoCaseMap<V> extends HashMap<String, V>{
 		if (map.isEmpty()) {
 			return;
 		}
-		for (Entry<? extends String, ? extends V> entry : map.entrySet()) {
+		for (Map.Entry<? extends String, ? extends V> entry : map.entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}

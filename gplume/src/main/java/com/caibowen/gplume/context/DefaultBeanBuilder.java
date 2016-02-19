@@ -24,8 +24,7 @@ import com.caibowen.gplume.context.bean.IDAwareBean;
 import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
-import com.caibowen.gplume.misc.Assert;
-import com.caibowen.gplume.misc.Klass;
+import com.caibowen.gplume.misc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -62,11 +61,13 @@ public class DefaultBeanBuilder implements IBeanBuilder {
     }
 
     protected @Nonnull Class<?> getClass(Element element) throws Exception {
-        String clazzName = element.getAttribute(XMLTags.BEAN_CLASS).trim();
-        clazzName = configCenter.replaceIfPresent(clazzName);
+        String clazzName = element.getAttribute(XMLTags.BEAN_CLASS);
+        if (Str.Utils.isBlank(clazzName)) {
+            throw new IllegalArgumentException("Empty class name at [" + element.toString() + "]");
+        }
+        clazzName = configCenter.replaceIfPresent(clazzName.trim());
         return getClass(clazzName);
     }
-
 
     /**
      * For one field, there are 3 notation:
@@ -135,6 +136,8 @@ public class DefaultBeanBuilder implements IBeanBuilder {
              * 				    <list> or <value>
              */
             Node iter = prop.getFirstChild().getNextSibling();
+            if (iter == null)
+                continue;
 
             if (XMLTags.PROP_LIST.equals(iter.getNodeName()))
                 container = 2;

@@ -75,7 +75,7 @@ public class SampleController {
 	}
 	
 	@Handle({"/",
-			"/index",
+			"/index.jsp",
 			"/index.html",
 			"index"})
 	public String index(SampleController self, RequestContext context) {

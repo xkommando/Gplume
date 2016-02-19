@@ -44,9 +44,6 @@
 <input type="submit" value="<gp:msg k="submit"/>"/>
 </form>
 
-
-
-
 </div>
 <a href=" 
 <c:url value="/test">

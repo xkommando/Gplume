@@ -281,7 +281,6 @@ public class ControlCenter extends BaseControlCenter {
 
 		errorHandler = null;
 		injector = null;
-		controllers.clear();
 		controllers = null;
 
 		LOG.info("control center destroyed");

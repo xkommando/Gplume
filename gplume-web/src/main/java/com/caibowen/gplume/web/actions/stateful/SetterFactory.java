@@ -251,7 +251,7 @@ public class SetterFactory {
 	/**
 	 * @Named.value()
 	 *   -> annotation.value()
-	 *   	->field name
+	 *   	-> field name
 	 *   
 	 * @param field
 	 */

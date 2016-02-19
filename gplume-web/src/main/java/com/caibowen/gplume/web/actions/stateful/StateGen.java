@@ -16,6 +16,8 @@
 package com.caibowen.gplume.web.actions.stateful;
 
 import com.caibowen.gplume.web.RequestContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -32,6 +34,7 @@ import java.util.List;
 public class StateGen {
 
 	List<? extends IStateSetter> setters;
+    private static Logger LOG = LoggerFactory.getLogger(StateGen.class);
 
 	/**
 	 * should be set accessible if necessary
@@ -50,6 +53,7 @@ public class StateGen {
 				setter.setWith(req, state);
 			return state;
 		} catch(Throwable t) {
+            LOG.debug("exception on setting properties for [" + state + "]", t);
 			return null;
 		}
 	}

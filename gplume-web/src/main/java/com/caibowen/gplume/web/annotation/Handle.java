@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 import com.caibowen.gplume.web.HttpMethod;
 
 
-
 /**
  * 
  * to identify a HTTP request handler(function)
@@ -39,6 +38,9 @@ public @interface Handle {
 	
 	String[] value();
 
-	HttpMethod[] httpMethods() default {HttpMethod.GET};
+	HttpMethod[] httpMethods() default {HttpMethod.GET,
+            HttpMethod.POST, HttpMethod.PUT,
+            HttpMethod.PATCH, HttpMethod.DELETE,
+            HttpMethod.OPTIONS, HttpMethod.TRACE};
 	
 }

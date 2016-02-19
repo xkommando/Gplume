@@ -93,8 +93,8 @@ public class ControllerScanner implements InitializingBean {
 		
 		ArrayList<Object> ctrls = new ArrayList<>(64);
 
-		List<Class<?>> allClazz =  ClassFinder.find(pkg, 
-									Thread.currentThread().getContextClassLoader());
+		List<Class<?>> allClazz =  ClassFinder.find(pkg,
+                ControllerScanner.class.getClassLoader());
 			for (Class<?> class1 : allClazz) {
 				if (mayBeController(class1)) {
 					LOG.debug("\t>>> find controller[" + class1.getName() + "]");

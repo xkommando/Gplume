@@ -38,6 +38,7 @@ object StrConversions {
       buffer
     }
 
+
     def decodeBase64 = Base64.getDecoder.decode(s)
 
   }

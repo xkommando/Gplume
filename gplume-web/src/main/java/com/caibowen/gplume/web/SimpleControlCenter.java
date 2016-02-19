@@ -56,7 +56,7 @@ public class SimpleControlCenter extends ControlCenter {
 		if (action == null) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("no action for URI[" + uri + "]");
-			}
+            }
 			errorHandler.http404(requestContext);
 			return;
 		}
