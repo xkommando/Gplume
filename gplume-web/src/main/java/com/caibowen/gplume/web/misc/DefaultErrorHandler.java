@@ -155,6 +155,7 @@ public class DefaultErrorHandler implements IErrorHandler {
 				LOG.error("error setting response to 500: response already committed\n"
 										+ "error sending error response; Message[" + e.getMessage() + "]");
 			}
+			return;
 		}
 		requestContext.response.reset();
 		try {
