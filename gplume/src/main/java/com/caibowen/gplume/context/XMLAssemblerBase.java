@@ -165,7 +165,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
                     break;
 
                 case XMLTags.DEFINE:
-                    handleProperties(elem);
+                    handleDefProperties(elem);
                     break;
 
                 case XMLTags.BEAN:
@@ -260,7 +260,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
      *
      * @param elem
      */
-    protected void handleProperties(Element elem) {
+    protected void handleDefProperties(Element elem) {
         beanBuilder.getConfigCenter().scanXMLElem(elem);
     }
 

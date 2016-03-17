@@ -291,6 +291,17 @@ public class DefaultBeanBuilder implements IBeanBuilder {
     }
 
 
+    /**
+     * map definition in xml
+     * <map>
+     *     <key>string_value1</key>
+     *     <key2 type="int">5566</key2>
+     *     <key name="irregular key name" type="date">2013-12-25</key>
+     * </map>
+     * @param iter
+     * @param propName
+     * @return
+     */
     protected  @Nonnull
     Properties buildMap(Node iter, String propName) {
         Properties properties = new Properties();
@@ -300,10 +311,17 @@ public class DefaultBeanBuilder implements IBeanBuilder {
                 elemBn = (Element)iter;
             else continue;
 
-            String mapK = configCenter.replaceIfPresent(elemBn.getTagName().trim());
+            String mapK = elemBn.getTagName().trim();
+            if (XMLTags.PROP_MAP_KEY.equals(mapK)) {
+                String _k = elemBn.getAttribute(XMLTags.PROP_NAME);
+                if (notBlank(_k))
+                    mapK = _k;
+            }
+            mapK = getConfigCenter().replaceIfPresent(mapK);
+
             if (properties.containsKey(mapK))
                 throw new IllegalArgumentException(
-                        "duplicated map key for property[" + propName + "]");
+                        "duplicated map key [" + mapK + "] for property[" + propName + "]");
 
             String _v = elemBn.getTextContent();
             Assert.hasText(_v);

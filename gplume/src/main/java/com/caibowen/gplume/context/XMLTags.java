@@ -39,7 +39,7 @@ public final class XMLTags {
 
     public static final String CONFIG = "config";
     public static final String SCOPE = "scope";
-	public static final String IMPROT = "import";
+	public static final String IMPORT = "import";
 	
 	public static final String BEAN_ID = "id";
 	public static final String BEAN_CLASS = "class";
@@ -61,6 +61,7 @@ public final class XMLTags {
 	public static final String PROP_INSTANCE = "instance";
 	public static final String PROP_LIST = "list";
 	public static final String PROP_MAP = "map";
+	public static final String PROP_MAP_KEY = "key";
 	public static final String PROP_SET = "set";
 	public static final String PROP_VALUE = "val";
 	public static final String PROP_REF = "ref";

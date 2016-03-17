@@ -48,15 +48,15 @@ Spring-like configuration:
   <config>some_other_config.xml</config>
   <config>so_many_configs.xml</config>
 
-<!--add global properties-->
-  <variables import="kv_pairs.properties" scope="global">
+<!--define global properties-->
+  <define scope="global">
     <gplumeVersion>1.0.0.nightly</gplumeVersion>
     <webErrorHandler>com.caibowen.web.misc.ErrorHandler</webErrorHandler>
-  </variables>
+  </define>
 
 <!-- default scope: current file -->
-  <properties import="kv_pairs_of_xml_format.xml" scope="file"/>
-<!--all properties is accessible at run time-->
+  <define import="kv_pairs_of_xml_format.xml" scope="file"/>
+<!-- all properties is accessible at run time -->
 
   <bean class="com.caibowen.gplume.web.WebConfig" aftercall="afterPropertySet">
     <construct> <!--constructor injection -->
@@ -92,8 +92,9 @@ specify them in the manifest.xml
 <bean id="i18nService" class="com.caibowen.gplume.web.i18n.HotSwapWebI18n">
 	<construct>
 		<map>
-			<en value-type="String">${lang_cn}</en>
+			<en type="String">${lang_cn}</en> <!--tag name as key -->
 			<zh_CN>/${i18base}/${i18_cn}</zh_CN>
+			<key name="third key" type="Date">${date}</key> <!-- specify key name and value type -->
 		</map>
 	</construct>
 	<prop name="defaultLang" value="SimplifiedChinese"/>
@@ -268,7 +269,7 @@ Chaining processors in XML
 ```
 Handle request with method
 ```Java
-// Support arbitrary return type. Customer view resolvers is binded before runing
+// Support arbitrary return type. request handle is built and bind to custom view resolvers at server set-up, no overhead at runtime
 class MyStrViewResolver implements IViewResolver;
 class FreeMarkerResolver implements IViewResolver;
 ```

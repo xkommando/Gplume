@@ -80,9 +80,14 @@ class SBeanBuilder extends JBeanBuilder {
     while (iter != null) {
       if (iter.getNodeType == Node.ELEMENT_NODE) {
         val elemBn = iter.asInstanceOf[Element]
-        val mapK = getConfigCenter.replaceIfPresent(elemBn.getTagName.trim)
+        var mapK = elemBn.getTagName.trim
+        if (XMLTags.PROP_MAP_KEY == mapK) {
+          val _k = elemBn.getAttribute(XMLTags.PROP_NAME)
+          if (notBlank(_k)) mapK = _k
+        }
+        mapK = getConfigCenter.replaceIfPresent(mapK)
         if (builder.contains(mapK))
-          throw new IllegalArgumentException("duplicated map key for property[" + propName + "]")
+          throw new IllegalArgumentException("duplicated map key[" + mapK + "] for property[" + propName + "]")
 
         val _v = elemBn.getTextContent
         Assert.hasText(_v)

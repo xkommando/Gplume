@@ -802,7 +802,7 @@ public class Converter {
 	@Nonnull
 	public static Class<?> getClass(String typeName) {
 		Class<?> v = TYPE_TABLE.get(typeName);
-		Assert.notNull(v, "unknow class[" + typeName + "]");
+		Assert.notNull(v, "unknown class[" + typeName + "]");
 		return v;
 	}
 

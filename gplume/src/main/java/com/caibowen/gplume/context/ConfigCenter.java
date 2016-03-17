@@ -88,15 +88,12 @@ public class ConfigCenter implements Serializable {
         String _sc = elem.getAttribute(XMLTags.SCOPE);
         boolean isGlobal = ConfigScope.Global.name().equalsIgnoreCase(_sc);
 
-        final String loc = elem.getAttribute(XMLTags.IMPROT).trim();
+        final String loc = elem.getAttribute(XMLTags.IMPORT).trim();
 
         if (Str.Utils.notBlank(loc)) {
-
             String _lastConfig = currentConfigName;
             currentConfigName = loc;
-
             final Properties p = new Properties();
-
             withPath(loc, new InputStreamCallback() {
                 @Override
                 public void doInStream(InputStream stream) throws Exception {
@@ -234,7 +231,7 @@ public class ConfigCenter implements Serializable {
     /**
      * support multi property in one string
      * hahaha ${name sad} ooo ${second-hahaha} back-back
-     *
+     * currently does not support escape <del>to escape, use \ </del>
      * do not support nested properties
      *
      * hahaha ${name sad${second-hahaha}} ooo  back-back -> goes wrong
@@ -246,8 +243,10 @@ public class ConfigCenter implements Serializable {
     @Nonnull
     public String replaceIfPresent(@Nonnull String name) {
         int lq = name.indexOf("${", 0);
-        if (lq == -1)
+        if (lq < 0)
             return name;
+
+        LOG.warn("xml <define> properties, string [{}] not escaped, use with caution", name);
 
         int rq;
         int lastL = 0;
