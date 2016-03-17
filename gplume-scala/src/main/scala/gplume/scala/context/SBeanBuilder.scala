@@ -1,6 +1,7 @@
 package gplume.scala.context
 
 
+import java.lang.reflect.{Field, Modifier}
 import java.util.{List => JList, Map => JMap, Properties => JProperties}
 import javax.annotation.{Nonnull, Nullable}
 
@@ -12,12 +13,13 @@ import org.w3c.dom.{Element, Node}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.collection.convert.wrapAsScala._
 
 /**
 * @author BowenCai
 * @since  12/12/2014.
 */
-class BeanBuilder extends JBeanBuilder {
+class SBeanBuilder extends JBeanBuilder {
 
   /**
    * @param start
@@ -97,15 +99,21 @@ class BeanBuilder extends JBeanBuilder {
     builder.toMap
   }
 
-  @throws(classOf[Exception])
   protected override def
   newInstance(@Nonnull klass: Class[_], @Nullable prop: Element): AnyRef = {
     if (prop == null) {
+      val _sobj = findSingletonObject(klass)
+      if (_sobj != null)
+        return _sobj
       try {
-        return klass.newInstance().asInstanceOf[AnyRef]
+        val empty = Array[Class[_]]()
+        val ctor = klass.getDeclaredConstructor(empty:_*)
+        if (!Modifier.isPublic(ctor.getModifiers))
+          ctor.setAccessible(true)
+        return ctor.newInstance().asInstanceOf[AnyRef]
       }catch {
         case e:Throwable =>
-                  throw new BeanAssemblingException("Could not find default constructor", e)
+                  throw new BeanAssemblingException("Could not find default constructor:" + klass.getCanonicalName, e)
       }
     }
     // 2 try in tag
@@ -114,13 +122,12 @@ class BeanBuilder extends JBeanBuilder {
       _tagVal = super.inTag(prop, false, null)
     }
     catch {
-      case e: NullPointerException => {
+      case e: NullPointerException =>
         val cs = Klass.findCtorParam(klass)
         if (cs.size != 0) {
           throw new IllegalStateException("Could not determine constructor parameter for [" + klass + "]")
         }
         _tagVal = inTag(prop, false, cs.get(0))
-      }
     }
 
     if (null != _tagVal) return BeanEditor.construct(klass, _tagVal)
@@ -128,6 +135,47 @@ class BeanBuilder extends JBeanBuilder {
     // 3 try parse xml
     val ls = this.scalaList(prop)
     BeanEditor.construct(klass, ls.toArray)
+  }
+
+  /**
+    * given
+    * object scalaSingletonObject {}
+    * returns
+    * scalaSingletonObject$.MODULE$
+    *
+    *  check if it is sington object by:
+    *  1. exists scalaSingtonObject$
+    *  2. original class does not declare any fields
+    *  3. original class only have public static methods
+    *  4. the scalaSingtonObject$ has same typed non-null public static field named MODULE$;
+    *
+    * @param klass
+    * @return
+    */
+  def findSingletonObject(@Nonnull klass: Class[_]): AnyRef = {
+    val mdKls = try Class.forName(klass.getCanonicalName + "$")
+      catch {
+        case cn: ClassNotFoundException => null.asInstanceOf[Class[_]]
+      }
+    if (mdKls != null && klass.getDeclaredFields.isEmpty
+      && (!klass.getDeclaredMethods.exists { m =>
+      val modi = m.getModifiers
+      !Modifier.isPublic(modi) || !Modifier.isStatic(modi)
+    })) {
+      val fdSObj = try mdKls.getDeclaredField("MODULE$")
+        catch {
+          case nf: NoSuchFieldException => null.asInstanceOf[Field]
+        }
+      if (fdSObj != null && fdSObj.getType == mdKls) {
+        val modi = fdSObj.getModifiers
+        if (Modifier.isPublic(modi) && Modifier.isStatic(modi)) {
+          val realObj = fdSObj.get()
+          require(realObj != null)
+          return realObj
+        }
+      }
+    }
+    null.asInstanceOf[AnyRef]
   }
 
   @Nonnull@throws(classOf[Exception])
@@ -189,7 +237,7 @@ class BeanBuilder extends JBeanBuilder {
                   "in class [${bnClass.getName}]\r\n + needs 1 actual ${beanList3.size}
                   actual values : ${beanList3.toString}""")
 
-              BeanEditor.setProperty(beanObj, propName, beanList3(0))
+              BeanEditor.setProperty(beanObj, propName, beanList3.head)
 
           } // match
         } //else

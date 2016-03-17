@@ -52,6 +52,7 @@ public class XMLAssembler extends XMLAssemblerBase
 	public XMLAssembler() {}
 	public XMLAssembler(IBeanBuilder builder) {
 		super(builder);
+		builder.setAssembler(this);
 	}
 
 	public void assemble(@Nonnull final InputSource in) throws Exception {
@@ -176,7 +177,7 @@ public class XMLAssembler extends XMLAssemblerBase
 
 		pod.instance = bean;
 
-        LOG.debug("{} of type {} updated", id, bean.getClass().getName());
+        LOG.trace("{} of type {} updated", id, bean.getClass().getName());
 		return true;
 	}
 	

@@ -16,6 +16,7 @@
 
 package com.caibowen.gplume.resource;
 
+import com.caibowen.gplume.common.Pair;
 import com.caibowen.gplume.misc.Str;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,10 +66,8 @@ public class InputStreamProviderProxy implements InputStreamProvider {
         this.defaultProvider = defaultProvider;
     }
 
-    @Override
-	public InputStream getStream(String path) throws IOException {
+    private Pair<InputStreamProvider, String> matchProvider(String path) {
         InputStreamProvider providerToUse = null;
-
         if (Str.Utils.notBlank(path)) {
             // build beans
             if (path.startsWith("classpath:")) {
@@ -86,35 +85,22 @@ public class InputStreamProviderProxy implements InputStreamProvider {
             } else {
                 providerToUse = defaultProvider;
             }
-        }
-        LOG.debug("using [" + providerToUse.getClass().getSimpleName() + "] to get [" + path + "]");
-		return providerToUse.getStream(path);
-	}
+            return new Pair<>(providerToUse, path);
+        } else
+            throw new NullPointerException("Empty path value");
+    }
 
+    @Override
+	public InputStream getStream(String path) throws IOException {
+        Pair<InputStreamProvider, String> p = matchProvider(path);
+        LOG.trace("using [" + p.first.getClass().getSimpleName() + "] to get [" + p.second + "]");
+		return p.first.getStream(p.second);
+	}
 
 	@Override
 	public String getRealPath(String path) {
-        InputStreamProvider providerToUse;
-        if (Str.Utils.notBlank(path)) {
-            // build beans
-            if (path.startsWith("classpath:")) {
-                providerToUse = classPathProvider;
-                path = path.substring(10, path.length());
-
-            } else if (path.startsWith("file:")) {
-                providerToUse = FILE_PROVIDER;
-                path = path.substring(5, path.length());
-
-            } else if (path.startsWith("url:")) {
-                providerToUse = URL_PROVIDER;
-                path = path.substring(4, path.length());
-
-            } else {
-                providerToUse = defaultProvider;
-            }
-            return providerToUse.getRealPath(path);
-        }
-        throw new NullPointerException();
+        Pair<InputStreamProvider, String> p = matchProvider(path);
+        return p.first.getRealPath(p.second);
 	}
 
 }

@@ -124,7 +124,7 @@ public class WebConfig implements InitializingBean, Serializable {
 
 			boolean boo = AppContext.beanAssembler.addBean("controlCenter", center);
 
-            if (boo) LOG.debug("ControlCenter set up");
+            if (boo) LOG.trace("ControlCenter set up");
             else LOG.debug("Could not add [controlCenter] to beanAssembler");
 
 		} catch (Exception e) {

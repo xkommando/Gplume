@@ -115,7 +115,7 @@ public class GenI18nService implements I18nService, InitializingBean, Serializab
 		}
 		if (dialect == defaultLang) {
 			Object o = pkgTable.put(dialect, new NativePackage(dialect, properties, null));
-            LOG.debug("pkg for default dialect[" + defaultLang.nativeName
+            LOG.trace("pkg for default dialect[" + defaultLang.nativeName
                     + (o == null ? "] added" : "] updated") );
 
 		} else {
@@ -123,7 +123,7 @@ public class GenI18nService implements I18nService, InitializingBean, Serializab
 									properties, 
 									pkgTable.get(defaultLang)));
 
-			LOG.debug("pkg for [" + dialect.nativeName +
+			LOG.trace("pkg for [" + dialect.nativeName +
                     (o == null ? "] added" : "] updated") );
 		}
 	}

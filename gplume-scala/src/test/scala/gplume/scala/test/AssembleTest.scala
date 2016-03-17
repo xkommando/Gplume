@@ -1,7 +1,7 @@
 package gplume.scala.test
 
 import com.caibowen.gplume.resource.ClassLoaderInputStreamProvider
-import gplume.scala.context.{AppContext, ContextBooter}
+import gplume.scala.context.{AppContext, SContextBooter}
 import net.liftweb.json.{DefaultFormats, Serialization}
 
 /**
@@ -10,7 +10,7 @@ import net.liftweb.json.{DefaultFormats, Serialization}
  */
 object AssembleTest extends App {
 
-  val booter = new ContextBooter()
+  val booter = new SContextBooter()
   booter.setManifestPath("classpath:test_scala_assemble.xml")
   val _ss = this.getClass.getClassLoader
   booter.setStreamProvider(new ClassLoaderInputStreamProvider(_ss))

@@ -27,15 +27,15 @@ object AppContext {
         return Calendar.getInstance(defaults.timeZone)
       }
     }
+
   /**
    * config file location, written in web.xml
    */
   val MANIFEST = "manifest"
   val LOCALE  = "locale"
   val TIME_ZONE = "timezone"
-  private[this] val _beanBuilder = new gplume.scala.context.BeanBuilder
-  val beanAssembler: IBeanAssembler = new XMLAssembler(_beanBuilder)
-  _beanBuilder.setAssembler(beanAssembler)
+
+  val beanAssembler: IBeanAssembler = new XMLAssembler(new gplume.scala.context.SBeanBuilder)
 
   val broadcaster = new Broadcaster
 

@@ -39,8 +39,14 @@ import static com.caibowen.gplume.misc.Str.EMPTY;
 
 /**
  * base class of XMLBeanAssemble
- * parse xml and build beans
- * 
+ * parse xml and build beans:
+ *
+ * IBeanAssembler: interface
+ *              \
+ *      XMLAssemblerBase: organize beans, processing xml. |  IBeanBuilder: Build bean based on XML node information, hsa config center
+ *                      \
+ *
+ *                  XMLAssembler:  implement/extend interface and bean CRUD method
  * @author BowenCai
  *
  */
@@ -98,7 +104,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
     }
 
     protected void prepareAssemble(Document doc) {
-        LOG.debug("Initializing assembling");
+        LOG.trace("Initializing assembling");
     }
 
     protected void finishAssemble(Document doc) {
@@ -112,7 +118,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
                 throw new IllegalStateException("Proxy Bean already has value");
             pb.init(realBean);
         }
-        LOG.debug("Assembling finished, {} beans, created", tree.size());
+        LOG.trace("Assembling finished, {} beans, created", tree.size());
     }
     /**
 	 * xml bean factory being singleton implies that this function is not
@@ -229,8 +235,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
                 tree.put(bnId, new Pod(bnId, elem, null));
         }
 
-
-        LOG.debug("Add Bean: id[{}] of class[{}] singleton ? {}",
+        LOG.trace("Add Bean: id[{}] of class[{}] singleton ? {}",
                 bnId, (bean != null ? bean.getClass().getName() : "unknown")
                 , isSingleton
         );
@@ -282,7 +287,7 @@ public abstract class XMLAssemblerBase implements IBeanAssembler {
 
         currentNamespace = oldCur;
         refNamespace = oldRef;
-        LOG.debug("importing configuration from {}, {} beans created", loc, (tree.size() - oldsz));
+        LOG.trace("importing configuration from {}, {} beans created", loc, (tree.size() - oldsz));
     }
 
     void handleRequire(Element elem) {

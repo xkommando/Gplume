@@ -85,7 +85,7 @@ public class DefaultBeanBuilder implements IBeanBuilder {
         Class<?> bnClass = getClass(beanElem);
         Object beanObj = construct(bnClass, beanElem);
 
-        LOG.debug("bean class[{}] created", bnClass.getName());
+        LOG.trace("bean class[{}] created", bnClass.getName());
 
         beforeProcess(beanObj, beanID);
         NodeList _propLs = beanElem.getElementsByTagName(XMLTags.BEAN_PROP);
@@ -192,21 +192,21 @@ public class DefaultBeanBuilder implements IBeanBuilder {
     public void beforeProcess(Object bean, @Nullable String beanID) throws Exception {
         if (bean instanceof ClassLoaderAwareBean) {
             ((ClassLoaderAwareBean)bean).setBeanClassLoader(this.classLoader);
-            LOG.debug(
+            LOG.trace(
                     "classLoader aware  bean ["
                             + bean.getClass().getSimpleName()
                             + "] set classLoader [" + this.classLoader);
         }
         if (bean instanceof IDAwareBean) {
             ((IDAwareBean)bean).setBeanID(beanID);
-            LOG.debug(
+            LOG.trace(
                     "classLoader aware  bean ["
                             + bean.getClass().getSimpleName()
                             + "] setting classLoader [" + this.classLoader);
         }
         if (bean instanceof AssemblerAwareBean) {
             ((AssemblerAwareBean)bean).setAssembler(assembler);
-            LOG.debug(
+            LOG.trace(
                     "AssemblerAwareBean bean ["
                             + bean.getClass().getSimpleName()
                             + "] setting assembler [" + this.classLoader);
@@ -222,7 +222,7 @@ public class DefaultBeanBuilder implements IBeanBuilder {
 
         if (realBean instanceof InitializingBean) {
             ((InitializingBean) realBean).afterPropertiesSet();
-            LOG.debug(
+            LOG.trace(
                     "bean [" + realBean.getClass().getSimpleName()
                             + "] initialized");
         }

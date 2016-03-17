@@ -39,11 +39,11 @@ public class JdbcUtil {
         ConnectionHolder holder = LocalList.last();
         if (holder != null) {
             if (holder.currentCon == null) {
-                LOG.debug("Fetching JDBC Connection from DataSource");
+                LOG.trace("Fetching JDBC Connection from DataSource");
                 holder.currentCon = dataSource.getConnection();
             }
         } else {
-            LOG.debug("Fetching JDBC Connection from DataSource");
+            LOG.trace("Fetching JDBC Connection from DataSource");
             holder = new ConnectionHolder(dataSource.getConnection());
             LocalList.push(holder);
         }

@@ -53,7 +53,7 @@ public class JdbcTransactionManager implements TransactionManager {
                     "Transaction is already completed - do not call commit or rollback more than once per transaction");
         if (tnx.isRollbackOnly()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Transactional code has requested rollback");
+                LOG.trace("Transactional code has requested rollback");
             }
             rollback(tnx);
             return;
@@ -61,7 +61,7 @@ public class JdbcTransactionManager implements TransactionManager {
 
         if (tnx.savepoint != null) {
             if (LOG.isDebugEnabled())
-                LOG.debug("Releasing transaction savepoint");
+                LOG.trace("Releasing transaction savepoint");
             tnx.releaseSavepoint();
         }
         if (LOG.isDebugEnabled()) {

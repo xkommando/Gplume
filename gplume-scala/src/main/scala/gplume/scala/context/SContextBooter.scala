@@ -8,7 +8,7 @@ import com.caibowen.gplume.resource.ClassLoaderInputStreamProvider
  * @author BowenCai
  * @since  12/12/2014.
  */
-class ContextBooter extends JBooter {
+class SContextBooter extends JBooter {
 
   override def boot() : Unit = {
     // set classloader for beanAssembler

@@ -276,7 +276,7 @@ public class Broadcaster implements Serializable {
             }
 		}
 
-        LOG.debug("event [" + event + "] pusblished");
+        LOG.trace("event [" + event + "] pusblished");
 	}
 	
 	/**

@@ -32,10 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @auther bowen.cbw
@@ -144,21 +141,44 @@ public class ConfigCenter implements Serializable {
         }
     }
 
-    public void addLocal(String k, String v) {
-        Map<String, String> current = configs.get(currentConfigName);
 
-        if (current == null) {
-            current = new HashMap(64);
-            configs.put(currentConfigName, current);
-            current.put(k, v);
+    @Nullable
+    public void getLocal(String k) {
+        getLocal(currentConfigName, k);
+    }
+
+    @Nullable
+    public String getLocal(String cfgName, String k) {
+        Map<String, String> curCfg = configs.get(cfgName);
+        if (curCfg != null) {
+            return curCfg.get(k);
+        }
+        return null;
+    }
+
+    /**
+     * used in progress
+     * @param k
+     * @param v
+     */
+    public void addLocal(String k, String v) {
+        addLocal(currentConfigName, k, v);
+    }
+
+    public void addLocal(String cfgName, String k, String v) {
+        Map<String, String> curCfg = configs.get(cfgName);
+        if (curCfg == null) {
+            curCfg = new HashMap(64);
+            configs.put(currentConfigName, curCfg);
+            curCfg.put(k, v);
             keyToConfigName.put(k, currentConfigName);
-            LOG.debug("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
+            LOG.trace("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
         } else {
-            String old = current.get(k);
+            String old = curCfg.get(k);
             if (old == null) {
-                current.put(k, v);
+                curCfg.put(k, v);
                 keyToConfigName.put(k, currentConfigName);
-                LOG.debug("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
+                LOG.trace("config file [" + currentConfigName + "] add [" + k + "] -> [" + v + "]");
             } else {
                 if (old.equals(v))
                     LOG.warn("duplicated key ["
@@ -175,11 +195,21 @@ public class ConfigCenter implements Serializable {
         }
     }
 
+
+    @Nullable public Set<Map.Entry<String, String>>
+    localEntries(String cfgName) {
+        Map<String, String> cfg = configs.get(cfgName);
+        if (cfg != null)
+            return cfg.entrySet();
+        else
+            return null;
+    }
+
     public void addGlobal(String k, String v) {
         String old = globalProperties.get(k);
         if (old == null) {
             globalProperties.put(k, v);
-            LOG.debug("add global property: [" + k + "] -> [" + v + "]");
+            LOG.trace("add global property: [" + k + "] -> [" + v + "]");
         } else {
             if (old.equals(v))
                 LOG.warn("duplicated global key ["
@@ -190,6 +220,15 @@ public class ConfigCenter implements Serializable {
                                 + "] first defined as ["
                                 + old + "] second defined as [" + v + "]");
         }
+    }
+
+    @Nullable
+    public String getGlobal(String k) {
+        return globalProperties.get(k);
+    }
+
+    public Set<Map.Entry<String, String>> globalEntries() {
+        return globalProperties.entrySet();
     }
 
     /**
@@ -222,7 +261,7 @@ public class ConfigCenter implements Serializable {
             b.append(name.substring(lastL, lq));
 
             String k = name.substring(lq + 2, rq);
-            String val = getVal(k.trim());
+            String val = findVal(k.trim());
             if (val == null)
                 throw new NoSuchElementException("cannot find property of key [" + k + "]");
 
@@ -235,8 +274,13 @@ public class ConfigCenter implements Serializable {
         return b.toString();
     }
 
+    /**
+     *
+     * @param k
+     * @return
+     */
     @Nullable
-    public String getVal(String k) {
+    public String findVal(String k) {
         String conf = keyToConfigName.get(k);
         if (conf == null)
             return globalProperties.get(k);
@@ -244,7 +288,12 @@ public class ConfigCenter implements Serializable {
             return configs.get(conf).get(k);
     }
 
-    public Entry getEntry(String k) {
+    /**
+     *
+     * @param k
+     * @return
+     */
+    public Entry findEntry(String k) {
         String confName = keyToConfigName.get(k);
         Map<String, String> conf = configs.get(confName);
         return conf == null ? new Entry(confName, k, globalProperties.get(k))
