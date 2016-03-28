@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ContextBooter {
 
-	protected static final Logger LOG
+	public static final Logger LOG
 					= LoggerFactory.getLogger(ContextBooter.class);
 
 	// optional
@@ -74,11 +74,10 @@ public class ContextBooter {
 			} catch (Exception e) {
 				throw new RuntimeException("Error building beans", e);
 			}
-			
 		} else {
 			LOG.warn("no manifest file specified "
-					+ "For web application, check your web.xml for context-param[{0}]"
-					+ AppContext.MANIFEST);
+					+ "for application, check your web.xml for context-param["
+					+ AppContext.MANIFEST + "]");
 			return;
 		}
 

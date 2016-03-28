@@ -31,7 +31,7 @@ public class FileInputStreamProvider implements InputStreamProvider{
 	@Override
 	public InputStream getStream(String path) {
 		try {
-			return  new FileInputStream(path);
+			return new FileInputStream(path);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}

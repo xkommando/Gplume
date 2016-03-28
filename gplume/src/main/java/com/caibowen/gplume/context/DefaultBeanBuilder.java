@@ -25,8 +25,6 @@ import com.caibowen.gplume.context.bean.InitializingBean;
 import com.caibowen.gplume.core.BeanEditor;
 import com.caibowen.gplume.core.Converter;
 import com.caibowen.gplume.misc.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -390,7 +388,7 @@ public class DefaultBeanBuilder implements IBeanBuilder {
                     break;
                 case XMLTags.PROP_MAP:
                     Element _propM = (Element)elemBn.getFirstChild().getNextSibling();
-                    Map m = buildMap(_propM, "Constructor:");
+                    Map<Object, Object> m = buildMap(_propM, "Constructor:");
                     beanList.add(m);
                     break;
                 default:
@@ -451,8 +449,9 @@ public class DefaultBeanBuilder implements IBeanBuilder {
         _c += isBlank(poxVal) ? 0 : 1;
         _c += isBlank(poxRef) ? 0 : 3;
         switch (_c) {
-            case 0 : return newInstance(klass, findCtorElem(beanElem));
-            case 1 :
+            case 0 : // no proxy, no ref
+                return newInstance(klass, findCtorElem(beanElem));
+            case 1 : // proxy
                 String poxHM = configCenter.replaceIfPresent(poxVal.trim());
                 Class poxHandle = getClass(poxHM);
                 if (! InvocationHandler.class.isAssignableFrom(poxHandle))
@@ -460,7 +459,7 @@ public class DefaultBeanBuilder implements IBeanBuilder {
                 // xml construct invocation handler
                 InvocationHandler handler = (InvocationHandler)newInstance(poxHandle, findCtorElem(beanElem));
                 return Proxy.newProxyInstance(classLoader, new Class[]{klass}, handler);
-            case 3:
+            case 3: // proxy, actual obj referred to thr value specified
                 return assembler.getForBuild(configCenter.replaceIfPresent(poxRef.trim()), true, klass);
             default:
                 throw new IllegalArgumentException("wrong config of InvocationHandler");

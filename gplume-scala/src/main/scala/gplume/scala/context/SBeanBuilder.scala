@@ -158,25 +158,27 @@ class SBeanBuilder extends JBeanBuilder {
     * @return
     */
   def findSingletonObject(@Nonnull klass: Class[_]): AnyRef = {
-    val mdKls = try Class.forName(klass.getCanonicalName + "$")
-      catch {
-        case cn: ClassNotFoundException => null.asInstanceOf[Class[_]]
-      }
-    if (mdKls != null && klass.getDeclaredFields.isEmpty
+    if (klass.getDeclaredFields.isEmpty
       && (!klass.getDeclaredMethods.exists { m =>
       val modi = m.getModifiers
       !Modifier.isPublic(modi) || !Modifier.isStatic(modi)
     })) {
-      val fdSObj = try mdKls.getDeclaredField("MODULE$")
+      val mdKls = try Class.forName(klass.getCanonicalName + "$")
+      catch {
+        case cn: ClassNotFoundException => null.asInstanceOf[Class[_]]
+      }
+      if (mdKls != null) {
+        val fdSObj = try mdKls.getDeclaredField("MODULE$")
         catch {
           case nf: NoSuchFieldException => null.asInstanceOf[Field]
         }
-      if (fdSObj != null && fdSObj.getType == mdKls) {
-        val modi = fdSObj.getModifiers
-        if (Modifier.isPublic(modi) && Modifier.isStatic(modi)) {
-          val realObj = fdSObj.get()
-          require(realObj != null)
-          return realObj
+        if (fdSObj != null && fdSObj.getType == mdKls) {
+          val modi = fdSObj.getModifiers
+          if (Modifier.isPublic(modi) && Modifier.isStatic(modi)) {
+            val realObj = fdSObj.get()
+            require(realObj != null)
+            return realObj
+          }
         }
       }
     }

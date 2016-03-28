@@ -29,8 +29,8 @@ class SContextBooter extends JBooter {
 
     } else {
       JBooter.LOG.warn("no manifest file specified "
-        + "For web application, check your web.xml for context-param[{0}]"
-        + AppContext.MANIFEST)
+        + "For web application, check your web.xml for context-param["
+        + AppContext.MANIFEST + "]")
       return
     }
 
